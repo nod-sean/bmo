@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v55 - Visual FX Update</title>
+    <title>KOV Prototype v57 - Resource ID Bug Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -295,7 +295,9 @@
 
 <script>
 /**
- * KOV Prototype v55 - Visual FX Update (LevelUp, XP Popups)
+ * KOV Prototype v57 - Resource ID Bug Fix
+ * FIX: getInfoFromCode incorrectly parsed level using %100 for resources.
+ * Changed to use subtraction logic for 18xx codes.
  */
 
 // --- CONFIGURATION ---
@@ -336,7 +338,15 @@ const BUILDING_STATS = { 1: { energy: 1, probs: [90, 10, 0, 0, 0] }, 2: { energy
 const ITEM_VALUES = { 1: 1, 2: 2, 3: 6, 4: 14, 5: 32 };
 const UNLOCK_GOLD_MAP = [[100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5,  5,  10, 40, 50], [30, 10, 0,  0,  0,  0,  10, 30], [20, 5,  0,  0,  0,  0,  5,  20], [20, 5,  0,  0,  0,  0,  5,  20], [30, 10, 0,  0,  0,  0,  10, 30], [50, 40, 10, 5,  5,  10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]];
 const UNLOCK_LEVEL_MAP = [[24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6,  2,  2,  6,  18, 21], [17, 8,  0,  0,  0,  0,  9,  15], [13, 5,  0,  0,  0,  0,  3,  11], [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]];
-const CHEST_DROP_TABLE = { 1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ], 2: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ], 3: [ {code: 1802, prob: 30}, {code: 1803, prob: 20}, {code: 1812, prob: 30}, {code: 1813, prob: 20} ], 4: [ {code: 1803, prob: 30}, {code: 1804, prob: 20}, {code: 1813, prob: 30}, {code: 1814, prob: 20} ], 5: [ {code: 1804, prob: 30}, {code: 1805, prob: 20}, {code: 1814, prob: 30}, {code: 1815, prob: 20} ] };
+
+const CHEST_DROP_TABLE = {
+    1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ],
+    2: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ],
+    3: [ {code: 1801, prob: 20}, {code: 1802, prob: 20}, {code: 1803, prob: 10}, {code: 1811, prob: 20}, {code: 1812, prob: 20}, {code: 1813, prob: 10} ],
+    4: [ {code: 1802, prob: 20}, {code: 1803, prob: 20}, {code: 1804, prob: 5}, {code: 1812, prob: 20}, {code: 1813, prob: 20}, {code: 1814, prob: 5}, {code: 1821, prob: 10} ],
+    5: [ {code: 1802, prob: 15}, {code: 1803, prob: 20}, {code: 1804, prob: 10}, {code: 1812, prob: 15}, {code: 1813, prob: 20}, {code: 1814, prob: 10}, {code: 1821, prob: 5}, {code: 1825, prob: 5} ] 
+};
+
 const CONFIG = { gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, squadCols: 3, squadRows: 3, squadTopY: 50, squadGap: 20, squadCellSize: 130 };
 const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5, UNIT_INFANTRY: 10, UNIT_ARCHER: 11, UNIT_CAVALRY: 12, ITEM_GOLD: 20, ITEM_ENERGY: 21, ITEM_CRYSTAL: 22 };
 const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
@@ -348,9 +358,13 @@ function getInfoFromCode(code) {
     if (code >= 1100 && code < 1200) return { type: ITEM_TYPE.UNIT_INFANTRY, level: code % 100 };
     if (code >= 1200 && code < 1300) return { type: ITEM_TYPE.UNIT_ARCHER, level: code % 100 };
     if (code >= 1300 && code < 1400) return { type: ITEM_TYPE.UNIT_CAVALRY, level: code % 100 };
-    if (code >= 1800 && code < 1810) return { type: ITEM_TYPE.ITEM_GOLD, level: code % 100 };
-    if (code >= 1810 && code < 1820) return { type: ITEM_TYPE.ITEM_ENERGY, level: code % 100 };
-    if (code >= 1820 && code < 1830) return { type: ITEM_TYPE.ITEM_CRYSTAL, level: code % 100 };
+    
+    // FIX: Using subtraction for level to avoid 1811 % 100 = 11 bug.
+    // 1801 -> 1, 1811 -> 1, 1821 -> 1
+    if (code >= 1800 && code < 1810) return { type: ITEM_TYPE.ITEM_GOLD, level: code - 1800 };
+    if (code >= 1810 && code < 1820) return { type: ITEM_TYPE.ITEM_ENERGY, level: code - 1810 };
+    if (code >= 1820 && code < 1830) return { type: ITEM_TYPE.ITEM_CRYSTAL, level: code - 1820 };
+    
     return { type: ITEM_TYPE.ITEM_GOLD, level: 1 };
 }
 
@@ -1102,7 +1116,7 @@ class Game {
 
     roundRect(x,y,w,h,r){this.ctx.beginPath();this.ctx.moveTo(x+r,y);this.ctx.arcTo(x+w,y,x+w,y+h,r);this.ctx.arcTo(x+w,y+h,x,y+h,r);this.ctx.arcTo(x,y+h,x,y,r);this.ctx.arcTo(x,y,x+w,y,r);this.ctx.closePath();}
     
-    showToast(msg, x, y) { 
+    showToast(msg, x, y, color='#ffd700') { 
         if (x && y) {
             const rect = this.canvas.getBoundingClientRect();
             const scale = rect.width / this.width;
@@ -1112,6 +1126,7 @@ class Game {
             el.className = 'float-text';
             el.style.left = `${screenX}px`; el.style.top = `${screenY}px`;
             el.innerText = msg;
+            el.style.color = color; // Apply dynamic color
             document.getElementById('canvas-wrapper').appendChild(el);
             setTimeout(() => el.remove(), 1000);
         } else {
@@ -1198,12 +1213,21 @@ class Game {
     collectResource(item, r, c) {
         const val = ITEM_VALUES[item.level] || 1;
         let msg = "";
+        let color = "#fff"; // Default white
         const cellX = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
         const cellY = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
-        if(item.type === ITEM_TYPE.ITEM_GOLD) { this.gold += val; msg = `+${val} Gold`; }
-        if(item.type === ITEM_TYPE.ITEM_ENERGY) { this.energy = Math.min(this.energy + val, this.maxEnergy); msg = `+${val} Energy`; }
-        if(item.type === ITEM_TYPE.ITEM_CRYSTAL) { this.gem += val; msg = `+${val} Gem`; }
-        this.showToast(msg, cellX, cellY);
+
+        if(item.type === ITEM_TYPE.ITEM_GOLD) { 
+            this.gold += val; msg = `+${val} Gold`; color = "#ffd700"; // Yellow
+        }
+        if(item.type === ITEM_TYPE.ITEM_ENERGY) { 
+            this.energy = Math.min(this.energy + val, this.maxEnergy); msg = `+${val} Energy`; color = "#00bfff"; // Deep Sky Blue
+        }
+        if(item.type === ITEM_TYPE.ITEM_CRYSTAL) { 
+            this.gem += val; msg = `+${val} Gem`; color = "#ff69b4"; // Hot Pink
+        }
+        
+        this.showToast(msg, cellX, cellY, color);
         this.grid[r][c] = null; 
         this.updateUI(); this.requestRender();
     }
