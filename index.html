@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v33 - Building Limits</title>
+    <title>KOV Prototype v42 - Chest Spawner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -58,7 +58,7 @@
             padding: 8px 12px;
             padding-bottom: max(10px, env(safe-area-inset-bottom));
             display: flex; align-items: center; justify-content: space-between;
-            min-height: 70px;
+            min-height: 90px;
             z-index: 20;
         }
 
@@ -74,14 +74,21 @@
             background: #f5f5f5;
             border: 1px solid #8d6e63;
             border-radius: 6px;
-            padding: 2px 8px;
-            height: 44px;
+            padding: 4px 8px;
+            height: 64px;
             display: flex; flex-direction: column; justify-content: center;
             color: #3e2723; margin: 0 6px; overflow: hidden;
         }
 
+        .stat-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+            font-size: 10px; font-weight: bold; color: #444; margin-top: 2px;
+        }
+        .stat-item { display: flex; align-items: center; gap: 2px; }
+        .stat-icon { font-size: 10px; }
+
         .action-btn {
-            width: 44px; height: 44px;
+            width: 50px; height: 50px;
             background: linear-gradient(to bottom, #ffca28, #ff6f00);
             border: 1px solid #e65100;
             border-radius: 8px;
@@ -91,19 +98,36 @@
         }
         .action-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #bf360c; }
         
-        .btn-open { background: linear-gradient(to bottom, #26a69a, #00695c); border-color: #004d40; box-shadow: 0 2px 0 #004d40; }
-        .btn-open:active { transform: translateY(2px); box-shadow: 0 1px 0 #004d40; }
-        
         .world-btn { background: linear-gradient(to bottom, #42a5f5, #1565c0); border-color: #0d47a1; box-shadow: 0 2px 0 #0d47a1; }
         .chat-btn { background: linear-gradient(to bottom, #78909c, #455a64); border-color:#37474f; box-shadow: 0 2px 0 #263238; }
-        .sell-icon { font-size: 16px; margin-bottom: -2px; }
-        
-        /* 건설 버튼 스타일 */
-        .build-btn {
-            background: #5d4037; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px;
-            border: 1px solid #8d6e63;
+        .build-btn { background: linear-gradient(to bottom, #8d6e63, #5d4037); border-color: #3e2723; box-shadow: 0 2px 0 #3e2723; }
+
+        #field-modal {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
+            background: rgba(30, 20, 15, 0.98);
+            border-top: 4px solid #8d6e63;
+            border-radius: 20px 20px 0 0;
+            z-index: 50;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            display: flex; flex-direction: column;
+            padding: 20px;
+            color: white;
         }
-        .build-btn:active { background: #3e2723; }
+        #field-modal.open { transform: translateY(0); }
+        
+        .shop-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+            overflow-y: auto;
+        }
+        .shop-item {
+            background: #4e342e; border: 2px solid #8d6e63; border-radius: 10px;
+            padding: 10px; display: flex; flex-direction: column; align-items: center;
+        }
+        .shop-btn {
+            background: #ffb300; color: black; font-weight: bold; padding: 5px 15px;
+            border-radius: 5px; margin-top: 5px; font-size: 12px;
+        }
 
         #toast {
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
@@ -127,6 +151,7 @@
 <body>
 
 <div id="game-container">
+    <!-- Header -->
     <div class="header-panel">
         <div class="flex justify-between mb-1">
             <div class="res-pill"><span style="color:#ffeb3b">⚡</span> <span id="energy-display">50/50</span></div>
@@ -142,28 +167,38 @@
                 <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
             </div>
         </div>
-        <!-- 건설 테스트 버튼 (Limit Test) -->
-        <div class="flex gap-2 mt-2 justify-end">
-            <button onclick="game.trySpawnBuilding(1)" class="build-btn">🏠병영(3)</button>
-            <button onclick="game.trySpawnBuilding(2)" class="build-btn">🎯사격(2)</button>
-            <button onclick="game.trySpawnBuilding(3)" class="build-btn">🐴마구(2)</button>
-            <button onclick="game.spawnCamp()" class="build-btn">⛺캠프(2)</button>
+        <div class="flex gap-2 mt-1 opacity-30 hover:opacity-100 transition-opacity justify-end">
+            <button onclick="game.cheatEnergy()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⚡+30</button>
+            <button onclick="game.cheatLevelUp()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⬆️LvUP</button>
         </div>
     </div>
 
+    <!-- Canvas -->
     <div id="canvas-wrapper">
         <canvas id="gameCanvas"></canvas>
     </div>
 
+    <!-- Footer -->
     <div class="footer-panel">
-        <button class="action-btn chat-btn"><span class="sell-icon">💬</span></button>
+        <button class="action-btn chat-btn" onclick="game.showToast('채팅 기능 준비 중')">
+            <span class="sell-icon">💬</span>
+        </button>
         
         <div class="info-box" id="info-panel">
             <div class="flex justify-between items-center mb-0">
                 <span class="font-bold text-sm truncate" id="info-name">선택된 없음</span>
-                <span class="text-xs text-blue-800 font-bold ml-1" id="info-stats"></span>
+                <span class="text-[10px] text-gray-500 font-bold" id="info-class"></span>
             </div>
-            <div class="text-[10px] text-gray-600 leading-tight truncate" id="info-desc">오브젝트를 선택하세요.</div>
+            <!-- 상세 스탯 그리드 -->
+            <div class="stat-grid hidden" id="unit-stats-grid">
+                <div class="stat-item"><span class="stat-icon">❤</span><span id="st-hp">0</span></div>
+                <div class="stat-item"><span class="stat-icon">⚔</span><span id="st-atk">0</span></div>
+                <div class="stat-item"><span class="stat-icon">🛡️</span><span id="st-def">0</span></div>
+                <div class="stat-item"><span class="stat-icon">🦶</span><span id="st-spd">0</span></div>
+                <div class="stat-item"><span class="stat-icon">🎯</span><span id="st-rng">0</span></div>
+                <div class="stat-item"><span class="stat-icon">🏃</span><span id="st-mov">0</span></div>
+            </div>
+            <div class="text-[10px] text-gray-600 leading-tight truncate mt-1" id="info-desc">유닛이나 건물을 선택하세요.</div>
         </div>
 
         <button class="action-btn" id="btn-action" onclick="game.handleAction()">
@@ -171,9 +206,21 @@
             <span id="action-label" style="font-size: 9px;">Sell</span>
         </button>
         
-        <button class="action-btn world-btn" onclick="game.goToWorld()" style="margin-left:5px;">
-            <span class="sell-icon">🌍</span><span style="font-size: 9px;">월드</span>
+        <button class="action-btn world-btn" onclick="game.toggleFieldModal()" style="margin-left:5px;">
+            <span class="sell-icon">🌍</span><span style="font-size: 9px;">필드</span>
         </button>
+    </div>
+
+    <!-- Field/Construction Modal -->
+    <div id="field-modal">
+        <div class="flex justify-between items-center mb-2 border-b border-gray-600 pb-2">
+            <div>
+                <h2 class="text-xl font-bold text-yellow-400">필드 수집(미구현)</h2>
+                <p class="text-xs text-gray-400">건물을 건설하여 영지를 확장하세요.</p>
+            </div>
+            <button onclick="game.toggleFieldModal()" class="text-gray-400 text-2xl">✖</button>
+        </div>
+        <div class="shop-grid" id="shop-list"></div>
     </div>
     
     <div id="toast">메시지</div>
@@ -181,15 +228,21 @@
 
 <script>
 /**
- * KOV Prototype v33 - Building Limits
- * - Added 'BUILDING_LIMITS' to enforce max counts per building type.
- * - Added Test UI to try spawning specific buildings.
+ * KOV Prototype v42 - Chest Spawner Update
+ * - CHESTS now act as Buildings:
+ * - Click to Produce Items (Energy cost).
+ * - Can be Merged (up to Lv.5).
+ * - Purchase in Shop.
+ * - Removed 'Open' button logic.
  */
 
-// --- DATA ---
 const LEVEL_DATA = [ { level: 1, xp: 10, maxEnergy: 50 }, { level: 2, xp: 22, maxEnergy: 52 }, { level: 3, xp: 37, maxEnergy: 54 }, { level: 4, xp: 55, maxEnergy: 56 }, { level: 5, xp: 77, maxEnergy: 58 }, { level: 6, xp: 103, maxEnergy: 60 }, { level: 7, xp: 134, maxEnergy: 62 }, { level: 8, xp: 169, maxEnergy: 64 }, { level: 9, xp: 209, maxEnergy: 66 }, { level: 10, xp: 254, maxEnergy: 68 }, { level: 11, xp: 304, maxEnergy: 70 }, { level: 12, xp: 359, maxEnergy: 72 }, { level: 13, xp: 420, maxEnergy: 74 }, { level: 14, xp: 486, maxEnergy: 76 }, { level: 15, xp: 558, maxEnergy: 78 }];
 const MERGE_XP_DATA = { 1:1, 2:2, 3:4, 4:5, 5:6, 6:8, 7:10, 8:15, 9:20, 10:0 };
-const UNIT_STATS = { 10: { name: "보병", hp: 10, atk: 5, sell: 5 }, 11: { name: "궁병", hp: 8, atk: 8, sell: 5 }, 12: { name: "기병", hp: 15, atk: 4, sell: 5 } };
+const UNIT_STATS = { 
+    10: { name: "보병", class:"보병", hp: 10, atk: 5, def: 10, spd: 5, rng: 1, mov: 3, sell: 5 }, 
+    11: { name: "궁병", class:"궁병", hp: 8, atk: 8, def: 5, spd: 7, rng: 3, mov: 3, sell: 5 }, 
+    12: { name: "기병", class:"기병", hp: 15, atk: 4, def: 8, spd: 9, rng: 1, mov: 5, sell: 5 } 
+};
 const BUILDING_STATS = { 1: { energy: 1, probs: [90, 10, 0, 0, 0] }, 2: { energy: 2, probs: [0, 90, 10, 0, 0] }, 3: { energy: 3, probs: [0, 45, 55, 0, 0] }, 4: { energy: 4, probs: [0, 0, 90, 10, 0] }, 5: { energy: 5, probs: [0, 0, 80, 10, 10] } };
 const ITEM_VALUES = { 1: 1, 2: 2, 3: 6, 4: 14, 5: 32 };
 const CHEST_NAMES = { 1: "동 상자", 2: "은 상자", 3: "금 상자", 4: "백금 상자", 5: "다이아 상자" };
@@ -203,6 +256,24 @@ const UNLOCK_LEVEL_MAP = [
     [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]
 ];
 
+const CHEST_DROP_TABLE = {
+    1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ],
+    2: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ],
+    3: [ {code: 1802, prob: 30}, {code: 1803, prob: 20}, {code: 1812, prob: 30}, {code: 1813, prob: 20} ],
+    4: [ {code: 1803, prob: 30}, {code: 1804, prob: 20}, {code: 1813, prob: 30}, {code: 1814, prob: 20} ],
+    5: [ {code: 1804, prob: 30}, {code: 1805, prob: 20}, {code: 1814, prob: 30}, {code: 1815, prob: 20} ]
+};
+
+function getInfoFromCode(code) {
+    if (code >= 1100 && code < 1200) return { type: ITEM_TYPE.UNIT_INFANTRY, level: code % 100 };
+    if (code >= 1200 && code < 1300) return { type: ITEM_TYPE.UNIT_ARCHER, level: code % 100 };
+    if (code >= 1300 && code < 1400) return { type: ITEM_TYPE.UNIT_CAVALRY, level: code % 100 };
+    if (code >= 1800 && code < 1810) return { type: ITEM_TYPE.ITEM_GOLD, level: code % 100 };
+    if (code >= 1810 && code < 1820) return { type: ITEM_TYPE.ITEM_ENERGY, level: code % 100 };
+    if (code >= 1820 && code < 1830) return { type: ITEM_TYPE.ITEM_CRYSTAL, level: code % 100 };
+    return { type: ITEM_TYPE.ITEM_GOLD, level: 1 };
+}
+
 const ASSET_MAP = {
     '10_1': '1PkG2U9TO6M09gP-ems90YrxXZhZiHVwl', '10_3': '1zewPXV4yx1YNCB5dCwhesx_NnXhE4xt_', '10_4': '1NNx5uvJB4bPLOpXePIyCHy6mJ07xUDR0', '10_6': '1NDSoQsn1Pfnc0sKmMaF9-16PTFUeySWb',
     '11_3': '1Rx5W791NsIwY5og_FIA_6lkTsaR_hBCp', '11_6': '1Q6Txp-h7wcKFXAXrZnAypOHamMhk-6oX',
@@ -212,7 +283,6 @@ const ASSET_MAP = {
     '20_1': '173wg0wb4I-kuy5RIK_emyfex_fuVfYZC', '21_1': '1DQ8djwy-_V51Dzwz6vCzGd8bffiZi8gl', '22_1': '1Fay27Ipx4GH45HAlqLV0_tQ-7yz8TAzP'
 };
 
-// --- CONFIG ---
 const CONFIG = {
     gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20,
     squadCols: 3, squadRows: 3, squadTopY: 50, squadGap: 20, squadCellSize: 130,
@@ -223,13 +293,21 @@ const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_
 const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
 const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
 
-// ** NEW: Building Limits from building.csv **
-const BUILDING_LIMITS = {
-    [ITEM_TYPE.BUILDING_BARRACKS]: 3,
-    [ITEM_TYPE.BUILDING_RANGE]: 2,
-    [ITEM_TYPE.BUILDING_STABLE]: 2,
-    [ITEM_TYPE.BUILDING_CAMP]: 2
+const BUILDING_LIMITS = { 
+    [ITEM_TYPE.BUILDING_BARRACKS]: 3, 
+    [ITEM_TYPE.BUILDING_RANGE]: 2, 
+    [ITEM_TYPE.BUILDING_STABLE]: 2, 
+    [ITEM_TYPE.BUILDING_CAMP]: 2,
+    [ITEM_TYPE.BUILDING_CHEST]: 99 // 상자는 많이 지을 수 있게
 };
+
+const SHOP_DATA = [
+    { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" },
+    { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" },
+    { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" },
+    { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" },
+    { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" }
+];
 
 class AssetLoader {
     constructor() { this.images = {}; }
@@ -268,6 +346,7 @@ class Game {
         this.lordLevel = 1; this.currentXp = 0; this.updateLevelStats();
         this.energy = this.maxEnergy; this.gold = 3000; this.gem = 50; 
         this.drag = null; this.hover = null; this.selectedItem = null;
+        this.potentialDrag = null;
 
         this.calcLayout();
         this.initGame();
@@ -286,6 +365,7 @@ class Game {
         window.addEventListener('touchmove', move, {passive: false});
         window.addEventListener('touchend', end);
 
+        this.initShopUI();
         this.loop();
         this.updateUI();
     }
@@ -307,11 +387,7 @@ class Game {
 
     initGame() {
         this.refreshLockState(); 
-        
-        // Initial Buildings
         this.grid[3][3] = { type: ITEM_TYPE.BUILDING_BARRACKS, level: 1, scale: 1 };
-        this.grid[3][4] = { type: ITEM_TYPE.BUILDING_RANGE, level: 1, scale: 1 };
-        this.grid[4][3] = { type: ITEM_TYPE.BUILDING_STABLE, level: 1, scale: 1 };
         this.grid[4][4] = { type: ITEM_TYPE.BUILDING_CHEST, level: 1, scale: 1 };
     }
 
@@ -327,43 +403,60 @@ class Game {
         this.requestRender();
     }
 
-    // --- Building Limit Logic ---
-    getBuildingCount(type) {
-        let count = 0;
-        // Check Grid
-        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
-            if (this.grid[r][c] && this.grid[r][c].type === type) count++;
-        }
-        // Check Squads (rare, but possible if user moves building there)
-        this.squad1.forEach(i => { if(i && i.type === type) count++; });
-        this.squad2.forEach(i => { if(i && i.type === type) count++; });
-        return count;
+    initShopUI() {
+        const list = document.getElementById('shop-list');
+        list.innerHTML = "";
+        SHOP_DATA.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'shop-item';
+            div.innerHTML = `<div class="text-2xl">${item.icon}</div><div class="font-bold text-sm text-white">${item.name}</div><button class="shop-btn" onclick="game.buyBuilding(${item.type}, ${item.price})">💰 ${item.price}</button>`;
+            list.appendChild(div);
+        });
     }
 
-    trySpawnBuilding(type) {
+    toggleFieldModal() { const modal = document.getElementById('field-modal'); modal.classList.toggle('open'); }
+    toggleShop() { this.toggleFieldModal(); }
+
+    buyBuilding(type, price) {
+        if (this.gold < price) { this.showToast("골드 부족!"); return; }
         const limit = BUILDING_LIMITS[type] || 999;
         const current = this.getBuildingCount(type);
-        
-        if (current >= limit) {
-            this.showToast(`건설 제한 도달! (최대 ${limit}개)`);
-            return;
-        }
+        if (current >= limit) { this.showToast(`최대 개수 도달! (${limit})`); return; }
 
-        // Spawn Logic
         for(let r=0;r<8;r++) for(let c=0;c<8;c++) {
             if(this.gridState[r][c].type===LOCK_TYPE.OPEN && !this.grid[r][c]) {
+                this.gold -= price;
                 this.grid[r][c] = { type: type, level: 1, scale: 0 };
-                this.requestRender();
+                this.updateUI(); this.requestRender();
                 this.showToast("건설 완료!");
+                this.toggleFieldModal();
                 return;
             }
         }
         this.showToast("공간 부족!");
     }
 
-    spawnCamp() { this.trySpawnBuilding(ITEM_TYPE.BUILDING_CAMP); }
+    getBuildingCount(type) {
+        let count = 0;
+        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) { if (this.grid[r][c] && this.grid[r][c].type === type) count++; }
+        return count;
+    }
 
-    // ... (Existing Functions: resize, addXp, levelUp, selectItem, etc.) ...
+    getHighestBuildingLevel(unitType) {
+        let bType = -1;
+        if (unitType === ITEM_TYPE.UNIT_INFANTRY) bType = ITEM_TYPE.BUILDING_BARRACKS;
+        if (unitType === ITEM_TYPE.UNIT_ARCHER) bType = ITEM_TYPE.BUILDING_RANGE;
+        if (unitType === ITEM_TYPE.UNIT_CAVALRY) bType = ITEM_TYPE.BUILDING_STABLE;
+        if (bType === -1) return 10; 
+        let maxLvl = 0;
+        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
+            if (this.grid[r][c] && this.grid[r][c].type === bType) {
+                if (this.grid[r][c].level > maxLvl) maxLvl = this.grid[r][c].level;
+            }
+        }
+        return maxLvl;
+    }
+
     resize() {
         const wrapper = document.getElementById('game-container');
         const canvasWrap = document.getElementById('canvas-wrapper');
@@ -403,7 +496,7 @@ class Game {
     }
 
     selectItem(item, location) {
-        this.selectedItem = { item, location };
+        this.selectedItem = item ? { item, location } : null;
         this.updateInfoPanel();
         this.requestRender();
     }
@@ -411,37 +504,42 @@ class Game {
     updateInfoPanel() {
         const nameEl = document.getElementById('info-name');
         const descEl = document.getElementById('info-desc');
-        const statsEl = document.getElementById('info-stats');
+        const statsGrid = document.getElementById('unit-stats-grid');
         const actionBtn = document.getElementById('btn-action');
         const actionLabel = document.getElementById('action-label');
         const actionIcon = document.getElementById('action-icon');
+
+        statsGrid.classList.add('hidden');
         actionBtn.className = 'action-btn'; 
         
         if (!this.selectedItem || !this.selectedItem.item) {
             nameEl.innerText = "선택된 없음";
             descEl.innerText = "유닛이나 건물을 선택하세요.";
-            statsEl.innerText = "";
             actionLabel.innerText = "-";
             actionBtn.style.opacity = 0.5;
             return;
         }
 
         const item = this.selectedItem.item;
-        let name = "알 수 없음"; let desc = ""; let stats = ""; let price = 0;
+        let name = "알 수 없음"; let desc = ""; let price = 0;
         let actionType = "sell"; 
 
         if (item.type < 10) { 
             if(item.type === ITEM_TYPE.BUILDING_BARRACKS) { name = "병영"; desc = "보병 생산"; }
             else if(item.type === ITEM_TYPE.BUILDING_RANGE) { name = "사격장"; desc = "궁병 생산"; }
             else if(item.type === ITEM_TYPE.BUILDING_STABLE) { name = "마구간"; desc = "기병 생산"; }
-            else if(item.type === ITEM_TYPE.BUILDING_CHEST) { name = CHEST_NAMES[item.level] || "보물상자"; desc = "클릭하여 오픈"; actionType = "open"; }
+            else if(item.type === ITEM_TYPE.BUILDING_CHEST) { 
+                name = CHEST_NAMES[item.level] || "보물상자"; 
+                desc = "클릭하여 아이템 생산"; // Changed
+                actionType = "none"; // No button needed, click to use
+            }
             else if(item.type === ITEM_TYPE.BUILDING_CAMP) { name = "캠프"; desc = "유닛 보관"; }
             
             if(item.type !== ITEM_TYPE.BUILDING_CHEST) name += ` LV.${item.level}`;
             const bStats = BUILDING_STATS[item.level] || BUILDING_STATS[1];
             
-            if (item.type <= 3) stats = `⚡${bStats.energy}`;
-            if (item.type === ITEM_TYPE.BUILDING_CAMP) stats = `보관:${item.storedUnit ? 'O' : 'X'}`;
+            if (item.type <= 3) { /* stats display logic removed */ }
+            if (item.type === ITEM_TYPE.BUILDING_CAMP) desc += ` (보관:${item.storedUnit ? 'O' : 'X'})`;
             
         } else if (item.type >= 20) {
             const val = ITEM_VALUES[item.level];
@@ -449,20 +547,29 @@ class Game {
             if(item.type === ITEM_TYPE.ITEM_GOLD) typeName = "골드";
             if(item.type === ITEM_TYPE.ITEM_ENERGY) typeName = "에너지";
             if(item.type === ITEM_TYPE.ITEM_CRYSTAL) typeName = "크리스탈";
-            name = `${typeName} LV.${item.level}`; desc = "클릭하여 획득"; stats = `+${val}`;
+            name = `${typeName} LV.${item.level}`; 
+            desc = `클릭하여 +${val} 획득`;
         } else {
-            const base = UNIT_STATS[item.type] || { name: "유닛", hp: 10, atk: 1, sell: 1 };
+            const base = UNIT_STATS[item.type] || { name: "유닛", hp: 10, atk: 1, def: 1, spd: 1, rng: 1, mov: 1, sell: 1, class: "없음" };
             name = `${base.name} LV.${item.level}`;
             desc = `${base.name} 부대`;
-            stats = `HP:${base.hp * item.level} ATK:${base.atk * item.level}`;
             price = base.sell * item.level;
+            
+            statsGrid.classList.remove('hidden');
+            document.getElementById('st-hp').innerText = base.hp * item.level;
+            document.getElementById('st-atk').innerText = base.atk * item.level;
+            document.getElementById('st-def').innerText = base.def * item.level;
+            document.getElementById('st-spd').innerText = base.spd;
+            document.getElementById('st-rng').innerText = base.rng;
+            document.getElementById('st-mov').innerText = base.mov;
         }
 
-        nameEl.innerText = name; descEl.innerText = desc; statsEl.innerText = stats;
+        nameEl.innerText = name; 
+        if(!statsGrid.classList.contains('hidden')) desc = ""; 
+        descEl.innerText = desc;
         
-        if (actionType === "open") {
-            actionLabel.innerText = "OPEN"; actionIcon.innerText = "🔓";
-            actionBtn.classList.add('btn-open'); actionBtn.style.opacity = 1;
+        if (actionType === "none") {
+             actionLabel.innerText = "-"; actionBtn.style.opacity = 0.5;
         } else if (price > 0) { 
             actionLabel.innerText = `+${price}`; actionIcon.innerText = "💰"; actionBtn.style.opacity = 1; 
         } else { 
@@ -473,7 +580,8 @@ class Game {
     handleAction() {
         if (!this.selectedItem || !this.selectedItem.item) return;
         const { item } = this.selectedItem;
-        if (item.type === ITEM_TYPE.BUILDING_CHEST) { this.openChestSelected(); } else { this.sellSelectedItem(); }
+        if (item.type === ITEM_TYPE.BUILDING_CHEST) return; // No action button for chest
+        this.sellSelectedItem();
     }
 
     sellSelectedItem() {
@@ -492,15 +600,6 @@ class Game {
             this.selectedItem = null; this.updateInfoPanel(); this.updateUI(); this.requestRender();
         } else { this.showToast("판매 불가"); }
     }
-    
-    openChestSelected() {
-        const { item, location } = this.selectedItem;
-        if(location.zone !== ZONES.GRID) return; 
-        this.openChest(location.r, location.c, item.level);
-        this.selectedItem = null; this.updateInfoPanel();
-    }
-
-    goToWorld() { this.showToast("준비 중"); }
 
     getGamePos(e) {
         const rect = this.canvas.getBoundingClientRect();
@@ -514,17 +613,17 @@ class Game {
         if (x >= this.squad1Rect.x && x < this.squad1Rect.x + this.squad1Rect.w && y >= this.squad1Rect.y && y < this.squad1Rect.y + this.squad1Rect.h) {
             const c = Math.floor((x - this.squad1Rect.x) / this.squadCellSize);
             const r = Math.floor((y - this.squad1Rect.y) / this.squadCellSize);
-            return { zone: ZONES.SQUAD1, idx: r * 3 + c, r, c };
+            if (c >= 0 && c < CONFIG.squadCols && r >= 0 && r < CONFIG.squadRows) return { zone: ZONES.SQUAD1, idx: r * 3 + c, r, c };
         }
         if (x >= this.squad2Rect.x && x < this.squad2Rect.x + this.squad2Rect.w && y >= this.squad2Rect.y && y < this.squad2Rect.y + this.squad2Rect.h) {
             const c = Math.floor((x - this.squad2Rect.x) / this.squadCellSize);
             const r = Math.floor((y - this.squad2Rect.y) / this.squadCellSize);
-            return { zone: ZONES.SQUAD2, idx: r * 3 + c, r, c };
+            if (c >= 0 && c < CONFIG.squadCols && r >= 0 && r < CONFIG.squadRows) return { zone: ZONES.SQUAD2, idx: r * 3 + c, r, c };
         }
         if (x >= this.gridStartX && x < this.gridStartX + this.gridTileSize * CONFIG.gridCols && y >= this.gridStartY && y < this.gridStartY + this.gridTileSize * CONFIG.gridRows) {
-            const c = Math.min(CONFIG.gridCols - 1, Math.max(0, Math.floor((x - this.gridStartX) / this.gridTileSize)));
-            const r = Math.min(CONFIG.gridRows - 1, Math.max(0, Math.floor((y - this.gridStartY) / this.gridTileSize)));
-            return { zone: ZONES.GRID, r, c, idx: r*8+c };
+            const c = Math.floor((x - this.gridStartX) / this.gridTileSize);
+            const r = Math.floor((y - this.gridStartY) / this.gridTileSize);
+            if (c >= 0 && c < CONFIG.gridCols && r >= 0 && r < CONFIG.gridRows) return { zone: ZONES.GRID, r, c, idx: r*8+c };
         }
         return null;
     }
@@ -535,110 +634,157 @@ class Game {
 
         if (state === 'start') {
             const hit = this.getZoneAt(pos.x, pos.y);
-            if (!hit) { this.selectItem(null); return; }
+            
+            if (hit) {
+                if (hit.zone === ZONES.GRID) {
+                    if (this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) { 
+                        this.tryUnlock(hit.r, hit.c); return; 
+                    }
+                }
+                
+                let item = null;
+                if(hit.zone === ZONES.GRID) item = this.grid[hit.r][hit.c];
+                else if(hit.zone === ZONES.SQUAD1) item = this.squad1[hit.idx];
+                else if(hit.zone === ZONES.SQUAD2) item = this.squad2[hit.idx];
 
-            if (hit.zone === ZONES.GRID) {
-                if (this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) { this.tryUnlock(hit.r, hit.c); return; }
-                const item = this.grid[hit.r][hit.c];
-                if (item) {
-                    this.selectItem(item, hit);
-                    if (item.type >= 20) { this.collectResource(item, hit.r, hit.c); return; }
-                    if (item.type === ITEM_TYPE.BUILDING_CAMP) { this.ejectCamp(item, hit.r, hit.c); return; }
-                    if (item.type < 10 && item.type !== ITEM_TYPE.BUILDING_CHEST && item.type !== ITEM_TYPE.BUILDING_CAMP) { this.produce(item); return; }
+                this.potentialDrag = { startPos: pos, item: item, hit: hit };
+            } else {
+                this.selectItem(null); 
+            }
+        }
+        else if (state === 'move') {
+            if (this.potentialDrag && !this.drag) {
+                const dist = Math.hypot(pos.x - this.potentialDrag.startPos.x, pos.y - this.potentialDrag.startPos.y);
+                if (dist > 10 && this.potentialDrag.item) {
+                    this.startDrag(this.potentialDrag.item, this.potentialDrag.hit, pos);
                 }
             }
-
-            let item = null;
-            if(hit.zone === ZONES.GRID) item = this.grid[hit.r][hit.c];
-            else if(hit.zone === ZONES.SQUAD1) item = this.squad1[hit.idx];
-            else if(hit.zone === ZONES.SQUAD2) item = this.squad2[hit.idx];
-
-            if (item) this.selectItem(item, hit);
-
-            if (item) {
-                let cellX, cellY, cellSize;
-                if (hit.zone === ZONES.GRID) {
-                    cellX = this.gridStartX + hit.c * this.gridTileSize; cellY = this.gridStartY + hit.r * this.gridTileSize; cellSize = this.gridTileSize;
-                } else if (hit.zone === ZONES.SQUAD1) {
-                    const c = hit.idx % 3, r = Math.floor(hit.idx / 3);
-                    cellX = this.squad1Rect.x + c * this.squadCellSize; cellY = this.squad1Rect.y + r * this.squadCellSize; cellSize = this.squadCellSize;
-                } else {
-                    const c = hit.idx % 3, r = Math.floor(hit.idx / 3);
-                    cellX = this.squad2Rect.x + c * this.squadCellSize; cellY = this.squad2Rect.y + r * this.squadCellSize; cellSize = this.squadCellSize;
-                }
-                this.drag = { item: item, startZone: hit, x: pos.x, y: pos.y, offsetX: pos.x - cellX, offsetY: pos.y - cellY, size: cellSize };
-                this.hover = hit;
-                if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = null;
-                else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = null;
-                else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = null;
+            if (this.drag) {
+                this.drag.x = pos.x; this.drag.y = pos.y; this.hover = this.getZoneAt(pos.x, pos.y); 
                 this.requestRender();
             }
         }
-        else if (state === 'move' && this.drag) {
-            this.drag.x = pos.x; this.drag.y = pos.y; this.hover = this.getZoneAt(pos.x, pos.y); 
-            this.requestRender();
-        }
-        else if (state === 'end' && this.drag) {
-            const hit = this.getZoneAt(this.drag.x, this.drag.y);
-            let returned = false;
-            if (hit) {
-                let target = null;
-                let isLocked = false;
-                if(hit.zone === ZONES.GRID) {
-                    if(this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) isLocked = true;
-                    else target = this.grid[hit.r][hit.c];
-                }
-                else if(hit.zone === ZONES.SQUAD1) target = this.squad1[hit.idx];
-                else if(hit.zone === ZONES.SQUAD2) target = this.squad2[hit.idx];
-
-                if (isLocked) returned = true;
-                else if (!target) {
-                    if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = this.drag.item;
-                    else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = this.drag.item;
-                    else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = this.drag.item;
-                    this.selectItem(this.drag.item, hit);
-                }
-                else if (target) {
-                    if (hit.zone === ZONES.GRID && target.type === ITEM_TYPE.BUILDING_CAMP && !target.storedUnit && this.drag.item.type >= 10 && this.drag.item.type < 20) {
-                        target.storedUnit = this.drag.item; this.showToast("보관 완료");
-                        this.selectItem(target, hit);
-                    }
-                    else if (target.type === this.drag.item.type && target.level === this.drag.item.level) {
-                        const isUnit = (target.type >= 10 && target.type < 20);
-                        const isBuilding = (target.type < 10);
-                        const maxLvl = isUnit ? 10 : 5;
-
-                        if (target.level < maxLvl) {
-                            target.level++; target.scale = 1.3;
-                            if (isUnit) {
-                                const gain = MERGE_XP_DATA[target.level - 1] || 0;
-                                if (gain > 0) { this.addXp(gain); this.showToast(`XP +${gain}`); }
-                                else { this.showToast("Level Up!"); }
-                            } else {
-                                this.showToast(`업그레이드! (Lv.${target.level})`);
-                            }
-                            this.selectItem(target, hit);
-                        } else {
-                            this.showToast("최대 레벨입니다");
-                            returned = true;
-                        }
-                    }
-                    else returned = true; 
-                }
-            } else returned = true; 
-
-            if (returned) {
-                const s = this.drag.startZone;
-                if(s.zone === ZONES.GRID) this.grid[s.r][s.c] = this.drag.item;
-                else if(s.zone === ZONES.SQUAD1) this.squad1[s.idx] = this.drag.item;
-                else if(s.zone === ZONES.SQUAD2) this.squad2[s.idx] = this.drag.item;
-                this.selectItem(this.drag.item, s);
+        else if (state === 'end') {
+            if (this.drag) {
+                this.endDrag();
+            } else if (this.potentialDrag) {
+                this.handleClick(this.potentialDrag.item, this.potentialDrag.hit);
             }
-            this.drag = null; this.hover = null; this.updateUI(); this.requestRender();
+            this.potentialDrag = null;
+            this.drag = null;
         }
     }
 
+    startDrag(item, hit, pos) {
+        let cellX, cellY, cellSize;
+        if (hit.zone === ZONES.GRID) {
+            cellX = this.gridStartX + hit.c * this.gridTileSize; cellY = this.gridStartY + hit.r * this.gridTileSize; cellSize = this.gridTileSize;
+        } else if (hit.zone === ZONES.SQUAD1) {
+            const c = hit.idx % 3, r = Math.floor(hit.idx / 3);
+            cellX = this.squad1Rect.x + c * this.squadCellSize; cellY = this.squad1Rect.y + r * this.squadCellSize; cellSize = this.squadCellSize;
+        } else {
+            const c = hit.idx % 3, r = Math.floor(hit.idx / 3);
+            cellX = this.squad2Rect.x + c * this.squadCellSize; cellY = this.squad2Rect.y + r * this.squadCellSize; cellSize = this.squadCellSize;
+        }
+        
+        this.drag = { item: item, startZone: hit, x: pos.x, y: pos.y, offsetX: pos.x - cellX, offsetY: pos.y - cellY, size: cellSize };
+        this.hover = hit;
+        
+        if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = null;
+        else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = null;
+        else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = null;
+        
+        this.selectItem(item, hit);
+        this.requestRender();
+    }
+
+    endDrag() {
+        const hit = this.getZoneAt(this.drag.x, this.drag.y);
+        let returned = false;
+        
+        if (hit) {
+            let target = null;
+            let isLocked = false;
+            if(hit.zone === ZONES.GRID) {
+                if(this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) isLocked = true;
+                else target = this.grid[hit.r][hit.c];
+            }
+            else if(hit.zone === ZONES.SQUAD1) target = this.squad1[hit.idx];
+            else if(hit.zone === ZONES.SQUAD2) target = this.squad2[hit.idx];
+
+            if (isLocked) returned = true;
+            else if (!target) {
+                if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = this.drag.item;
+                else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = this.drag.item;
+                else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = this.drag.item;
+                this.selectItem(this.drag.item, hit);
+            }
+            else if (target) {
+                if (hit.zone === ZONES.GRID && target.type === ITEM_TYPE.BUILDING_CAMP && !target.storedUnit && this.drag.item.type >= 10 && this.drag.item.type < 20) {
+                    target.storedUnit = this.drag.item; this.showToast("보관 완료");
+                    this.selectItem(target, hit);
+                }
+                else if (target.type === this.drag.item.type && target.level === this.drag.item.level) {
+                    const isUnit = (target.type >= 10 && target.type < 20);
+                    const isBuilding = (target.type < 10);
+                    const maxLvl = isUnit ? 10 : 5;
+
+                    if (isUnit) {
+                        const buildingLvl = this.getHighestBuildingLevel(target.type);
+                        const unitCap = Math.min(10, buildingLvl + 5);
+                        if (target.level >= unitCap) { this.showToast(`성장 한계! (건물 Lv.${unitCap-5} 필요)`); returned = true; }
+                    }
+
+                    if (!returned && target.level < maxLvl) {
+                        target.level++; target.scale = 1.3;
+                        if (isUnit) {
+                            const gain = MERGE_XP_DATA[target.level - 1] || 0;
+                            if (gain > 0) { this.addXp(gain); this.showToast(`XP +${gain}`); }
+                            else { this.showToast("Level Up!"); }
+                        } else { this.showToast(`Upgraded! (Lv.${target.level})`); }
+                        this.selectItem(target, hit);
+                    } else if (!returned) {
+                        this.showToast("최대 레벨입니다");
+                        returned = true;
+                    }
+                }
+                else returned = true; 
+            }
+        } else returned = true; 
+
+        if (returned) {
+            const s = this.drag.startZone;
+            if(s.zone === ZONES.GRID) this.grid[s.r][s.c] = this.drag.item;
+            else if(s.zone === ZONES.SQUAD1) this.squad1[s.idx] = this.drag.item;
+            else if(s.zone === ZONES.SQUAD2) this.squad2[s.idx] = this.drag.item;
+            this.selectItem(this.drag.item, s);
+        }
+        this.hover = null; 
+        this.updateUI(); 
+        this.requestRender();
+    }
+
+    handleClick(item, hit) {
+        if (!item) { this.selectItem(null); return; }
+        this.selectItem(item, hit);
+        
+        if (item.type >= 20) { this.collectResource(item, hit.r, hit.c); return; }
+        if (item.type === ITEM_TYPE.BUILDING_CAMP) { this.ejectCamp(item, hit.r, hit.c); return; }
+        // Produce items (including Chests)
+        if (item.type < 10 && item.type !== ITEM_TYPE.BUILDING_CAMP) { 
+            if (item.type === ITEM_TYPE.BUILDING_CHEST) this.produceFromChest(item, hit.r, hit.c);
+            else this.produce(item); 
+            return; 
+        }
+    }
+
+    // --- Rendering ---
     loop() {
+        if (!this.isDirty && !this.drag) {
+            requestAnimationFrame(() => this.loop());
+            return;
+        }
+
         this.ctx.clearRect(0, 0, this.width, this.height);
         this.drawSquad(this.squad1, this.squad1Rect, "SQUAD 1", "#4caf50", ZONES.SQUAD1);
         this.drawSquad(this.squad2, this.squad2Rect, "SQUAD 2", "#2196f3", ZONES.SQUAD2);
@@ -646,7 +792,7 @@ class Game {
             const x = this.gridStartX + c * this.gridTileSize;
             const y = this.gridStartY + r * this.gridTileSize;
             const isHover = (this.hover && this.hover.zone === ZONES.GRID && this.hover.r === r && this.hover.c === c);
-            const isSelected = (this.selectedItem && this.selectedItem.location.zone === ZONES.GRID && this.selectedItem.location.r === r && this.selectedItem.location.c === c);
+            const isSelected = (this.selectedItem && this.selectedItem.location && this.selectedItem.location.zone === ZONES.GRID && this.selectedItem.location.r === r && this.selectedItem.location.c === c);
             this.drawCell(x, y, this.gridTileSize, this.grid[r][c], this.gridState[r][c], isHover, isSelected);
         }
         if(this.drag) {
@@ -672,7 +818,7 @@ class Game {
         for(let i=0; i<9; i++) {
             const cx = r.x + (i%3)*this.squadCellSize; const cy = r.y + Math.floor(i/3)*this.squadCellSize;
             const isHover = (this.hover && this.hover.zone === zoneName && this.hover.idx === i);
-            const isSelected = (this.selectedItem && this.selectedItem.location.zone === zoneName && this.selectedItem.location.idx === i);
+            const isSelected = (this.selectedItem && this.selectedItem.location && this.selectedItem.location.zone === zoneName && this.selectedItem.location.idx === i);
             this.drawCell(cx, cy, this.squadCellSize, d[i], {type:LOCK_TYPE.OPEN}, isHover, isSelected);
         }
     }
@@ -681,12 +827,10 @@ class Game {
         const p = 2; const is = s - p*2;
         this.ctx.fillStyle = (l.type !== LOCK_TYPE.OPEN) ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.1)";
         this.ctx.fillRect(Math.floor(x+p), Math.floor(y+p), Math.floor(is), Math.floor(is));
-        
         if (isSelected) { this.ctx.strokeStyle = "#00ff00"; this.ctx.lineWidth = 6; }
         else if (isHover) { this.ctx.strokeStyle = "#ffff00"; this.ctx.lineWidth = 4; }
         else { this.ctx.strokeStyle = "rgba(0,0,0,0.3)"; this.ctx.lineWidth = 2; }
         this.ctx.strokeRect(Math.floor(x+p), Math.floor(y+p), Math.floor(is), Math.floor(is));
-
         if(l.type !== LOCK_TYPE.OPEN) {
             this.ctx.fillStyle = "white"; this.ctx.font = "24px sans-serif"; this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
             const text = (l.type === LOCK_TYPE.GOLD) ? `💰${l.value}` : `🔒LV.${l.value}`;
@@ -701,9 +845,7 @@ class Game {
         const offset = Math.floor((size - ds) / 2);
         const dx = x + offset; const dy = y + offset;
         const cx = x + size/2; const cy = y + size/2;
-
         if(isDrag) { this.ctx.shadowColor = "black"; this.ctx.shadowBlur = 20; }
-
         const img = this.assets.getImage(item.type, item.level);
         if(img && img.complete && img.naturalWidth !== 0) {
             this.ctx.drawImage(img, dx, dy, ds, ds);
@@ -741,7 +883,6 @@ class Game {
         else if(item.type===ITEM_TYPE.ITEM_GOLD) label="골드";
         else if(item.type===ITEM_TYPE.ITEM_ENERGY) label="에너지";
         else if(item.type===ITEM_TYPE.ITEM_CRYSTAL) label="크리스탈";
-        
         if (label) {
             this.ctx.fillStyle = "rgba(0,0,0,0.7)";
             const w = 60;
@@ -750,7 +891,6 @@ class Game {
             this.ctx.textAlign = "center"; this.ctx.textBaseline = "top";
             this.ctx.fillText(label, cx, Math.floor(dy + 8));
         }
-
         if ((item.type >= 10 && item.type < 20) || (item.type < 10 && item.type > 0)) { 
             this.ctx.fillStyle = "black";
             this.ctx.beginPath(); this.ctx.arc(cx, dy + ds - 15, 12, 0, Math.PI*2); this.ctx.fill();
@@ -814,30 +954,33 @@ class Game {
         this.showToast("공간 부족!");
     }
 
-    openChest(r, c, level) {
-        this.grid[r][c] = null; 
-        const cellX = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
-        const cellY = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
-        this.showToast("상자 오픈...", cellX, cellY);
+    produceFromChest(chest, r, c) {
+        // Chest spawn cost is also Energy? Let's assume standard cost 1 for now or 0
+        const cost = 1; 
+        if(this.energy < cost) { this.showToast(`에너지 부족 (${cost} 필요)`); return; }
 
-        this.requestRender();
-        setTimeout(() => {
-            const rand = Math.random();
-            let rewardType = ITEM_TYPE.ITEM_GOLD;
-            let rewardLevel = 1;
-            
-            if (level >= 3 && rand < 0.3) {
-                 rewardType = ITEM_TYPE.UNIT_INFANTRY;
-                 rewardLevel = level - 1;
-            } else {
-                 if (rand < 0.33) rewardType = ITEM_TYPE.ITEM_GOLD;
-                 else if (rand < 0.66) rewardType = ITEM_TYPE.ITEM_ENERGY;
-                 else rewardType = ITEM_TYPE.ITEM_CRYSTAL;
-                 rewardLevel = Math.max(1, Math.floor(Math.random() * level) + 1);
+        // Determine Spawn
+        const table = CHEST_DROP_TABLE[chest.level] || CHEST_DROP_TABLE[1];
+        let totalWeight = 0;
+        table.forEach(entry => totalWeight += entry.prob);
+        let rand = Math.random() * totalWeight;
+        let selectedCode = table[0].code;
+        for(let entry of table) {
+            if(rand < entry.prob) { selectedCode = entry.code; break; }
+            rand -= entry.prob;
+        }
+        const info = getInfoFromCode(selectedCode);
+
+        // Find Spot
+        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
+            if(this.gridState[r][c].type === LOCK_TYPE.OPEN && !this.grid[r][c]) {
+                this.energy -= cost;
+                this.grid[r][c] = { type: info.type, level: info.level, scale: 0 };
+                chest.scale = 1.3; // Animate chest
+                this.updateUI(); this.requestRender(); return;
             }
-            this.grid[r][c] = { type: rewardType, level: rewardLevel, scale: 0 };
-            this.requestRender();
-        }, 500);
+        }
+        this.showToast("공간 부족!");
     }
 
     collectResource(item, r, c) {
