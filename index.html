@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KOV Prototype v20 - Stable Fix</title>
+    <title>KOV Prototype v21 - Level Data & UI Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -22,7 +22,6 @@
             position: relative;
             background-color: #4e342e;
             box-shadow: 0 0 30px rgba(0,0,0,0.8);
-            /* 모바일 9:16 비율 유지 (화면에 꽉 차게) */
             aspect-ratio: 9/16;
             height: 100vh;
             max-height: 100vh;
@@ -32,14 +31,14 @@
             flex-direction: column;
         }
 
-        /* 내부 캔버스는 CSS 크기와 무관하게 1080x1920 고정 해상도를 가집니다 */
         canvas {
             display: block;
             width: 100%;
             height: 100%;
+            /* 픽셀 아트 스타일 유지 */
+            image-rendering: pixelated; 
         }
 
-        /* UI 오버레이 (HTML로 구현하여 선명도 유지) */
         .ui-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -57,7 +56,7 @@
             background: linear-gradient(to top, rgba(30,20,15,0.95), transparent);
             padding: 4%;
             text-align: center;
-            pointer-events: auto; /* 버튼 클릭 허용 */
+            pointer-events: auto;
         }
 
         .res-pill {
@@ -86,6 +85,7 @@
             background: rgba(0,0,0,0.85); color: white; padding: 1.5vh 3vh;
             border-radius: 2vh; font-size: 2vh; font-weight: bold;
             opacity: 0; transition: opacity 0.3s; pointer-events: none; border: 2px solid #ffd700;
+            white-space: nowrap; z-index: 100;
         }
     </style>
 </head>
@@ -98,17 +98,21 @@
         <!-- Header -->
         <div class="header-panel">
             <div class="flex justify-between mb-2">
-                <div class="res-pill"><span style="color:#ffeb3b">⚡</span> <span id="energy-display">100/100</span></div>
+                <div class="res-pill"><span style="color:#ffeb3b">⚡</span> <span id="energy-display">50/50</span></div>
                 <div class="res-pill"><span style="color:#ffd700">💰</span> <span id="gold-display">3000</span></div>
                 <div class="res-pill"><span style="color:#4fc3f7">💎</span> <span id="gem-display">50</span></div>
             </div>
-            <div class="flex justify-between items-end px-1">
-                <span class="font-bold" style="font-size: 1.8vh; color:#ffb74d" id="level-display">LORD LV.1</span>
-                <span class="font-bold text-green-400" style="font-size: 1.8vh;" id="xp-display">0 XP</span>
-            </div>
-            <!-- XP Bar -->
-            <div class="w-full bg-gray-700 h-2 mt-1 rounded-full overflow-hidden border border-gray-600">
-                <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
+            
+            <!-- Level & XP Info -->
+            <div class="flex flex-col w-full mt-2">
+                <div class="flex justify-between items-end px-1">
+                    <span class="font-bold text-yellow-400" style="font-size: 1.8vh;" id="level-display">LORD LV.1</span>
+                    <span class="font-bold text-gray-300" style="font-size: 1.5vh;" id="xp-text">0 / 10 XP</span>
+                </div>
+                <!-- XP Bar -->
+                <div class="w-full bg-gray-800 h-3 mt-1 rounded-full overflow-hidden border border-gray-600 relative">
+                    <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
+                </div>
             </div>
         </div>
 
@@ -128,13 +132,12 @@
 
 <script>
 /**
- * KOV Prototype v20 - Stability Fix
- * 1. Fixed Internal Resolution: 1080x1920 (No more scaling jitter)
- * 2. Fixed Animation Loop: Stops exactly at 1.0 (Fixes "shaking while standing still")
- * 3. Simplified Input Mapping: Mouse to Game Coordinate conversion
+ * KOV Prototype v21
+ * - INTEGRATED: Real Data from 'KOV_data_level.xlsx'
+ * - FIXED: UI Labels covered by images (Z-Order correction)
  */
 
-// --- Data ---
+// --- [DATA] level.csv (Level, Required XP, Max Energy) ---
 const LEVEL_DATA = [
     { level: 1, xp: 10, maxEnergy: 50 },
     { level: 2, xp: 22, maxEnergy: 52 },
@@ -153,8 +156,21 @@ const LEVEL_DATA = [
     { level: 15, xp: 558, maxEnergy: 78 }
 ];
 
-const MERGE_XP_DATA = { 1:1, 2:2, 3:4, 4:5, 5:6, 6:8, 7:10, 8:15, 9:20, 10:0 };
+// --- [DATA] XP.csv (Merge Level -> XP Gain) ---
+const MERGE_XP_DATA = { 
+    1: 1, 
+    2: 2, 
+    3: 4, 
+    4: 5, 
+    5: 6, 
+    6: 8, 
+    7: 10, 
+    8: 15, 
+    9: 20, 
+    10: 0 
+};
 
+// --- Assets (Google Drive) ---
 const ASSET_MAP = {
     '10_1': '1PkG2U9TO6M09gP-ems90YrxXZhZiHVwl',
     '10_3': '1zewPXV4yx1YNCB5dCwhesx_NnXhE4xt_',
@@ -197,12 +213,8 @@ class AssetLoader {
 }
 
 const CONFIG = {
-    // 1080x1920 기준 좌표 설정
-    gridCols: 8, gridRows: 8, 
-    gridTopY: 880, gridPadding: 30,
-    squadCols: 3, squadRows: 3, 
-    squadTopY: 350, squadGap: 40,
-    
+    gridCols: 8, gridRows: 8, gridTopY: 880, gridPadding: 30,
+    squadCols: 3, squadRows: 3, squadTopY: 350, squadGap: 40,
     barracksCost: 5, maxLevel: 10
 };
 
@@ -221,12 +233,8 @@ class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
+        this.width = 1080; this.height = 1920;
         
-        // 고정 해상도 설정
-        this.width = 1080;
-        this.height = 1920;
-        // 캔버스 크기는 HTML 태그에서 1080x1920으로 고정됨. CSS로 화면에 맞게 축소됨.
-
         this.assets = new AssetLoader();
         this.assets.loadAll(() => this.requestRender());
 
@@ -235,8 +243,10 @@ class Game {
         this.squad1 = Array(9).fill(null);
         this.squad2 = Array(9).fill(null);
         
-        this.lordLevel = 1; this.currentXp = 0;
-        this.updateLevelStats();
+        // Stats
+        this.lordLevel = 1; 
+        this.currentXp = 0;
+        this.updateLevelStats(); // Initialize Max Energy & Required XP
         this.energy = this.maxEnergy; 
         this.gold = 3000; this.gem = 50; 
         
@@ -263,14 +273,12 @@ class Game {
     }
 
     calcLayout() {
-        // Calculate Sizes based on 1080 width
         const gridAvailW = this.width - (CONFIG.gridPadding * 2);
         this.gridTileSize = Math.floor(gridAvailW / CONFIG.gridCols);
-        
         this.gridStartX = CONFIG.gridPadding;
         this.gridStartY = CONFIG.gridTopY;
 
-        this.squadCellSize = 140; // Fixed size for squad cells
+        this.squadCellSize = 140; 
         const squadW = this.squadCellSize * 3;
         const totalSquadW = (squadW * 2) + CONFIG.squadGap;
         const squadStartX = Math.floor((this.width - totalSquadW) / 2);
@@ -295,62 +303,54 @@ class Game {
         this.grid[4][4] = { type: ITEM_TYPE.BUILDING_CAMP, level: 1, scale: 1, storedUnit: null };
     }
 
+    // --- LEVEL UP LOGIC (Using Uploaded Data) ---
     addXp(amount) {
         this.currentXp += amount;
         if (this.currentXp >= this.requiredXp) this.levelUp();
         this.updateUI();
     }
+
     levelUp() {
-        if (this.lordLevel >= 15) return; 
-        this.currentXp -= this.requiredXp;
+        if (this.lordLevel >= 15) return; // Data limit
+        this.currentXp -= this.requiredXp; // Overflow carry over
         this.lordLevel++;
         this.updateLevelStats();
-        this.energy = this.maxEnergy; 
+        this.energy = this.maxEnergy; // Refill Energy on Level Up
         this.showToast(`LEVEL UP! LV.${this.lordLevel}`);
+        
+        // Check if multi-level up is possible
         if (this.currentXp >= this.requiredXp) this.levelUp();
     }
+
     updateLevelStats() {
+        // level.csv uses 1-based indexing for level
         const levelData = LEVEL_DATA.find(d => d.level === this.lordLevel) || LEVEL_DATA[LEVEL_DATA.length - 1];
         this.maxEnergy = levelData.maxEnergy;
         this.requiredXp = levelData.xp;
     }
 
-    // --- Input Mapping ---
+    // --- Input ---
     getGamePos(e) {
-        // Map Client coordinates to 1080x1920 Game Coordinates
         const rect = this.canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
         const scaleX = this.width / rect.width;
         const scaleY = this.height / rect.height;
-
-        return { 
-            x: (clientX - rect.left) * scaleX, 
-            y: (clientY - rect.top) * scaleY 
-        };
+        return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
     }
 
     getZoneAt(x, y) {
-        // Squad 1
-        if (x >= this.squad1Rect.x && x < this.squad1Rect.x + this.squad1Rect.w &&
-            y >= this.squad1Rect.y && y < this.squad1Rect.y + this.squad1Rect.h) {
+        if (x >= this.squad1Rect.x && x < this.squad1Rect.x + this.squad1Rect.w && y >= this.squad1Rect.y && y < this.squad1Rect.y + this.squad1Rect.h) {
             const c = Math.floor((x - this.squad1Rect.x) / this.squadCellSize);
             const r = Math.floor((y - this.squad1Rect.y) / this.squadCellSize);
             return { zone: ZONES.SQUAD1, idx: r * 3 + c, r, c };
         }
-        // Squad 2
-        if (x >= this.squad2Rect.x && x < this.squad2Rect.x + this.squad2Rect.w &&
-            y >= this.squad2Rect.y && y < this.squad2Rect.y + this.squad2Rect.h) {
+        if (x >= this.squad2Rect.x && x < this.squad2Rect.x + this.squad2Rect.w && y >= this.squad2Rect.y && y < this.squad2Rect.y + this.squad2Rect.h) {
             const c = Math.floor((x - this.squad2Rect.x) / this.squadCellSize);
             const r = Math.floor((y - this.squad2Rect.y) / this.squadCellSize);
             return { zone: ZONES.SQUAD2, idx: r * 3 + c, r, c };
         }
-        // Grid
-        const gridW = this.gridTileSize * CONFIG.gridCols;
-        const gridH = this.gridTileSize * CONFIG.gridRows;
-        if (x >= this.gridStartX && x < this.gridStartX + gridW &&
-            y >= this.gridStartY && y < this.gridStartY + gridH) {
+        if (x >= this.gridStartX && x < this.gridStartX + this.gridTileSize * CONFIG.gridCols && y >= this.gridStartY && y < this.gridStartY + this.gridTileSize * CONFIG.gridRows) {
             const c = Math.min(CONFIG.gridCols - 1, Math.max(0, Math.floor((x - this.gridStartX) / this.gridTileSize)));
             const r = Math.min(CONFIG.gridRows - 1, Math.max(0, Math.floor((y - this.gridStartY) / this.gridTileSize)));
             return { zone: ZONES.GRID, r, c, idx: r*8+c };
@@ -366,7 +366,6 @@ class Game {
             const hit = this.getZoneAt(pos.x, pos.y);
             if (!hit) return;
 
-            // Click Actions
             if (hit.zone === ZONES.GRID) {
                 if (this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) { this.tryUnlock(hit.r, hit.c); return; }
                 const item = this.grid[hit.r][hit.c];
@@ -378,7 +377,6 @@ class Game {
                 }
             }
 
-            // Drag Start
             let item = null;
             if(hit.zone === ZONES.GRID) item = this.grid[hit.r][hit.c];
             else if(hit.zone === ZONES.SQUAD1) item = this.squad1[hit.idx];
@@ -387,47 +385,27 @@ class Game {
             if (item && item.type >= 10 && item.type < 20) {
                 let cellX, cellY, cellSize;
                 if (hit.zone === ZONES.GRID) {
-                    cellX = this.gridStartX + hit.c * this.gridTileSize;
-                    cellY = this.gridStartY + hit.r * this.gridTileSize;
-                    cellSize = this.gridTileSize;
+                    cellX = this.gridStartX + hit.c * this.gridTileSize; cellY = this.gridStartY + hit.r * this.gridTileSize; cellSize = this.gridTileSize;
                 } else if (hit.zone === ZONES.SQUAD1) {
                     const c = hit.idx % 3, r = Math.floor(hit.idx / 3);
-                    cellX = this.squad1Rect.x + c * this.squadCellSize;
-                    cellY = this.squad1Rect.y + r * this.squadCellSize;
-                    cellSize = this.squadCellSize;
+                    cellX = this.squad1Rect.x + c * this.squadCellSize; cellY = this.squad1Rect.y + r * this.squadCellSize; cellSize = this.squadCellSize;
                 } else {
                     const c = hit.idx % 3, r = Math.floor(hit.idx / 3);
-                    cellX = this.squad2Rect.x + c * this.squadCellSize;
-                    cellY = this.squad2Rect.y + r * this.squadCellSize;
-                    cellSize = this.squadCellSize;
+                    cellX = this.squad2Rect.x + c * this.squadCellSize; cellY = this.squad2Rect.y + r * this.squadCellSize; cellSize = this.squadCellSize;
                 }
-
-                this.drag = { 
-                    item: item, 
-                    startZone: hit, 
-                    x: pos.x, 
-                    y: pos.y,
-                    offsetX: pos.x - cellX, 
-                    offsetY: pos.y - cellY,
-                    size: cellSize
-                };
+                this.drag = { item: item, startZone: hit, x: pos.x, y: pos.y, offsetX: pos.x - cellX, offsetY: pos.y - cellY, size: cellSize };
                 this.hover = hit;
-                
-                // Hide from grid while dragging
                 if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = null;
                 else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = null;
                 else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = null;
             }
         }
         else if (state === 'move' && this.drag) {
-            this.drag.x = pos.x; 
-            this.drag.y = pos.y;
-            this.hover = this.getZoneAt(pos.x, pos.y); 
+            this.drag.x = pos.x; this.drag.y = pos.y; this.hover = this.getZoneAt(pos.x, pos.y); 
         }
         else if (state === 'end' && this.drag) {
             const hit = this.getZoneAt(this.drag.x, this.drag.y);
             let returned = false;
-
             if (hit) {
                 let target = null;
                 let isLocked = false;
@@ -438,9 +416,7 @@ class Game {
                 else if(hit.zone === ZONES.SQUAD1) target = this.squad1[hit.idx];
                 else if(hit.zone === ZONES.SQUAD2) target = this.squad2[hit.idx];
 
-                if (isLocked) {
-                    returned = true;
-                }
+                if (isLocked) returned = true;
                 else if (!target) {
                     if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = this.drag.item;
                     else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = this.drag.item;
@@ -452,8 +428,9 @@ class Game {
                     }
                     else if (target.type === this.drag.item.type && target.level === this.drag.item.level && target.level < CONFIG.maxLevel) {
                         target.level++; target.scale = 1.3;
+                        // --- XP GAIN ---
                         const gain = MERGE_XP_DATA[target.level - 1] || 0;
-                        if (gain > 0) { this.addXp(gain); this.showToast(`XP +${gain}`); } 
+                        if (gain > 0) { this.addXp(gain); this.showToast(`XP +${gain}`); }
                         else { this.showToast("Level Up!"); }
                     }
                     else returned = true; 
@@ -466,10 +443,7 @@ class Game {
                 else if(s.zone === ZONES.SQUAD1) this.squad1[s.idx] = this.drag.item;
                 else if(s.zone === ZONES.SQUAD2) this.squad2[s.idx] = this.drag.item;
             }
-            
-            this.drag = null;
-            this.hover = null;
-            this.updateUI();
+            this.drag = null; this.hover = null; this.updateUI();
         }
     }
 
@@ -488,35 +462,26 @@ class Game {
         }
 
         if(this.drag) {
-            // Draw Item at Mouse Pos - Offset
-            const dx = this.drag.x - this.drag.offsetX;
-            const dy = this.drag.y - this.drag.offsetY;
+            const dx = Math.floor(this.drag.x - this.drag.offsetX);
+            const dy = Math.floor(this.drag.y - this.drag.offsetY);
             this.drawItem(dx, dy, this.drag.size, this.drag.item, true);
         }
         
         this.grid.flat().forEach(i => i && this.anim(i));
         requestAnimationFrame(() => this.loop());
     }
-
-    // *** FIX: Animation logic that stops exactly at 1.0 ***
+    
     anim(i) { 
         if (i.scale === 1) return;
-        
-        if (i.scale < 1) {
-            i.scale += 0.1;
-            if (i.scale >= 1) i.scale = 1;
-        } 
-        else if (i.scale > 1) {
-            i.scale -= 0.05;
-            if (i.scale <= 1) i.scale = 1;
-        }
+        if (i.scale < 1) { i.scale += 0.1; if (i.scale >= 1) i.scale = 1; } 
+        else if (i.scale > 1) { i.scale -= 0.05; if (i.scale <= 1) i.scale = 1; }
     }
 
     drawSquad(d, r, l, c, zoneName) {
         this.ctx.fillStyle = c; this.ctx.font = "bold 30px sans-serif"; this.ctx.textAlign="center"; 
-        this.ctx.fillText(l, r.x + r.w/2, r.y - 15);
+        this.ctx.fillText(l, Math.floor(r.x + r.w/2), Math.floor(r.y - 15));
         this.ctx.fillStyle = c + "33"; 
-        this.ctx.fillRect(r.x-5, r.y-5, r.w+10, r.h+10);
+        this.ctx.fillRect(Math.floor(r.x-5), Math.floor(r.y-5), Math.floor(r.w+10), Math.floor(r.h+10));
         
         for(let i=0; i<9; i++) {
             const cx = r.x + (i%3)*this.squadCellSize; const cy = r.y + Math.floor(i/3)*this.squadCellSize;
@@ -528,10 +493,10 @@ class Game {
     drawCell(x, y, s, i, l, isHover) {
         const p = 2; const is = s - p*2;
         this.ctx.fillStyle = (l.type !== LOCK_TYPE.OPEN) ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.1)";
-        this.ctx.fillRect(x+p, y+p, is, is);
+        this.ctx.fillRect(Math.floor(x+p), Math.floor(y+p), Math.floor(is), Math.floor(is));
         this.ctx.strokeStyle = isHover ? "#ffff00" : "rgba(0,0,0,0.3)"; 
         this.ctx.lineWidth = isHover ? 4 : 2; 
-        this.ctx.strokeRect(x+p, y+p, is, is);
+        this.ctx.strokeRect(Math.floor(x+p), Math.floor(y+p), Math.floor(is), Math.floor(is));
 
         if(l.type !== LOCK_TYPE.OPEN) {
             this.ctx.fillStyle = "white"; this.ctx.font = "24px sans-serif"; this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
@@ -540,19 +505,16 @@ class Game {
     }
 
     drawItem(x, y, size, item, isDrag=false) {
-        // Enforce integer for crisp rendering
         x = Math.floor(x); y = Math.floor(y); size = Math.floor(size);
         const scale = isDrag ? 1.0 : item.scale;
-        const pad = 4; 
-        const ds = Math.floor((size - pad * 2) * scale);
+        const pad = 4; const ds = Math.floor((size - pad * 2) * scale);
         const offset = Math.floor((size - ds) / 2);
-        const dx = x + offset;
-        const dy = y + offset;
-        const cx = x + size/2;
-        const cy = y + size/2;
+        const dx = x + offset; const dy = y + offset;
+        const cx = x + size/2; const cy = y + size/2;
 
         if(isDrag) { this.ctx.shadowColor = "black"; this.ctx.shadowBlur = 20; }
 
+        // 1. Draw Image
         const img = this.assets.getImage(item.type, item.level);
         if(img && img.complete && img.naturalWidth !== 0) {
             this.ctx.drawImage(img, dx, dy, ds, ds);
@@ -570,20 +532,14 @@ class Game {
             else if(item.type===ITEM_TYPE.ITEM_ENERGY) { c="#80deea"; sym="⚡"; }
             else if(item.type===ITEM_TYPE.ITEM_CRYSTAL) { c="#e1bee7"; sym="💎"; }
 
-            this.ctx.fillStyle = c; 
-            this.roundRect(dx, dy, ds, ds, 12); 
-            this.ctx.fill();
-            this.ctx.strokeStyle = "rgba(0,0,0,0.4)"; 
-            this.ctx.lineWidth = 2; 
-            this.ctx.stroke();
-            
-            this.ctx.fillStyle = "rgba(0,0,0,0.6)";
-            this.ctx.font = `${Math.floor(ds*0.5)}px sans-serif`;
-            this.ctx.textAlign = "center";
-            this.ctx.textBaseline = "middle";
+            this.ctx.fillStyle = c; this.roundRect(dx, dy, ds, ds, 12); this.ctx.fill();
+            this.ctx.strokeStyle = "rgba(0,0,0,0.4)"; this.ctx.lineWidth = 2; this.ctx.stroke();
+            this.ctx.fillStyle = "rgba(0,0,0,0.6)"; this.ctx.font = `${Math.floor(ds*0.5)}px sans-serif`;
+            this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
             this.ctx.fillText(sym, cx, cy);
         }
 
+        // 2. Draw Label (ON TOP)
         this.drawLabel(item, cx, dy, ds);
         this.ctx.shadowBlur = 0;
     }
@@ -598,8 +554,9 @@ class Game {
         else if(item.type===ITEM_TYPE.BUILDING_CAMP) label="캠프";
         else if(item.type===ITEM_TYPE.ITEM_GOLD) label="골드";
         
+        // Background for text visibility
         if (label) {
-            this.ctx.fillStyle = "rgba(0,0,0,0.65)";
+            this.ctx.fillStyle = "rgba(0,0,0,0.7)";
             const w = 60;
             this.ctx.fillRect(Math.floor(cx - w/2), Math.floor(dy + 5), w, 22);
             this.ctx.fillStyle = "white"; 
@@ -630,7 +587,7 @@ class Game {
         document.getElementById('energy-display').innerText = `${this.energy}/${this.maxEnergy}`;
         document.getElementById('gold-display').innerText = this.gold;
         document.getElementById('level-display').innerText = `LORD LV.${this.lordLevel}`;
-        document.getElementById('xp-display').innerText = `${this.currentXp} / ${this.requiredXp} XP`;
+        document.getElementById('xp-text').innerText = `${this.currentXp} / ${this.requiredXp} XP`;
         document.getElementById('xp-bar').style.width = `${Math.min(100, (this.currentXp/this.requiredXp)*100)}%`;
     }
     cheatEnergy(){ this.energy = Math.min(this.energy+30, this.maxEnergy); this.updateUI(); }
