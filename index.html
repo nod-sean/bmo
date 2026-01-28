@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KOV Prototype v24 - Layout Fix</title>
+    <title>KOV Prototype v25 - Building System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -53,7 +53,6 @@
             flex: 0 0 auto;
         }
 
-        /* 하단 패널: 컴팩트한 높이 유지 */
         .footer-panel {
             background: #d7ccc8; 
             border-top: 3px solid #8d6e63;
@@ -178,11 +177,12 @@
 
 <script>
 /**
- * KOV Prototype v24 - Layout Optimization
- * - Moved Squad and Grid area UP significantly to prevent footer overlap.
- * - Normalized Coordinates logic retained.
+ * KOV Prototype v25 - Building Merge & Probability System
+ * - Added Building Merge Logic (Max Level 5)
+ * - Added Production Probability based on Building Level (building.csv)
  */
 
+// --- DATA ---
 const LEVEL_DATA = [
     { level: 1, xp: 10, maxEnergy: 50 }, { level: 2, xp: 22, maxEnergy: 52 }, { level: 3, xp: 37, maxEnergy: 54 },
     { level: 4, xp: 55, maxEnergy: 56 }, { level: 5, xp: 77, maxEnergy: 58 }, { level: 6, xp: 103, maxEnergy: 60 },
@@ -195,6 +195,16 @@ const UNIT_STATS = {
     10: { name: "보병", hp: 10, atk: 5, sell: 5 },
     11: { name: "궁병", hp: 8, atk: 8, sell: 5 },
     12: { name: "기병", hp: 15, atk: 4, sell: 5 }
+};
+
+// --- BUILDING STATS (from building.csv) ---
+// probs: [Lv1, Lv2, Lv3, Lv4, Lv5, Lv6...] probability
+const BUILDING_STATS = {
+    1: { energy: 1, probs: [90, 10, 0, 0, 0, 0, 0, 0, 0, 0] },
+    2: { energy: 2, probs: [0, 90, 10, 0, 0, 0, 0, 0, 0, 0] },
+    3: { energy: 3, probs: [0, 45, 55, 0, 0, 0, 0, 0, 0, 0] },
+    4: { energy: 4, probs: [0, 0, 90, 10, 0, 0, 0, 0, 0, 0] },
+    5: { energy: 5, probs: [0, 0, 80, 10, 10, 0, 0, 0, 0, 0] }
 };
 
 const ASSET_MAP = {
@@ -230,14 +240,11 @@ class AssetLoader {
     }
 }
 
-// --- CONFIG MODIFIED FOR SPACING ---
 const CONFIG = {
     gridCols: 8, gridRows: 8, 
-    gridTopY: 740, // Moved UP from 880 (approx -140px)
-    gridPadding: 30,
+    gridTopY: 740, gridPadding: 30,
     squadCols: 3, squadRows: 3, 
-    squadTopY: 240, // Moved UP from 350 (approx -110px) to reduce top whitespace
-    squadGap: 40,
+    squadTopY: 240, squadGap: 40,
     barracksCost: 5, maxLevel: 10
 };
 
@@ -370,6 +377,11 @@ class Game {
             else if(item.type === ITEM_TYPE.BUILDING_STABLE) { name = "마구간"; desc = "기병 생산"; }
             else if(item.type === ITEM_TYPE.BUILDING_CHEST) { name = "상자"; desc = "자원 획득"; }
             else if(item.type === ITEM_TYPE.BUILDING_CAMP) { name = "캠프"; desc = "유닛 보관"; }
+            
+            // 건물 레벨 표시
+            name += ` LV.${item.level}`;
+            const bStats = BUILDING_STATS[item.level] || BUILDING_STATS[1];
+            stats = `소모 ⚡${bStats.energy}`;
         } else if (item.type >= 20) {
             name = "자원"; desc = "클릭 획득";
         } else {
@@ -468,7 +480,8 @@ class Game {
                     if (item.type === ITEM_TYPE.BUILDING_CHEST) { this.openChest(hit.r, hit.c); return; }
                     if (item.type >= 20) { this.collectResource(item, hit.r, hit.c); return; }
                     if (item.type === ITEM_TYPE.BUILDING_CAMP) { this.ejectCamp(item, hit.r, hit.c); return; }
-                    if (item.type < 10) { this.produce(item.type); return; }
+                    // Building Produce on Click
+                    if (item.type < 10) { this.produce(item); return; }
                 }
             }
 
@@ -479,7 +492,7 @@ class Game {
 
             if (item) this.selectItem(item, hit);
 
-            if (item && item.type >= 10 && item.type < 20) {
+            if (item) { // Allow dragging everything (including buildings for merge)
                 let cellX, cellY, cellSize;
                 if (hit.zone === ZONES.GRID) {
                     cellX = this.gridStartX + hit.c * this.gridTileSize; cellY = this.gridStartY + hit.r * this.gridTileSize; cellSize = this.gridTileSize;
@@ -515,22 +528,37 @@ class Game {
 
                 if (isLocked) returned = true;
                 else if (!target) {
+                    // Move to empty
                     if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = this.drag.item;
                     else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = this.drag.item;
                     else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = this.drag.item;
                     this.selectItem(this.drag.item, hit);
                 }
                 else if (target) {
-                    if (hit.zone === ZONES.GRID && target.type === ITEM_TYPE.BUILDING_CAMP && !target.storedUnit) {
+                    // Special: Store in Camp
+                    if (hit.zone === ZONES.GRID && target.type === ITEM_TYPE.BUILDING_CAMP && !target.storedUnit && this.drag.item.type >= 10 && this.drag.item.type < 20) {
                         target.storedUnit = this.drag.item; this.showToast("보관 완료");
                         this.selectItem(target, hit);
                     }
-                    else if (target.type === this.drag.item.type && target.level === this.drag.item.level && target.level < CONFIG.maxLevel) {
-                        target.level++; target.scale = 1.3;
-                        const gain = MERGE_XP_DATA[target.level - 1] || 0;
-                        if (gain > 0) { this.addXp(gain); this.showToast(`XP +${gain}`); }
-                        else { this.showToast("Level Up!"); }
-                        this.selectItem(target, hit);
+                    // Merge Logic (Units OR Buildings)
+                    else if (target.type === this.drag.item.type && target.level === this.drag.item.level) {
+                        const isUnit = (target.type >= 10 && target.type < 20);
+                        const isBuilding = (target.type < 10);
+                        const maxLvl = isBuilding ? 5 : 10;
+
+                        if (target.level < maxLvl) {
+                            target.level++; target.scale = 1.3;
+                            if (isUnit) {
+                                const gain = MERGE_XP_DATA[target.level - 1] || 0;
+                                if (gain > 0) { this.addXp(gain); this.showToast(`XP +${gain}`); }
+                                else { this.showToast("Level Up!"); }
+                            } else {
+                                this.showToast("건물 업그레이드!");
+                            }
+                            this.selectItem(target, hit);
+                        } else {
+                            returned = true; // Max level reached
+                        }
                     }
                     else returned = true; 
                 }
@@ -683,19 +711,36 @@ class Game {
     cheatEnergy(){ this.energy = Math.min(this.energy+30, this.maxEnergy); this.updateUI(); }
     spawnChest(){ for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(this.gridState[r][c].type===LOCK_TYPE.OPEN&&!this.grid[r][c]){ this.grid[r][c]={type:ITEM_TYPE.BUILDING_CHEST,level:1,scale:0}; return; } }
     spawnCamp(){ for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(this.gridState[r][c].type===LOCK_TYPE.OPEN&&!this.grid[r][c]){ this.grid[r][c]={type:ITEM_TYPE.BUILDING_CAMP,level:1,scale:0}; return; } }
-    produce(type) {
-        if(this.energy < CONFIG.barracksCost) { this.showToast("에너지 부족!"); return; }
+    
+    produce(building) {
+        // Building Data Check
+        const stats = BUILDING_STATS[building.level] || BUILDING_STATS[1];
+        if(this.energy < stats.energy) { this.showToast(`에너지 부족 (${stats.energy} 필요)`); return; }
+        
         let unitType = ITEM_TYPE.UNIT_INFANTRY;
-        if(type === ITEM_TYPE.BUILDING_RANGE) unitType = ITEM_TYPE.UNIT_ARCHER;
-        if(type === ITEM_TYPE.BUILDING_STABLE) unitType = ITEM_TYPE.UNIT_CAVALRY;
+        if(building.type === ITEM_TYPE.BUILDING_RANGE) unitType = ITEM_TYPE.UNIT_ARCHER;
+        if(building.type === ITEM_TYPE.BUILDING_STABLE) unitType = ITEM_TYPE.UNIT_CAVALRY;
+
+        // Probabilistic Spawn
+        let spawnLevel = 1;
+        const rand = Math.random() * 100;
+        let cum = 0;
+        for(let i=0; i<stats.probs.length; i++) {
+            cum += stats.probs[i];
+            if(rand < cum) { spawnLevel = i + 1; break; }
+        }
+
+        // Find Spot
         for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
             if(this.gridState[r][c].type === LOCK_TYPE.OPEN && !this.grid[r][c]) {
-                this.energy -= CONFIG.barracksCost; this.grid[r][c] = { type: unitType, level: 1, scale: 0 };
+                this.energy -= stats.energy;
+                this.grid[r][c] = { type: unitType, level: spawnLevel, scale: 0 };
                 this.updateUI(); return;
             }
         }
         this.showToast("공간 부족!");
     }
+
     openChest(r, c) {
         this.grid[r][c] = null; this.showToast("상자 오픈...");
         setTimeout(() => {
