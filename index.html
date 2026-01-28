@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v61 - Canvas Preview</title>
+    <title>KOV Prototype v62 - Asset Loader Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -295,16 +295,17 @@
 
 <script>
 /**
- * KOV Prototype v61
- * - Loads data from 'data/game_data.json'
- * - Implements visual enhancements (Money bag lock, High contrast text, etc.)
+ * KOV Prototype v62 - Asset Loader Optimization
+ * FIX: Reordered SEARCH_PATHS to prioritize "img/" folder.
+ * FIX: Updated tryLoadImage to search folders even for local loading.
  */
 
 // --- CONFIGURATION ---
 const GITHUB_REPO = "nod-sean/bmo";
 const GITHUB_BRANCH = "main";
 const LOCAL_BASE_PATH = "./"; 
-const SEARCH_PATHS = ["", "img/", "assets/", "images/"];
+// Updated: "img/" first to prevent 404s on root scan
+const SEARCH_PATHS = ["img/", "", "assets/", "images/"];
 const EXTENSIONS = [".png", ".PNG", ".jpg", ".jpeg"];
 
 // --- ASSET KEYS ---
@@ -386,26 +387,34 @@ class AssetLoader {
     
     tryLoadImage(key, pathIndex, extIndex, useLocal) {
         return new Promise((resolve, reject) => {
-            if (!useLocal && pathIndex >= SEARCH_PATHS.length) {
-                this.failedKeys.add(key);
-                resolve(null); 
+            // Check if we exhausted all paths
+            if (pathIndex >= SEARCH_PATHS.length) {
+                if (useLocal) {
+                    resolve(null); // Local failed -> fallback to Remote
+                } else {
+                    this.failedKeys.add(key); // Remote failed -> Give up
+                    resolve(null); 
+                }
+                return;
+            }
+
+            // Check if we exhausted all extensions for current path
+            if (extIndex >= EXTENSIONS.length) {
+                // Try next path, reset extension index
+                this.tryLoadImage(key, pathIndex + 1, 0, useLocal).then(resolve);
                 return;
             }
 
             const img = new Image();
             if (!useLocal) img.crossOrigin = "Anonymous"; 
 
+            const folder = SEARCH_PATHS[pathIndex];
+            const ext = EXTENSIONS[extIndex];
+            
             let url = "";
             if (useLocal) {
-                if (extIndex >= EXTENSIONS.length) { resolve(null); return; }
-                url = `${LOCAL_BASE_PATH}${key}${EXTENSIONS[extIndex]}`;
+                url = `${LOCAL_BASE_PATH}${folder}${key}${ext}`;
             } else {
-                if (extIndex >= EXTENSIONS.length) {
-                    this.tryLoadImage(key, pathIndex + 1, 0, false).then(resolve);
-                    return;
-                }
-                const folder = SEARCH_PATHS[pathIndex];
-                const ext = EXTENSIONS[extIndex];
                 url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${folder}${key}${ext}`;
             }
 
@@ -415,6 +424,7 @@ class AssetLoader {
             };
 
             img.onerror = () => {
+                // Try next extension in same folder
                 this.tryLoadImage(key, pathIndex, extIndex + 1, useLocal).then(resolve);
             };
 
