@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KOV Prototype v9 - Graphic Fix</title>
+    <title>KOV Prototype v20 - Stable Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -18,132 +18,191 @@
             height: 100vh;
         }
 
-        /* 전체 컨테이너 (9:16 비율 유지) */
-        #app-root {
+        #game-container {
             position: relative;
             background-color: #4e342e;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            /* 모바일 9:16 비율 유지 (화면에 꽉 차게) */
             aspect-ratio: 9/16;
             height: 100vh;
             max-height: 100vh;
             max-width: 56.25vh; 
+            width: auto;
             display: flex;
             flex-direction: column;
         }
 
-        /* 1. 상단 정보창 */
-        #ui-header {
-            flex: 0 0 10%;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            z-index: 20;
-        }
-
-        /* 2. 게임 캔버스 */
-        #canvas-wrapper {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background-color: #3e2723; /* 캔버스 배경색 명시 */
-        }
+        /* 내부 캔버스는 CSS 크기와 무관하게 1080x1920 고정 해상도를 가집니다 */
         canvas {
             display: block;
             width: 100%;
             height: 100%;
         }
 
-        /* 3. 하단 컨트롤 패널 */
-        #ui-footer {
-            flex: 0 0 15%;
-            background: rgba(30, 20, 15, 0.95);
-            border-top: 4px solid #8d6e63;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-            z-index: 20;
+        /* UI 오버레이 (HTML로 구현하여 선명도 유지) */
+        .ui-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
 
-        /* UI Elements */
-        .pill {
-            background: #333; padding: 4px 12px;
-            border-radius: 15px; display: flex; align-items: center; gap: 5px;
-            font-size: 14px; font-weight: bold; border: 1px solid #555;
+        .header-panel {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            padding: 2% 4%;
+            color: white;
         }
-        
+
+        .footer-panel {
+            background: linear-gradient(to top, rgba(30,20,15,0.95), transparent);
+            padding: 4%;
+            text-align: center;
+            pointer-events: auto; /* 버튼 클릭 허용 */
+        }
+
+        .res-pill {
+            background: rgba(0,0,0,0.6); border: 1px solid #555;
+            border-radius: 99px; padding: 0.5vh 1.5vh;
+            display: flex; align-items: center; gap: 0.5vh;
+            font-weight: bold; font-size: 1.8vh;
+        }
+
         .btn {
+            pointer-events: auto;
             background: linear-gradient(to bottom, #ffb300, #ff6f00);
-            color: #fff; border: none; padding: 10px 20px;
-            border-radius: 8px; font-weight: bold; font-size: 14px;
-            box-shadow: 0 4px 0 #e65100; cursor: pointer;
-            margin: 0 5px;
+            color: white; font-weight: bold; border-radius: 1vh;
+            padding: 1.2vh 2.5vh; font-size: 1.8vh;
+            box-shadow: 0 0.5vh 0 #e65100;
+            transition: transform 0.1s;
         }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #e65100; }
-        .btn-green { background: linear-gradient(to bottom, #66bb6a, #43a047); box-shadow: 0 4px 0 #2e7d32; }
-        .btn-purple { background: linear-gradient(to bottom, #ab47bc, #8e24aa); box-shadow: 0 4px 0 #6a1b9a; }
-        
+        .btn:active { transform: translateY(0.3vh); box-shadow: 0 0.2vh 0 #e65100; }
+        .btn-green { background: linear-gradient(to bottom, #66bb6a, #43a047); box-shadow: 0 0.5vh 0 #2e7d32; }
+        .btn-green:active { box-shadow: 0 0.2vh 0 #2e7d32; }
+        .btn-purple { background: linear-gradient(to bottom, #ab47bc, #8e24aa); box-shadow: 0 0.5vh 0 #6a1b9a; }
+        .btn-purple:active { box-shadow: 0 0.2vh 0 #6a1b9a; }
+
         #toast {
-            position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8); color: #fff;
-            padding: 10px 20px; border-radius: 20px;
-            pointer-events: none; opacity: 0; transition: opacity 0.3s;
-            z-index: 100; font-weight: bold; text-align: center;
+            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85); color: white; padding: 1.5vh 3vh;
+            border-radius: 2vh; font-size: 2vh; font-weight: bold;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; border: 2px solid #ffd700;
         }
     </style>
 </head>
 <body>
 
-<div id="app-root">
-    <!-- Header -->
-    <div id="ui-header">
-        <div class="flex justify-between mb-2">
-            <div class="pill"><span style="color:#ffeb3b">⚡</span> <span id="energy-display">100/100</span></div>
-            <div class="pill"><span style="color:#ffd700">💰</span> <span id="gold-display">3000</span></div>
-            <div class="pill"><span style="color:#4fc3f7">💎</span> <span id="gem-display">50</span></div>
-        </div>
-        <div class="flex justify-between px-1">
-             <span class="text-gray-300 font-bold text-sm" id="level-display">LORD LV.1</span>
-             <span class="text-green-400 font-bold text-sm" id="squad-power">POWER: 0</span>
-        </div>
-    </div>
+<div id="game-container">
+    <canvas id="gameCanvas" width="1080" height="1920"></canvas>
 
-    <!-- Game View -->
-    <div id="canvas-wrapper">
-        <canvas id="gameCanvas"></canvas>
-        <div id="toast">메시지</div>
-    </div>
+    <div class="ui-overlay">
+        <!-- Header -->
+        <div class="header-panel">
+            <div class="flex justify-between mb-2">
+                <div class="res-pill"><span style="color:#ffeb3b">⚡</span> <span id="energy-display">100/100</span></div>
+                <div class="res-pill"><span style="color:#ffd700">💰</span> <span id="gold-display">3000</span></div>
+                <div class="res-pill"><span style="color:#4fc3f7">💎</span> <span id="gem-display">50</span></div>
+            </div>
+            <div class="flex justify-between items-end px-1">
+                <span class="font-bold" style="font-size: 1.8vh; color:#ffb74d" id="level-display">LORD LV.1</span>
+                <span class="font-bold text-green-400" style="font-size: 1.8vh;" id="xp-display">0 XP</span>
+            </div>
+            <!-- XP Bar -->
+            <div class="w-full bg-gray-700 h-2 mt-1 rounded-full overflow-hidden border border-gray-600">
+                <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
+            </div>
+        </div>
 
-    <!-- Footer -->
-    <div id="ui-footer">
-        <h3 id="info-title" class="text-yellow-400 font-bold text-lg mb-1">준비 완료</h3>
-        <p id="info-desc" class="text-gray-300 text-xs mb-3">건물을 눌러 생산하거나, 드래그하여 머지하세요.</p>
-        <div class="flex">
-            <button class="btn" onclick="game.cheatEnergy()">⚡ +30</button>
-            <button class="btn btn-green" onclick="game.spawnChest()">🎁 상자</button>
-            <button class="btn btn-purple" onclick="game.spawnCamp()">⛺ 캠프</button>
+        <!-- Footer -->
+        <div class="footer-panel">
+            <h3 id="info-title" class="text-yellow-400 font-bold mb-2" style="font-size: 2.2vh;">준비 완료</h3>
+            <div class="flex justify-center gap-2">
+                <button class="btn" onclick="game.cheatEnergy()">⚡ +30</button>
+                <button class="btn btn-green" onclick="game.spawnChest()">🎁 상자</button>
+                <button class="btn btn-purple" onclick="game.spawnCamp()">⛺ 캠프</button>
+            </div>
         </div>
     </div>
+    
+    <div id="toast">메시지</div>
 </div>
 
 <script>
 /**
- * KOV Prototype v9
- * - Replaced external images with Canvas Drawing to fix "White Square" issue.
- * - Added Name Labels above Level Numbers.
+ * KOV Prototype v20 - Stability Fix
+ * 1. Fixed Internal Resolution: 1080x1920 (No more scaling jitter)
+ * 2. Fixed Animation Loop: Stops exactly at 1.0 (Fixes "shaking while standing still")
+ * 3. Simplified Input Mapping: Mouse to Game Coordinate conversion
  */
 
-// --- Game Logic ---
+// --- Data ---
+const LEVEL_DATA = [
+    { level: 1, xp: 10, maxEnergy: 50 },
+    { level: 2, xp: 22, maxEnergy: 52 },
+    { level: 3, xp: 37, maxEnergy: 54 },
+    { level: 4, xp: 55, maxEnergy: 56 },
+    { level: 5, xp: 77, maxEnergy: 58 },
+    { level: 6, xp: 103, maxEnergy: 60 },
+    { level: 7, xp: 134, maxEnergy: 62 },
+    { level: 8, xp: 169, maxEnergy: 64 },
+    { level: 9, xp: 209, maxEnergy: 66 },
+    { level: 10, xp: 254, maxEnergy: 68 },
+    { level: 11, xp: 304, maxEnergy: 70 },
+    { level: 12, xp: 359, maxEnergy: 72 },
+    { level: 13, xp: 420, maxEnergy: 74 },
+    { level: 14, xp: 486, maxEnergy: 76 },
+    { level: 15, xp: 558, maxEnergy: 78 }
+];
+
+const MERGE_XP_DATA = { 1:1, 2:2, 3:4, 4:5, 5:6, 6:8, 7:10, 8:15, 9:20, 10:0 };
+
+const ASSET_MAP = {
+    '10_1': '1PkG2U9TO6M09gP-ems90YrxXZhZiHVwl',
+    '10_3': '1zewPXV4yx1YNCB5dCwhesx_NnXhE4xt_',
+    '10_4': '1NNx5uvJB4bPLOpXePIyCHy6mJ07xUDR0',
+    '10_6': '1NDSoQsn1Pfnc0sKmMaF9-16PTFUeySWb',
+    '11_3': '1Rx5W791NsIwY5og_FIA_6lkTsaR_hBCp',
+    '11_6': '1Q6Txp-h7wcKFXAXrZnAypOHamMhk-6oX',
+    '12_6': '1puFKeJ8jEZr-BmFajzqlHvG6Jp-6aYXs',
+    '1_1': '1_-nupZ7RIpxFbPEU3_MOtO85UXe67t4C',
+    '2_1': '1SAvICsvtvI49UpjHn0MIRyNmlcAHVvI_',
+    '4_1': '1aoRRg3dYMofX_zkQ2RkH_rsOmeDTyWUz',
+    '5_1': '18RFtqBXA3MqptmbJuaDzHnqylP_FqBg4',
+    '20_1': '173wg0wb4I-kuy5RIK_emyfex_fuVfYZC',
+    '21_1': '1DQ8djwy-_V51Dzwz6vCzGd8bffiZi8gl',
+    '22_1': '1Fay27Ipx4GH45HAlqLV0_tQ-7yz8TAzP',
+};
+
+class AssetLoader {
+    constructor() { this.images = {}; }
+    loadAll(callback) {
+        let loadedCount = 0;
+        const keys = Object.keys(ASSET_MAP);
+        if(keys.length === 0) { if(callback) callback(); return; }
+        keys.forEach(key => {
+            const img = new Image();
+            img.src = `https://drive.google.com/uc?export=view&id=${ASSET_MAP[key]}`;
+            img.onload = () => { this.images[key] = img; checkDone(); };
+            img.onerror = () => { checkDone(); };
+        });
+        const checkDone = () => { loadedCount++; if(loadedCount === keys.length && callback) callback(); };
+    }
+    getImage(type, level) {
+        if (this.images[`${type}_${level}`]) return this.images[`${type}_${level}`];
+        if (type >= 10 && type < 20) {
+            for(let l=level; l>=1; l--) if(this.images[`${type}_${l}`]) return this.images[`${type}_${l}`];
+        }
+        if (this.images[`${type}_1`]) return this.images[`${type}_1`];
+        return null;
+    }
+}
 
 const CONFIG = {
-    gridCols: 8, gridRows: 8, gridPadding: 10,
-    squadCols: 3, squadRows: 3, squadGap: 10,
+    // 1080x1920 기준 좌표 설정
+    gridCols: 8, gridRows: 8, 
+    gridTopY: 880, gridPadding: 30,
+    squadCols: 3, squadRows: 3, 
+    squadTopY: 350, squadGap: 40,
+    
     barracksCost: 5, maxLevel: 10
 };
 
@@ -162,45 +221,73 @@ class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
-        this.wrapper = document.getElementById('canvas-wrapper');
         
-        // Game State
+        // 고정 해상도 설정
+        this.width = 1080;
+        this.height = 1920;
+        // 캔버스 크기는 HTML 태그에서 1080x1920으로 고정됨. CSS로 화면에 맞게 축소됨.
+
+        this.assets = new AssetLoader();
+        this.assets.loadAll(() => this.requestRender());
+
         this.grid = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
         this.gridState = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
         this.squad1 = Array(9).fill(null);
         this.squad2 = Array(9).fill(null);
-        this.energy = 100; this.gold = 3000; this.gem = 50; this.lordLevel = 1;
+        
+        this.lordLevel = 1; this.currentXp = 0;
+        this.updateLevelStats();
+        this.energy = this.maxEnergy; 
+        this.gold = 3000; this.gem = 50; 
+        
         this.drag = null;
+        this.hover = null;
 
+        this.calcLayout();
         this.initGame();
         
-        window.addEventListener('resize', () => this.resize());
-        this.resize();
-
-        this.canvas.addEventListener('mousedown', e => this.handleInput(e, 'start'));
-        window.addEventListener('mousemove', e => this.handleInput(e, 'move'));
-        window.addEventListener('mouseup', e => this.handleInput(e, 'end'));
+        // Inputs
+        const start = e => this.handleInput(e, 'start');
+        const move = e => this.handleInput(e, 'move');
+        const end = e => this.handleInput(e, 'end');
         
-        this.canvas.addEventListener('touchstart', e => this.handleInput(e, 'start'), {passive: false});
-        window.addEventListener('touchmove', e => this.handleInput(e, 'move'), {passive: false});
-        window.addEventListener('touchend', e => this.handleInput(e, 'end'));
+        this.canvas.addEventListener('mousedown', start);
+        window.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', end);
+        this.canvas.addEventListener('touchstart', start, {passive: false});
+        window.addEventListener('touchmove', move, {passive: false});
+        window.addEventListener('touchend', end);
 
         this.loop();
+        this.updateUI();
+    }
+
+    calcLayout() {
+        // Calculate Sizes based on 1080 width
+        const gridAvailW = this.width - (CONFIG.gridPadding * 2);
+        this.gridTileSize = Math.floor(gridAvailW / CONFIG.gridCols);
+        
+        this.gridStartX = CONFIG.gridPadding;
+        this.gridStartY = CONFIG.gridTopY;
+
+        this.squadCellSize = 140; // Fixed size for squad cells
+        const squadW = this.squadCellSize * 3;
+        const totalSquadW = (squadW * 2) + CONFIG.squadGap;
+        const squadStartX = Math.floor((this.width - totalSquadW) / 2);
+        
+        this.squad1Rect = { x: squadStartX, y: CONFIG.squadTopY, w: squadW, h: squadW };
+        this.squad2Rect = { x: squadStartX + squadW + CONFIG.squadGap, y: CONFIG.squadTopY, w: squadW, h: squadW };
     }
 
     initGame() {
-        // Init Locks
-        for(let r=0; r<CONFIG.gridRows; r++) {
-            for(let c=0; c<CONFIG.gridCols; c++) {
-                const isEdge = (r===0 || r===CONFIG.gridRows-1 || c===0 || c===CONFIG.gridCols-1);
-                if(!isEdge) this.gridState[r][c] = { type: LOCK_TYPE.OPEN };
-                else {
-                    if((r+c)%2===0) this.gridState[r][c] = { type: LOCK_TYPE.GOLD, value: 500 };
-                    else this.gridState[r][c] = { type: LOCK_TYPE.LEVEL, value: 3 };
-                }
+        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
+            const isEdge = (r===0 || r===CONFIG.gridRows-1 || c===0 || c===CONFIG.gridCols-1);
+            if(!isEdge) this.gridState[r][c] = { type: LOCK_TYPE.OPEN };
+            else {
+                if((r+c)%2===0) this.gridState[r][c] = { type: LOCK_TYPE.GOLD, value: 500 };
+                else this.gridState[r][c] = { type: LOCK_TYPE.LEVEL, value: 3 };
             }
         }
-        // Init Buildings
         this.grid[2][2] = { type: ITEM_TYPE.BUILDING_BARRACKS, level: 1, scale: 1 };
         this.grid[2][4] = { type: ITEM_TYPE.BUILDING_RANGE, level: 1, scale: 1 };
         this.grid[2][5] = { type: ITEM_TYPE.BUILDING_STABLE, level: 1, scale: 1 };
@@ -208,70 +295,78 @@ class Game {
         this.grid[4][4] = { type: ITEM_TYPE.BUILDING_CAMP, level: 1, scale: 1, storedUnit: null };
     }
 
-    resize() {
-        this.canvas.width = this.wrapper.clientWidth;
-        this.canvas.height = this.wrapper.clientHeight;
-        
-        const W = this.canvas.width;
-        const H = this.canvas.height;
-        
-        const squadAreaH = H * 0.35;
-        this.squadCellSize = Math.min((W - 40) / 7, squadAreaH / 4);
-        
-        const squadW = this.squadCellSize * 3;
-        const squadTotalW = squadW * 2 + 20;
-        const squadStartX = (W - squadTotalW) / 2;
-        const squadStartY = 20;
-
-        this.squad1Rect = { x: squadStartX, y: squadStartY, w: squadW, h: squadW };
-        this.squad2Rect = { x: squadStartX + squadW + 20, y: squadStartY, w: squadW, h: squadW };
-
-        const gridAreaY = squadStartY + squadW + 30;
-        const availH = H - gridAreaY - 10;
-        const availW = W - 20;
-        this.gridTileSize = Math.min(availW / CONFIG.gridCols, availH / CONFIG.gridRows);
-        
-        const gridTotalW = this.gridTileSize * CONFIG.gridCols;
-        this.gridStartX = (W - gridTotalW) / 2;
-        this.gridStartY = gridAreaY;
+    addXp(amount) {
+        this.currentXp += amount;
+        if (this.currentXp >= this.requiredXp) this.levelUp();
+        this.updateUI();
+    }
+    levelUp() {
+        if (this.lordLevel >= 15) return; 
+        this.currentXp -= this.requiredXp;
+        this.lordLevel++;
+        this.updateLevelStats();
+        this.energy = this.maxEnergy; 
+        this.showToast(`LEVEL UP! LV.${this.lordLevel}`);
+        if (this.currentXp >= this.requiredXp) this.levelUp();
+    }
+    updateLevelStats() {
+        const levelData = LEVEL_DATA.find(d => d.level === this.lordLevel) || LEVEL_DATA[LEVEL_DATA.length - 1];
+        this.maxEnergy = levelData.maxEnergy;
+        this.requiredXp = levelData.xp;
     }
 
-    getCanvasPos(e) {
+    // --- Input Mapping ---
+    getGamePos(e) {
+        // Map Client coordinates to 1080x1920 Game Coordinates
         const rect = this.canvas.getBoundingClientRect();
-        const cx = e.touches ? e.touches[0].clientX : e.clientX;
-        const cy = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: cx - rect.left, y: cy - rect.top };
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        const scaleX = this.width / rect.width;
+        const scaleY = this.height / rect.height;
+
+        return { 
+            x: (clientX - rect.left) * scaleX, 
+            y: (clientY - rect.top) * scaleY 
+        };
     }
 
     getZoneAt(x, y) {
-        if (x >= this.squad1Rect.x && x < this.squad1Rect.x + this.squad1Rect.w && y >= this.squad1Rect.y && y < this.squad1Rect.y + this.squad1Rect.h) {
+        // Squad 1
+        if (x >= this.squad1Rect.x && x < this.squad1Rect.x + this.squad1Rect.w &&
+            y >= this.squad1Rect.y && y < this.squad1Rect.y + this.squad1Rect.h) {
             const c = Math.floor((x - this.squad1Rect.x) / this.squadCellSize);
             const r = Math.floor((y - this.squad1Rect.y) / this.squadCellSize);
-            return { zone: ZONES.SQUAD1, idx: r * 3 + c };
+            return { zone: ZONES.SQUAD1, idx: r * 3 + c, r, c };
         }
-        if (x >= this.squad2Rect.x && x < this.squad2Rect.x + this.squad2Rect.w && y >= this.squad2Rect.y && y < this.squad2Rect.y + this.squad2Rect.h) {
+        // Squad 2
+        if (x >= this.squad2Rect.x && x < this.squad2Rect.x + this.squad2Rect.w &&
+            y >= this.squad2Rect.y && y < this.squad2Rect.y + this.squad2Rect.h) {
             const c = Math.floor((x - this.squad2Rect.x) / this.squadCellSize);
             const r = Math.floor((y - this.squad2Rect.y) / this.squadCellSize);
-            return { zone: ZONES.SQUAD2, idx: r * 3 + c };
+            return { zone: ZONES.SQUAD2, idx: r * 3 + c, r, c };
         }
-        if (x >= this.gridStartX && y >= this.gridStartY) {
-            const c = Math.floor((x - this.gridStartX) / this.gridTileSize);
-            const r = Math.floor((y - this.gridStartY) / this.gridTileSize);
-            if (c >= 0 && c < CONFIG.gridCols && r >= 0 && r < CONFIG.gridRows) {
-                return { zone: ZONES.GRID, r, c };
-            }
+        // Grid
+        const gridW = this.gridTileSize * CONFIG.gridCols;
+        const gridH = this.gridTileSize * CONFIG.gridRows;
+        if (x >= this.gridStartX && x < this.gridStartX + gridW &&
+            y >= this.gridStartY && y < this.gridStartY + gridH) {
+            const c = Math.min(CONFIG.gridCols - 1, Math.max(0, Math.floor((x - this.gridStartX) / this.gridTileSize)));
+            const r = Math.min(CONFIG.gridRows - 1, Math.max(0, Math.floor((y - this.gridStartY) / this.gridTileSize)));
+            return { zone: ZONES.GRID, r, c, idx: r*8+c };
         }
         return null;
     }
 
     handleInput(e, state) {
         if(state === 'start') e.preventDefault();
-        let pos = (state !== 'end') ? this.getCanvasPos(e) : { x: this.drag?.x||0, y: this.drag?.y||0 };
+        let pos = (state !== 'end') ? this.getGamePos(e) : { x: this.drag?.x||0, y: this.drag?.y||0 };
 
         if (state === 'start') {
             const hit = this.getZoneAt(pos.x, pos.y);
             if (!hit) return;
 
+            // Click Actions
             if (hit.zone === ZONES.GRID) {
                 if (this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) { this.tryUnlock(hit.r, hit.c); return; }
                 const item = this.grid[hit.r][hit.c];
@@ -283,20 +378,51 @@ class Game {
                 }
             }
 
+            // Drag Start
             let item = null;
             if(hit.zone === ZONES.GRID) item = this.grid[hit.r][hit.c];
             else if(hit.zone === ZONES.SQUAD1) item = this.squad1[hit.idx];
             else if(hit.zone === ZONES.SQUAD2) item = this.squad2[hit.idx];
 
             if (item && item.type >= 10 && item.type < 20) {
-                this.drag = { item: item, startZone: hit, x: pos.x, y: pos.y };
+                let cellX, cellY, cellSize;
+                if (hit.zone === ZONES.GRID) {
+                    cellX = this.gridStartX + hit.c * this.gridTileSize;
+                    cellY = this.gridStartY + hit.r * this.gridTileSize;
+                    cellSize = this.gridTileSize;
+                } else if (hit.zone === ZONES.SQUAD1) {
+                    const c = hit.idx % 3, r = Math.floor(hit.idx / 3);
+                    cellX = this.squad1Rect.x + c * this.squadCellSize;
+                    cellY = this.squad1Rect.y + r * this.squadCellSize;
+                    cellSize = this.squadCellSize;
+                } else {
+                    const c = hit.idx % 3, r = Math.floor(hit.idx / 3);
+                    cellX = this.squad2Rect.x + c * this.squadCellSize;
+                    cellY = this.squad2Rect.y + r * this.squadCellSize;
+                    cellSize = this.squadCellSize;
+                }
+
+                this.drag = { 
+                    item: item, 
+                    startZone: hit, 
+                    x: pos.x, 
+                    y: pos.y,
+                    offsetX: pos.x - cellX, 
+                    offsetY: pos.y - cellY,
+                    size: cellSize
+                };
+                this.hover = hit;
+                
+                // Hide from grid while dragging
                 if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = null;
                 else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = null;
                 else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = null;
             }
         }
         else if (state === 'move' && this.drag) {
-            this.drag.x = pos.x; this.drag.y = pos.y;
+            this.drag.x = pos.x; 
+            this.drag.y = pos.y;
+            this.hover = this.getZoneAt(pos.x, pos.y); 
         }
         else if (state === 'end' && this.drag) {
             const hit = this.getZoneAt(this.drag.x, this.drag.y);
@@ -304,31 +430,35 @@ class Game {
 
             if (hit) {
                 let target = null;
+                let isLocked = false;
                 if(hit.zone === ZONES.GRID) {
-                    if(this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) returned = true;
+                    if(this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) isLocked = true;
                     else target = this.grid[hit.r][hit.c];
                 }
                 else if(hit.zone === ZONES.SQUAD1) target = this.squad1[hit.idx];
                 else if(hit.zone === ZONES.SQUAD2) target = this.squad2[hit.idx];
 
-                if (!returned) {
-                    if (hit.zone === ZONES.GRID && target && target.type === ITEM_TYPE.BUILDING_CAMP && !target.storedUnit) {
-                        target.storedUnit = this.drag.item;
-                        this.showToast("병사 보관 완료");
-                    }
-                    else if (!target) {
-                        if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = this.drag.item;
-                        else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = this.drag.item;
-                        else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = this.drag.item;
+                if (isLocked) {
+                    returned = true;
+                }
+                else if (!target) {
+                    if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = this.drag.item;
+                    else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = this.drag.item;
+                    else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = this.drag.item;
+                }
+                else if (target) {
+                    if (hit.zone === ZONES.GRID && target.type === ITEM_TYPE.BUILDING_CAMP && !target.storedUnit) {
+                        target.storedUnit = this.drag.item; this.showToast("보관 완료");
                     }
                     else if (target.type === this.drag.item.type && target.level === this.drag.item.level && target.level < CONFIG.maxLevel) {
-                        target.level++;
-                        target.scale = 1.3;
-                        this.showToast("Level Up!");
+                        target.level++; target.scale = 1.3;
+                        const gain = MERGE_XP_DATA[target.level - 1] || 0;
+                        if (gain > 0) { this.addXp(gain); this.showToast(`XP +${gain}`); } 
+                        else { this.showToast("Level Up!"); }
                     }
-                    else returned = true;
+                    else returned = true; 
                 }
-            } else returned = true;
+            } else returned = true; 
 
             if (returned) {
                 const s = this.drag.startZone;
@@ -336,261 +466,231 @@ class Game {
                 else if(s.zone === ZONES.SQUAD1) this.squad1[s.idx] = this.drag.item;
                 else if(s.zone === ZONES.SQUAD2) this.squad2[s.idx] = this.drag.item;
             }
+            
             this.drag = null;
+            this.hover = null;
             this.updateUI();
         }
     }
 
-    // --- Game Logic Methods ---
-    produce(type) {
-        if(this.energy < CONFIG.barracksCost) { this.showToast("에너지 부족!"); return; }
-        
-        let unitType = ITEM_TYPE.UNIT_INFANTRY;
-        if(type === ITEM_TYPE.BUILDING_RANGE) unitType = ITEM_TYPE.UNIT_ARCHER;
-        if(type === ITEM_TYPE.BUILDING_STABLE) unitType = ITEM_TYPE.UNIT_CAVALRY;
-
-        for(let r=0; r<CONFIG.gridRows; r++) {
-            for(let c=0; c<CONFIG.gridCols; c++) {
-                if(this.gridState[r][c].type === LOCK_TYPE.OPEN && !this.grid[r][c]) {
-                    this.energy -= CONFIG.barracksCost;
-                    this.grid[r][c] = { type: unitType, level: 1, scale: 0 };
-                    this.updateUI();
-                    return;
-                }
-            }
-        }
-        this.showToast("공간 부족!");
-    }
-
-    openChest(r, c) {
-        this.grid[r][c] = null;
-        this.showToast("상자 오픈...");
-        setTimeout(() => {
-            const rand = Math.random();
-            let reward = ITEM_TYPE.ITEM_GOLD;
-            if(rand > 0.6) reward = ITEM_TYPE.ITEM_ENERGY;
-            this.grid[r][c] = { type: reward, level: 1, scale: 0 };
-        }, 300);
-    }
-
-    collectResource(item, r, c) {
-        if(item.type === ITEM_TYPE.ITEM_GOLD) this.gold += 100;
-        if(item.type === ITEM_TYPE.ITEM_ENERGY) this.energy += 20;
-        this.grid[r][c] = null;
-        this.updateUI();
-    }
-
-    ejectCamp(camp, r, c) {
-        if(!camp.storedUnit) { this.showToast("비어있음"); return; }
-        const neighbors = [[0,1],[0,-1],[1,0],[-1,0]];
-        for(let n of neighbors) {
-            const nr = r+n[0], nc = c+n[1];
-            if(nr>=0 && nr<8 && nc>=0 && nc<8 && !this.grid[nr][nc] && this.gridState[nr][nc].type===LOCK_TYPE.OPEN) {
-                this.grid[nr][nc] = camp.storedUnit;
-                camp.storedUnit = null;
-                return;
-            }
-        }
-        this.showToast("공간 부족");
-    }
-
-    tryUnlock(r, c) {
-        const lock = this.gridState[r][c];
-        if(lock.type === LOCK_TYPE.GOLD) {
-            if(this.gold >= lock.value) {
-                this.gold -= lock.value;
-                this.gridState[r][c] = { type: LOCK_TYPE.OPEN };
-                this.showToast("해금 완료!");
-            } else this.showToast("골드 부족");
-        } else if(lock.type === LOCK_TYPE.LEVEL) {
-            if(this.lordLevel >= lock.value) {
-                this.gridState[r][c] = { type: LOCK_TYPE.OPEN };
-                this.showToast("해금 완료!");
-            } else this.showToast(`LV.${lock.value} 필요`);
-        }
-        this.updateUI();
-    }
-
     // --- Rendering ---
     loop() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.width, this.height);
         
-        this.drawSquad(this.squad1, this.squad1Rect, "SQUAD 1", "#4caf50");
-        this.drawSquad(this.squad2, this.squad2Rect, "SQUAD 2", "#2196f3");
-
-        for(let r=0; r<CONFIG.gridRows; r++) {
-            for(let c=0; c<CONFIG.gridCols; c++) {
-                const x = this.gridStartX + c * this.gridTileSize;
-                const y = this.gridStartY + r * this.gridTileSize;
-                this.drawCell(x, y, this.gridTileSize, this.grid[r][c], this.gridState[r][c]);
-            }
+        this.drawSquad(this.squad1, this.squad1Rect, "SQUAD 1", "#4caf50", ZONES.SQUAD1);
+        this.drawSquad(this.squad2, this.squad2Rect, "SQUAD 2", "#2196f3", ZONES.SQUAD2);
+        
+        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
+            const x = this.gridStartX + c * this.gridTileSize;
+            const y = this.gridStartY + r * this.gridTileSize;
+            const isHover = (this.hover && this.hover.zone === ZONES.GRID && this.hover.r === r && this.hover.c === c);
+            this.drawCell(x, y, this.gridTileSize, this.grid[r][c], this.gridState[r][c], isHover);
         }
 
         if(this.drag) {
-            this.drawItem(this.drag.x - this.gridTileSize/2, this.drag.y - this.gridTileSize/2, this.gridTileSize, this.drag.item, true);
+            // Draw Item at Mouse Pos - Offset
+            const dx = this.drag.x - this.drag.offsetX;
+            const dy = this.drag.y - this.drag.offsetY;
+            this.drawItem(dx, dy, this.drag.size, this.drag.item, true);
         }
-
+        
         this.grid.flat().forEach(i => i && this.anim(i));
         requestAnimationFrame(() => this.loop());
     }
 
-    anim(item) {
-        if(item.scale < 1) item.scale += 0.1;
-        if(item.scale > 1) item.scale -= 0.05;
+    // *** FIX: Animation logic that stops exactly at 1.0 ***
+    anim(i) { 
+        if (i.scale === 1) return;
+        
+        if (i.scale < 1) {
+            i.scale += 0.1;
+            if (i.scale >= 1) i.scale = 1;
+        } 
+        else if (i.scale > 1) {
+            i.scale -= 0.05;
+            if (i.scale <= 1) i.scale = 1;
+        }
     }
 
-    drawSquad(data, rect, label, color) {
-        this.ctx.fillStyle = color;
-        this.ctx.font = "bold 16px sans-serif";
-        this.ctx.textAlign = "center";
-        this.ctx.fillText(label, rect.x + rect.w/2, rect.y - 8);
+    drawSquad(d, r, l, c, zoneName) {
+        this.ctx.fillStyle = c; this.ctx.font = "bold 30px sans-serif"; this.ctx.textAlign="center"; 
+        this.ctx.fillText(l, r.x + r.w/2, r.y - 15);
+        this.ctx.fillStyle = c + "33"; 
+        this.ctx.fillRect(r.x-5, r.y-5, r.w+10, r.h+10);
         
-        this.ctx.fillStyle = color + "33";
-        this.ctx.fillRect(rect.x-5, rect.y-5, rect.w+10, rect.h+10);
-
         for(let i=0; i<9; i++) {
-            const c = i % 3; const r = Math.floor(i / 3);
-            const x = rect.x + c * this.squadCellSize;
-            const y = rect.y + r * this.squadCellSize;
-            this.drawCell(x, y, this.squadCellSize, data[i], {type:LOCK_TYPE.OPEN});
+            const cx = r.x + (i%3)*this.squadCellSize; const cy = r.y + Math.floor(i/3)*this.squadCellSize;
+            const isHover = (this.hover && this.hover.zone === zoneName && this.hover.idx === i);
+            this.drawCell(cx, cy, this.squadCellSize, d[i], {type:LOCK_TYPE.OPEN}, isHover);
         }
     }
 
-    drawCell(x, y, size, item, lock) {
-        const pad = 2;
-        const innerSize = size - pad * 2;
-        
-        this.ctx.fillStyle = (lock.type !== LOCK_TYPE.OPEN) ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.1)";
-        this.ctx.fillRect(x + pad, y + pad, innerSize, innerSize);
-        this.ctx.strokeStyle = "rgba(0,0,0,0.3)";
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeRect(x+pad, y+pad, innerSize, innerSize);
+    drawCell(x, y, s, i, l, isHover) {
+        const p = 2; const is = s - p*2;
+        this.ctx.fillStyle = (l.type !== LOCK_TYPE.OPEN) ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.1)";
+        this.ctx.fillRect(x+p, y+p, is, is);
+        this.ctx.strokeStyle = isHover ? "#ffff00" : "rgba(0,0,0,0.3)"; 
+        this.ctx.lineWidth = isHover ? 4 : 2; 
+        this.ctx.strokeRect(x+p, y+p, is, is);
 
-        if(lock.type !== LOCK_TYPE.OPEN) {
-            this.ctx.fillStyle = "white";
-            this.ctx.font = "16px sans-serif";
-            this.ctx.textAlign = "center";
-            this.ctx.textBaseline = "middle";
-            const text = lock.type === LOCK_TYPE.GOLD ? `💰${lock.value}` : `🔒LV.${lock.value}`;
-            this.ctx.fillText(text, x + size/2, y + size/2);
-            return;
-        }
-
-        if(item && item !== this.drag?.item) {
-            this.drawItem(x, y, size, item);
-        }
+        if(l.type !== LOCK_TYPE.OPEN) {
+            this.ctx.fillStyle = "white"; this.ctx.font = "24px sans-serif"; this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
+            this.ctx.fillText(l.type === LOCK_TYPE.GOLD ? `💰${l.value}` : `🔒LV.${l.value}`, x+s/2, y+s/2);
+        } else if(i && i !== this.drag?.item) this.drawItem(x, y, s, i);
     }
 
     drawItem(x, y, size, item, isDrag=false) {
-        const scale = isDrag ? 1.1 : item.scale;
-        const pad = 4;
-        const innerSize = size - pad * 2;
-        const drawSize = innerSize * scale;
-        const cx = x + size / 2;
-        const cy = y + size / 2;
-        const dx = cx - drawSize/2;
-        const dy = cy - drawSize/2;
+        // Enforce integer for crisp rendering
+        x = Math.floor(x); y = Math.floor(y); size = Math.floor(size);
+        const scale = isDrag ? 1.0 : item.scale;
+        const pad = 4; 
+        const ds = Math.floor((size - pad * 2) * scale);
+        const offset = Math.floor((size - ds) / 2);
+        const dx = x + offset;
+        const dy = y + offset;
+        const cx = x + size/2;
+        const cy = y + size/2;
 
-        if(isDrag) {
-            this.ctx.shadowColor = "black";
-            this.ctx.shadowBlur = 10;
+        if(isDrag) { this.ctx.shadowColor = "black"; this.ctx.shadowBlur = 20; }
+
+        const img = this.assets.getImage(item.type, item.level);
+        if(img && img.complete && img.naturalWidth !== 0) {
+            this.ctx.drawImage(img, dx, dy, ds, ds);
+        } else {
+            let c = "#cfd8dc"; let sym = "❓";
+            if(item.type===ITEM_TYPE.BUILDING_BARRACKS) { c="#795548"; sym="🏠"; }
+            else if(item.type===ITEM_TYPE.BUILDING_RANGE) { c="#388e3c"; sym="🎯"; }
+            else if(item.type===ITEM_TYPE.BUILDING_STABLE) { c="#1976d2"; sym="🐴"; }
+            else if(item.type===ITEM_TYPE.BUILDING_CHEST) { c="#ffa000"; sym="🎁"; }
+            else if(item.type===ITEM_TYPE.BUILDING_CAMP) { c="#5d4037"; sym="⛺"; }
+            else if(item.type===ITEM_TYPE.UNIT_INFANTRY) { c="#eeeeee"; sym="🛡️"; }
+            else if(item.type===ITEM_TYPE.UNIT_ARCHER) { c="#c8e6c9"; sym="🏹"; }
+            else if(item.type===ITEM_TYPE.UNIT_CAVALRY) { c="#bbdefb"; sym="🐎"; }
+            else if(item.type===ITEM_TYPE.ITEM_GOLD) { c="#fff176"; sym="💰"; }
+            else if(item.type===ITEM_TYPE.ITEM_ENERGY) { c="#80deea"; sym="⚡"; }
+            else if(item.type===ITEM_TYPE.ITEM_CRYSTAL) { c="#e1bee7"; sym="💎"; }
+
+            this.ctx.fillStyle = c; 
+            this.roundRect(dx, dy, ds, ds, 12); 
+            this.ctx.fill();
+            this.ctx.strokeStyle = "rgba(0,0,0,0.4)"; 
+            this.ctx.lineWidth = 2; 
+            this.ctx.stroke();
+            
+            this.ctx.fillStyle = "rgba(0,0,0,0.6)";
+            this.ctx.font = `${Math.floor(ds*0.5)}px sans-serif`;
+            this.ctx.textAlign = "center";
+            this.ctx.textBaseline = "middle";
+            this.ctx.fillText(sym, cx, cy);
         }
 
-        // --- Procedural Drawing (No external images) ---
-        const type = item.type;
-        const level = item.level;
-        
-        // 1. Background Color
-        let bgColor = "#aaa";
-        let label = "";
-        let symbol = "";
-
-        if (type === ITEM_TYPE.BUILDING_BARRACKS) { bgColor = "#8d6e63"; label = "병영"; symbol = "🏠"; }
-        else if (type === ITEM_TYPE.BUILDING_RANGE) { bgColor = "#558b2f"; label = "사격장"; symbol = "🎯"; }
-        else if (type === ITEM_TYPE.BUILDING_STABLE) { bgColor = "#1565c0"; label = "마구간"; symbol = "🐴"; }
-        else if (type === ITEM_TYPE.BUILDING_CHEST) { bgColor = "#ffb300"; label = "상자"; symbol = "🎁"; }
-        else if (type === ITEM_TYPE.BUILDING_CAMP) { bgColor = "#795548"; label = "캠프"; symbol = "⛺"; }
-        else if (type === ITEM_TYPE.ITEM_GOLD) { bgColor = "#FFD700"; label = "골드"; symbol = "💰"; }
-        else if (type === ITEM_TYPE.ITEM_ENERGY) { bgColor = "#00E5FF"; label = "에너지"; symbol = "⚡"; }
-        else if (type === ITEM_TYPE.ITEM_CRYSTAL) { bgColor = "#E040FB"; label = "수정"; symbol = "💎"; }
-        else if (type === ITEM_TYPE.UNIT_INFANTRY) { bgColor = "#fff"; label = "보병"; symbol = "🛡️"; }
-        else if (type === ITEM_TYPE.UNIT_ARCHER) { bgColor = "#c8e6c9"; label = "궁병"; symbol = "🏹"; }
-        else if (type === ITEM_TYPE.UNIT_CAVALRY) { bgColor = "#bbdefb"; label = "기병"; symbol = "🐎"; }
-
-        // Draw Box
-        this.ctx.fillStyle = bgColor;
-        this.roundRect(dx, dy, drawSize, drawSize, 10);
-        this.ctx.fill();
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeStyle = "rgba(0,0,0,0.3)";
-        this.ctx.stroke();
-
-        // 2. Name Label (Top)
-        this.ctx.fillStyle = "black";
-        this.ctx.font = "bold 12px sans-serif";
-        this.ctx.textAlign = "center";
-        this.ctx.textBaseline = "top";
-        // 건물은 텍스트가 잘 보이게, 유닛은 작게
-        if (type < 10) this.ctx.fillStyle = "white"; 
-        this.ctx.fillText(label, cx, dy + 5);
-
-        // 3. Center Symbol
-        this.ctx.font = "24px sans-serif";
-        this.ctx.textBaseline = "middle";
-        this.ctx.fillText(symbol, cx, cy);
-
-        // 4. Level Number (Bottom)
-        if ((type >= 10 && type < 20) || type >= 20) {
-            this.ctx.fillStyle = "black";
-            this.ctx.font = "bold 16px sans-serif";
-            this.ctx.textBaseline = "bottom";
-            this.ctx.fillText(level, cx, dy + drawSize - 5);
-        }
-
-        // Camp Stored Indicator
-        if (type === ITEM_TYPE.BUILDING_CAMP && item.storedUnit) {
-            this.ctx.fillStyle = "white";
-            this.ctx.strokeStyle = "black";
-            this.ctx.lineWidth = 3;
-            this.ctx.strokeText("IN", cx + 15, cy + 15);
-            this.ctx.fillText("IN", cx + 15, cy + 15);
-        }
-
+        this.drawLabel(item, cx, dy, ds);
         this.ctx.shadowBlur = 0;
     }
 
-    roundRect(x, y, w, h, r) {
-        this.ctx.beginPath();
-        this.ctx.moveTo(x + r, y);
-        this.ctx.arcTo(x + w, y, x + w, y + h, r);
-        this.ctx.arcTo(x + w, y + h, x, y + h, r);
-        this.ctx.arcTo(x, y + h, x, y, r);
-        this.ctx.arcTo(x, y, x + w, y, r);
-        this.ctx.closePath();
+    drawLabel(item, cx, dy, ds) {
+        let label = "";
+        if(item.type===ITEM_TYPE.BUILDING_BARRACKS) label="병영";
+        else if(item.type===ITEM_TYPE.UNIT_INFANTRY) label="보병";
+        else if(item.type===ITEM_TYPE.UNIT_ARCHER) label="궁병";
+        else if(item.type===ITEM_TYPE.UNIT_CAVALRY) label="기병";
+        else if(item.type===ITEM_TYPE.BUILDING_CHEST) label="상자";
+        else if(item.type===ITEM_TYPE.BUILDING_CAMP) label="캠프";
+        else if(item.type===ITEM_TYPE.ITEM_GOLD) label="골드";
+        
+        if (label) {
+            this.ctx.fillStyle = "rgba(0,0,0,0.65)";
+            const w = 60;
+            this.ctx.fillRect(Math.floor(cx - w/2), Math.floor(dy + 5), w, 22);
+            this.ctx.fillStyle = "white"; 
+            this.ctx.font = "bold 16px sans-serif"; 
+            this.ctx.textAlign = "center"; 
+            this.ctx.textBaseline = "top";
+            this.ctx.fillText(label, cx, Math.floor(dy + 8));
+        }
+
+        if ((item.type >= 10 && item.type < 20) || (item.type < 10 && item.type > 0)) { 
+            this.ctx.fillStyle = "black";
+            this.ctx.beginPath(); this.ctx.arc(cx, dy + ds - 15, 12, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.fillStyle = "white"; 
+            this.ctx.font = "bold 18px sans-serif"; 
+            this.ctx.textBaseline = "middle";
+            this.ctx.fillText(item.level, cx, Math.floor(dy + ds - 14));
+        }
+
+        if (item.type === ITEM_TYPE.BUILDING_CAMP && item.storedUnit) {
+            this.ctx.fillStyle = "#ff5252"; this.ctx.font="bold 20px sans-serif"; 
+            this.ctx.fillText("IN", cx, Math.floor(dy + ds/2));
+        }
     }
 
-    // --- Helpers ---
-    showToast(msg) {
-        const el = document.getElementById('toast');
-        el.innerText = msg; el.style.opacity = 1;
-        setTimeout(() => el.style.opacity = 0, 1000);
-    }
-    updateUI() {
-        document.getElementById('energy-display').innerText = this.energy;
+    roundRect(x,y,w,h,r){this.ctx.beginPath();this.ctx.moveTo(x+r,y);this.ctx.arcTo(x+w,y,x+w,y+h,r);this.ctx.arcTo(x+w,y+h,x,y+h,r);this.ctx.arcTo(x,y+h,x,y,r);this.ctx.arcTo(x,y,x+w,y,r);this.ctx.closePath();}
+    showToast(msg){ const t = document.getElementById('toast'); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,1000); }
+    updateUI(){ 
+        document.getElementById('energy-display').innerText = `${this.energy}/${this.maxEnergy}`;
         document.getElementById('gold-display').innerText = this.gold;
+        document.getElementById('level-display').innerText = `LORD LV.${this.lordLevel}`;
+        document.getElementById('xp-display').innerText = `${this.currentXp} / ${this.requiredXp} XP`;
+        document.getElementById('xp-bar').style.width = `${Math.min(100, (this.currentXp/this.requiredXp)*100)}%`;
     }
-    cheatEnergy() { this.energy+=30; this.updateUI(); }
-    spawnChest() {
-        for(let r=0; r<8; r++) for(let c=0; c<8; c++) 
-            if(this.gridState[r][c].type===LOCK_TYPE.OPEN && !this.grid[r][c]) {
-                this.grid[r][c] = {type: ITEM_TYPE.BUILDING_CHEST, level:1, scale:0}; return;
-            }
+    cheatEnergy(){ this.energy = Math.min(this.energy+30, this.maxEnergy); this.updateUI(); }
+    spawnChest(){ 
+        for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(this.gridState[r][c].type===LOCK_TYPE.OPEN&&!this.grid[r][c]){
+            this.grid[r][c]={type:ITEM_TYPE.BUILDING_CHEST,level:1,scale:0}; return;
+        }
     }
-    spawnCamp() {
-        for(let r=0; r<8; r++) for(let c=0; c<8; c++) 
-            if(this.gridState[r][c].type===LOCK_TYPE.OPEN && !this.grid[r][c]) {
-                this.grid[r][c] = {type: ITEM_TYPE.BUILDING_CAMP, level:1, scale:0}; return;
+    spawnCamp(){
+        for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(this.gridState[r][c].type===LOCK_TYPE.OPEN&&!this.grid[r][c]){
+            this.grid[r][c]={type:ITEM_TYPE.BUILDING_CAMP,level:1,scale:0}; return;
+        }
+    }
+    produce(type) {
+        if(this.energy < CONFIG.barracksCost) { this.showToast("에너지 부족!"); return; }
+        let unitType = ITEM_TYPE.UNIT_INFANTRY;
+        if(type === ITEM_TYPE.BUILDING_RANGE) unitType = ITEM_TYPE.UNIT_ARCHER;
+        if(type === ITEM_TYPE.BUILDING_STABLE) unitType = ITEM_TYPE.UNIT_CAVALRY;
+        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
+            if(this.gridState[r][c].type === LOCK_TYPE.OPEN && !this.grid[r][c]) {
+                this.energy -= CONFIG.barracksCost; this.grid[r][c] = { type: unitType, level: 1, scale: 0 };
+                this.updateUI(); return;
             }
+        }
+        this.showToast("공간 부족!");
+    }
+    openChest(r, c) {
+        this.grid[r][c] = null; this.showToast("상자 오픈...");
+        setTimeout(() => {
+            const rand = Math.random();
+            let reward = rand > 0.6 ? ITEM_TYPE.ITEM_ENERGY : ITEM_TYPE.ITEM_GOLD;
+            this.grid[r][c] = { type: reward, level: 1, scale: 0 };
+        }, 300);
+    }
+    collectResource(item, r, c) {
+        if(item.type === ITEM_TYPE.ITEM_GOLD) this.gold += 100;
+        if(item.type === ITEM_TYPE.ITEM_ENERGY) this.energy = Math.min(this.energy + 20, this.maxEnergy);
+        this.grid[r][c] = null; this.updateUI();
+    }
+    ejectCamp(camp, r, c) {
+        if(!camp.storedUnit) { this.showToast("비어있음"); return; }
+        const n = [[0,1],[0,-1],[1,0],[-1,0]];
+        for(let o of n) {
+            const nr=r+o[0], nc=c+o[1];
+            if(nr>=0 && nr<8 && nc>=0 && nc<8 && !this.grid[nr][nc] && this.gridState[nr][nc].type===LOCK_TYPE.OPEN) {
+                this.grid[nr][nc] = camp.storedUnit; camp.storedUnit = null; return;
+            }
+        }
+        this.showToast("공간 부족");
+    }
+    tryUnlock(r, c) {
+        const lock = this.gridState[r][c];
+        if(lock.type === LOCK_TYPE.GOLD) {
+            if(this.gold >= lock.value) { this.gold -= lock.value; this.gridState[r][c] = { type: LOCK_TYPE.OPEN }; this.showToast("해금 완료!"); }
+            else this.showToast("골드 부족");
+        } else if(lock.type === LOCK_TYPE.LEVEL) {
+            if(this.lordLevel >= lock.value) { this.gridState[r][c] = { type: LOCK_TYPE.OPEN }; this.showToast("해금 완료!"); }
+            else this.showToast(`LV.${lock.value} 필요`);
+        }
+        this.updateUI();
     }
 }
 
