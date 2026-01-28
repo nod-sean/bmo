@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v45 - Chest Spawner Fix</title>
+    <title>KOV Prototype v55 - Visual FX Update</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -64,10 +64,11 @@
 
         .res-pill {
             background: rgba(0,0,0,0.6); border: 1px solid #555;
-            border-radius: 99px; padding: 2px 8px;
+            border-radius: 99px; padding: 2px 8px 2px 4px;
             display: flex; align-items: center; gap: 4px;
-            font-weight: bold; font-size: 12px;
+            font-weight: bold; font-size: 12px; color: #fff;
         }
+        .res-icon { width: 20px; height: 20px; object-fit: contain; }
 
         .info-box {
             flex: 1;
@@ -151,32 +152,79 @@
             opacity: 0; transition: opacity 0.3s; pointer-events: none; border: 2px solid #ffd700;
             white-space: nowrap; z-index: 100;
         }
+
+        /* Level Up Banner Animation */
+        #levelup-banner {
+            position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            z-index: 150; pointer-events: none;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #levelup-banner.show { transform: translate(-50%, -50%) scale(1); }
+        #levelup-banner img { width: 300px; max-width: 80vw; filter: drop-shadow(0 0 10px gold); }
+
+        /* DEBUG OVERLAY */
+        #debug-overlay {
+            position: absolute; top: 60px; left: 10px; right: 10px;
+            background: rgba(0, 0, 0, 0.7); color: white;
+            padding: 10px; border-radius: 8px; font-size: 11px;
+            pointer-events: none; z-index: 999;
+            display: none;
+            text-align: left;
+        }
         
         .float-text {
             position: absolute; color: #ffd700; font-weight: bold; font-size: 16px;
             text-shadow: 1px 1px 0 #000; pointer-events: none;
             animation: floatUp 1s ease-out forwards; z-index: 50;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .float-img {
+            position: absolute; pointer-events: none; z-index: 60;
+            animation: floatUpImg 1.2s ease-out forwards;
+            width: 60px; height: auto;
         }
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
             100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
+        }
+        @keyframes floatUpImg {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-60px) scale(1); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <!-- Level Up Banner -->
+    <div id="levelup-banner">
+        <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/levelup.png" onerror="this.style.display='none'">
+    </div>
+
     <!-- Header -->
     <div class="header-panel">
         <div class="flex justify-between mb-1">
-            <div class="res-pill"><span style="color:#ffeb3b">⚡</span> <span id="energy-display">50/50</span></div>
-            <div class="res-pill"><span style="color:#ffd700">💰</span> <span id="gold-display">3000</span></div>
-            <div class="res-pill"><span style="color:#4fc3f7">💎</span> <span id="gem-display">50</span></div>
+            <div class="res-pill">
+                <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/energy.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='⚡'+this.nextElementSibling.innerText">
+                <span id="energy-display">50/50</span>
+            </div>
+            <div class="res-pill">
+                <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/gold.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='💰'+this.nextElementSibling.innerText">
+                <span id="gold-display">3000</span>
+            </div>
+            <div class="res-pill">
+                <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/crystal.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='💎'+this.nextElementSibling.innerText">
+                <span id="gem-display">50</span>
+            </div>
         </div>
         <div class="flex flex-col w-full">
             <div class="flex justify-between items-end px-1">
                 <span class="font-bold text-yellow-400 text-xs" id="level-display">LORD LV.1</span>
-                <span class="font-bold text-gray-300 text-xs" id="xp-text">0 / 10 XP</span>
+                <span class="font-bold text-gray-300 text-xs flex items-center gap-1">
+                    <span id="xp-text">0 / 10</span>
+                    <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/xp.png" class="h-3 object-contain" onerror="this.style.display='none';this.previousElementSibling.innerText+=' XP'">
+                </span>
             </div>
             <div class="w-full bg-gray-800 h-2 mt-1 rounded-full overflow-hidden border border-gray-600 relative">
                 <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
@@ -191,6 +239,7 @@
 
     <!-- Canvas -->
     <div id="canvas-wrapper">
+        <div id="debug-overlay"></div>
         <canvas id="gameCanvas"></canvas>
     </div>
 
@@ -234,7 +283,9 @@
                 <h2 class="text-xl font-bold text-yellow-400">필드 수집(미구현)</h2>
                 <p class="text-xs text-gray-400">건물을 건설하여 영지를 확장하세요.</p>
             </div>
-            <button onclick="game.toggleFieldModal()" class="text-gray-400 text-2xl">✖</button>
+            <button onclick="game.toggleFieldModal()" class="w-8 h-8">
+                <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/x.png" class="w-full h-full object-contain" onerror="this.style.display='none';this.parentNode.innerText='✖'">
+            </button>
         </div>
         <div class="shop-grid" id="shop-list"></div>
     </div>
@@ -244,40 +295,54 @@
 
 <script>
 /**
- * KOV Prototype v45 - Chest Spawner Fix
- * - FIXED: Chests behave like Buildings (Produce items into empty slots, persist on board).
- * - FIXED: Chests can be merged.
- * - FIXED: MouseUp logic ensures production only happens on click, not drag start.
+ * KOV Prototype v55 - Visual FX Update (LevelUp, XP Popups)
  */
+
+// --- CONFIGURATION ---
+const GITHUB_REPO = "nod-sean/bmo";
+const GITHUB_BRANCH = "main";
+const LOCAL_BASE_PATH = "./"; 
+const SEARCH_PATHS = ["", "img/", "assets/", "images/"];
+const EXTENSIONS = [".png", ".PNG", ".jpg", ".jpeg"];
+
+// --- ASSET KEYS ---
+const ASSET_KEYS = [
+    // Units: Infantry
+    '1101', '1102', '1103', '1104', '1105', '1106', '1107', '1108', '1109', '1110',
+    // Units: Archer
+    '1201', '1202', '1203', '1204', '1205', '1206', '1207', '1208', '1209', '1210',
+    // Buildings: Barracks
+    '2101', '2102', '2103', '2104', '2105',
+    // Buildings: Range (Fallback handles missing)
+    '2201', '2204', '2205',
+    // Buildings: Stable
+    '2301', '2302', '2303', '2304',
+    // Buildings: Chest
+    '2801', '2802', '2803', '2804', '2805',
+    // Resources: Gold
+    '1801', '1802', '1803', '1804', '1805', 
+    // Resources: Energy
+    '1811', '1812', '1813', '1814', '1815',
+    // Resources: Crystal
+    '1821', '1822', '1823', '1824', '1825',
+    // UI Elements
+    'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', '5xp', '10xp', 'x', 'LV'
+];
 
 // --- DATA ---
 const LEVEL_DATA = [ { level: 1, xp: 10, maxEnergy: 50 }, { level: 2, xp: 22, maxEnergy: 52 }, { level: 3, xp: 37, maxEnergy: 54 }, { level: 4, xp: 55, maxEnergy: 56 }, { level: 5, xp: 77, maxEnergy: 58 }, { level: 6, xp: 103, maxEnergy: 60 }, { level: 7, xp: 134, maxEnergy: 62 }, { level: 8, xp: 169, maxEnergy: 64 }, { level: 9, xp: 209, maxEnergy: 66 }, { level: 10, xp: 254, maxEnergy: 68 }, { level: 11, xp: 304, maxEnergy: 70 }, { level: 12, xp: 359, maxEnergy: 72 }, { level: 13, xp: 420, maxEnergy: 74 }, { level: 14, xp: 486, maxEnergy: 76 }, { level: 15, xp: 558, maxEnergy: 78 }];
 const MERGE_XP_DATA = { 1:1, 2:2, 3:4, 4:5, 5:6, 6:8, 7:10, 8:15, 9:20, 10:0 };
-const UNIT_STATS = { 
-    10: { name: "보병", class:"보병", hp: 10, atk: 5, def: 10, spd: 5, rng: 1, mov: 3, sell: 5 }, 
-    11: { name: "궁병", class:"궁병", hp: 8, atk: 8, def: 5, spd: 7, rng: 3, mov: 3, sell: 5 }, 
-    12: { name: "기병", class:"기병", hp: 15, atk: 4, def: 8, spd: 9, rng: 1, mov: 5, sell: 5 } 
-};
 const BUILDING_STATS = { 1: { energy: 1, probs: [90, 10, 0, 0, 0] }, 2: { energy: 2, probs: [0, 90, 10, 0, 0] }, 3: { energy: 3, probs: [0, 45, 55, 0, 0] }, 4: { energy: 4, probs: [0, 0, 90, 10, 0] }, 5: { energy: 5, probs: [0, 0, 80, 10, 10] } };
 const ITEM_VALUES = { 1: 1, 2: 2, 3: 6, 4: 14, 5: 32 };
-const CHEST_NAMES = { 1: "동 상자", 2: "은 상자", 3: "금 상자", 4: "백금 상자", 5: "다이아 상자" };
-
-const UNLOCK_GOLD_MAP = [
-    [100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5,  5,  10, 40, 50], [30, 10, 0,  0,  0,  0,  10, 30], [20, 5,  0,  0,  0,  0,  5,  20],
-    [20, 5,  0,  0,  0,  0,  5,  20], [30, 10, 0,  0,  0,  0,  10, 30], [50, 40, 10, 5,  5,  10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]
-];
-const UNLOCK_LEVEL_MAP = [
-    [24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6,  2,  2,  6,  18, 21], [17, 8,  0,  0,  0,  0,  9,  15], [13, 5,  0,  0,  0,  0,  3,  11],
-    [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]
-];
-
-const CHEST_DROP_TABLE = {
-    1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ],
-    2: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ],
-    3: [ {code: 1802, prob: 30}, {code: 1803, prob: 20}, {code: 1812, prob: 30}, {code: 1813, prob: 20} ],
-    4: [ {code: 1803, prob: 30}, {code: 1804, prob: 20}, {code: 1813, prob: 30}, {code: 1814, prob: 20} ],
-    5: [ {code: 1804, prob: 30}, {code: 1805, prob: 20}, {code: 1814, prob: 30}, {code: 1815, prob: 20} ]
-};
+const UNLOCK_GOLD_MAP = [[100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5,  5,  10, 40, 50], [30, 10, 0,  0,  0,  0,  10, 30], [20, 5,  0,  0,  0,  0,  5,  20], [20, 5,  0,  0,  0,  0,  5,  20], [30, 10, 0,  0,  0,  0,  10, 30], [50, 40, 10, 5,  5,  10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]];
+const UNLOCK_LEVEL_MAP = [[24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6,  2,  2,  6,  18, 21], [17, 8,  0,  0,  0,  0,  9,  15], [13, 5,  0,  0,  0,  0,  3,  11], [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]];
+const CHEST_DROP_TABLE = { 1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ], 2: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ], 3: [ {code: 1802, prob: 30}, {code: 1803, prob: 20}, {code: 1812, prob: 30}, {code: 1813, prob: 20} ], 4: [ {code: 1803, prob: 30}, {code: 1804, prob: 20}, {code: 1813, prob: 30}, {code: 1814, prob: 20} ], 5: [ {code: 1804, prob: 30}, {code: 1805, prob: 20}, {code: 1814, prob: 30}, {code: 1815, prob: 20} ] };
+const CONFIG = { gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, squadCols: 3, squadRows: 3, squadTopY: 50, squadGap: 20, squadCellSize: 130 };
+const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5, UNIT_INFANTRY: 10, UNIT_ARCHER: 11, UNIT_CAVALRY: 12, ITEM_GOLD: 20, ITEM_ENERGY: 21, ITEM_CRYSTAL: 22 };
+const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
+const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
+const BUILDING_LIMITS = { [ITEM_TYPE.BUILDING_BARRACKS]: 3, [ITEM_TYPE.BUILDING_RANGE]: 2, [ITEM_TYPE.BUILDING_STABLE]: 2, [ITEM_TYPE.BUILDING_CAMP]: 2, [ITEM_TYPE.BUILDING_CHEST]: 99 };
+const SHOP_DATA = [ { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" }, { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" }, { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" }, { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" }, { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" } ];
 
 function getInfoFromCode(code) {
     if (code >= 1100 && code < 1200) return { type: ITEM_TYPE.UNIT_INFANTRY, level: code % 100 };
@@ -287,55 +352,6 @@ function getInfoFromCode(code) {
     if (code >= 1810 && code < 1820) return { type: ITEM_TYPE.ITEM_ENERGY, level: code % 100 };
     if (code >= 1820 && code < 1830) return { type: ITEM_TYPE.ITEM_CRYSTAL, level: code % 100 };
     return { type: ITEM_TYPE.ITEM_GOLD, level: 1 };
-}
-
-const ASSET_MAP = {
-    '10_1': '1PkG2U9TO6M09gP-ems90YrxXZhZiHVwl', '10_3': '1zewPXV4yx1YNCB5dCwhesx_NnXhE4xt_', '10_4': '1NNx5uvJB4bPLOpXePIyCHy6mJ07xUDR0', '10_6': '1NDSoQsn1Pfnc0sKmMaF9-16PTFUeySWb',
-    '11_3': '1Rx5W791NsIwY5og_FIA_6lkTsaR_hBCp', '11_6': '1Q6Txp-h7wcKFXAXrZnAypOHamMhk-6oX',
-    '12_6': '1puFKeJ8jEZr-BmFajzqlHvG6Jp-6aYXs',
-    '1_1': '1_-nupZ7RIpxFbPEU3_MOtO85UXe67t4C', '2_1': '1SAvICsvtvI49UpjHn0MIRyNmlcAHVvI_',
-    '4_1': '1aoRRg3dYMofX_zkQ2RkH_rsOmeDTyWUz', '5_1': '18RFtqBXA3MqptmbJuaDzHnqylP_FqBg4',
-    '20_1': '173wg0wb4I-kuy5RIK_emyfex_fuVfYZC', '21_1': '1DQ8djwy-_V51Dzwz6vCzGd8bffiZi8gl', '22_1': '1Fay27Ipx4GH45HAlqLV0_tQ-7yz8TAzP'
-};
-
-const CONFIG = {
-    gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20,
-    squadCols: 3, squadRows: 3, squadTopY: 50, squadGap: 20, squadCellSize: 130,
-    barracksCost: 5, maxLevel: 10
-};
-
-const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5, UNIT_INFANTRY: 10, UNIT_ARCHER: 11, UNIT_CAVALRY: 12, ITEM_GOLD: 20, ITEM_ENERGY: 21, ITEM_CRYSTAL: 22 };
-const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
-const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
-
-const BUILDING_LIMITS = { [ITEM_TYPE.BUILDING_BARRACKS]: 3, [ITEM_TYPE.BUILDING_RANGE]: 2, [ITEM_TYPE.BUILDING_STABLE]: 2, [ITEM_TYPE.BUILDING_CAMP]: 2, [ITEM_TYPE.BUILDING_CHEST]: 99 };
-const SHOP_DATA = [
-    { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" },
-    { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" },
-    { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" },
-    { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" },
-    { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" }
-];
-
-class AssetLoader {
-    constructor() { this.images = {}; }
-    loadAll(callback) {
-        let loadedCount = 0; const keys = Object.keys(ASSET_MAP);
-        if(keys.length === 0) { if(callback) callback(); return; }
-        keys.forEach(key => {
-            const img = new Image();
-            img.src = `https://drive.google.com/uc?export=view&id=${ASSET_MAP[key]}`;
-            img.onload = () => { this.images[key] = img; checkDone(); };
-            img.onerror = () => { checkDone(); };
-        });
-        const checkDone = () => { loadedCount++; if(loadedCount === keys.length && callback) callback(); };
-    }
-    getImage(type, level) {
-        if (this.images[`${type}_${level}`]) return this.images[`${type}_${level}`];
-        if (type >= 10 && type < 20) { for(let l=level; l>=1; l--) if(this.images[`${type}_${l}`]) return this.images[`${type}_${l}`]; }
-        if (this.images[`${type}_1`]) return this.images[`${type}_1`];
-        return null;
-    }
 }
 
 function getData(type, level) {
@@ -364,21 +380,113 @@ function getCode(type, level) {
     return 0;
 }
 const DB = {
-    units: {
+    units: { 
         1101: { name:"민병", class:"보병", hp:10, atk:5, def:10, spd:5, rng:1, mov:1, sell:0 },
-        // ... (truncated for brevity, logic handles level scaling)
+        1201: { name:"궁병", class:"궁병", hp:8, atk:8, def:5, spd:7, rng:3, mov:1, sell:0 },
+        1301: { name:"기병", class:"기병", hp:15, atk:4, def:8, spd:9, rng:1, mov:1, sell:0 }
     },
-    buildings: {
-        2101: { name: "병영", energy: 1, probs: [90, 10, 0, 0, 0] },
-        // ...
+    buildings: { 
+        2101: { name: "병영" }, 
+        2201: { name: "사격장" },
+        2301: { name: "마구간" },
         2801: { name: "동 상자" }, 2802: { name: "은 상자" }, 2803: { name: "금 상자" }, 2804: { name: "백금 상자" }, 2805: { name: "다이아 상자" },
-        2811: { name: "캠프" }
+        2811: { name: "캠프" } 
     },
-    items: {
+    items: { 
         1801: { name: "골드", earn: 1 }, 1802: { name: "골드", earn: 2 }, 1803: { name: "골드", earn: 6 }, 1804: { name: "골드", earn: 14 }, 1805: { name: "골드", earn: 32 },
-        // ...
+        1811: { name: "에너지", earn: 1 }, 1812: { name: "에너지", earn: 2 }, 1813: { name: "에너지", earn: 6 }, 1814: { name: "에너지", earn: 14 }, 1815: { name: "에너지", earn: 32 },
+        1821: { name: "크리스탈", earn: 1 }, 1822: { name: "크리스탈", earn: 2 }, 1823: { name: "크리스탈", earn: 6 }, 1824: { name: "크리스탈", earn: 14 }, 1825: { name: "크리스탈", earn: 32 }
     }
 };
+
+// --- SMART ASSET LOADER ---
+class AssetLoader {
+    constructor() { 
+        this.images = {}; 
+        this.failedKeys = new Set();
+        this.successUrls = {}; 
+    }
+    
+    tryLoadImage(key, pathIndex, extIndex, useLocal) {
+        return new Promise((resolve, reject) => {
+            if (!useLocal && pathIndex >= SEARCH_PATHS.length) {
+                this.failedKeys.add(key);
+                resolve(null); 
+                return;
+            }
+
+            const img = new Image();
+            if (!useLocal) img.crossOrigin = "Anonymous"; 
+
+            let url = "";
+            if (useLocal) {
+                if (extIndex >= EXTENSIONS.length) { resolve(null); return; }
+                url = `${LOCAL_BASE_PATH}${key}${EXTENSIONS[extIndex]}`;
+            } else {
+                if (extIndex >= EXTENSIONS.length) {
+                    this.tryLoadImage(key, pathIndex + 1, 0, false).then(resolve);
+                    return;
+                }
+                const folder = SEARCH_PATHS[pathIndex];
+                const ext = EXTENSIONS[extIndex];
+                url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${folder}${key}${ext}`;
+            }
+
+            img.onload = () => {
+                this.images[key] = img;
+                this.successUrls[key] = url;
+                resolve(img);
+            };
+
+            img.onerror = () => {
+                this.tryLoadImage(key, pathIndex, extIndex + 1, useLocal).then(resolve);
+            };
+
+            img.src = url;
+        });
+    }
+
+    async loadAll(callback) {
+        this.failedKeys.clear();
+        const promises = ASSET_KEYS.map(async (key) => {
+            let result = await this.tryLoadImage(key, 0, 0, true);
+            if (result) return;
+            await this.tryLoadImage(key, 0, 0, false);
+        });
+        await Promise.all(promises);
+        this.reportStatus();
+        if (callback) callback();
+    }
+
+    reportStatus() {
+        const overlay = document.getElementById('debug-overlay');
+        const failCount = this.failedKeys.size;
+        if (failCount > 0) {
+            overlay.style.display = 'block';
+            const missing = Array.from(this.failedKeys).join(', ');
+            overlay.innerHTML = `<strong style="color:#ff5252">⚠️ 이미지 로딩 실패 (${failCount}개)</strong><br><div style="margin-top:5px; color:#ddd; font-size:10px;">${missing}</div>`;
+        } else { overlay.style.display = 'none'; }
+    }
+
+    getImage(type, level) {
+        if(typeof type === 'string') return this.images[type]; 
+        
+        const code = getCode(type, level);
+        if (this.images[code]) return this.images[code];
+        
+        if (level > 1) { 
+            for(let l=level-1; l>=1; l--) {
+                const lowerCode = getCode(type, l);
+                if(this.images[lowerCode]) return this.images[lowerCode];
+            }
+        }
+        for(let l=level+1; l<=10; l++) {
+             const higherCode = getCode(type, l);
+             if(this.images[higherCode]) return this.images[higherCode];
+        }
+        return null;
+    }
+}
 
 class Game {
     constructor() {
@@ -386,7 +494,10 @@ class Game {
         this.ctx = this.canvas.getContext('2d');
         this.width = 1080; this.height = 1920;
         this.assets = new AssetLoader();
-        this.assets.loadAll(() => this.requestRender());
+        
+        this.assets.loadAll(() => {
+            this.requestRender();
+        });
 
         this.grid = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
         this.gridState = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
@@ -535,7 +646,12 @@ class Game {
         this.updateLevelStats();
         this.energy = this.maxEnergy; 
         this.refreshLockState();
-        this.showToast(`LEVEL UP! LV.${this.lordLevel}`);
+        
+        // Show Level Up Banner
+        const banner = document.getElementById('levelup-banner');
+        banner.classList.add('show');
+        setTimeout(() => banner.classList.remove('show'), 2000);
+        
         if (this.currentXp >= this.requiredXp) this.levelUp();
     }
     cheatLevelUp() { this.addXp(this.requiredXp - this.currentXp); }
@@ -793,12 +909,23 @@ class Game {
                         target.level++; target.scale = 1.3;
                         if (isUnit) {
                             const gain = MERGE_XP_DATA[target.level - 1] || 0;
-                            if (gain > 0) { this.addXp(gain); this.showToast(`XP +${gain}`); }
-                            else { this.showToast("Level Up!"); }
-                        } else { this.showToast(`Upgraded! (Lv.${target.level})`); }
+                            if (gain > 0) { 
+                                this.addXp(gain); 
+                                // Show Image Toast for XP
+                                if (gain === 5 || gain === 10) {
+                                    this.showFloatingImage(`${gain}xp`, hit.x, hit.y);
+                                } else {
+                                    this.showToast(`XP +${gain}`, hit.x, hit.y); 
+                                }
+                            } else { 
+                                this.showToast("Level Up!", hit.x, hit.y); 
+                            }
+                        } else { 
+                            this.showToast(`Upgraded!`, hit.x, hit.y); 
+                        }
                         this.selectItem(target, hit);
                     } else if (!returned) {
-                        this.showToast("최대 레벨입니다");
+                        this.showToast("최대 레벨입니다", hit.x, hit.y);
                         returned = true;
                     }
                 }
@@ -879,18 +1006,44 @@ class Game {
 
     drawCell(x, y, s, i, l, isHover, isSelected) {
         const p = 2; const is = s - p*2;
+        
+        // Background
         this.ctx.fillStyle = (l.type !== LOCK_TYPE.OPEN) ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.1)";
         this.ctx.fillRect(Math.floor(x+p), Math.floor(y+p), Math.floor(is), Math.floor(is));
         
+        // Border
         if (isSelected) { this.ctx.strokeStyle = "#00ff00"; this.ctx.lineWidth = 6; }
         else if (isHover) { this.ctx.strokeStyle = "#ffff00"; this.ctx.lineWidth = 4; }
         else { this.ctx.strokeStyle = "rgba(0,0,0,0.3)"; this.ctx.lineWidth = 2; }
         this.ctx.strokeRect(Math.floor(x+p), Math.floor(y+p), Math.floor(is), Math.floor(is));
 
+        // Content
         if(l.type !== LOCK_TYPE.OPEN) {
-            this.ctx.fillStyle = "white"; this.ctx.font = "24px sans-serif"; this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
-            const text = (l.type === LOCK_TYPE.GOLD) ? `💰${l.value}` : `🔒LV.${l.value}`;
-            this.ctx.fillText(text, x+s/2, y+s/2);
+            // Draw Lock Icon
+            const lockImg = this.assets.getImage('lock');
+            const lvImg = this.assets.getImage('LV');
+            
+            if (lockImg && lockImg.complete) {
+                const iconSize = is * 0.5;
+                this.ctx.drawImage(lockImg, x + (is-iconSize)/2, y + (is-iconSize)/2 - 10, iconSize, iconSize);
+            } else {
+                this.ctx.fillStyle = "white"; this.ctx.font = "24px sans-serif"; this.ctx.textAlign = "center";
+                this.ctx.fillText("🔒", x+s/2, y+s/2 - 10);
+            }
+
+            // Draw Requirement Text
+            this.ctx.fillStyle = "white"; this.ctx.font = "bold 16px sans-serif"; this.ctx.textAlign = "center"; 
+            const text = (l.type === LOCK_TYPE.GOLD) ? `💰${l.value}` : `LV.${l.value}`;
+            
+            // Draw LV Badge background if available
+            if (l.type === LOCK_TYPE.LEVEL && lvImg && lvImg.complete) {
+                 const badgeW = 60, badgeH = 30;
+                 this.ctx.drawImage(lvImg, x + (is-badgeW)/2, y + s - badgeH - 15, badgeW, badgeH);
+                 this.ctx.fillText(l.value, x + s/2, y + s - 28);
+            } else {
+                 this.ctx.fillText(text, x+s/2, y+s/2 + 25);
+            }
+            
         } else if(i && i !== this.drag?.item) this.drawItem(x, y, s, i);
     }
 
@@ -908,6 +1061,7 @@ class Game {
         if(img && img.complete && img.naturalWidth !== 0) {
             this.ctx.drawImage(img, dx, dy, ds, ds);
         } else {
+            // Fallback render
             let c = "#cfd8dc"; let sym = "❓";
             if(item.type===ITEM_TYPE.BUILDING_BARRACKS) { c="#795548"; sym="🏠"; }
             else if(item.type===ITEM_TYPE.BUILDING_RANGE) { c="#388e3c"; sym="🎯"; }
@@ -932,30 +1086,13 @@ class Game {
 
     drawLabel(item, cx, dy, ds) {
         let label = "";
-        if(item.type===ITEM_TYPE.BUILDING_BARRACKS) label="병영";
-        else if(item.type===ITEM_TYPE.UNIT_INFANTRY) label="보병";
-        else if(item.type===ITEM_TYPE.UNIT_ARCHER) label="궁병";
-        else if(item.type===ITEM_TYPE.UNIT_CAVALRY) label="기병";
-        else if(item.type===ITEM_TYPE.BUILDING_CHEST) label="상자";
-        else if(item.type===ITEM_TYPE.BUILDING_CAMP) label="캠프";
-        else if(item.type===ITEM_TYPE.ITEM_GOLD) label="골드";
-        else if(item.type===ITEM_TYPE.ITEM_ENERGY) label="에너지";
-        else if(item.type===ITEM_TYPE.ITEM_CRYSTAL) label="크리스탈";
         
-        if (label) {
-            this.ctx.fillStyle = "rgba(0,0,0,0.7)";
-            const w = 60;
-            this.ctx.fillRect(Math.floor(cx - w/2), Math.floor(dy + 5), w, 22);
-            this.ctx.fillStyle = "white"; this.ctx.font = "bold 16px sans-serif"; 
-            this.ctx.textAlign = "center"; this.ctx.textBaseline = "top";
-            this.ctx.fillText(label, cx, Math.floor(dy + 8));
-        }
-
         if ((item.type >= 10 && item.type < 20) || (item.type < 10 && item.type > 0)) { 
+            // Level Badge
             this.ctx.fillStyle = "black";
             this.ctx.beginPath(); this.ctx.arc(cx, dy + ds - 15, 12, 0, Math.PI*2); this.ctx.fill();
             this.ctx.fillStyle = "white"; this.ctx.font = "bold 18px sans-serif"; 
-            this.ctx.textBaseline = "middle";
+            this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
             this.ctx.fillText(item.level, cx, Math.floor(dy + ds - 14));
         }
         if (item.type === ITEM_TYPE.BUILDING_CAMP && item.storedUnit) {
@@ -964,6 +1101,7 @@ class Game {
     }
 
     roundRect(x,y,w,h,r){this.ctx.beginPath();this.ctx.moveTo(x+r,y);this.ctx.arcTo(x+w,y,x+w,y+h,r);this.ctx.arcTo(x+w,y+h,x,y+h,r);this.ctx.arcTo(x,y+h,x,y,r);this.ctx.arcTo(x,y,x+w,y,r);this.ctx.closePath();}
+    
     showToast(msg, x, y) { 
         if (x && y) {
             const rect = this.canvas.getBoundingClientRect();
@@ -980,12 +1118,31 @@ class Game {
             const t = document.getElementById('toast'); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,1000); 
         }
     }
+
+    showFloatingImage(key, x, y) {
+        const imgObj = this.assets.getImage(key);
+        if (!imgObj) return;
+
+        const rect = this.canvas.getBoundingClientRect();
+        const scale = rect.width / this.width;
+        const screenX = x * scale;
+        const screenY = y * scale;
+
+        const el = document.createElement('img');
+        el.className = 'float-img';
+        el.src = imgObj.src;
+        el.style.left = `${screenX - 30}px`; // Center align adjustment
+        el.style.top = `${screenY}px`;
+        document.getElementById('canvas-wrapper').appendChild(el);
+        setTimeout(() => el.remove(), 1200);
+    }
+
     updateUI(){ 
         document.getElementById('energy-display').innerText = `${this.energy}/${this.maxEnergy}`;
         document.getElementById('gold-display').innerText = this.gold;
         document.getElementById('gem-display').innerText = this.gem;
         document.getElementById('level-display').innerText = `LORD LV.${this.lordLevel}`;
-        document.getElementById('xp-text').innerText = `${this.currentXp} / ${this.requiredXp} XP`;
+        document.getElementById('xp-text').innerText = `${this.currentXp} / ${this.requiredXp}`;
         document.getElementById('xp-bar').style.width = `${Math.min(100, (this.currentXp/this.requiredXp)*100)}%`;
     }
     cheatEnergy(){ this.energy = Math.min(this.energy+30, this.maxEnergy); this.updateUI(); }
@@ -1015,11 +1172,8 @@ class Game {
     }
 
     produceFromChest(chest, r, c) {
-        // Assume cost is 1 energy per click for chest production, similar to buildings.
         const cost = 1; 
         if(this.energy < cost) { this.showToast(`에너지 부족 (${cost} 필요)`); return; }
-
-        // Determine Spawn from Chest Table
         const table = CHEST_DROP_TABLE[chest.level] || CHEST_DROP_TABLE[1];
         let totalWeight = 0;
         table.forEach(entry => totalWeight += entry.prob);
@@ -1030,13 +1184,11 @@ class Game {
             rand -= entry.prob;
         }
         const info = getInfoFromCode(selectedCode);
-
-        // Find Empty Spot (Scanning grid)
         for(let tr=0; tr<CONFIG.gridRows; tr++) for(let tc=0; tc<CONFIG.gridCols; tc++) {
             if(this.gridState[tr][tc].type === LOCK_TYPE.OPEN && !this.grid[tr][tc]) {
                 this.energy -= cost;
                 this.grid[tr][tc] = { type: info.type, level: info.level, scale: 0 };
-                chest.scale = 1.3; // Animate chest to show activity
+                chest.scale = 1.3; 
                 this.updateUI(); this.requestRender(); return;
             }
         }
@@ -1048,11 +1200,9 @@ class Game {
         let msg = "";
         const cellX = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
         const cellY = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
-
         if(item.type === ITEM_TYPE.ITEM_GOLD) { this.gold += val; msg = `+${val} Gold`; }
         if(item.type === ITEM_TYPE.ITEM_ENERGY) { this.energy = Math.min(this.energy + val, this.maxEnergy); msg = `+${val} Energy`; }
         if(item.type === ITEM_TYPE.ITEM_CRYSTAL) { this.gem += val; msg = `+${val} Gem`; }
-        
         this.showToast(msg, cellX, cellY);
         this.grid[r][c] = null; 
         this.updateUI(); this.requestRender();
