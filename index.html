@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v57 - Resource ID Bug Fix</title>
+    <title>KOV Prototype v60 - Money Bag for Gold Locks</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -295,9 +295,8 @@
 
 <script>
 /**
- * KOV Prototype v57 - Resource ID Bug Fix
- * FIX: getInfoFromCode incorrectly parsed level using %100 for resources.
- * Changed to use subtraction logic for 18xx codes.
+ * KOV Prototype v60 - Money Bag for Gold Locks
+ * FEATURE: Replaced lock icon with money bag (1804.png) for gold-unlockable slots.
  */
 
 // --- CONFIGURATION ---
@@ -315,7 +314,7 @@ const ASSET_KEYS = [
     '1201', '1202', '1203', '1204', '1205', '1206', '1207', '1208', '1209', '1210',
     // Buildings: Barracks
     '2101', '2102', '2103', '2104', '2105',
-    // Buildings: Range (Fallback handles missing)
+    // Buildings: Range
     '2201', '2204', '2205',
     // Buildings: Stable
     '2301', '2302', '2303', '2304',
@@ -358,13 +357,9 @@ function getInfoFromCode(code) {
     if (code >= 1100 && code < 1200) return { type: ITEM_TYPE.UNIT_INFANTRY, level: code % 100 };
     if (code >= 1200 && code < 1300) return { type: ITEM_TYPE.UNIT_ARCHER, level: code % 100 };
     if (code >= 1300 && code < 1400) return { type: ITEM_TYPE.UNIT_CAVALRY, level: code % 100 };
-    
-    // FIX: Using subtraction for level to avoid 1811 % 100 = 11 bug.
-    // 1801 -> 1, 1811 -> 1, 1821 -> 1
     if (code >= 1800 && code < 1810) return { type: ITEM_TYPE.ITEM_GOLD, level: code - 1800 };
     if (code >= 1810 && code < 1820) return { type: ITEM_TYPE.ITEM_ENERGY, level: code - 1810 };
     if (code >= 1820 && code < 1830) return { type: ITEM_TYPE.ITEM_CRYSTAL, level: code - 1820 };
-    
     return { type: ITEM_TYPE.ITEM_GOLD, level: 1 };
 }
 
@@ -1033,29 +1028,53 @@ class Game {
 
         // Content
         if(l.type !== LOCK_TYPE.OPEN) {
-            // Draw Lock Icon
-            const lockImg = this.assets.getImage('lock');
-            const lvImg = this.assets.getImage('LV');
-            
-            if (lockImg && lockImg.complete) {
-                const iconSize = is * 0.5;
-                this.ctx.drawImage(lockImg, x + (is-iconSize)/2, y + (is-iconSize)/2 - 10, iconSize, iconSize);
-            } else {
-                this.ctx.fillStyle = "white"; this.ctx.font = "24px sans-serif"; this.ctx.textAlign = "center";
-                this.ctx.fillText("🔒", x+s/2, y+s/2 - 10);
+            // Determine which icon to draw
+            let iconKey = 'lock'; // Default to lock
+            if (l.type === LOCK_TYPE.GOLD) {
+                iconKey = '1804'; // Use Gold Bag for gold unlocks
             }
 
-            // Draw Requirement Text
-            this.ctx.fillStyle = "white"; this.ctx.font = "bold 16px sans-serif"; this.ctx.textAlign = "center"; 
-            const text = (l.type === LOCK_TYPE.GOLD) ? `💰${l.value}` : `LV.${l.value}`;
+            const iconImg = this.assets.getImage(iconKey);
+            const lvImg = this.assets.getImage('LV');
             
-            // Draw LV Badge background if available
-            if (l.type === LOCK_TYPE.LEVEL && lvImg && lvImg.complete) {
-                 const badgeW = 60, badgeH = 30;
-                 this.ctx.drawImage(lvImg, x + (is-badgeW)/2, y + s - badgeH - 15, badgeW, badgeH);
-                 this.ctx.fillText(l.value, x + s/2, y + s - 28);
+            if (iconImg && iconImg.complete) {
+                const iconSize = is * 0.8; 
+                this.ctx.drawImage(iconImg, x + (is-iconSize)/2, y + (is-iconSize)/2, iconSize, iconSize);
+                
+                // Text styling
+                this.ctx.fillStyle = "#FFFFFF"; 
+                this.ctx.font = "bold 22px sans-serif"; // Slightly larger font
+                this.ctx.textAlign = "center"; 
+                this.ctx.textBaseline = "middle";
+                this.ctx.shadowColor = "black";
+                this.ctx.shadowBlur = 4;
+                this.ctx.lineWidth = 5; // Thicker stroke
+                this.ctx.strokeStyle = "black"; 
+                
+                let text = `${l.value}`;
+                
+                if(l.type === LOCK_TYPE.GOLD) {
+                    this.ctx.fillStyle = "#FFD700"; // Gold text color
+                    text = `💰${l.value}`; 
+                }
+
+                // Adjust Y for text based on icon type
+                // For lock, we want it in the screen area (center).
+                // For money bag, we want it clearly visible over the bag.
+                const textY = y + s/2;
+                
+                this.ctx.strokeText(text, x + s/2, textY);
+                this.ctx.fillText(text, x + s/2, textY);
+                
+                this.ctx.shadowBlur = 0;
             } else {
-                 this.ctx.fillText(text, x+s/2, y+s/2 + 25);
+                // Fallback if image not loaded
+                this.ctx.fillStyle = "white"; this.ctx.font = "24px sans-serif"; this.ctx.textAlign = "center";
+                const fallbackIcon = (l.type === LOCK_TYPE.GOLD) ? "💰" : "🔒";
+                this.ctx.fillText(fallbackIcon, x+s/2, y+s/2 - 10);
+                
+                const text = (l.type === LOCK_TYPE.GOLD) ? `💰${l.value}` : `LV.${l.value}`;
+                this.ctx.fillText(text, x+s/2, y+s/2 + 25);
             }
             
         } else if(i && i !== this.drag?.item) this.drawItem(x, y, s, i);
@@ -1102,12 +1121,26 @@ class Game {
         let label = "";
         
         if ((item.type >= 10 && item.type < 20) || (item.type < 10 && item.type > 0)) { 
-            // Level Badge
-            this.ctx.fillStyle = "black";
-            this.ctx.beginPath(); this.ctx.arc(cx, dy + ds - 15, 12, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.fillStyle = "white"; this.ctx.font = "bold 18px sans-serif"; 
-            this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
-            this.ctx.fillText(item.level, cx, Math.floor(dy + ds - 14));
+            // Level Badge Circle
+            const badgeX = cx;
+            const badgeY = dy + ds - 12; // Adjusted position (-10 -> -12)
+            const badgeRadius = 11;
+
+            this.ctx.fillStyle = "rgba(0,0,0,0.85)"; // Darker background
+            this.ctx.beginPath(); 
+            this.ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI*2); 
+            this.ctx.fill();
+            
+            // Border for visibility
+            this.ctx.strokeStyle = "white";
+            this.ctx.lineWidth = 1;
+            this.ctx.stroke();
+
+            this.ctx.fillStyle = "white"; 
+            this.ctx.font = "bold 14px sans-serif"; 
+            this.ctx.textAlign = "center"; 
+            this.ctx.textBaseline = "middle";
+            this.ctx.fillText(item.level, badgeX, badgeY + 1); // +1 Y 보정
         }
         if (item.type === ITEM_TYPE.BUILDING_CAMP && item.storedUnit) {
             this.ctx.fillStyle = "#ff5252"; this.ctx.font="bold 20px sans-serif"; this.ctx.fillText("IN", cx, Math.floor(dy + ds/2));
