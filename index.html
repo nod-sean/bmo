@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v77 - Audio Path Fix</title>
+    <title>KOV Prototype v82 - Syntax Fix Complete</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -109,13 +109,12 @@ const ASSET_KEYS = [
     '1821', '1822', '1823', '1824', '1825', 'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', '5xp', '10xp', 'x', 'LV'
 ];
 
-const LEVEL_DATA = [ { level: 1, xp: 10, maxEnergy: 50 }, { level: 2, xp: 22, maxEnergy: 52 }, { level: 3, xp: 37, maxEnergy: 54 }, { level: 4, xp: 55, maxEnergy: 56 }, { level: 5, xp: 77, maxEnergy: 58 }, { level: 6, xp: 103, maxEnergy: 60 }, { level: 7, xp: 134, maxEnergy: 62 }, { level: 8, xp: 169, maxEnergy: 64 }, { level: 9, xp: 209, maxEnergy: 66 }, { level: 10, xp: 254, maxEnergy: 68 }, { level: 11, xp: 304, maxEnergy: 70 }, { level: 12, xp: 359, maxEnergy: 72 }, { level: 13, xp: 420, maxEnergy: 74 }, { level: 14, xp: 486, maxEnergy: 76 }, { level: 15, xp: 558, maxEnergy: 78 }];
-const MERGE_XP_DATA = { 1:1, 2:2, 3:4, 4:5, 5:6, 6:8, 7:10, 8:15, 9:20, 10:0 };
-const BUILDING_STATS = { 1: { energy: 1, probs: [90, 10, 0, 0, 0] }, 2: { energy: 2, probs: [0, 90, 10, 0, 0] }, 3: { energy: 3, probs: [0, 45, 55, 0, 0] }, 4: { energy: 4, probs: [0, 0, 90, 10, 0] }, 5: { energy: 5, probs: [0, 0, 80, 10, 10] } };
-const ITEM_VALUES = { 1: 1, 2: 2, 3: 6, 4: 14, 5: 32 };
-const UNLOCK_GOLD_MAP = [[100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5,  5,  10, 40, 50], [30, 10, 0,  0,  0,  0,  10, 30], [20, 5,  0,  0,  0,  0,  5,  20], [20, 5,  0,  0,  0,  0,  5,  20], [30, 10, 0,  0,  0,  0,  10, 30], [50, 40, 10, 5,  5,  10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]];
-const UNLOCK_LEVEL_MAP = [[24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6,  2,  2,  6,  18, 21], [17, 8,  0,  0,  0,  0,  9,  15], [13, 5,  0,  0,  0,  0,  3,  11], [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]];
-const CHEST_DROP_TABLE = { 1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ], 2: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ], 3: [ {code: 1801, prob: 20}, {code: 1802, prob: 20}, {code: 1803, prob: 10}, {code: 1811, prob: 20}, {code: 1812, prob: 20}, {code: 1813, prob: 10} ], 4: [ {code: 1802, prob: 20}, {code: 1803, prob: 20}, {code: 1804, prob: 5}, {code: 1812, prob: 20}, {code: 1813, prob: 20}, {code: 1814, prob: 5}, {code: 1821, prob: 10} ], 5: [ {code: 1802, prob: 15}, {code: 1803, prob: 20}, {code: 1804, prob: 10}, {code: 1812, prob: 15}, {code: 1813, prob: 20}, {code: 1814, prob: 10}, {code: 1821, prob: 5}, {code: 1825, prob: 5} ] };
+const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5, UNIT_INFANTRY: 10, UNIT_ARCHER: 11, UNIT_CAVALRY: 12, ITEM_GOLD: 20, ITEM_ENERGY: 21, ITEM_CRYSTAL: 22 };
+const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
+const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
+const BUILDING_LIMITS = { [ITEM_TYPE.BUILDING_BARRACKS]: 3, [ITEM_TYPE.BUILDING_RANGE]: 2, [ITEM_TYPE.BUILDING_STABLE]: 2, [ITEM_TYPE.BUILDING_CAMP]: 2, [ITEM_TYPE.BUILDING_CHEST]: 99 };
+const SHOP_DATA = [ { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" }, { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" }, { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" }, { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" }, { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" } ];
+
 const CONFIG = { 
     gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, 
     squadCols: 3, squadRows: 3, 
@@ -123,51 +122,109 @@ const CONFIG = {
     squadGap: 80, 
     squadCellSize: 130 
 };
-const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5, UNIT_INFANTRY: 10, UNIT_ARCHER: 11, UNIT_CAVALRY: 12, ITEM_GOLD: 20, ITEM_ENERGY: 21, ITEM_CRYSTAL: 22 };
-const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
-const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
-const BUILDING_LIMITS = { [ITEM_TYPE.BUILDING_BARRACKS]: 3, [ITEM_TYPE.BUILDING_RANGE]: 2, [ITEM_TYPE.BUILDING_STABLE]: 2, [ITEM_TYPE.BUILDING_CAMP]: 2, [ITEM_TYPE.BUILDING_CHEST]: 99 };
-const SHOP_DATA = [ { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" }, { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" }, { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" }, { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" }, { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" } ];
-const CAMP_CAPACITY = {1:4, 2:6, 3:8, 4:12, 5:16};
 
-// --- UNIT STATS DATA (Synced with unit.csv) ---
-const UNIT_STATS = {
-    // Infantry (11xx)
-    1101: { name: "민병", hp: 10, atk: 5, def: 10, spd: 5, rng: 1, mov: 1, sell: 0 },
-    1102: { name: "보병", hp: 20, atk: 7, def: 15, spd: 7, rng: 1, mov: 1, sell: 1 },
-    1103: { name: "검병", hp: 30, atk: 9, def: 20, spd: 9, rng: 1, mov: 1, sell: 1 },
-    1104: { name: "방패병", hp: 40, atk: 11, def: 25, spd: 11, rng: 1, mov: 1, sell: 2 },
-    1105: { name: "중갑병", hp: 50, atk: 13, def: 30, spd: 13, rng: 1, mov: 1, sell: 3 },
-    1106: { name: "정예병", hp: 60, atk: 15, def: 35, spd: 15, rng: 1, mov: 1, sell: 6 },
-    1107: { name: "근위병", hp: 70, atk: 17, def: 40, spd: 17, rng: 1, mov: 1, sell: 12 },
-    1108: { name: "템플러", hp: 80, atk: 19, def: 45, spd: 19, rng: 1, mov: 1, sell: 25 },
-    1109: { name: "팔라딘", hp: 90, atk: 21, def: 50, spd: 21, rng: 1, mov: 1, sell: 50 },
-    1110: { name: "영웅", hp: 100, atk: 23, def: 55, spd: 23, rng: 1, mov: 1, sell: 100 },
+// --- DATA HANDLING ---
+let GAME_DATA = null;
 
-    // Archer (12xx)
-    1201: { name: "초보 궁수", hp: 8, atk: 8, def: 5, spd: 7, rng: 3, mov: 1, sell: 0 },
-    1202: { name: "궁수", hp: 16, atk: 11, def: 7, spd: 9, rng: 3, mov: 1, sell: 1 },
-    1203: { name: "사냥꾼", hp: 24, atk: 14, def: 9, spd: 11, rng: 3, mov: 1, sell: 1 },
-    1204: { name: "명사수", hp: 32, atk: 17, def: 11, spd: 13, rng: 4, mov: 1, sell: 2 },
-    1205: { name: "저격수", hp: 40, atk: 20, def: 13, spd: 15, rng: 4, mov: 1, sell: 3 },
-    1206: { name: "정예 궁수", hp: 48, atk: 23, def: 15, spd: 17, rng: 4, mov: 1, sell: 6 },
-    1207: { name: "데드아이", hp: 56, atk: 26, def: 17, spd: 19, rng: 5, mov: 1, sell: 12 },
-    1208: { name: "패스파인더", hp: 64, atk: 29, def: 19, spd: 21, rng: 5, mov: 1, sell: 25 },
-    1209: { name: "보우마스터", hp: 72, atk: 32, def: 21, spd: 23, rng: 5, mov: 1, sell: 50 },
-    1210: { name: "신궁", hp: 80, atk: 35, def: 23, spd: 25, rng: 6, mov: 1, sell: 100 },
-
-    // Cavalry (13xx)
-    1301: { name: "기병", hp: 12, atk: 6, def: 8, spd: 10, rng: 1, mov: 2, sell: 0 },
-    1302: { name: "경기병", hp: 24, atk: 9, def: 12, spd: 12, rng: 1, mov: 2, sell: 1 },
-    1303: { name: "창기병", hp: 36, atk: 12, def: 16, spd: 14, rng: 1, mov: 2, sell: 1 },
-    1304: { name: "기사", hp: 48, atk: 15, def: 20, spd: 16, rng: 1, mov: 2, sell: 2 },
-    1305: { name: "중기병", hp: 60, atk: 18, def: 24, spd: 18, rng: 1, mov: 2, sell: 3 },
-    1306: { name: "정예 기병", hp: 72, atk: 21, def: 28, spd: 20, rng: 1, mov: 2, sell: 6 },
-    1307: { name: "로얄 나이트", hp: 84, atk: 24, def: 32, spd: 22, rng: 1, mov: 2, sell: 12 },
-    1308: { name: "드래곤 나이트", hp: 96, atk: 27, def: 36, spd: 24, rng: 1, mov: 2, sell: 25 },
-    1309: { name: "발키리", hp: 108, atk: 30, def: 40, spd: 26, rng: 1, mov: 2, sell: 50 },
-    1310: { name: "전설의 기사", hp: 120, atk: 33, def: 44, spd: 28, rng: 1, mov: 2, sell: 100 }
+// Full Fallback Data Definition - Used if JSON load fails
+const FALLBACK_GAME_DATA = {
+    level_data: [ 
+        { level: 1, xp: 10, maxEnergy: 50 }, { level: 2, xp: 22, maxEnergy: 52 }, { level: 3, xp: 37, maxEnergy: 54 }, 
+        { level: 4, xp: 55, maxEnergy: 56 }, { level: 5, xp: 77, maxEnergy: 58 }, { level: 6, xp: 103, maxEnergy: 60 }, 
+        { level: 7, xp: 134, maxEnergy: 62 }, { level: 8, xp: 169, maxEnergy: 64 }, { level: 9, xp: 209, maxEnergy: 66 }, 
+        { level: 10, xp: 254, maxEnergy: 68 }, { level: 11, xp: 304, maxEnergy: 70 }, { level: 12, xp: 359, maxEnergy: 72 }, 
+        { level: 13, xp: 420, maxEnergy: 74 }, { level: 14, xp: 486, maxEnergy: 76 }, { level: 15, xp: 558, maxEnergy: 78 } 
+    ],
+    merge_xp: { "1":1, "2":2, "3":4, "4":5, "5":6, "6":8, "7":10, "8":15, "9":20, "10":0 },
+    units: {
+        "1101": { name: "Militia", name_kr: "민병", hp: 10, atk: 5, def: 10, spd: 5, range: 1, move: 1, sell: 0 },
+        "1102": { name: "Infantry", name_kr: "보병", hp: 20, atk: 7, def: 15, spd: 7, range: 1, move: 1, sell: 1 },
+        "1103": { name: "Swordsman", name_kr: "검병", hp: 30, atk: 9, def: 20, spd: 9, range: 1, move: 1, sell: 1 },
+        "1104": { name: "Shieldman", name_kr: "방패병", hp: 40, atk: 11, def: 25, spd: 11, range: 1, move: 1, sell: 2 },
+        "1105": { name: "Heavy Infantry", name_kr: "중갑병", hp: 50, atk: 13, def: 30, spd: 13, range: 1, move: 1, sell: 3 },
+        "1106": { name: "Elite", name_kr: "정예병", hp: 60, atk: 15, def: 35, spd: 15, range: 1, move: 1, sell: 6 },
+        "1107": { name: "Guard", name_kr: "근위병", hp: 70, atk: 17, def: 40, spd: 17, range: 1, move: 1, sell: 12 },
+        "1108": { name: "Templar", name_kr: "템플러", hp: 80, atk: 19, def: 45, spd: 19, range: 1, move: 1, sell: 25 },
+        "1109": { name: "Paladin", name_kr: "팔라딘", hp: 90, atk: 21, def: 50, spd: 21, range: 1, move: 1, sell: 50 },
+        "1110": { name: "Hero", name_kr: "영웅", hp: 100, atk: 23, def: 55, spd: 23, range: 1, move: 1, sell: 100 },
+        "1201": { name: "Rookie Archer", name_kr: "초보 궁수", hp: 8, atk: 8, def: 5, spd: 7, range: 3, move: 1, sell: 0 },
+        "1202": { name: "Archer", name_kr: "궁수", hp: 16, atk: 11, def: 7, spd: 9, range: 3, move: 1, sell: 1 },
+        "1203": { name: "Hunter", name_kr: "사냥꾼", hp: 24, atk: 14, def: 9, spd: 11, range: 3, move: 1, sell: 1 },
+        "1204": { name: "Marksman", name_kr: "명사수", hp: 32, atk: 17, def: 11, spd: 13, range: 4, move: 1, sell: 2 },
+        "1205": { name: "Sniper", name_kr: "저격수", hp: 40, atk: 20, def: 13, spd: 15, range: 4, move: 1, sell: 3 },
+        "1206": { name: "Elite Archer", name_kr: "정예 궁수", hp: 48, atk: 23, def: 15, spd: 17, range: 4, move: 1, sell: 6 },
+        "1207": { name: "Deadeye", name_kr: "데드아이", hp: 56, atk: 26, def: 17, spd: 19, range: 5, move: 1, sell: 12 },
+        "1208": { name: "Pathfinder", name_kr: "패스파인더", hp: 64, atk: 29, def: 19, spd: 21, range: 5, move: 1, sell: 25 },
+        "1209": { name: "Bowmaster", name_kr: "보우마스터", hp: 72, atk: 32, def: 21, spd: 23, range: 5, move: 1, sell: 50 },
+        "1210": { name: "Divine Archer", name_kr: "신궁", hp: 80, atk: 35, def: 23, spd: 25, range: 6, move: 1, sell: 100 },
+        "1301": { name: "Rider", name_kr: "기병", hp: 12, atk: 6, def: 8, spd: 10, range: 1, move: 2, sell: 0 },
+        "1302": { name: "Light Cavalry", name_kr: "경기병", hp: 24, atk: 9, def: 12, spd: 12, range: 1, move: 2, sell: 1 },
+        "1303": { name: "Lancer", name_kr: "창기병", hp: 36, atk: 12, def: 16, spd: 14, range: 1, move: 2, sell: 1 },
+        "1304": { name: "Knight", name_kr: "기사", hp: 48, atk: 15, def: 20, spd: 16, range: 1, move: 2, sell: 2 },
+        "1305": { name: "Heavy Cavalry", name_kr: "중기병", hp: 60, atk: 18, def: 24, spd: 18, range: 1, move: 2, sell: 3 },
+        "1306": { name: "Elite Cavalry", name_kr: "정예 기병", hp: 72, atk: 21, def: 28, spd: 20, range: 1, move: 2, sell: 6 },
+        "1307": { name: "Royal Knight", name_kr: "로얄 나이트", hp: 84, atk: 24, def: 32, spd: 22, range: 1, move: 2, sell: 12 },
+        "1308": { name: "Dragon Knight", "name_kr": "드래곤 나이트", hp: 96, atk: 27, def: 36, spd: 24, range: 1, move: 2, sell: 25 },
+        "1309": { name: "Valkyrie", "name_kr": "발키리", hp: 108, atk: 30, def: 40, spd: 26, range: 1, move: 2, sell: 50 },
+        "1310": { name: "Legendary Knight", "name_kr": "전설의 기사", hp: 120, atk: 33, def: 44, spd: 28, range: 1, move: 2, sell: 100 }
+    },
+    items: {
+        "1801": { name: "Gold", name_kr: "골드", earn: 1 },
+        "1802": { name: "Gold", name_kr: "골드", earn: 2 },
+        "1803": { name: "Gold", name_kr: "골드", earn: 6 },
+        "1804": { name: "Gold", name_kr: "골드", earn: 14 },
+        "1805": { name: "Gold", name_kr: "골드", earn: 32 },
+        "1811": { name: "Energy", name_kr: "에너지", earn: 1 },
+        "1812": { name: "Energy", name_kr: "에너지", earn: 2 },
+        "1813": { name: "Energy", name_kr: "에너지", earn: 6 },
+        "1814": { name: "Energy", name_kr: "에너지", earn: 14 },
+        "1815": { name: "Energy", name_kr: "에너지", earn: 32 },
+        "1821": { name: "Crystal", name_kr: "크리스탈", earn: 1 },
+        "1822": { name: "Crystal", name_kr: "크리스탈", earn: 2 },
+        "1823": { name: "Crystal", name_kr: "크리스탈", earn: 6 },
+        "1824": { name: "Crystal", name_kr: "크리스탈", earn: 14 },
+        "1825": { name: "Crystal", name_kr: "크리스탈", earn: 32 }
+    },
+    buildings: {
+        "2101": { energy: 1, prob: [90, 10, 0, 0, 0, 0, 0, 0, 0, 0] }, "2102": { energy: 2, prob: [0, 90, 10, 0, 0, 0, 0, 0, 0, 0] },
+        "2103": { energy: 3, prob: [0, 45, 55, 0, 0, 0, 0, 0, 0, 0] }, "2104": { energy: 4, prob: [0, 0, 90, 10, 0, 0, 0, 0, 0, 0] },
+        "2105": { energy: 5, prob: [0, 0, 80, 10, 10, 0, 0, 0, 0, 0] },
+        "2201": { energy: 1, prob: [90, 10, 0, 0, 0, 0, 0, 0, 0, 0] }, "2202": { energy: 2, prob: [0, 90, 10, 0, 0, 0, 0, 0, 0, 0] },
+        "2203": { energy: 3, prob: [0, 45, 55, 0, 0, 0, 0, 0, 0, 0] }, "2204": { energy: 4, prob: [0, 0, 90, 10, 0, 0, 0, 0, 0, 0] },
+        "2205": { energy: 5, prob: [0, 0, 80, 10, 10, 0, 0, 0, 0, 0] },
+        "2301": { energy: 1, prob: [90, 10, 0, 0, 0, 0, 0, 0, 0, 0] }, "2302": { energy: 2, prob: [0, 90, 10, 0, 0, 0, 0, 0, 0, 0] },
+        "2303": { energy: 3, prob: [0, 45, 55, 0, 0, 0, 0, 0, 0, 0] }, "2304": { energy: 4, prob: [0, 0, 90, 10, 0, 0, 0, 0, 0, 0] },
+        "2305": { energy: 5, prob: [0, 0, 80, 10, 10, 0, 0, 0, 0, 0] },
+        "2801": { min: 2, max: 3 }, "2802": { min: 2, max: 4 }, "2803": { min: 3, max: 4 },
+        "2804": { min: 4, max: 5 }, "2805": { min: 4, max: 5 }
+    },
+    chests: {
+        "2801": { drops: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ] },
+        "2802": { drops: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ] },
+        "2803": { drops: [ {code: 1801, prob: 20}, {code: 1802, prob: 20}, {code: 1803, prob: 10}, {code: 1811, prob: 20}, {code: 1812, prob: 20}, {code: 1813, prob: 10} ] },
+        "2804": { drops: [ {code: 1802, prob: 20}, {code: 1803, prob: 20}, {code: 1804, prob: 5}, {code: 1812, prob: 20}, {code: 1813, prob: 20}, {code: 1814, prob: 5}, {code: 1821, prob: 10} ] },
+        "2805": { drops: [ {code: 1802, prob: 15}, {code: 1803, prob: 20}, {code: 1804, prob: 10}, {code: 1812, prob: 15}, {code: 1813, prob: 20}, {code: 1814, prob: 10}, {code: 1821, prob: 5}, {code: 1825, prob: 5} ] }
+    },
+    camps: {
+        "3101": {capacity:4}, "3102": {capacity:6}, "3103": {capacity:8}, "3104": {capacity:12}, "3105": {capacity:16}
+    },
+    unlock_conditions: {
+        level: [[24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6,  2,  2,  6,  18, 21], [17, 8,  0,  0,  0,  0,  9,  15], [13, 5,  0,  0,  0,  0,  3,  11], [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]],
+        gold: [[100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5,  5,  10, 40, 50], [30, 10, 0,  0,  0,  0,  10, 30], [20, 5,  0,  0,  0,  0,  5,  20], [20, 5,  0,  0,  0,  0,  5,  20], [30, 10, 0,  0,  0,  0,  10, 30], [50, 40, 10, 5,  5,  10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]]
+    }
 };
+
+async function initGameData() {
+    try {
+        const response = await fetch('game_data.json');
+        if (!response.ok) throw new Error("Network response was not ok");
+        GAME_DATA = await response.json();
+        console.log("Game Data Loaded Successfully");
+    } catch (error) {
+        console.error("Failed to load game_data.json, using fallback.", error);
+        GAME_DATA = FALLBACK_GAME_DATA; // Simply assign the fallback data
+    }
+}
 
 function getInfoFromCode(code) {
     if (code >= 1100 && code < 1200) return { type: ITEM_TYPE.UNIT_INFANTRY, level: code % 100 };
@@ -177,35 +234,6 @@ function getInfoFromCode(code) {
     if (code >= 1810 && code < 1820) return { type: ITEM_TYPE.ITEM_ENERGY, level: code - 1810 };
     if (code >= 1820 && code < 1830) return { type: ITEM_TYPE.ITEM_CRYSTAL, level: code - 1820 };
     return { type: ITEM_TYPE.ITEM_GOLD, level: 1 };
-}
-
-function getData(type, level) {
-    if (type >= 20) {
-        if(type === ITEM_TYPE.ITEM_GOLD) return { name: "골드", earn: ITEM_VALUES[level] };
-        if(type === ITEM_TYPE.ITEM_ENERGY) return { name: "에너지", earn: ITEM_VALUES[level] };
-        if(type === ITEM_TYPE.ITEM_CRYSTAL) return { name: "크리스탈", earn: ITEM_VALUES[level] };
-    }
-    if (type < 10) {
-        if(type === ITEM_TYPE.BUILDING_BARRACKS) return { name: "병영", energy: BUILDING_STATS[level]?.energy };
-        if(type === ITEM_TYPE.BUILDING_RANGE) return { name: "사격장", energy: BUILDING_STATS[level]?.energy };
-        if(type === ITEM_TYPE.BUILDING_STABLE) return { name: "마구간", energy: BUILDING_STATS[level]?.energy };
-        if(type === ITEM_TYPE.BUILDING_CHEST) return { name: "보물상자" };
-        if(type === ITEM_TYPE.BUILDING_CAMP) return { name: "막사" };
-    }
-    // Updated to use UNIT_STATS lookup
-    if (type >= 10 && type < 20) {
-        const code = getCode(type, level);
-        const stat = UNIT_STATS[code];
-        if (stat) {
-            return { 
-                name: stat.name, 
-                class: type === 10 ? "보병" : (type === 11 ? "궁병" : "기병"),
-                hp: stat.hp, atk: stat.atk, def: stat.def, 
-                spd: stat.spd, rng: stat.rng, mov: stat.mov, sell: stat.sell 
-            };
-        }
-    }
-    return { name: "Unknown", earn: 0, sell: 0 };
 }
 
 function getCode(type, level) {
@@ -221,6 +249,38 @@ function getCode(type, level) {
     if (type === ITEM_TYPE.ITEM_ENERGY) return 1810 + level;
     if (type === ITEM_TYPE.ITEM_CRYSTAL) return 1820 + level;
     return 0;
+}
+
+function getData(type, level) {
+    const code = getCode(type, level);
+    if (!GAME_DATA) return { name: "Loading..." };
+
+    if (type >= 20) { // Items
+        const data = GAME_DATA.items[code];
+        if (data) return { name: data.name_kr || data.name, earn: data.earn };
+    }
+    if (type < 10) { // Buildings
+        const data = GAME_DATA.buildings[code];
+        if (type === ITEM_TYPE.BUILDING_CHEST) return { name: "보물상자" }; // Fallback name
+        if (type === ITEM_TYPE.BUILDING_CAMP) return { name: "막사" };
+        if (data) return { 
+            name: (type === 1 ? "병영" : (type === 2 ? "사격장" : "마구간")), 
+            energy: data.energy 
+        };
+    }
+    // Units
+    if (type >= 10 && type < 20) {
+        const stat = GAME_DATA.units[code];
+        if (stat) {
+            return { 
+                name: stat.name_kr || stat.name, 
+                class: type === 10 ? "보병" : (type === 11 ? "궁병" : "기병"),
+                hp: stat.hp, atk: stat.atk, def: stat.def, 
+                spd: stat.spd, rng: stat.range || stat.rng, mov: stat.move || stat.mov, sell: stat.sell 
+            };
+        }
+    }
+    return { name: "Unknown", earn: 0, sell: 0 };
 }
 
 class SoundManager {
@@ -434,9 +494,13 @@ class Game {
     }
 
     refreshLockState() {
+        if (!GAME_DATA) return;
         for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
             if (this.gridState[r][c] && this.gridState[r][c].type === LOCK_TYPE.OPEN) continue;
-            const lvlReq = UNLOCK_LEVEL_MAP[r][c], goldReq = UNLOCK_GOLD_MAP[r][c];
+            // Access unlocked conditions from GAME_DATA
+            const lvlReq = GAME_DATA.unlock_conditions.level[r] ? GAME_DATA.unlock_conditions.level[r][c] : 99;
+            const goldReq = GAME_DATA.unlock_conditions.gold[r] ? GAME_DATA.unlock_conditions.gold[r][c] : 9999;
+            
             if (this.lordLevel < lvlReq) this.gridState[r][c] = { type: LOCK_TYPE.LEVEL, value: lvlReq };
             else if (goldReq > 0) this.gridState[r][c] = { type: LOCK_TYPE.GOLD, value: goldReq };
             else this.gridState[r][c] = { type: LOCK_TYPE.OPEN };
@@ -529,7 +593,9 @@ class Game {
         if (this.currentXp >= this.requiredXp) this.levelUp();
     }
     updateLevelStats() {
-        const d = LEVEL_DATA.find(d => d.level === this.lordLevel) || LEVEL_DATA[LEVEL_DATA.length - 1];
+        if (!GAME_DATA) return;
+        // Use GAME_DATA for Level Data
+        const d = GAME_DATA.level_data.find(d => d.level === this.lordLevel) || GAME_DATA.level_data[GAME_DATA.level_data.length - 1];
         this.maxEnergy = d.maxEnergy; this.requiredXp = d.xp;
     }
 
@@ -559,8 +625,9 @@ class Game {
         els.name.innerText = `${data.name} LV.${item.level}`;
 
         if (item.type < 10) { 
+            const campData = GAME_DATA.camps[getCode(item.type, item.level)] || {capacity: 4};
             if (item.type === ITEM_TYPE.BUILDING_CHEST) els.desc.innerText = `남은 횟수: ${item.usage}회`;
-            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = `보관: ${item.storedUnit ? 1 : 0} / ${CAMP_CAPACITY[item.level]}`;
+            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = `보관: ${item.storedUnit ? 1 : 0} / ${campData.capacity}`;
             else {
                 els.desc.innerText = "유닛 생산";
                 const cost = data.energy || 1;
@@ -669,7 +736,7 @@ class Game {
                     if(canMerge && target.level < maxLvl) {
                         target.level++; target.scale=1.3;
                         if(target.type===ITEM_TYPE.BUILDING_CHEST) target.usage = Math.floor((target.usage+this.drag.item.usage)/2);
-                        const xp = MERGE_XP_DATA[target.level-1] || 1;
+                        const xp = GAME_DATA.merge_xp[target.level-1] || 1;
                         this.addXp(xp); this.showFloatingImage('xp', hit.zone===ZONES.GRID ? this.gridStartX+hit.c*this.gridTileSize : this.drag.x, this.drag.y);
                         this.spawnParticles(this.drag.x, this.drag.y, "#FFD700", 30, "spark");
                         this.sound.playMerge();
@@ -720,14 +787,20 @@ class Game {
 
     // --- LOGIC ---
     produce(building) {
-        const stats = BUILDING_STATS[building.level] || BUILDING_STATS[1];
+        // Fetch stats from GAME_DATA
+        const code = getCode(building.type, building.level);
+        const stats = GAME_DATA.buildings[code];
+        
         if(this.energy < stats.energy) { this.showToast(`에너지 부족 (${stats.energy})`); return; }
         let type = ITEM_TYPE.UNIT_INFANTRY;
         if(building.type===ITEM_TYPE.BUILDING_RANGE) type=ITEM_TYPE.UNIT_ARCHER;
         else if(building.type===ITEM_TYPE.BUILDING_STABLE) type=ITEM_TYPE.UNIT_CAVALRY;
         
         let lvl=1, r=Math.random()*100, sum=0;
-        for(let i=0; i<stats.probs.length; i++) { sum+=stats.probs[i]; if(r<sum){lvl=i+1;break;} }
+        // Use dynamic probability array from stats.prob (prob is array [prob_1, prob_2...])
+        // stats.prob is an array like [90, 10, 0...]
+        const probs = stats.prob || [100,0,0,0,0];
+        for(let i=0; i<probs.length; i++) { sum+=probs[i]; if(r<sum){lvl=i+1;break;} }
         
         if(this.spawnItem({type, level:lvl, scale:0})) {
             this.energy-=stats.energy; this.updateUI(); this.requestRender();
@@ -739,12 +812,16 @@ class Game {
         if(chest.usage<=0) { this.showToast("빈 상자 (머지 필요)"); return; }
         if(this.energy<1) { this.showToast("에너지 부족"); return; }
         
-        const table = CHEST_DROP_TABLE[chest.level] || CHEST_DROP_TABLE[1];
+        const code = getCode(ITEM_TYPE.BUILDING_CHEST, chest.level);
+        const chestData = GAME_DATA.chests[code];
+        if(!chestData) return;
+
+        const table = chestData.drops;
         let total=0; table.forEach(e=>total+=e.prob);
-        let rnd=Math.random()*total, code=table[0].code;
-        for(let e of table) { if(rnd<e.prob){code=e.code;break;} rnd-=e.prob; }
+        let rnd=Math.random()*total, dropCode=table[0].code;
+        for(let e of table) { if(rnd<e.prob){dropCode=e.code;break;} rnd-=e.prob; }
         
-        const info = getInfoFromCode(code);
+        const info = getInfoFromCode(dropCode);
         if(this.spawnItem({type:info.type, level:info.level, scale:0})) {
             this.energy--; chest.usage--; chest.scale=1.2; this.updateUI(); this.requestRender();
             this.sound.playSpawn();
@@ -777,7 +854,8 @@ class Game {
     }
 
     collectResource(item, r, c) {
-        const val = ITEM_VALUES[item.level] || 1;
+        // Use GAME_DATA via getData/getCode or direct access if needed, but item.level for resources maps to logic
+        const val = ITEM_VALUES[item.level] || 1; // Keep ITEM_VALUES constant for now as logic, or move to JSON
         let pColor = "#fff";
         if(item.type===ITEM_TYPE.ITEM_GOLD) { this.gold+=val; this.showToast(`+${val}G`); pColor="#FFD700"; }
         else if(item.type===ITEM_TYPE.ITEM_ENERGY) { this.energy=Math.min(this.energy+val, this.maxEnergy); this.showToast(`+${val}⚡`); pColor="#00FFFF"; }
@@ -946,13 +1024,30 @@ class Game {
         }
 
         // Badges
-        const bx=x+s/2, by=y+ds; // Keep badge position relative to original cell size to avoid covering too much
-        if(item.type>=10 || item.type<10) { 
-            this.ctx.fillStyle="rgba(0,0,0,0.8)"; this.ctx.beginPath(); this.ctx.arc(bx, by-10, 10, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.strokeStyle="#fff"; this.ctx.lineWidth=1; this.ctx.stroke();
-            this.ctx.fillStyle="#fff"; this.ctx.font="bold 12px sans-serif"; this.ctx.textAlign="center";
-            this.ctx.fillText(item.level, bx, by-6);
-        }
+        // Level Badge - Much larger and clearer
+        const cx = x + s/2;
+        const cy = y + s - 18; // Moved up a bit from bottom edge
+
+        this.ctx.save();
+        this.ctx.shadowColor = "black";
+        this.ctx.shadowBlur = 4;
+        
+        this.ctx.fillStyle = "rgba(0,0,0,0.9)";
+        this.ctx.beginPath();
+        this.ctx.arc(cx, cy, 15, 0, Math.PI*2); // Radius 15 (diameter 30)
+        this.ctx.fill();
+        
+        this.ctx.strokeStyle = "#FFD700"; // Gold border for visibility
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+        
+        this.ctx.fillStyle = "#FFF";
+        this.ctx.font = "bold 20px 'Segoe UI', sans-serif"; // Much larger font
+        this.ctx.textAlign = "center";
+        this.ctx.textBaseline = "middle";
+        this.ctx.fillText(item.level, cx, cy + 1); // Slight offset for visual center
+        this.ctx.restore();
+
         if(item.type===ITEM_TYPE.BUILDING_CAMP && item.storedUnit) {
             this.ctx.fillStyle="#f00"; this.ctx.font="bold 16px sans-serif"; this.ctx.fillText("IN", bx, y+s/2);
         }
@@ -986,7 +1081,15 @@ class Game {
         document.getElementById('xp-bar').style.width=`${(this.currentXp/this.requiredXp)*100}%`;
     }
 }
-const game = new Game();
+
+// Global Game Instance
+let game;
+window.onload = () => {
+    // Load data first, then start game
+    initGameData().then(() => {
+        game = new Game();
+    });
+};
 </script>
 </body>
 </html>
