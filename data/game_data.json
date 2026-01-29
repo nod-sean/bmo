@@ -1,4 +1,6 @@
 {
+  "//_COMMENT": "KOV Game Data - Merged with Field & Localization",
+  
   "level_xp": {
     "1": 10, "2": 22, "3": 37, "4": 55, "5": 77, "6": 103, "7": 134, "8": 169, "9": 209, "10": 254,
     "11": 304, "12": 359, "13": 420, "14": 486, "15": 558
@@ -10,65 +12,68 @@
   "merge_xp": {
     "1": 1, "2": 2, "3": 4, "4": 5, "5": 6, "6": 8, "7": 10, "8": 15, "9": 20, "10": 0
   },
+  
   "units": {
-    "1101": { "name": "Militia", "name_kr": "민병", "hp": 10, "atk": 5, "def": 10, "spd": 5, "rng": 1, "mov": 1, "sell": 0 },
-    "1102": { "name": "Infantry", "name_kr": "보병", "hp": 20, "atk": 7, "def": 15, "spd": 7, "rng": 1, "mov": 1, "sell": 0 },
-    "1103": { "name": "Swordsman", "name_kr": "검병", "hp": 30, "atk": 9, "def": 20, "spd": 9, "rng": 1, "mov": 1, "sell": 0 },
-    "1104": { "name": "Shieldman", "name_kr": "방패병", "hp": 40, "atk": 11, "def": 25, "spd": 11, "rng": 1, "mov": 1, "sell": 2 },
-    "1105": { "name": "Heavy Infantry", "name_kr": "중갑병", "hp": 50, "atk": 13, "def": 30, "spd": 13, "rng": 1, "mov": 1, "sell": 3 },
-    "1106": { "name": "Elite", "name_kr": "정예병", "hp": 60, "atk": 15, "def": 35, "spd": 15, "rng": 1, "mov": 1, "sell": 6 },
-    "1107": { "name": "Guard", "name_kr": "근위병", "hp": 70, "atk": 17, "def": 40, "spd": 17, "rng": 1, "mov": 1, "sell": 12 },
-    "1108": { "name": "Templar", "name_kr": "템플러", "hp": 80, "atk": 19, "def": 45, "spd": 19, "rng": 1, "mov": 1, "sell": 25 },
-    "1109": { "name": "Paladin", "name_kr": "팔라딘", "hp": 90, "atk": 21, "def": 50, "spd": 21, "rng": 1, "mov": 1, "sell": 50 },
-    "1110": { "name": "Hero", "name_kr": "영웅", "hp": 100, "atk": 23, "def": 55, "spd": 23, "rng": 1, "mov": 1, "sell": 100 },
-    "1201": { "name": "Rookie Archer", "name_kr": "초보 궁수", "hp": 8, "atk": 8, "def": 5, "spd": 7, "rng": 3, "mov": 1, "sell": 0 },
-    "1202": { "name": "Archer", "name_kr": "궁수", "hp": 16, "atk": 11, "def": 7, "spd": 9, "rng": 3, "mov": 1, "sell": 0 },
-    "1203": { "name": "Hunter", "name_kr": "사냥꾼", "hp": 24, "atk": 14, "def": 9, "spd": 11, "rng": 3, "mov": 1, "sell": 0 },
-    "1204": { "name": "Marksman", "name_kr": "명사수", "hp": 32, "atk": 17, "def": 11, "spd": 13, "rng": 3, "mov": 1, "sell": 2 },
-    "1205": { "name": "Sniper", "name_kr": "저격수", "hp": 40, "atk": 20, "def": 13, "spd": 15, "rng": 4, "mov": 1, "sell": 3 },
-    "1206": { "name": "Elite Archer", "name_kr": "정예 궁수", "hp": 48, "atk": 23, "def": 15, "spd": 17, "rng": 4, "mov": 1, "sell": 6 },
-    "1207": { "name": "Deadeye", "name_kr": "데드아이", "hp": 56, "atk": 26, "def": 17, "spd": 19, "rng": 4, "mov": 1, "sell": 12 },
-    "1208": { "name": "Pathfinder", "name_kr": "패스파인더", "hp": 64, "atk": 29, "def": 19, "spd": 21, "rng": 4, "mov": 1, "sell": 25 },
-    "1209": { "name": "Bowmaster", "name_kr": "보우마스터", "hp": 72, "atk": 32, "def": 21, "spd": 23, "rng": 5, "mov": 1, "sell": 50 },
-    "1210": { "name": "Divine Archer", "name_kr": "신궁", "hp": 80, "atk": 35, "def": 23, "spd": 25, "rng": 5, "mov": 1, "sell": 100 },
-    "1301": { "name": "Rider", "name_kr": "기병", "hp": 15, "atk": 4, "def": 8, "spd": 9, "rng": 1, "mov": 1, "sell": 0 }
+    "1101": { "name": "Militia", "name_kr": "민병", "class": "infantry", "hp": 10, "atk": 5, "def": 10, "spd": 5, "rng": 1, "mov": 1, "sell": 0, "desc_key": "desc_11xx" },
+    "1102": { "name": "Infantry", "name_kr": "보병", "class": "infantry", "hp": 20, "atk": 7, "def": 15, "spd": 7, "rng": 1, "mov": 1, "sell": 0, "desc_key": "desc_11xx" },
+    "1103": { "name": "Swordsman", "name_kr": "검병", "class": "infantry", "hp": 30, "atk": 9, "def": 20, "spd": 9, "rng": 1, "mov": 1, "sell": 0, "desc_key": "desc_11xx" },
+    "1104": { "name": "Shieldman", "name_kr": "방패병", "class": "infantry", "hp": 40, "atk": 11, "def": 25, "spd": 11, "rng": 1, "mov": 1, "sell": 2, "desc_key": "desc_11xx" },
+    "1105": { "name": "Heavy Infantry", "name_kr": "중갑병", "class": "infantry", "hp": 50, "atk": 13, "def": 30, "spd": 13, "rng": 1, "mov": 1, "sell": 3, "desc_key": "desc_11xx" },
+    "1106": { "name": "Elite", "name_kr": "정예병", "class": "infantry", "hp": 60, "atk": 15, "def": 35, "spd": 15, "rng": 1, "mov": 1, "sell": 6, "desc_key": "desc_11xx" },
+    "1107": { "name": "Guard", "name_kr": "근위병", "class": "infantry", "hp": 70, "atk": 17, "def": 40, "spd": 17, "rng": 1, "mov": 1, "sell": 12, "desc_key": "desc_11xx" },
+    "1108": { "name": "Templar", "name_kr": "템플러", "class": "infantry", "hp": 80, "atk": 19, "def": 45, "spd": 19, "rng": 1, "mov": 1, "sell": 25, "desc_key": "desc_11xx" },
+    "1109": { "name": "Paladin", "name_kr": "팔라딘", "class": "infantry", "hp": 90, "atk": 21, "def": 50, "spd": 21, "rng": 1, "mov": 1, "sell": 50, "desc_key": "desc_11xx" },
+    "1110": { "name": "Hero", "name_kr": "영웅", "class": "infantry", "hp": 100, "atk": 23, "def": 55, "spd": 23, "rng": 1, "mov": 1, "sell": 100, "desc_key": "desc_11xx" },
+    
+    "1201": { "name": "Rookie Archer", "name_kr": "초보 궁수", "class": "archer", "hp": 8, "atk": 8, "def": 5, "spd": 7, "rng": 3, "mov": 1, "sell": 0, "desc_key": "desc_12xx" },
+    "1202": { "name": "Archer", "name_kr": "궁수", "class": "archer", "hp": 16, "atk": 11, "def": 7, "spd": 9, "rng": 3, "mov": 1, "sell": 0, "desc_key": "desc_12xx" },
+    "1203": { "name": "Hunter", "name_kr": "사냥꾼", "class": "archer", "hp": 24, "atk": 14, "def": 9, "spd": 11, "rng": 3, "mov": 1, "sell": 0, "desc_key": "desc_12xx" },
+    "1204": { "name": "Marksman", "name_kr": "명사수", "class": "archer", "hp": 32, "atk": 17, "def": 11, "spd": 13, "rng": 3, "mov": 1, "sell": 2, "desc_key": "desc_12xx" },
+    "1205": { "name": "Sniper", "name_kr": "저격수", "class": "archer", "hp": 40, "atk": 20, "def": 13, "spd": 15, "rng": 4, "mov": 1, "sell": 3, "desc_key": "desc_12xx" },
+    "1206": { "name": "Elite Archer", "name_kr": "정예 궁수", "class": "archer", "hp": 48, "atk": 23, "def": 15, "spd": 17, "rng": 4, "mov": 1, "sell": 6, "desc_key": "desc_12xx" },
+    "1207": { "name": "Deadeye", "name_kr": "데드아이", "class": "archer", "hp": 56, "atk": 26, "def": 17, "spd": 19, "rng": 4, "mov": 1, "sell": 12, "desc_key": "desc_12xx" },
+    "1208": { "name": "Pathfinder", "name_kr": "패스파인더", "class": "archer", "hp": 64, "atk": 29, "def": 19, "spd": 21, "rng": 4, "mov": 1, "sell": 25, "desc_key": "desc_12xx" },
+    "1209": { "name": "Bowmaster", "name_kr": "보우마스터", "class": "archer", "hp": 72, "atk": 32, "def": 21, "spd": 23, "rng": 5, "mov": 1, "sell": 50, "desc_key": "desc_12xx" },
+    "1210": { "name": "Divine Archer", "name_kr": "신궁", "class": "archer", "hp": 80, "atk": 35, "def": 23, "spd": 25, "rng": 5, "mov": 1, "sell": 100, "desc_key": "desc_12xx" },
+
+    "1301": { "name": "Rider", "name_kr": "기병", "class": "cavalry", "hp": 15, "atk": 4, "def": 8, "spd": 9, "rng": 1, "mov": 1, "sell": 0, "desc_key": "desc_13xx" },
+    "1302": { "name": "Light Cavalry", "name_kr": "경기병", "class": "cavalry", "hp": 30, "atk": 8, "def": 16, "spd": 11, "rng": 1, "mov": 1, "sell": 0, "desc_key": "desc_13xx" },
+    "1303": { "name": "Lancer", "name_kr": "창기병", "class": "cavalry", "hp": 45, "atk": 12, "def": 24, "spd": 13, "rng": 1, "mov": 1, "sell": 0, "desc_key": "desc_13xx" },
+    "1304": { "name": "Knight", "name_kr": "기사", "class": "cavalry", "hp": 60, "atk": 16, "def": 32, "spd": 15, "rng": 1, "mov": 1, "sell": 2, "desc_key": "desc_13xx" }
   },
+
   "buildings": {
-    "2101": { "name": "barracks", "name_kr": "병영", "level": 1, "energy": 1, "probs": [90, 10, 0, 0, 0, 0, 0, 0, 0, 0] },
-    "2102": { "name": "barracks", "name_kr": "병영", "level": 2, "energy": 2, "probs": [0, 90, 10, 0, 0, 0, 0, 0, 0, 0] },
-    "2103": { "name": "barracks", "name_kr": "병영", "level": 3, "energy": 3, "probs": [0, 45, 55, 0, 0, 0, 0, 0, 0, 0] },
-    "2104": { "name": "barracks", "name_kr": "병영", "level": 4, "energy": 4, "probs": [0, 0, 90, 10, 0, 0, 0, 0, 0, 0] },
-    "2105": { "name": "barracks", "name_kr": "병영", "level": 5, "energy": 5, "probs": [0, 0, 80, 10, 10, 0, 0, 0, 0, 0] },
-    "2201": { "name": "Archery Range", "name_kr": "사격장", "level": 1, "energy": 1, "probs": [90, 10, 0, 0, 0, 0, 0, 0, 0, 0] },
-    "2202": { "name": "Archery Range", "name_kr": "사격장", "level": 2, "energy": 2, "probs": [0, 90, 10, 0, 0, 0, 0, 0, 0, 0] },
-    "2203": { "name": "Archery Range", "name_kr": "사격장", "level": 3, "energy": 3, "probs": [0, 45, 55, 0, 0, 0, 0, 0, 0, 0] },
-    "2204": { "name": "Archery Range", "name_kr": "사격장", "level": 4, "energy": 4, "probs": [0, 0, 90, 10, 0, 0, 0, 0, 0, 0] },
-    "2205": { "name": "Archery Range", "name_kr": "사격장", "level": 5, "energy": 5, "probs": [0, 0, 80, 10, 10, 0, 0, 0, 0, 0] },
-    "2301": { "name": "Stable", "name_kr": "마구간", "level": 1, "energy": 1, "probs": [90, 10, 0, 0, 0, 0, 0, 0, 0, 0] },
-    "2302": { "name": "Stable", "name_kr": "마구간", "level": 2, "energy": 2, "probs": [0, 90, 10, 0, 0, 0, 0, 0, 0, 0] },
-    "2303": { "name": "Stable", "name_kr": "마구간", "level": 3, "energy": 3, "probs": [0, 45, 55, 0, 0, 0, 0, 0, 0, 0] },
-    "2304": { "name": "Stable", "name_kr": "마구간", "level": 4, "energy": 4, "probs": [0, 0, 90, 10, 0, 0, 0, 0, 0, 0] },
-    "2305": { "name": "Stable", "name_kr": "마구간", "level": 5, "energy": 5, "probs": [0, 0, 80, 10, 10, 0, 0, 0, 0, 0] },
-    "3101": { "name": "camp", "name_kr": "막사", "level": 1, "capacity": 4 },
-    "3102": { "name": "camp", "name_kr": "막사", "level": 2, "capacity": 6 },
-    "3103": { "name": "camp", "name_kr": "막사", "level": 3, "capacity": 8 },
-    "3104": { "name": "camp", "name_kr": "막사", "level": 4, "capacity": 12 },
-    "3105": { "name": "camp", "name_kr": "막사", "level": 5, "capacity": 16 }
+    "2101": { "name": "barracks", "name_kr": "병영", "level": 1, "energy": 1, "probs": [90, 10, 0, 0, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2101" },
+    "2102": { "name": "barracks", "name_kr": "병영", "level": 2, "energy": 2, "probs": [0, 90, 10, 0, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2101" },
+    "2103": { "name": "barracks", "name_kr": "병영", "level": 3, "energy": 3, "probs": [0, 45, 55, 0, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2101" },
+    "2104": { "name": "barracks", "name_kr": "병영", "level": 4, "energy": 4, "probs": [0, 0, 90, 10, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2101" },
+    "2105": { "name": "barracks", "name_kr": "병영", "level": 5, "energy": 5, "probs": [0, 0, 80, 10, 10, 0, 0, 0, 0, 0], "desc_key": "desc_2101" },
+    
+    "2201": { "name": "Archery Range", "name_kr": "사격장", "level": 1, "energy": 1, "probs": [90, 10, 0, 0, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2201" },
+    "2202": { "name": "Archery Range", "name_kr": "사격장", "level": 2, "energy": 2, "probs": [0, 90, 10, 0, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2201" },
+    "2203": { "name": "Archery Range", "name_kr": "사격장", "level": 3, "energy": 3, "probs": [0, 45, 55, 0, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2201" },
+    "2204": { "name": "Archery Range", "name_kr": "사격장", "level": 4, "energy": 4, "probs": [0, 0, 90, 10, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2201" },
+    "2205": { "name": "Archery Range", "name_kr": "사격장", "level": 5, "energy": 5, "probs": [0, 0, 80, 10, 10, 0, 0, 0, 0, 0], "desc_key": "desc_2201" },
+    
+    "2301": { "name": "Stable", "name_kr": "마구간", "level": 1, "energy": 1, "probs": [90, 10, 0, 0, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2301" },
+    "2302": { "name": "Stable", "name_kr": "마구간", "level": 2, "energy": 2, "probs": [0, 90, 10, 0, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2301" },
+    "2303": { "name": "Stable", "name_kr": "마구간", "level": 3, "energy": 3, "probs": [0, 45, 55, 0, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2301" },
+    "2304": { "name": "Stable", "name_kr": "마구간", "level": 4, "energy": 4, "probs": [0, 0, 90, 10, 0, 0, 0, 0, 0, 0], "desc_key": "desc_2301" },
+    "2305": { "name": "Stable", "name_kr": "마구간", "level": 5, "energy": 5, "probs": [0, 0, 80, 10, 10, 0, 0, 0, 0, 0], "desc_key": "desc_2301" },
+    
+    "3101": { "name": "Camp", "name_kr": "막사", "level": 1, "capacity": 4, "desc_key": "desc_3101" },
+    "3102": { "name": "Camp", "name_kr": "막사", "level": 2, "capacity": 6, "desc_key": "desc_3101" },
+    "3103": { "name": "Camp", "name_kr": "막사", "level": 3, "capacity": 8, "desc_key": "desc_3101" },
+    "3104": { "name": "Camp", "name_kr": "막사", "level": 4, "capacity": 12, "desc_key": "desc_3101" },
+    "3105": { "name": "Camp", "name_kr": "막사", "level": 5, "capacity": 16, "desc_key": "desc_3101" },
+
+    "2801": { "name": "Bronze Chest", "name_kr": "동 상자", "level": 1, "desc_key": "desc_28xx" },
+    "2802": { "name": "Silver Chest", "name_kr": "은 상자", "level": 2, "desc_key": "desc_28xx" },
+    "2803": { "name": "Gold Chest", "name_kr": "금 상자", "level": 3, "desc_key": "desc_28xx" },
+    "2804": { "name": "Platinum Chest", "name_kr": "백금 상자", "level": 4, "desc_key": "desc_28xx" },
+    "2805": { "name": "Diamond Chest", "name_kr": "다이아 상자", "level": 5, "desc_key": "desc_28xx" }
   },
-  "chests": {
-    "2801": { "name": "Bronze Chest", "name_kr": "동 상자", "level": 1 },
-    "2802": { "name": "Silver Chest", "name_kr": "은 상자", "level": 2 },
-    "2803": { "name": "Gold Chest", "name_kr": "금 상자", "level": 3 },
-    "2804": { "name": "Platinum Chest", "name_kr": "백금 상자", "level": 4 },
-    "2805": { "name": "Diamond Chest", "name_kr": "다이아 상자", "level": 5 }
-  },
-  "chest_drops": {
-    "1": [ {"code": 1801, "prob": 50}, {"code": 1811, "prob": 50} ],
-    "2": [ {"code": 1801, "prob": 25}, {"code": 1802, "prob": 25}, {"code": 1811, "prob": 25}, {"code": 1812, "prob": 25} ],
-    "3": [ {"code": 1801, "prob": 20}, {"code": 1802, "prob": 20}, {"code": 1803, "prob": 10}, {"code": 1811, "prob": 20}, {"code": 1812, "prob": 20}, {"code": 1813, "prob": 10} ],
-    "4": [ {"code": 1802, "prob": 20}, {"code": 1803, "prob": 20}, {"code": 1804, "prob": 5}, {"code": 1812, "prob": 20}, {"code": 1813, "prob": 20}, {"code": 1814, "prob": 5}, {"code": 1821, "prob": 10} ],
-    "5": [ {"code": 1802, "prob": 15}, {"code": 1803, "prob": 20}, {"code": 1804, "prob": 10}, {"code": 1812, "prob": 15}, {"code": 1813, "prob": 20}, {"code": 1814, "prob": 10}, {"code": 1821, "prob": 5}, {"code": 1825, "prob": 5} ] 
-  },
+
   "items": {
     "1801": { "name": "Gold", "name_kr": "골드", "earn": 1 },
     "1802": { "name": "Gold", "name_kr": "골드", "earn": 2 },
@@ -86,6 +91,15 @@
     "1824": { "name": "Crystal", "name_kr": "크리스탈", "earn": 14 },
     "1825": { "name": "Crystal", "name_kr": "크리스탈", "earn": 32 }
   },
+
+  "chest_drops": {
+    "1": [ {"code": 1801, "prob": 50}, {"code": 1811, "prob": 50} ],
+    "2": [ {"code": 1801, "prob": 25}, {"code": 1802, "prob": 25}, {"code": 1811, "prob": 25}, {"code": 1812, "prob": 25} ],
+    "3": [ {"code": 1801, "prob": 20}, {"code": 1802, "prob": 20}, {"code": 1803, "prob": 10}, {"code": 1811, "prob": 20}, {"code": 1812, "prob": 20}, {"code": 1813, "prob": 10} ],
+    "4": [ {"code": 1802, "prob": 20}, {"code": 1803, "prob": 20}, {"code": 1804, "prob": 5}, {"code": 1812, "prob": 20}, {"code": 1813, "prob": 20}, {"code": 1814, "prob": 5}, {"code": 1821, "prob": 10} ],
+    "5": [ {"code": 1802, "prob": 15}, {"code": 1803, "prob": 20}, {"code": 1804, "prob": 10}, {"code": 1812, "prob": 15}, {"code": 1813, "prob": 20}, {"code": 1814, "prob": 10}, {"code": 1821, "prob": 5}, {"code": 1825, "prob": 5} ] 
+  },
+
   "unlock_gold": [
     [100, 50, 30, 20, 20, 30, 50, 100], 
     [50, 40, 10, 5,  5,  10, 40, 50], 
@@ -105,5 +119,62 @@
     [17, 8,  0,  0,  0,  0,  9,  15], 
     [23, 19, 7,  4,  4,  7,  19, 21], 
     [25, 22, 16, 12, 12, 16, 22, 25]
-  ]
+  ],
+
+  "field_map": [
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,3,4,2,4,4,1,4,4,2,4,3,4,2,4,4,1,4,4,2,0,3,0,0],
+    [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0],
+    [0,0,2,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,2,0],
+    [0,0,4,0,0,0,0,2,0,0,0,0,2,0,0,0,0,2,0,0,0,0,4,0,0],
+    [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,4,0],
+    [0,0,1,4,4,2,4,3,4,2,4,4,1,4,4,2,4,3,4,2,4,4,1,0,0],
+    [0,0,4,0,0,0,0,4,0,0,0,0,4,0,0,0,0,4,0,0,0,0,4,0,0],
+    [0,0,4,0,0,0,0,2,0,0,0,0,4,0,0,0,0,2,0,0,0,0,4,0,0],
+    [0,0,2,0,0,0,0,4,0,0,0,0,2,0,0,0,0,4,0,0,0,0,2,0,0],
+    [0,0,4,0,0,0,0,4,0,0,0,0,4,0,0,0,0,4,0,0,0,0,4,0,0],
+    [0,0,3,0,2,2,4,1,4,4,2,4,3,4,2,4,4,1,4,2,2,0,3,0,0],
+    [0,0,4,0,0,0,0,4,0,0,0,0,4,0,0,0,0,4,0,0,0,0,4,0,0],
+    [0,0,2,0,0,0,0,4,0,0,0,0,2,0,0,0,0,4,0,0,0,0,2,0,0],
+    [0,0,4,0,0,0,0,2,0,0,0,0,4,0,0,0,0,2,0,0,0,0,4,0,0],
+    [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,4,0],
+    [0,0,1,4,4,2,4,3,4,2,4,4,1,4,4,2,4,3,4,2,4,4,1,0,0],
+    [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,4,0],
+    [0,0,4,0,0,0,0,2,0,0,0,0,2,0,0,0,0,2,0,0,0,0,4,0,0],
+    [0,0,2,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,2,0],
+    [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0],
+    [0,0,3,4,2,4,4,1,4,4,2,4,3,4,2,4,4,1,4,4,2,0,3,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  ],
+  
+  "localization": {
+    "en": {
+        "desc_11xx": "Infantry units.\nStrong defense and basic attack.",
+        "desc_12xx": "Archer units.\nLong range attack but low defense.",
+        "desc_13xx": "Cavalry units.\nFast movement and high attack.",
+        "desc_2101": "Barracks.\nProduces Infantry units. Upgrade to unlock higher level units.",
+        "desc_2201": "Archery Range.\nProduces Archer units. Upgrade to unlock higher level units.",
+        "desc_2301": "Stable.\nProduces Cavalry units. Upgrade to unlock higher level units.",
+        "desc_3101": "Camp.\nStores units. Upgrade to increase capacity.",
+        "desc_28xx": "Treasure Chest.\nContains random resources and items.",
+        "not_implemented": "This feature is not implemented yet.",
+        "sell": "Sell",
+        "field": "Field"
+    },
+    "ko": {
+        "desc_11xx": "보병 유닛입니다.\n방어력이 높고 기본적인 공격을 합니다.",
+        "desc_12xx": "궁수 유닛입니다.\n사거리가 길지만 방어력이 낮습니다.",
+        "desc_13xx": "기병 유닛입니다.\n이동 속도가 빠르고 공격력이 높습니다.",
+        "desc_2101": "병영.\n보병 유닛을 생산합니다. 업그레이드하면 더 높은 레벨의 유닛을 얻을 수 있습니다.",
+        "desc_2201": "사격장.\n궁수 유닛을 생산합니다. 업그레이드하면 더 높은 레벨의 유닛을 얻을 수 있습니다.",
+        "desc_2301": "마구간.\n기병 유닛을 생산합니다. 업그레이드하면 더 높은 레벨의 유닛을 얻을 수 있습니다.",
+        "desc_3101": "막사.\n유닛을 보관합니다. 업그레이드하면 보관 용량이 늘어납니다.",
+        "desc_28xx": "보물 상자.\n랜덤한 자원과 아이템이 들어있습니다.",
+        "not_implemented": "아직 구현되지 않은 기능입니다.",
+        "sell": "판매",
+        "field": "필드"
+    }
+  }
 }
