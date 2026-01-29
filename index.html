@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v93 - Field Map & Resource Fix</title>
+    <title>KOV Prototype v91 - Squad Movement</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -240,34 +240,13 @@ const GAME_DATA = {
         level: [[24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6,  2,  2,  6,  18, 21], [17, 8,  0,  0,  0,  0,  9,  15], [13, 5,  0,  0,  0,  0,  3,  11], [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]],
         gold: [[100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5,  5,  10, 40, 50], [30, 10, 0,  0,  0,  0,  10, 30], [20, 5,  0,  0,  0,  0,  5,  20], [20, 5,  0,  0,  0,  0,  5,  20], [30, 10, 0,  0,  0,  0,  10, 30], [50, 40, 10, 5,  5,  10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]]
     },
-    field_map: [
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,3,4,2,4,4,1,4,4,2,4,3,4,2,4,4,1,4,4,2,0,3,0,0],
-        [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0],
-        [0,0,2,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,2,0],
-        [0,0,4,0,0,0,0,2,0,0,0,0,2,0,0,0,0,2,0,0,0,0,4,0,0],
-        [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,4,0],
-        [0,1,4,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,4,1],
-        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0],
-        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0],
-        [0,2,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,2,0],
-        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0],
-        [0,4,3,0,0,2,0,0,0,0,0,0,1,0,0,0,0,0,0,2,0,0,3,4,0],
-        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0],
-        [0,2,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,2,0],
-        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0],
-        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0],
-        [0,1,4,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,4,1],
-        [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,4,0],
-        [0,0,4,0,0,0,0,2,0,0,0,0,2,0,0,0,0,2,0,0,0,0,4,0,0],
-        [0,0,2,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,2,0],
-        [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0],
-        [0,0,3,4,2,4,4,1,4,4,2,4,3,4,2,4,4,1,4,4,2,0,3,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    ]
+    field_map: Array(25).fill().map(() => Array(25).fill(0))
 };
+
+// Fallback Field map population with some dummy data if JSON fails
+GAME_DATA.field_map[12][12] = 1; // Center Castle
+GAME_DATA.field_map[10][10] = 2; // Gate
+GAME_DATA.field_map[14][14] = 3; // Fortress
 
 function initGameData() {
     // Return a promise that resolves immediately since data is embedded
@@ -1068,11 +1047,7 @@ class Game {
     }
 
     collectResource(item, r, c) {
-        // Updated Logic to use GAME_DATA
-        const code = getCode(item.type, item.level);
-        const data = GAME_DATA.items[code];
-        const val = data ? data.earn : 1;
-
+        const val = ITEM_VALUES[item.level] || 1;
         let pColor = "#fff";
         if(item.type===ITEM_TYPE.ITEM_GOLD) { this.gold+=val; this.showToast(`+${val}G`); pColor="#FFD700"; }
         else if(item.type===ITEM_TYPE.ITEM_ENERGY) { this.energy=Math.min(this.energy+val, this.maxEnergy); this.showToast(`+${val}⚡`); pColor="#00FFFF"; }
