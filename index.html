@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v89 - Fix ReferenceError</title>
+    <title>KOV Prototype v77 - Audio Path Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background-color: #000; touch-action: none; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100dvh; }
         #game-container { position: relative; background-color: #4e342e; box-shadow: 0 0 50px rgba(0,0,0,0.5); width: 100%; height: 100%; max-width: 56.25vh; display: flex; flex-direction: column; overflow: hidden; }
-        .header-panel { flex: 0 0 auto; background: linear-gradient(to bottom, rgba(0,0,0,0.95), rgba(0,0,0,0.0)); color: white; padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); z-index: 20; pointer-events: none; }
-        .header-content { pointer-events: auto; }
+        .header-panel { flex: 0 0 auto; background: linear-gradient(to bottom, rgba(0,0,0,0.95), rgba(0,0,0,0.0)); color: white; padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); z-index: 20; }
         #canvas-wrapper { flex: 1; position: relative; overflow: hidden; background-color: #3e2723; width: 100%; }
         canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
         .footer-panel { flex: 0 0 auto; background: #d7ccc8; border-top: 4px solid #8d6e63; padding: 8px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; min-height: 90px; z-index: 20; }
@@ -31,42 +30,32 @@
         .float-img { position: absolute; pointer-events: none; z-index: 60; animation: floatUpImg 1.2s ease-out forwards; width: 60px; height: auto; }
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
         @keyframes floatUpImg { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { transform: translateY(-10px) scale(1.2); opacity: 1; } 100% { transform: translateY(-60px) scale(1); opacity: 0; } }
-        
-        #view-indicator { 
-            position: absolute; top: 80px; left: 50%; transform: translateX(-50%); 
-            background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 20px; 
-            color: #fff; font-size: 12px; font-weight: bold; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 30;
-        }
-        #view-indicator.show { opacity: 1; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <div id="levelup-banner"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/levelup.png" onerror="this.style.display='none'"></div>
-    <div id="view-indicator">WORLD MAP</div>
 
     <div class="header-panel">
-        <div class="header-content">
-            <div class="flex justify-between mb-1">
-                <div class="res-pill"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/energy.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='⚡'+this.nextElementSibling.innerText"><span id="energy-display">50/50</span></div>
-                <div class="res-pill"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/gold.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='💰'+this.nextElementSibling.innerText"><span id="gold-display">3000</span></div>
-                <div class="res-pill"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/crystal.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='💎'+this.nextElementSibling.innerText"><span id="gem-display">50</span></div>
+        <div class="flex justify-between mb-1">
+            <div class="res-pill"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/energy.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='⚡'+this.nextElementSibling.innerText"><span id="energy-display">50/50</span></div>
+            <div class="res-pill"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/gold.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='💰'+this.nextElementSibling.innerText"><span id="gold-display">3000</span></div>
+            <div class="res-pill"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/crystal.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='💎'+this.nextElementSibling.innerText"><span id="gem-display">50</span></div>
+        </div>
+        <div class="flex flex-col w-full">
+            <div class="flex justify-between items-end px-1">
+                <span class="font-bold text-yellow-400 text-xs" id="level-display">LORD LV.1</span>
+                <span class="font-bold text-gray-300 text-xs flex items-center gap-1"><span id="xp-text">0 / 10</span><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/xp.png" class="h-3 object-contain" onerror="this.style.display='none';this.previousElementSibling.innerText+=' XP'"></span>
             </div>
-            <div class="flex flex-col w-full">
-                <div class="flex justify-between items-end px-1">
-                    <span class="font-bold text-yellow-400 text-xs" id="level-display">LORD LV.1</span>
-                    <span class="font-bold text-gray-300 text-xs flex items-center gap-1"><span id="xp-text">0 / 10</span><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/xp.png" class="h-3 object-contain" onerror="this.style.display='none';this.previousElementSibling.innerText+=' XP'"></span>
-                </div>
-                <div class="w-full bg-gray-800 h-2 mt-1 rounded-full overflow-hidden border border-gray-600 relative">
-                    <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
-                </div>
+            <div class="w-full bg-gray-800 h-2 mt-1 rounded-full overflow-hidden border border-gray-600 relative">
+                <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
             </div>
-            <div class="flex gap-2 mt-1 opacity-30 hover:opacity-100 transition-opacity justify-end">
-                <button onclick="game.cheatEnergy()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⚡+30</button>
-                <button onclick="game.spawnChest()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">🎁상자</button>
-                <button onclick="game.cheatLevelUp()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⬆️LvUP</button>
-            </div>
+        </div>
+        <div class="flex gap-2 mt-1 opacity-30 hover:opacity-100 transition-opacity justify-end">
+            <button onclick="game.cheatEnergy()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⚡+30</button>
+            <button onclick="game.spawnChest()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">🎁상자</button>
+            <button onclick="game.cheatLevelUp()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⬆️LvUP</button>
         </div>
     </div>
 
@@ -75,7 +64,7 @@
     </div>
 
     <div class="footer-panel">
-        <button class="action-btn chat-btn" onclick="game.toggleShopModal()"><span>🏠</span><span style="font-size: 8px;">건설</span></button>
+        <button class="action-btn chat-btn" onclick="game.showToast('채팅 준비 중')"><span>💬</span></button>
         <div class="info-box" id="info-panel">
             <div class="flex justify-between items-center"><span class="font-bold text-sm truncate" id="info-name">선택 없음</span><span class="text-[10px] text-gray-500 font-bold" id="info-class"></span></div>
             <div class="stat-grid hidden" id="unit-stats-grid">
@@ -89,13 +78,13 @@
             <div class="text-[10px] text-gray-600 truncate mt-1" id="info-desc">오브젝트를 선택하세요.</div>
         </div>
         <button class="action-btn" id="btn-action" onclick="game.handleAction()"><span id="action-icon">💰</span><span id="action-label" style="font-size: 9px;">Sell</span></button>
-        <button class="action-btn world-btn" onclick="game.toggleViewMode()" style="margin-left:5px;"><span>🌍</span><span id="btn-field-label" style="font-size: 9px;">필드</span></button>
+        <button class="action-btn world-btn" onclick="game.toggleFieldModal()" style="margin-left:5px;"><span>🌍</span><span style="font-size: 9px;">필드</span></button>
     </div>
 
     <div id="field-modal">
         <div class="flex justify-between items-center mb-2 border-b border-gray-600 pb-2">
             <h2 class="text-xl font-bold text-yellow-400">건설 상점</h2>
-            <button onclick="game.toggleShopModal()" class="w-8 h-8">✖</button>
+            <button onclick="game.toggleFieldModal()" class="w-8 h-8">✖</button>
         </div>
         <div class="shop-grid" id="shop-list"></div>
     </div>
@@ -120,12 +109,13 @@ const ASSET_KEYS = [
     '1821', '1822', '1823', '1824', '1825', 'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', '5xp', '10xp', 'x', 'LV'
 ];
 
-const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5, UNIT_INFANTRY: 10, UNIT_ARCHER: 11, UNIT_CAVALRY: 12, ITEM_GOLD: 20, ITEM_ENERGY: 21, ITEM_CRYSTAL: 22 };
-const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
-const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
-const BUILDING_LIMITS = { [ITEM_TYPE.BUILDING_BARRACKS]: 3, [ITEM_TYPE.BUILDING_RANGE]: 2, [ITEM_TYPE.BUILDING_STABLE]: 2, [ITEM_TYPE.BUILDING_CAMP]: 2, [ITEM_TYPE.BUILDING_CHEST]: 99 };
-const SHOP_DATA = [ { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" }, { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" }, { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" }, { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" }, { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" } ];
-
+const LEVEL_DATA = [ { level: 1, xp: 10, maxEnergy: 50 }, { level: 2, xp: 22, maxEnergy: 52 }, { level: 3, xp: 37, maxEnergy: 54 }, { level: 4, xp: 55, maxEnergy: 56 }, { level: 5, xp: 77, maxEnergy: 58 }, { level: 6, xp: 103, maxEnergy: 60 }, { level: 7, xp: 134, maxEnergy: 62 }, { level: 8, xp: 169, maxEnergy: 64 }, { level: 9, xp: 209, maxEnergy: 66 }, { level: 10, xp: 254, maxEnergy: 68 }, { level: 11, xp: 304, maxEnergy: 70 }, { level: 12, xp: 359, maxEnergy: 72 }, { level: 13, xp: 420, maxEnergy: 74 }, { level: 14, xp: 486, maxEnergy: 76 }, { level: 15, xp: 558, maxEnergy: 78 }];
+const MERGE_XP_DATA = { 1:1, 2:2, 3:4, 4:5, 5:6, 6:8, 7:10, 8:15, 9:20, 10:0 };
+const BUILDING_STATS = { 1: { energy: 1, probs: [90, 10, 0, 0, 0] }, 2: { energy: 2, probs: [0, 90, 10, 0, 0] }, 3: { energy: 3, probs: [0, 45, 55, 0, 0] }, 4: { energy: 4, probs: [0, 0, 90, 10, 0] }, 5: { energy: 5, probs: [0, 0, 80, 10, 10] } };
+const ITEM_VALUES = { 1: 1, 2: 2, 3: 6, 4: 14, 5: 32 };
+const UNLOCK_GOLD_MAP = [[100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5,  5,  10, 40, 50], [30, 10, 0,  0,  0,  0,  10, 30], [20, 5,  0,  0,  0,  0,  5,  20], [20, 5,  0,  0,  0,  0,  5,  20], [30, 10, 0,  0,  0,  0,  10, 30], [50, 40, 10, 5,  5,  10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]];
+const UNLOCK_LEVEL_MAP = [[24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6,  2,  2,  6,  18, 21], [17, 8,  0,  0,  0,  0,  9,  15], [13, 5,  0,  0,  0,  0,  3,  11], [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]];
+const CHEST_DROP_TABLE = { 1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ], 2: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ], 3: [ {code: 1801, prob: 20}, {code: 1802, prob: 20}, {code: 1803, prob: 10}, {code: 1811, prob: 20}, {code: 1812, prob: 20}, {code: 1813, prob: 10} ], 4: [ {code: 1802, prob: 20}, {code: 1803, prob: 20}, {code: 1804, prob: 5}, {code: 1812, prob: 20}, {code: 1813, prob: 20}, {code: 1814, prob: 5}, {code: 1821, prob: 10} ], 5: [ {code: 1802, prob: 15}, {code: 1803, prob: 20}, {code: 1804, prob: 10}, {code: 1812, prob: 15}, {code: 1813, prob: 20}, {code: 1814, prob: 10}, {code: 1821, prob: 5}, {code: 1825, prob: 5} ] };
 const CONFIG = { 
     gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, 
     squadCols: 3, squadRows: 3, 
@@ -133,125 +123,51 @@ const CONFIG = {
     squadGap: 80, 
     squadCellSize: 130 
 };
+const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5, UNIT_INFANTRY: 10, UNIT_ARCHER: 11, UNIT_CAVALRY: 12, ITEM_GOLD: 20, ITEM_ENERGY: 21, ITEM_CRYSTAL: 22 };
+const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
+const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
+const BUILDING_LIMITS = { [ITEM_TYPE.BUILDING_BARRACKS]: 3, [ITEM_TYPE.BUILDING_RANGE]: 2, [ITEM_TYPE.BUILDING_STABLE]: 2, [ITEM_TYPE.BUILDING_CAMP]: 2, [ITEM_TYPE.BUILDING_CHEST]: 99 };
+const SHOP_DATA = [ { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" }, { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" }, { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" }, { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" }, { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" } ];
+const CAMP_CAPACITY = {1:4, 2:6, 3:8, 4:12, 5:16};
 
-// --- DATA HANDLING ---
-// Embedded GAME_DATA to resolve CORS issues when running locally
-const GAME_DATA = {
-    level_xp: { "1": 10, "2": 22, "3": 37, "4": 55, "5": 77, "6": 103, "7": 134, "8": 169, "9": 209, "10": 254, "11": 304, "12": 359, "13": 420, "14": 486, "15": 558 },
-    level_energy: { "1": 50, "2": 52, "3": 54, "4": 56, "5": 58, "6": 60, "7": 62, "8": 64, "9": 66, "10": 68, "11": 70, "12": 72, "13": 74, "14": 76, "15": 78 },
-    merge_xp: { "1":1, "2":2, "3":4, "4":5, "5":6, "6":8, "7":10, "8":15, "9":20, "10":0 },
-    localization: {
-        en: { sell: "Sell", field: "Field" },
-        ko: { 
-            sell: "판매", field: "필드",
-            desc_11xx: "보병 유닛입니다.\n방어력이 높고 기본적인 공격을 합니다.",
-            desc_12xx: "궁수 유닛입니다.\n사거리가 길지만 방어력이 낮습니다.",
-            desc_13xx: "기병 유닛입니다.\n이동 속도가 빠르고 공격력이 높습니다.",
-            desc_2101: "병영.\n보병 유닛을 생산합니다.",
-            desc_2201: "사격장.\n궁수 유닛을 생산합니다.",
-            desc_2301: "마구간.\n기병 유닛을 생산합니다.",
-            desc_3101: "막사.\n유닛을 보관합니다.",
-            desc_28xx: "보물상자.\n랜덤한 자원과 아이템이 들어있습니다."
-        }
-    },
-    units: {
-        "1101": { name: "Militia", name_kr: "민병", hp: 10, atk: 5, def: 10, spd: 5, range: 1, move: 1, sell: 0 },
-        "1102": { name: "Infantry", name_kr: "보병", hp: 20, atk: 7, def: 15, spd: 7, range: 1, move: 1, sell: 1 },
-        "1103": { name: "Swordsman", name_kr: "검병", hp: 30, atk: 9, def: 20, spd: 9, range: 1, move: 1, sell: 1 },
-        "1104": { name: "Shieldman", name_kr: "방패병", hp: 40, atk: 11, def: 25, spd: 11, range: 1, move: 1, sell: 2 },
-        "1105": { name: "Heavy Infantry", name_kr: "중갑병", hp: 50, atk: 13, def: 30, spd: 13, range: 1, move: 1, sell: 3 },
-        "1106": { name: "Elite", name_kr: "정예병", hp: 60, atk: 15, def: 35, spd: 15, range: 1, move: 1, sell: 6 },
-        "1107": { name: "Guard", name_kr: "근위병", hp: 70, atk: 17, def: 40, spd: 17, range: 1, move: 1, sell: 12 },
-        "1108": { name: "Templar", name_kr: "템플러", hp: 80, atk: 19, def: 45, spd: 19, range: 1, move: 1, sell: 25 },
-        "1109": { name: "Paladin", name_kr: "팔라딘", hp: 90, atk: 21, def: 50, spd: 21, range: 1, move: 1, sell: 50 },
-        "1110": { name: "Hero", name_kr: "영웅", hp: 100, atk: 23, def: 55, spd: 23, range: 1, move: 1, sell: 100 },
-        "1201": { name: "Rookie Archer", name_kr: "초보 궁수", hp: 8, atk: 8, def: 5, spd: 7, range: 3, move: 1, sell: 0 },
-        "1202": { name: "Archer", name_kr: "궁수", hp: 16, atk: 11, def: 7, spd: 9, range: 3, move: 1, sell: 1 },
-        "1203": { name: "Hunter", name_kr: "사냥꾼", hp: 24, atk: 14, def: 9, spd: 11, range: 3, move: 1, sell: 1 },
-        "1204": { name: "Marksman", name_kr: "명사수", hp: 32, atk: 17, def: 11, spd: 13, range: 4, move: 1, sell: 2 },
-        "1205": { name: "Sniper", name_kr: "저격수", hp: 40, atk: 20, def: 13, spd: 15, range: 4, move: 1, sell: 3 },
-        "1206": { name: "Elite Archer", name_kr: "정예 궁수", hp: 48, atk: 23, def: 15, spd: 17, range: 4, move: 1, sell: 6 },
-        "1207": { name: "Deadeye", name_kr: "데드아이", hp: 56, atk: 26, def: 17, spd: 19, range: 5, move: 1, sell: 12 },
-        "1208": { name: "Pathfinder", name_kr: "패스파인더", hp: 64, atk: 29, def: 19, spd: 21, range: 5, move: 1, sell: 25 },
-        "1209": { name: "Bowmaster", name_kr: "보우마스터", hp: 72, atk: 32, def: 21, spd: 23, range: 5, move: 1, sell: 50 },
-        "1210": { name: "Divine Archer", name_kr: "신궁", hp: 80, atk: 35, def: 23, spd: 25, range: 6, move: 1, sell: 100 },
-        "1301": { name: "Rider", name_kr: "기병", hp: 12, atk: 6, def: 8, spd: 10, range: 1, move: 2, sell: 0 },
-        "1302": { name: "Light Cavalry", name_kr: "경기병", hp: 24, atk: 9, def: 12, spd: 12, range: 1, move: 2, sell: 1 },
-        "1303": { name: "Lancer", name_kr: "창기병", hp: 36, atk: 12, def: 16, spd: 14, range: 1, move: 2, sell: 1 },
-        "1304": { name: "Knight", name_kr: "기사", hp: 48, atk: 15, def: 20, spd: 16, range: 1, move: 2, sell: 2 },
-        "1305": { name: "Heavy Cavalry", name_kr: "중기병", hp: 60, atk: 18, def: 24, spd: 18, range: 1, move: 2, sell: 3 },
-        "1306": { name: "Elite Cavalry", name_kr: "정예 기병", hp: 72, atk: 21, def: 28, spd: 20, range: 1, move: 2, sell: 6 },
-        "1307": { name: "Royal Knight", name_kr: "로얄 나이트", hp: 84, atk: 24, def: 32, spd: 22, range: 1, move: 2, sell: 12 },
-        "1308": { name: "Dragon Knight", name_kr: "드래곤 나이트", hp: 96, atk: 27, def: 36, spd: 24, range: 1, move: 2, sell: 25 },
-        "1309": { name: "Valkyrie", name_kr: "발키리", hp: 108, atk: 30, def: 40, spd: 26, range: 1, move: 2, sell: 50 },
-        "1310": { name: "Legendary Knight", name_kr: "전설의 기사", hp: 120, atk: 33, def: 44, spd: 28, range: 1, move: 2, sell: 100 }
-    },
-    items: {
-        "1801": { name: "Gold", name_kr: "골드", earn: 1 },
-        "1802": { name: "Gold", name_kr: "골드", earn: 2 },
-        "1803": { name: "Gold", name_kr: "골드", earn: 6 },
-        "1804": { name: "Gold", name_kr: "골드", earn: 14 },
-        "1805": { name: "Gold", name_kr: "골드", earn: 32 },
-        "1811": { name: "Energy", name_kr: "에너지", earn: 1 },
-        "1812": { name: "Energy", name_kr: "에너지", earn: 2 },
-        "1813": { name: "Energy", name_kr: "에너지", earn: 6 },
-        "1814": { name: "Energy", name_kr: "에너지", earn: 14 },
-        "1815": { name: "Energy", name_kr: "에너지", earn: 32 },
-        "1821": { name: "Crystal", name_kr: "크리스탈", earn: 1 },
-        "1822": { name: "Crystal", name_kr: "크리스탈", earn: 2 },
-        "1823": { name: "Crystal", name_kr: "크리스탈", earn: 6 },
-        "1824": { name: "Crystal", name_kr: "크리스탈", earn: 14 },
-        "1825": { name: "Crystal", name_kr: "크리스탈", earn: 32 }
-    },
-    buildings: {
-        "2101": { energy: 1, prob: [90, 10, 0, 0, 0, 0, 0, 0, 0, 0] }, "2102": { energy: 2, prob: [0, 90, 10, 0, 0, 0, 0, 0, 0, 0] },
-        "2103": { energy: 3, prob: [0, 45, 55, 0, 0, 0, 0, 0, 0, 0] }, "2104": { energy: 4, prob: [0, 0, 90, 10, 0, 0, 0, 0, 0, 0] },
-        "2105": { energy: 5, prob: [0, 0, 80, 10, 10, 0, 0, 0, 0, 0] },
-        "2201": { energy: 1, prob: [90, 10, 0, 0, 0, 0, 0, 0, 0, 0] }, "2202": { energy: 2, prob: [0, 90, 10, 0, 0, 0, 0, 0, 0, 0] },
-        "2203": { energy: 3, prob: [0, 45, 55, 0, 0, 0, 0, 0, 0, 0] }, "2204": { energy: 4, prob: [0, 0, 90, 10, 0, 0, 0, 0, 0, 0] },
-        "2205": { energy: 5, prob: [0, 0, 80, 10, 10, 0, 0, 0, 0, 0] },
-        "2301": { energy: 1, prob: [90, 10, 0, 0, 0, 0, 0, 0, 0, 0] }, "2302": { energy: 2, prob: [0, 90, 10, 0, 0, 0, 0, 0, 0, 0] },
-        "2303": { energy: 3, prob: [0, 45, 55, 0, 0, 0, 0, 0, 0, 0] }, "2304": { energy: 4, prob: [0, 0, 90, 10, 0, 0, 0, 0, 0, 0] },
-        "2305": { energy: 5, prob: [0, 0, 80, 10, 10, 0, 0, 0, 0, 0] },
-        "2801": { min: 2, max: 3 }, "2802": { min: 2, max: 4 }, "2803": { min: 3, max: 4 },
-        "2804": { min: 4, max: 5 }, "2805": { min: 4, max: 5 }
-    },
-    chests: {
-        "2801": { drops: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ] },
-        "2802": { drops: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ] },
-        "2803": { drops: [ {code: 1801, prob: 20}, {code: 1802, prob: 20}, {code: 1803, prob: 10}, {code: 1811, prob: 20}, {code: 1812, prob: 20}, {code: 1813, prob: 10} ] },
-        "2804": { drops: [ {code: 1802, prob: 20}, {code: 1803, prob: 20}, {code: 1804, prob: 5}, {code: 1812, prob: 20}, {code: 1813, prob: 20}, {code: 1814, prob: 5}, {code: 1821, prob: 10} ] },
-        "2805": { drops: [ {code: 1802, prob: 15}, {code: 1803, prob: 20}, {code: 1804, prob: 10}, {code: 1812, prob: 15}, {code: 1813, prob: 20}, {code: 1814, prob: 10}, {code: 1821, prob: 5}, {code: 1825, prob: 5} ] }
-    },
-    camps: {
-        "3101": {capacity:4}, "3102": {capacity:6}, "3103": {capacity:8}, "3104": {capacity:12}, "3105": {capacity:16}
-    },
-    unlock_conditions: {
-        level: [[24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6,  2,  2,  6,  18, 21], [17, 8,  0,  0,  0,  0,  9,  15], [13, 5,  0,  0,  0,  0,  3,  11], [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]],
-        gold: [[100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5,  5,  10, 40, 50], [30, 10, 0,  0,  0,  0,  10, 30], [20, 5,  0,  0,  0,  0,  5,  20], [20, 5,  0,  0,  0,  0,  5,  20], [30, 10, 0,  0,  0,  0,  10, 30], [50, 40, 10, 5,  5,  10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]]
-    },
-    field_map: Array(25).fill().map(() => Array(25).fill(0))
+// --- UNIT STATS DATA (Synced with unit.csv) ---
+const UNIT_STATS = {
+    // Infantry (11xx)
+    1101: { name: "민병", hp: 10, atk: 5, def: 10, spd: 5, rng: 1, mov: 1, sell: 0 },
+    1102: { name: "보병", hp: 20, atk: 7, def: 15, spd: 7, rng: 1, mov: 1, sell: 1 },
+    1103: { name: "검병", hp: 30, atk: 9, def: 20, spd: 9, rng: 1, mov: 1, sell: 1 },
+    1104: { name: "방패병", hp: 40, atk: 11, def: 25, spd: 11, rng: 1, mov: 1, sell: 2 },
+    1105: { name: "중갑병", hp: 50, atk: 13, def: 30, spd: 13, rng: 1, mov: 1, sell: 3 },
+    1106: { name: "정예병", hp: 60, atk: 15, def: 35, spd: 15, rng: 1, mov: 1, sell: 6 },
+    1107: { name: "근위병", hp: 70, atk: 17, def: 40, spd: 17, rng: 1, mov: 1, sell: 12 },
+    1108: { name: "템플러", hp: 80, atk: 19, def: 45, spd: 19, rng: 1, mov: 1, sell: 25 },
+    1109: { name: "팔라딘", hp: 90, atk: 21, def: 50, spd: 21, rng: 1, mov: 1, sell: 50 },
+    1110: { name: "영웅", hp: 100, atk: 23, def: 55, spd: 23, rng: 1, mov: 1, sell: 100 },
+
+    // Archer (12xx)
+    1201: { name: "초보 궁수", hp: 8, atk: 8, def: 5, spd: 7, rng: 3, mov: 1, sell: 0 },
+    1202: { name: "궁수", hp: 16, atk: 11, def: 7, spd: 9, rng: 3, mov: 1, sell: 1 },
+    1203: { name: "사냥꾼", hp: 24, atk: 14, def: 9, spd: 11, rng: 3, mov: 1, sell: 1 },
+    1204: { name: "명사수", hp: 32, atk: 17, def: 11, spd: 13, rng: 4, mov: 1, sell: 2 },
+    1205: { name: "저격수", hp: 40, atk: 20, def: 13, spd: 15, rng: 4, mov: 1, sell: 3 },
+    1206: { name: "정예 궁수", hp: 48, atk: 23, def: 15, spd: 17, rng: 4, mov: 1, sell: 6 },
+    1207: { name: "데드아이", hp: 56, atk: 26, def: 17, spd: 19, rng: 5, mov: 1, sell: 12 },
+    1208: { name: "패스파인더", hp: 64, atk: 29, def: 19, spd: 21, rng: 5, mov: 1, sell: 25 },
+    1209: { name: "보우마스터", hp: 72, atk: 32, def: 21, spd: 23, rng: 5, mov: 1, sell: 50 },
+    1210: { name: "신궁", hp: 80, atk: 35, def: 23, spd: 25, rng: 6, mov: 1, sell: 100 },
+
+    // Cavalry (13xx)
+    1301: { name: "기병", hp: 12, atk: 6, def: 8, spd: 10, rng: 1, mov: 2, sell: 0 },
+    1302: { name: "경기병", hp: 24, atk: 9, def: 12, spd: 12, rng: 1, mov: 2, sell: 1 },
+    1303: { name: "창기병", hp: 36, atk: 12, def: 16, spd: 14, rng: 1, mov: 2, sell: 1 },
+    1304: { name: "기사", hp: 48, atk: 15, def: 20, spd: 16, rng: 1, mov: 2, sell: 2 },
+    1305: { name: "중기병", hp: 60, atk: 18, def: 24, spd: 18, rng: 1, mov: 2, sell: 3 },
+    1306: { name: "정예 기병", hp: 72, atk: 21, def: 28, spd: 20, rng: 1, mov: 2, sell: 6 },
+    1307: { name: "로얄 나이트", hp: 84, atk: 24, def: 32, spd: 22, rng: 1, mov: 2, sell: 12 },
+    1308: { name: "드래곤 나이트", hp: 96, atk: 27, def: 36, spd: 24, rng: 1, mov: 2, sell: 25 },
+    1309: { name: "발키리", hp: 108, atk: 30, def: 40, spd: 26, rng: 1, mov: 2, sell: 50 },
+    1310: { name: "전설의 기사", hp: 120, atk: 33, def: 44, spd: 28, rng: 1, mov: 2, sell: 100 }
 };
-
-// Fallback Field map population with some dummy data if JSON fails
-GAME_DATA.field_map[12][12] = 1; // Center Castle
-GAME_DATA.field_map[10][10] = 2; // Gate
-GAME_DATA.field_map[14][14] = 3; // Fortress
-
-function initGameData() {
-    // Return a promise that resolves immediately since data is embedded
-    return new Promise((resolve) => {
-        console.log("Game Data Loaded Successfully (Embedded)");
-        resolve(GAME_DATA);
-    });
-}
-
-function getText(key) {
-    if (GAME_DATA && GAME_DATA.localization && GAME_DATA.localization.ko) {
-        return GAME_DATA.localization.ko[key] || key;
-    }
-    return key;
-}
 
 function getInfoFromCode(code) {
     if (code >= 1100 && code < 1200) return { type: ITEM_TYPE.UNIT_INFANTRY, level: code % 100 };
@@ -261,6 +177,35 @@ function getInfoFromCode(code) {
     if (code >= 1810 && code < 1820) return { type: ITEM_TYPE.ITEM_ENERGY, level: code - 1810 };
     if (code >= 1820 && code < 1830) return { type: ITEM_TYPE.ITEM_CRYSTAL, level: code - 1820 };
     return { type: ITEM_TYPE.ITEM_GOLD, level: 1 };
+}
+
+function getData(type, level) {
+    if (type >= 20) {
+        if(type === ITEM_TYPE.ITEM_GOLD) return { name: "골드", earn: ITEM_VALUES[level] };
+        if(type === ITEM_TYPE.ITEM_ENERGY) return { name: "에너지", earn: ITEM_VALUES[level] };
+        if(type === ITEM_TYPE.ITEM_CRYSTAL) return { name: "크리스탈", earn: ITEM_VALUES[level] };
+    }
+    if (type < 10) {
+        if(type === ITEM_TYPE.BUILDING_BARRACKS) return { name: "병영", energy: BUILDING_STATS[level]?.energy };
+        if(type === ITEM_TYPE.BUILDING_RANGE) return { name: "사격장", energy: BUILDING_STATS[level]?.energy };
+        if(type === ITEM_TYPE.BUILDING_STABLE) return { name: "마구간", energy: BUILDING_STATS[level]?.energy };
+        if(type === ITEM_TYPE.BUILDING_CHEST) return { name: "보물상자" };
+        if(type === ITEM_TYPE.BUILDING_CAMP) return { name: "막사" };
+    }
+    // Updated to use UNIT_STATS lookup
+    if (type >= 10 && type < 20) {
+        const code = getCode(type, level);
+        const stat = UNIT_STATS[code];
+        if (stat) {
+            return { 
+                name: stat.name, 
+                class: type === 10 ? "보병" : (type === 11 ? "궁병" : "기병"),
+                hp: stat.hp, atk: stat.atk, def: stat.def, 
+                spd: stat.spd, rng: stat.rng, mov: stat.mov, sell: stat.sell 
+            };
+        }
+    }
+    return { name: "Unknown", earn: 0, sell: 0 };
 }
 
 function getCode(type, level) {
@@ -276,37 +221,6 @@ function getCode(type, level) {
     if (type === ITEM_TYPE.ITEM_ENERGY) return 1810 + level;
     if (type === ITEM_TYPE.ITEM_CRYSTAL) return 1820 + level;
     return 0;
-}
-
-function getData(type, level) {
-    const code = getCode(type, level);
-    if (!GAME_DATA) return { name: "Loading..." };
-
-    if (type >= 20) { 
-        const data = GAME_DATA.items[code];
-        if (data) return { name: data.name_kr || data.name, earn: data.earn };
-    }
-    if (type < 10) { 
-        const data = GAME_DATA.buildings[code];
-        if (type === ITEM_TYPE.BUILDING_CHEST) return { name: "보물상자" }; 
-        if (type === ITEM_TYPE.BUILDING_CAMP) return { name: "막사" };
-        if (data) return { 
-            name: (type === 1 ? "병영" : (type === 2 ? "사격장" : "마구간")), 
-            energy: data.energy 
-        };
-    }
-    if (type >= 10 && type < 20) {
-        const stat = GAME_DATA.units[code];
-        if (stat) {
-            return { 
-                name: stat.name_kr || stat.name, 
-                class: type === 10 ? "보병" : (type === 11 ? "궁병" : "기병"),
-                hp: stat.hp, atk: stat.atk, def: stat.def, 
-                spd: stat.spd, rng: stat.range || stat.rng, mov: stat.move || stat.mov, sell: stat.sell 
-            };
-        }
-    }
-    return { name: "Unknown", earn: 0, sell: 0 };
 }
 
 class SoundManager {
@@ -393,6 +307,7 @@ class AssetLoader {
         });
     }
     async loadAll(callback) {
+        this.failedKeys.clear();
         await Promise.all(ASSET_KEYS.map(async (key) => {
             let img = await this.tryLoadImage(key, 0, 0, true);
             if (!img) img = await this.tryLoadImage(key, 0, 0, false);
@@ -465,12 +380,6 @@ class Game {
         this.drag = null; this.hover = null; this.selectedItem = null; this.potentialDrag = null;
         this.dpr = window.devicePixelRatio || 1;
 
-        // View Mode: 'MERGE' or 'FIELD'
-        this.viewMode = 'MERGE';
-        this.fieldScroll = { x: 0, y: 0 };
-        this.fieldTileSize = 120; // Size of field tiles
-        this.lastMouse = { x: 0, y: 0 };
-
         this.calcLayout();
         this.initGame();
         
@@ -525,13 +434,9 @@ class Game {
     }
 
     refreshLockState() {
-        if (!GAME_DATA) return;
         for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
             if (this.gridState[r][c] && this.gridState[r][c].type === LOCK_TYPE.OPEN) continue;
-            // Access unlocked conditions from GAME_DATA
-            const lvlReq = GAME_DATA.unlock_conditions.level[r] ? GAME_DATA.unlock_conditions.level[r][c] : 99;
-            const goldReq = GAME_DATA.unlock_conditions.gold[r] ? GAME_DATA.unlock_conditions.gold[r][c] : 9999;
-            
+            const lvlReq = UNLOCK_LEVEL_MAP[r][c], goldReq = UNLOCK_GOLD_MAP[r][c];
             if (this.lordLevel < lvlReq) this.gridState[r][c] = { type: LOCK_TYPE.LEVEL, value: lvlReq };
             else if (goldReq > 0) this.gridState[r][c] = { type: LOCK_TYPE.GOLD, value: goldReq };
             else this.gridState[r][c] = { type: LOCK_TYPE.OPEN };
@@ -565,7 +470,10 @@ class Game {
                 this.grid[r][c] = newItem;
                 this.updateUI(); this.requestRender();
                 this.showToast("건설 완료!");
-                this.toggleShopModal(); // Close modal
+                this.toggleFieldModal();
+                const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
+                const cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
+                this.spawnParticles(cx, cy, "#FFD700", 20, "confetti");
                 this.sound.playSpawn();
                 return;
             }
@@ -600,12 +508,6 @@ class Game {
         this.ctx.scale(this.canvas.width / this.width, this.canvas.width / this.width);
         this.ctx.imageSmoothingEnabled = false;
         this.requestRender();
-        
-        // Center field view
-        if(this.viewMode === 'FIELD') {
-            this.fieldScroll.x = (25 * this.fieldTileSize - this.width) / 2;
-            this.fieldScroll.y = (25 * this.fieldTileSize - this.height) / 2;
-        }
     }
 
     addXp(amount) {
@@ -627,12 +529,8 @@ class Game {
         if (this.currentXp >= this.requiredXp) this.levelUp();
     }
     updateLevelStats() {
-        if (!GAME_DATA) return;
-        const lvlKey = String(this.lordLevel);
-        const xpReq = GAME_DATA.level_xp[lvlKey];
-        const maxEn = GAME_DATA.level_energy[lvlKey];
-        if (xpReq !== undefined) this.requiredXp = xpReq;
-        if (maxEn !== undefined) this.maxEnergy = maxEn;
+        const d = LEVEL_DATA.find(d => d.level === this.lordLevel) || LEVEL_DATA[LEVEL_DATA.length - 1];
+        this.maxEnergy = d.maxEnergy; this.requiredXp = d.xp;
     }
 
     selectItem(item, location) {
@@ -657,26 +555,14 @@ class Game {
         if (!this.selectedItem) { els.name.innerText = "선택된 없음"; els.desc.innerText = "유닛이나 건물을 선택하세요."; return; }
 
         const item = this.selectedItem.item;
-        const code = getCode(item.type, item.level);
         const data = getData(item.type, item.level);
         els.name.innerText = `${data.name} LV.${item.level}`;
 
-        let descKey = "";
-        if (code >= 1100 && code < 1200) descKey = "desc_11xx";
-        else if (code >= 1200 && code < 1300) descKey = "desc_12xx";
-        else if (code >= 1300 && code < 1400) descKey = "desc_13xx";
-        else if (item.type === ITEM_TYPE.BUILDING_BARRACKS) descKey = "desc_2101";
-        else if (item.type === ITEM_TYPE.BUILDING_RANGE) descKey = "desc_2201";
-        else if (item.type === ITEM_TYPE.BUILDING_STABLE) descKey = "desc_2301";
-        else if (item.type === ITEM_TYPE.BUILDING_CAMP) descKey = "desc_3101";
-        else if (item.type === ITEM_TYPE.BUILDING_CHEST) descKey = "desc_28xx";
-
         if (item.type < 10) { 
-            const campData = GAME_DATA.camps[code] || {capacity: 4};
-            if (item.type === ITEM_TYPE.BUILDING_CHEST) els.desc.innerText = `${getText(descKey)}\n(남은 횟수: ${item.usage}회)`;
-            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = `${getText(descKey)}\n(보관: ${item.storedUnit ? 1 : 0} / ${campData.capacity})`;
+            if (item.type === ITEM_TYPE.BUILDING_CHEST) els.desc.innerText = `남은 횟수: ${item.usage}회`;
+            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = `보관: ${item.storedUnit ? 1 : 0} / ${CAMP_CAPACITY[item.level]}`;
             else {
-                els.desc.innerText = getText(descKey);
+                els.desc.innerText = "유닛 생산";
                 const cost = data.energy || 1;
                 els.lbl.innerText = `-${cost}⚡`; els.btn.style.opacity = 1; els.icon.innerText = ""; 
             }
@@ -684,14 +570,13 @@ class Game {
             els.desc.innerText = "클릭하여 획득"; els.lbl.innerText = "획득"; els.btn.style.opacity = 1;
         } else { 
             els.cls.innerText = data.class;
-            els.desc.innerText = getText(descKey);
+            els.desc.innerText = "";
             els.stats.classList.remove('hidden');
             document.getElementById('st-hp').innerText = data.hp; document.getElementById('st-atk').innerText = data.atk;
             document.getElementById('st-def').innerText = data.def; document.getElementById('st-spd').innerText = data.spd;
             document.getElementById('st-rng').innerText = data.rng; document.getElementById('st-mov').innerText = data.mov;
             els.lbl.innerText = `+${data.sell}`; els.icon.innerText = "💰"; els.btn.style.opacity = 1;
         }
-        document.getElementById('action-label').innerText = item.type >= 10 && item.type < 20 ? getText("sell") : els.lbl.innerText;
     }
 
     handleAction() {
@@ -710,7 +595,6 @@ class Game {
         }
     }
 
-    // --- INPUT HANDLING ---
     setupInput() {
         const getPos = e => {
             const r = this.canvas.getBoundingClientRect();
@@ -718,15 +602,7 @@ class Game {
         };
         const start = e => {
             this.sound.resume();
-            const p = getPos(e);
-            this.lastMouse = p;
-            
-            if (this.viewMode === 'FIELD') {
-                this.isDraggingMap = true;
-                return;
-            }
-
-            const hit = this.getZoneAt(p.x, p.y);
+            const p = getPos(e); const hit = this.getZoneAt(p.x, p.y);
             if (hit) {
                 if (hit.zone === ZONES.GRID && this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) { this.tryUnlock(hit.r, hit.c); return; }
                 let item = hit.zone===ZONES.GRID ? this.grid[hit.r][hit.c] : (hit.zone===ZONES.SQUAD1 ? this.squad1[hit.idx] : this.squad2[hit.idx]);
@@ -734,34 +610,14 @@ class Game {
             } else this.selectItem(null);
         };
         const move = e => {
-            const p = getPos(e);
-            
-            if (this.viewMode === 'FIELD' && this.isDraggingMap) {
-                const dx = p.x - this.lastMouse.x;
-                const dy = p.y - this.lastMouse.y;
-                this.fieldScroll.x -= dx;
-                this.fieldScroll.y -= dy;
-                // Clamp scroll
-                const maxScroll = (25 * this.fieldTileSize) - this.width;
-                this.fieldScroll.x = Math.max(0, Math.min(this.fieldScroll.x, maxScroll > 0 ? maxScroll : 0));
-                this.fieldScroll.y = Math.max(0, Math.min(this.fieldScroll.y, (25 * this.fieldTileSize) - this.height));
-                this.lastMouse = p;
-                this.requestRender();
-                return;
-            }
-
             if (this.potentialDrag && !this.drag) {
+                const p = getPos(e);
                 if (Math.hypot(p.x-this.potentialDrag.startPos.x, p.y-this.potentialDrag.startPos.y) > 10 && this.potentialDrag.item)
                     this.startDrag(this.potentialDrag.item, this.potentialDrag.hit, p);
             }
-            if (this.drag) { this.drag.x = p.x; this.drag.y = p.y; this.hover = this.getZoneAt(this.drag.x, this.drag.y); this.requestRender(); }
+            if (this.drag) { this.drag.x = getPos(e).x; this.drag.y = getPos(e).y; this.hover = this.getZoneAt(this.drag.x, this.drag.y); this.requestRender(); }
         };
         const end = e => {
-            if (this.viewMode === 'FIELD') {
-                this.isDraggingMap = false;
-                // Click logic for field tiles could go here
-                return;
-            }
             if (this.drag) this.endDrag();
             else if (this.potentialDrag) this.handleClick(this.potentialDrag.item, this.potentialDrag.hit);
             this.potentialDrag = null; this.drag = null;
@@ -802,7 +658,7 @@ class Game {
                     target.storedUnit = this.drag.item; this.showToast("보관됨");
                     this.sound.playClick();
                 } else if (target.type===this.drag.item.type && target.level===this.drag.item.level) {
-                    // Merge Logic
+                    // Merge
                     const isUnit = target.type>=10 && target.type<20;
                     const maxLvl = isUnit ? 10 : 5;
                     let canMerge = true;
@@ -813,7 +669,7 @@ class Game {
                     if(canMerge && target.level < maxLvl) {
                         target.level++; target.scale=1.3;
                         if(target.type===ITEM_TYPE.BUILDING_CHEST) target.usage = Math.floor((target.usage+this.drag.item.usage)/2);
-                        const xp = GAME_DATA.merge_xp[String(target.level-1)] || 1;
+                        const xp = MERGE_XP_DATA[target.level-1] || 1;
                         this.addXp(xp); this.showFloatingImage('xp', hit.zone===ZONES.GRID ? this.gridStartX+hit.c*this.gridTileSize : this.drag.x, this.drag.y);
                         this.spawnParticles(this.drag.x, this.drag.y, "#FFD700", 30, "spark");
                         this.sound.playMerge();
@@ -864,17 +720,14 @@ class Game {
 
     // --- LOGIC ---
     produce(building) {
-        const code = getCode(building.type, building.level);
-        const stats = GAME_DATA.buildings[code];
-        
+        const stats = BUILDING_STATS[building.level] || BUILDING_STATS[1];
         if(this.energy < stats.energy) { this.showToast(`에너지 부족 (${stats.energy})`); return; }
         let type = ITEM_TYPE.UNIT_INFANTRY;
         if(building.type===ITEM_TYPE.BUILDING_RANGE) type=ITEM_TYPE.UNIT_ARCHER;
         else if(building.type===ITEM_TYPE.BUILDING_STABLE) type=ITEM_TYPE.UNIT_CAVALRY;
         
         let lvl=1, r=Math.random()*100, sum=0;
-        const probs = stats.prob || [100,0,0,0,0];
-        for(let i=0; i<probs.length; i++) { sum+=probs[i]; if(r<sum){lvl=i+1;break;} }
+        for(let i=0; i<stats.probs.length; i++) { sum+=stats.probs[i]; if(r<sum){lvl=i+1;break;} }
         
         if(this.spawnItem({type, level:lvl, scale:0})) {
             this.energy-=stats.energy; this.updateUI(); this.requestRender();
@@ -886,16 +739,12 @@ class Game {
         if(chest.usage<=0) { this.showToast("빈 상자 (머지 필요)"); return; }
         if(this.energy<1) { this.showToast("에너지 부족"); return; }
         
-        const code = getCode(ITEM_TYPE.BUILDING_CHEST, chest.level);
-        const chestData = GAME_DATA.chests[code];
-        if(!chestData) return;
-
-        const table = chestData.drops;
+        const table = CHEST_DROP_TABLE[chest.level] || CHEST_DROP_TABLE[1];
         let total=0; table.forEach(e=>total+=e.prob);
-        let rnd=Math.random()*total, dropCode=table[0].code;
-        for(let e of table) { if(rnd<e.prob){dropCode=e.code;break;} rnd-=e.prob; }
+        let rnd=Math.random()*total, code=table[0].code;
+        for(let e of table) { if(rnd<e.prob){code=e.code;break;} rnd-=e.prob; }
         
-        const info = getInfoFromCode(dropCode);
+        const info = getInfoFromCode(code);
         if(this.spawnItem({type:info.type, level:info.level, scale:0})) {
             this.energy--; chest.usage--; chest.scale=1.2; this.updateUI(); this.requestRender();
             this.sound.playSpawn();
@@ -916,6 +765,7 @@ class Game {
 
     ejectCamp(camp, r, c) {
         if(!camp.storedUnit) { this.showToast("비어있음"); return; }
+        // Try neighbors
         const moves = [[0,1],[0,-1],[1,0],[-1,0]];
         for(let m of moves) {
             const nr=r+m[0], nc=c+m[1];
@@ -969,21 +819,15 @@ class Game {
     loop() {
         if(this.isDirty || this.drag) {
             this.ctx.clearRect(0,0,this.width,this.height);
-            
-            if (this.viewMode === 'FIELD') {
-                this.drawField();
-            } else {
-                // Draw Merge Mode
-                this.drawSquad(this.squad1, this.squad1Rect, "SQUAD 1", "#4caf50", ZONES.SQUAD1);
-                this.drawSquad(this.squad2, this.squad2Rect, "SQUAD 2", "#2196f3", ZONES.SQUAD2);
-                for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
-                    const x = this.gridStartX+c*this.gridTileSize, y = this.gridStartY+r*this.gridTileSize;
-                    const isHover = this.hover && this.hover.zone===ZONES.GRID && this.hover.r===r && this.hover.c===c;
-                    const isSel = this.selectedItem && this.selectedItem.location.zone===ZONES.GRID && this.selectedItem.location.r===r && this.selectedItem.location.c===c;
-                    this.drawCell(x, y, this.gridTileSize, this.grid[r][c], this.gridState[r][c], isHover, isSel);
-                }
-                if(this.drag) this.drawItem(this.drag.x-this.drag.size/2, this.drag.y-this.drag.size/2, this.drag.size, this.drag.item, true);
+            this.drawSquad(this.squad1, this.squad1Rect, "SQUAD 1", "#4caf50", ZONES.SQUAD1);
+            this.drawSquad(this.squad2, this.squad2Rect, "SQUAD 2", "#2196f3", ZONES.SQUAD2);
+            for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
+                const x = this.gridStartX+c*this.gridTileSize, y = this.gridStartY+r*this.gridTileSize;
+                const isHover = this.hover && this.hover.zone===ZONES.GRID && this.hover.r===r && this.hover.c===c;
+                const isSel = this.selectedItem && this.selectedItem.location.zone===ZONES.GRID && this.selectedItem.location.r===r && this.selectedItem.location.c===c;
+                this.drawCell(x, y, this.gridTileSize, this.grid[r][c], this.gridState[r][c], isHover, isSel);
             }
+            if(this.drag) this.drawItem(this.drag.x-this.drag.size/2, this.drag.y-this.drag.size/2, this.drag.size, this.drag.item, true);
             
             // Update Particles
             for(let i=this.particles.length-1; i>=0; i--) {
@@ -998,63 +842,6 @@ class Game {
             this.isDirty = anim || !!this.drag || this.particles.length > 0;
         }
         requestAnimationFrame(()=>this.loop());
-    }
-
-    drawField() {
-        if (!GAME_DATA || !GAME_DATA.field_map) return;
-        const rows = 25;
-        const cols = 25;
-        const size = this.fieldTileSize;
-        
-        // Draw Field Background
-        this.ctx.fillStyle = "#2c3e50";
-        this.ctx.fillRect(0, 0, this.width, this.height);
-
-        this.ctx.save();
-        this.ctx.translate(-this.fieldScroll.x, -this.fieldScroll.y);
-
-        for(let r=0; r<rows; r++) {
-            for(let c=0; c<cols; c++) {
-                const x = c * size;
-                const y = r * size;
-                // Basic culling
-                if (x + size < this.fieldScroll.x || x > this.fieldScroll.x + this.width ||
-                    y + size < this.fieldScroll.y || y > this.fieldScroll.y + this.height) continue;
-
-                const code = GAME_DATA.field_map[r][c];
-                
-                // Tile Base
-                this.ctx.fillStyle = (r + c) % 2 === 0 ? "#5D4037" : "#4E342E"; // Dirt pattern
-                this.ctx.fillRect(x, y, size, size);
-                this.ctx.strokeStyle = "#3E2723";
-                this.ctx.lineWidth = 2;
-                this.ctx.strokeRect(x, y, size, size);
-
-                // Tile Object
-                if (code > 0) {
-                    this.ctx.font = `${size/2}px sans-serif`;
-                    this.ctx.textAlign = "center";
-                    this.ctx.textBaseline = "middle";
-                    let icon = "";
-                    let color = "#fff";
-                    
-                    if (code === 1) { icon = "🏰"; color = "#3498db"; } // My Castle
-                    else if (code === 2) { icon = "⛩️"; color = "#e74c3c"; } // Gate
-                    else if (code === 3) { icon = "🏯"; color = "#e67e22"; } // Fortress
-                    else if (code === 4) { icon = "🛣️"; } // Road
-                    else { icon = "🌲"; }
-
-                    this.ctx.fillStyle = color;
-                    this.ctx.fillText(icon, x + size/2, y + size/2);
-                    
-                    // Coord Debug
-                    this.ctx.fillStyle = "rgba(255,255,255,0.3)";
-                    this.ctx.font = "10px sans-serif";
-                    this.ctx.fillText(`${c},${r}`, x + size/2, y + size - 10);
-                }
-            }
-        }
-        this.ctx.restore();
     }
 
     getSquadPower(squad) {
@@ -1074,13 +861,16 @@ class Game {
         this.ctx.fillStyle = color; 
         this.ctx.font="bold 40px sans-serif"; 
         this.ctx.textAlign="center";
+        // Adjusted: rect.y - 22 (Up by 2px)
         this.ctx.fillText(`${label}`, rect.x+rect.w/2, rect.y-22);
         
         this.ctx.fillStyle = color+"11"; 
         this.ctx.fillRect(rect.x-5, rect.y-5, rect.w+10, rect.h+10);
         
+        // CP Display - 2x Size
         this.ctx.font="bold 40px sans-serif"; 
         this.ctx.fillStyle = "#fff";
+        // Adjusted: rect.y + rect.h + 39 (Was 42, moved up 3px)
         this.ctx.fillText(`⚔️ ${cp}`, rect.x+rect.w/2, rect.y + rect.h + 39); 
 
         for(let i=0; i<9; i++) {
@@ -1117,12 +907,17 @@ class Game {
     drawItem(x, y, s, item, isDrag=false) {
         const sc=isDrag?1.1:item.scale, p=4, ds=(s-p*2)*sc, offset=(s-ds)/2;
         const img = this.assets.getImage(item.type, item.level);
+        
+        // Image Size Multiplier
         const imageScale = 1.2;
         
         if(img && img.complete && img.naturalWidth>0) {
             if(isDrag) { this.ctx.shadowColor="black"; this.ctx.shadowBlur=15; }
+            
+            // Calculate new dimensions
             const drawSize = ds * imageScale;
             const drawOffset = (s - drawSize) / 2;
+            
             this.ctx.drawImage(img, x + drawOffset, y + drawOffset, drawSize, drawSize);
             this.ctx.shadowBlur=0;
         } else {
@@ -1139,13 +934,11 @@ class Game {
             else if(item.type===ITEM_TYPE.ITEM_ENERGY) { c="#80deea"; sym="⚡"; }
             else if(item.type===ITEM_TYPE.ITEM_CRYSTAL) { c="#e1bee7"; sym="💎"; }
             
-            // Define drawSize and drawOffset here for fallback rendering
+            // Apply scale to fallback rect as well
             const drawSize = ds * imageScale;
             const drawOffset = (s - drawSize) / 2;
-
-            this.ctx.fillStyle = c; 
-            this.roundRect(x + drawOffset, y + drawOffset, drawSize, drawSize, 12); 
-            this.ctx.fill();
+            
+            this.ctx.fillStyle = c; this.roundRect(x + drawOffset, y + drawOffset, drawSize, drawSize, 12); this.ctx.fill();
             this.ctx.strokeStyle = "rgba(0,0,0,0.4)"; this.ctx.lineWidth = 2; this.ctx.stroke();
             this.ctx.fillStyle = "rgba(0,0,0,0.6)"; this.ctx.font = `${Math.floor(drawSize*0.5)}px sans-serif`;
             this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
@@ -1153,25 +946,13 @@ class Game {
         }
 
         // Badges
-        const cx = x + s/2;
-        const cy = y + s - 18; 
-        this.ctx.save();
-        this.ctx.shadowColor = "black";
-        this.ctx.shadowBlur = 4;
-        this.ctx.fillStyle = "rgba(0,0,0,0.9)";
-        this.ctx.beginPath();
-        this.ctx.arc(cx, cy, 15, 0, Math.PI*2); 
-        this.ctx.fill();
-        this.ctx.strokeStyle = "#FFD700"; 
-        this.ctx.lineWidth = 2;
-        this.ctx.stroke();
-        this.ctx.fillStyle = "#FFF";
-        this.ctx.font = "bold 20px 'Segoe UI', sans-serif"; 
-        this.ctx.textAlign = "center";
-        this.ctx.textBaseline = "middle";
-        this.ctx.fillText(item.level, cx, cy + 1); 
-        this.ctx.restore();
-
+        const bx=x+s/2, by=y+ds; // Keep badge position relative to original cell size to avoid covering too much
+        if(item.type>=10 || item.type<10) { 
+            this.ctx.fillStyle="rgba(0,0,0,0.8)"; this.ctx.beginPath(); this.ctx.arc(bx, by-10, 10, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.strokeStyle="#fff"; this.ctx.lineWidth=1; this.ctx.stroke();
+            this.ctx.fillStyle="#fff"; this.ctx.font="bold 12px sans-serif"; this.ctx.textAlign="center";
+            this.ctx.fillText(item.level, bx, by-6);
+        }
         if(item.type===ITEM_TYPE.BUILDING_CAMP && item.storedUnit) {
             this.ctx.fillStyle="#f00"; this.ctx.font="bold 16px sans-serif"; this.ctx.fillText("IN", bx, y+s/2);
         }
@@ -1180,15 +961,6 @@ class Game {
     roundRect(x,y,w,h,r){this.ctx.beginPath();this.ctx.moveTo(x+r,y);this.ctx.arcTo(x+w,y,x+w,y+h,r);this.ctx.arcTo(x+w,y+h,x,y+h,r);this.ctx.arcTo(x,y+h,x,y,r);this.ctx.arcTo(x,y,x+w,y,r);this.ctx.closePath();}
 
     toggleFieldModal() { document.getElementById('field-modal').classList.toggle('open'); }
-    toggleShopModal() { document.getElementById('field-modal').classList.toggle('open'); }
-    toggleViewMode() {
-        this.viewMode = this.viewMode === 'MERGE' ? 'FIELD' : 'MERGE';
-        document.getElementById('btn-field-label').innerText = this.viewMode === 'MERGE' ? getText("field") : "성으로";
-        document.getElementById('view-indicator').innerText = this.viewMode === 'MERGE' ? "" : "WORLD MAP";
-        document.getElementById('view-indicator').classList.toggle('show', this.viewMode === 'FIELD');
-        this.requestRender();
-    }
-
     cheatEnergy() { this.energy = Math.min(this.energy+30, this.maxEnergy); this.updateUI(); }
     cheatLevelUp() { this.addXp(this.requiredXp-this.currentXp); }
     spawnChest() { this.spawnItem({type:ITEM_TYPE.BUILDING_CHEST, level:1, scale:0, usage:5}); this.requestRender(); }
@@ -1210,21 +982,11 @@ class Game {
         document.getElementById('gold-display').innerText=this.gold;
         document.getElementById('gem-display').innerText=this.gem;
         document.getElementById('level-display').innerText=`LORD LV.${this.lordLevel}`;
-        // Button label updated in toggleViewMode mostly, but sync here too
-        document.getElementById('btn-field-label').innerText = this.viewMode === 'MERGE' ? getText("field") : "성으로";
         document.getElementById('xp-text').innerText=`${this.currentXp} / ${this.requiredXp}`;
         document.getElementById('xp-bar').style.width=`${(this.currentXp/this.requiredXp)*100}%`;
     }
 }
-
-// Global Game Instance
-let game;
-window.onload = () => {
-    // Load data first, then start game
-    initGameData().then(() => {
-        game = new Game();
-    });
-};
+const game = new Game();
 </script>
 </body>
 </html>
