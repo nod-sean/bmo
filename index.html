@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v90 - Field Interaction</title>
+    <title>KOV Prototype v89 - Fix ReferenceError</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -125,16 +125,6 @@ const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
 const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
 const BUILDING_LIMITS = { [ITEM_TYPE.BUILDING_BARRACKS]: 3, [ITEM_TYPE.BUILDING_RANGE]: 2, [ITEM_TYPE.BUILDING_STABLE]: 2, [ITEM_TYPE.BUILDING_CAMP]: 2, [ITEM_TYPE.BUILDING_CHEST]: 99 };
 const SHOP_DATA = [ { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" }, { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" }, { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" }, { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" }, { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" } ];
-
-// Mapping Field Codes to Readable Data
-const FIELD_TILES = {
-    0: { name: "빈 땅", icon: "🌲", color: "#5D4037", desc: "비어 있는 토지입니다." },
-    1: { name: "내 성", icon: "🏰", color: "#3498db", desc: "나의 본거지입니다." },
-    2: { name: "관문", icon: "⛩️", color: "#e74c3c", desc: "전략적 요충지입니다." },
-    3: { name: "성채", icon: "🏯", color: "#e67e22", desc: "강력한 방어 시설입니다." },
-    4: { name: "도로", icon: "🛣️", color: "#95a5a6", desc: "이동 가능한 도로입니다." },
-    5: { name: "산", icon: "⛰️", color: "#2c3e50", desc: "넘을 수 없는 산입니다." }
-};
 
 const CONFIG = { 
     gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, 
@@ -480,10 +470,6 @@ class Game {
         this.fieldScroll = { x: 0, y: 0 };
         this.fieldTileSize = 120; // Size of field tiles
         this.lastMouse = { x: 0, y: 0 };
-        
-        // Field Selection State
-        this.selectedFieldTile = null; 
-        this.isDraggingMap = false;
 
         this.calcLayout();
         this.initGame();
@@ -649,18 +635,6 @@ class Game {
         if (maxEn !== undefined) this.maxEnergy = maxEn;
     }
 
-    selectFieldTile(r, c) {
-        if (r === null) {
-            this.selectedFieldTile = null;
-        } else {
-            const code = GAME_DATA.field_map[r][c];
-            this.selectedFieldTile = { r, c, code };
-            this.sound.playClick();
-        }
-        this.updateInfoPanel();
-        this.requestRender();
-    }
-
     selectItem(item, location) {
         if (this.selectedItem?.item !== item) this.sound.playClick();
         this.selectedItem = item ? { item, location } : null;
@@ -680,35 +654,6 @@ class Game {
         };
         els.stats.classList.add('hidden'); els.cls.innerText = ""; els.btn.style.opacity = 0.5; els.lbl.innerText = "-";
         
-        // Field Selection Mode
-        if (this.viewMode === 'FIELD') {
-            if (this.selectedFieldTile) {
-                const { r, c, code } = this.selectedFieldTile;
-                const tileInfo = FIELD_TILES[code] || FIELD_TILES[0];
-                
-                els.name.innerText = `${tileInfo.name} (${c}, ${r})`;
-                els.desc.innerText = tileInfo.desc;
-                
-                // Placeholder actions for Field
-                if (code === 0) { // Empty Land
-                    els.lbl.innerText = "점령";
-                    els.btn.style.opacity = 0.5; // Disable until logic exists
-                } else if (code === 1) { // My Castle
-                    els.lbl.innerText = "관리";
-                    els.btn.style.opacity = 1;
-                } else { // Enemy/Neutral
-                    els.lbl.innerText = "정찰";
-                    els.btn.style.opacity = 1;
-                }
-            } else {
-                els.name.innerText = "월드맵";
-                els.desc.innerText = "타일을 선택하여 정보를 확인하세요.";
-                els.lbl.innerText = "-";
-            }
-            return;
-        }
-
-        // Merge Selection Mode
         if (!this.selectedItem) { els.name.innerText = "선택된 없음"; els.desc.innerText = "유닛이나 건물을 선택하세요."; return; }
 
         const item = this.selectedItem.item;
@@ -750,14 +695,6 @@ class Game {
     }
 
     handleAction() {
-        // Field Action Logic Placeholder
-        if (this.viewMode === 'FIELD') {
-            if (this.selectedFieldTile) {
-                this.showToast("아직 구현되지 않은 기능입니다.");
-            }
-            return;
-        }
-
         if (!this.selectedItem) return;
         const { item, location } = this.selectedItem;
         if (item.type >= 10 && item.type < 20) { 
@@ -783,7 +720,6 @@ class Game {
             this.sound.resume();
             const p = getPos(e);
             this.lastMouse = p;
-            this.dragStartPos = p; // Keep initial pos to detect true click vs drag
             
             if (this.viewMode === 'FIELD') {
                 this.isDraggingMap = true;
@@ -821,22 +757,9 @@ class Game {
             if (this.drag) { this.drag.x = p.x; this.drag.y = p.y; this.hover = this.getZoneAt(this.drag.x, this.drag.y); this.requestRender(); }
         };
         const end = e => {
-            const p = getPos(e);
             if (this.viewMode === 'FIELD') {
-                // If moved less than 10px, treat as click
-                if (this.isDraggingMap && Math.hypot(p.x - this.dragStartPos.x, p.y - this.dragStartPos.y) < 10) {
-                    const worldX = p.x + this.fieldScroll.x;
-                    const worldY = p.y + this.fieldScroll.y;
-                    const c = Math.floor(worldX / this.fieldTileSize);
-                    const r = Math.floor(worldY / this.fieldTileSize);
-                    
-                    if (c >= 0 && c < 25 && r >= 0 && r < 25) {
-                        this.selectFieldTile(r, c);
-                    } else {
-                        this.selectFieldTile(null);
-                    }
-                }
                 this.isDraggingMap = false;
+                // Click logic for field tiles could go here
                 return;
             }
             if (this.drag) this.endDrag();
@@ -1107,13 +1030,6 @@ class Game {
                 this.ctx.lineWidth = 2;
                 this.ctx.strokeRect(x, y, size, size);
 
-                // Highlight Selected Tile
-                if (this.selectedFieldTile && this.selectedFieldTile.r === r && this.selectedFieldTile.c === c) {
-                    this.ctx.lineWidth = 4;
-                    this.ctx.strokeStyle = "#00FF00"; // Green Highlight
-                    this.ctx.strokeRect(x+2, y+2, size-4, size-4);
-                }
-
                 // Tile Object
                 if (code > 0) {
                     this.ctx.font = `${size/2}px sans-serif`;
@@ -1270,17 +1186,6 @@ class Game {
         document.getElementById('btn-field-label').innerText = this.viewMode === 'MERGE' ? getText("field") : "성으로";
         document.getElementById('view-indicator').innerText = this.viewMode === 'MERGE' ? "" : "WORLD MAP";
         document.getElementById('view-indicator').classList.toggle('show', this.viewMode === 'FIELD');
-        
-        // Reset selection when switching views
-        if (this.viewMode === 'FIELD') {
-            this.selectedItem = null;
-            this.selectedFieldTile = null;
-            this.updateInfoPanel();
-        } else {
-            this.selectedFieldTile = null;
-            this.selectedItem = null;
-            this.updateInfoPanel();
-        }
         this.requestRender();
     }
 
