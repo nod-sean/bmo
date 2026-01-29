@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v74 - Audio & UI Fix</title>
+    <title>KOV Prototype v77 - Audio Path Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -227,17 +227,42 @@ class SoundManager {
     constructor() {
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         this.enabled = true;
-        this.hasResumed = false;
+        this.bgmStarted = false;
+        
+        // Use GitHub Raw URL for Audio
+        const BASE_AUDIO_URL = "https://raw.githubusercontent.com/nod-sean/bmo/main/audio/";
+        
+        this.files = {
+            bgm: new Audio(BASE_AUDIO_URL + 'bgm.mp3'),
+            merge: new Audio(BASE_AUDIO_URL + 'merge.mp3'),
+            coin: new Audio(BASE_AUDIO_URL + 'coin.mp3'),
+            pop: new Audio(BASE_AUDIO_URL + 'pop.mp3')
+        };
+        
+        this.files.bgm.loop = true;
+        this.files.bgm.volume = 0.5; // BGM Volume
     }
 
     resume() {
-        if (!this.hasResumed && this.ctx.state === 'suspended') {
-            this.ctx.resume().then(() => {
-                this.hasResumed = true;
-            });
+        if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+        if (this.enabled && !this.bgmStarted) {
+            this.files.bgm.play().then(() => {
+                this.bgmStarted = true;
+            }).catch(e => console.log("BGM requires interaction"));
         }
     }
 
+    playFile(name, vol=1.0) {
+        if (!this.enabled || !this.files[name]) return;
+        const sound = this.files[name].cloneNode(); // Clone to allow overlapping
+        sound.crossOrigin = "anonymous"; // Safe check
+        sound.volume = vol;
+        sound.play().catch(e => {});
+    }
+
+    // Fallback Oscillator for missing files or specific effects
     playTone(freq, type, duration, vol=0.1) {
         if (!this.enabled) return;
         const osc = this.ctx.createOscillator();
@@ -252,23 +277,14 @@ class SoundManager {
         osc.stop(this.ctx.currentTime + duration);
     }
 
-    playClick() { this.playTone(600, 'sine', 0.1, 0.05); }
-    playError() { this.playTone(150, 'sawtooth', 0.3, 0.1); }
-    playSpawn() { this.playTone(400, 'square', 0.1, 0.05); }
-    playMerge() {
-        this.playTone(400, 'sine', 0.1);
-        setTimeout(() => this.playTone(600, 'sine', 0.1), 50);
-        setTimeout(() => this.playTone(800, 'sine', 0.2), 100);
-    }
-    playCollect() {
-        this.playTone(1200, 'sine', 0.1);
-        setTimeout(() => this.playTone(1800, 'sine', 0.2), 50);
-    }
-    playUnlock() {
-        this.playTone(500, 'square', 0.1);
-        setTimeout(() => this.playTone(1000, 'square', 0.4), 100);
-    }
+    playClick() { this.playFile('pop', 0.6); }
+    playError() { this.playTone(150, 'sawtooth', 0.3, 0.1); } // Keep oscillator for error
+    playSpawn() { this.playFile('pop', 0.5); }
+    playMerge() { this.playFile('merge', 0.8); }
+    playCollect() { this.playFile('coin', 0.6); }
+    playUnlock() { this.playFile('merge', 0.8); } // Reuse merge sound for unlock
     playLevelUp() {
+        // Keep special tone for level up
         [440, 554, 659, 880].forEach((f, i) => setTimeout(() => this.playTone(f, 'square', 0.3), i*100));
     }
 }
@@ -854,8 +870,8 @@ class Game {
         // CP Display - 2x Size
         this.ctx.font="bold 40px sans-serif"; 
         this.ctx.fillStyle = "#fff";
-        // Adjusted: rect.y + rect.h + 42 (Up by 3px)
-        this.ctx.fillText(`⚔️ ${cp}`, rect.x+rect.w/2, rect.y + rect.h + 42); 
+        // Adjusted: rect.y + rect.h + 39 (Was 42, moved up 3px)
+        this.ctx.fillText(`⚔️ ${cp}`, rect.x+rect.w/2, rect.y + rect.h + 39); 
 
         for(let i=0; i<9; i++) {
             const x = rect.x+(i%3)*this.squadCellSize, y = rect.y+Math.floor(i/3)*this.squadCellSize;
