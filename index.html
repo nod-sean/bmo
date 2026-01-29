@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v73 - Visual Polish</title>
+    <title>KOV Prototype v74 - Audio & UI Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -223,6 +223,56 @@ function getCode(type, level) {
     return 0;
 }
 
+class SoundManager {
+    constructor() {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        this.enabled = true;
+        this.hasResumed = false;
+    }
+
+    resume() {
+        if (!this.hasResumed && this.ctx.state === 'suspended') {
+            this.ctx.resume().then(() => {
+                this.hasResumed = true;
+            });
+        }
+    }
+
+    playTone(freq, type, duration, vol=0.1) {
+        if (!this.enabled) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
+    }
+
+    playClick() { this.playTone(600, 'sine', 0.1, 0.05); }
+    playError() { this.playTone(150, 'sawtooth', 0.3, 0.1); }
+    playSpawn() { this.playTone(400, 'square', 0.1, 0.05); }
+    playMerge() {
+        this.playTone(400, 'sine', 0.1);
+        setTimeout(() => this.playTone(600, 'sine', 0.1), 50);
+        setTimeout(() => this.playTone(800, 'sine', 0.2), 100);
+    }
+    playCollect() {
+        this.playTone(1200, 'sine', 0.1);
+        setTimeout(() => this.playTone(1800, 'sine', 0.2), 50);
+    }
+    playUnlock() {
+        this.playTone(500, 'square', 0.1);
+        setTimeout(() => this.playTone(1000, 'square', 0.4), 100);
+    }
+    playLevelUp() {
+        [440, 554, 659, 880].forEach((f, i) => setTimeout(() => this.playTone(f, 'square', 0.3), i*100));
+    }
+}
+
 class AssetLoader {
     constructor() { this.images = {}; this.failedKeys = new Set(); }
     tryLoadImage(key, pathIndex, extIndex, useLocal) {
@@ -300,6 +350,7 @@ class Game {
         this.ctx = this.canvas.getContext('2d');
         this.width = 1080; this.height = 1920;
         this.assets = new AssetLoader();
+        this.sound = new SoundManager();
         
         this.grid = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
         this.gridState = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
@@ -407,6 +458,7 @@ class Game {
                 const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
                 const cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
                 this.spawnParticles(cx, cy, "#FFD700", 20, "confetti");
+                this.sound.playSpawn();
                 return;
             }
         }
@@ -456,6 +508,7 @@ class Game {
         this.refreshLockState();
         document.getElementById('levelup-banner').classList.add('show');
         this.spawnParticles(this.width/2, this.height/2, "#FFD700", 100, "confetti");
+        this.sound.playLevelUp();
         setTimeout(() => document.getElementById('levelup-banner').classList.remove('show'), 2000);
         if (this.currentXp >= this.requiredXp) this.levelUp();
     }
@@ -465,6 +518,7 @@ class Game {
     }
 
     selectItem(item, location) {
+        if (this.selectedItem?.item !== item) this.sound.playClick();
         this.selectedItem = item ? { item, location } : null;
         this.updateInfoPanel();
         this.requestRender();
@@ -518,6 +572,7 @@ class Game {
             else this.squad2[location.idx]=null;
             const val = getData(item.type, item.level).sell;
             this.gold += val; this.showToast(`+${val} G`);
+            this.sound.playCollect();
             this.selectItem(null); this.updateUI(); this.requestRender();
         } else if (item.type < 10 && item.type !== ITEM_TYPE.BUILDING_CHEST && item.type !== ITEM_TYPE.BUILDING_CAMP) {
             this.produce(item); 
@@ -530,6 +585,7 @@ class Game {
             return { x: ((e.touches?e.touches[0].clientX:e.clientX)-r.left)*(this.width/r.width), y: ((e.touches?e.touches[0].clientY:e.clientY)-r.top)*(this.width/r.width) };
         };
         const start = e => {
+            this.sound.resume();
             const p = getPos(e); const hit = this.getZoneAt(p.x, p.y);
             if (hit) {
                 if (hit.zone === ZONES.GRID && this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) { this.tryUnlock(hit.r, hit.c); return; }
@@ -584,6 +640,7 @@ class Game {
                     this.selectItem(this.drag.item, hit);
                 } else if (target.type===ITEM_TYPE.BUILDING_CAMP && !target.storedUnit && this.drag.item.type>=10 && this.drag.item.type<20 && hit.zone===ZONES.GRID) {
                     target.storedUnit = this.drag.item; this.showToast("보관됨");
+                    this.sound.playClick();
                 } else if (target.type===this.drag.item.type && target.level===this.drag.item.level) {
                     // Merge
                     const isUnit = target.type>=10 && target.type<20;
@@ -599,6 +656,7 @@ class Game {
                         const xp = MERGE_XP_DATA[target.level-1] || 1;
                         this.addXp(xp); this.showFloatingImage('xp', hit.zone===ZONES.GRID ? this.gridStartX+hit.c*this.gridTileSize : this.drag.x, this.drag.y);
                         this.spawnParticles(this.drag.x, this.drag.y, "#FFD700", 30, "spark");
+                        this.sound.playMerge();
                     } else if(canMerge) { this.showToast("최대 레벨"); returned=true; }
                 } else returned=true;
             }
@@ -657,6 +715,7 @@ class Game {
         
         if(this.spawnItem({type, level:lvl, scale:0})) {
             this.energy-=stats.energy; this.updateUI(); this.requestRender();
+            this.sound.playSpawn();
         } else this.showToast("공간 부족");
     }
 
@@ -672,6 +731,7 @@ class Game {
         const info = getInfoFromCode(code);
         if(this.spawnItem({type:info.type, level:info.level, scale:0})) {
             this.energy--; chest.usage--; chest.scale=1.2; this.updateUI(); this.requestRender();
+            this.sound.playSpawn();
         } else this.showToast("공간 부족");
     }
 
@@ -694,7 +754,7 @@ class Game {
         for(let m of moves) {
             const nr=r+m[0], nc=c+m[1];
             if(nr>=0 && nr<8 && nc>=0 && nc<8 && this.gridState[nr][nc].type===LOCK_TYPE.OPEN && !this.grid[nr][nc]) {
-                this.grid[nr][nc]=camp.storedUnit; camp.storedUnit=null; this.requestRender(); return;
+                this.grid[nr][nc]=camp.storedUnit; camp.storedUnit=null; this.requestRender(); this.sound.playClick(); return;
             }
         }
         this.showToast("주변 공간 부족");
@@ -710,6 +770,7 @@ class Game {
         const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
         const cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
         this.spawnParticles(cx, cy, pColor, 15, "spark");
+        this.sound.playCollect();
         
         this.grid[r][c]=null; this.updateUI(); this.requestRender();
     }
@@ -722,16 +783,18 @@ class Game {
                 const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
                 const cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
                 this.spawnParticles(cx, cy, "#FFF", 20, "confetti");
+                this.sound.playUnlock();
             }
-            else this.showToast("골드 부족");
+            else { this.showToast("골드 부족"); this.sound.playError(); }
         } else if(l.type===LOCK_TYPE.LEVEL) {
             if(this.lordLevel>=l.value) { 
                 this.gridState[r][c]={type:LOCK_TYPE.OPEN}; this.showToast("해금!");
                 const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
                 const cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
                 this.spawnParticles(cx, cy, "#FFF", 20, "confetti");
+                this.sound.playUnlock();
             }
-            else this.showToast(`LV.${l.value} 필요`);
+            else { this.showToast(`LV.${l.value} 필요`); this.sound.playError(); }
         }
         this.updateUI(); this.requestRender();
     }
@@ -782,7 +845,8 @@ class Game {
         this.ctx.fillStyle = color; 
         this.ctx.font="bold 40px sans-serif"; 
         this.ctx.textAlign="center";
-        this.ctx.fillText(`${label}`, rect.x+rect.w/2, rect.y-20);
+        // Adjusted: rect.y - 22 (Up by 2px)
+        this.ctx.fillText(`${label}`, rect.x+rect.w/2, rect.y-22);
         
         this.ctx.fillStyle = color+"11"; 
         this.ctx.fillRect(rect.x-5, rect.y-5, rect.w+10, rect.h+10);
@@ -790,7 +854,8 @@ class Game {
         // CP Display - 2x Size
         this.ctx.font="bold 40px sans-serif"; 
         this.ctx.fillStyle = "#fff";
-        this.ctx.fillText(`⚔️ ${cp}`, rect.x+rect.w/2, rect.y + rect.h + 45); // Adjusted Y
+        // Adjusted: rect.y + rect.h + 42 (Up by 3px)
+        this.ctx.fillText(`⚔️ ${cp}`, rect.x+rect.w/2, rect.y + rect.h + 42); 
 
         for(let i=0; i<9; i++) {
             const x = rect.x+(i%3)*this.squadCellSize, y = rect.y+Math.floor(i/3)*this.squadCellSize;
@@ -885,6 +950,7 @@ class Game {
     spawnChest() { this.spawnItem({type:ITEM_TYPE.BUILDING_CHEST, level:1, scale:0, usage:5}); this.requestRender(); }
     
     showToast(msg) {
+        if (msg.includes("부족") || msg.includes("불가")) this.sound.playError();
         const t = document.getElementById('toast'); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,1000);
     }
     showFloatingImage(key, x, y) {
