@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v94 - Multi Squad Movement</title>
+    <title>KOV Prototype v93 - Field Map & Resource Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -38,19 +38,6 @@
             color: #fff; font-size: 12px; font-weight: bold; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 30;
         }
         #view-indicator.show { opacity: 1; }
-        
-        /* Squad Selector UI in Field Mode */
-        #squad-selector {
-            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
-            display: none; gap: 10px; z-index: 40;
-        }
-        #squad-selector.show { display: flex; }
-        .squad-btn {
-            background: rgba(0,0,0,0.7); border: 2px solid #555; color: #fff;
-            padding: 5px 15px; border-radius: 15px; font-weight: bold; font-size: 14px;
-            transition: all 0.2s;
-        }
-        .squad-btn.active { background: #FFD700; color: #000; border-color: #fff; transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -58,11 +45,6 @@
 <div id="game-container">
     <div id="levelup-banner"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/levelup.png" onerror="this.style.display='none'"></div>
     <div id="view-indicator">WORLD MAP</div>
-
-    <div id="squad-selector">
-        <button id="btn-squad1" class="squad-btn active" onclick="game.selectActiveSquad(1)">Squad 1</button>
-        <button id="btn-squad2" class="squad-btn" onclick="game.selectActiveSquad(2)">Squad 2</button>
-    </div>
 
     <div class="header-panel">
         <div class="header-content">
@@ -526,8 +508,6 @@ class Game {
 
         // Squad Movement State
         this.squad1Pos = { r: 12, c: 12 }; // Starting at center (My Castle)
-        this.squad2Pos = { r: 12, c: 12 }; // Starting at center (My Castle)
-        this.activeSquadId = 1; // Currently selected squad for field actions
 
         this.calcLayout();
         this.initGame();
@@ -735,16 +715,17 @@ class Game {
                 
                 // Movement logic: enable button if not mountain (5)
                 if (code !== 5) {
-                    // Check active squad position
-                    const currentPos = this.activeSquadId === 1 ? this.squad1Pos : this.squad2Pos;
-
-                    if (currentPos.r === r && currentPos.c === c) {
+                    // Check if squad is already here
+                    if (this.squad1Pos.r === r && this.squad1Pos.c === c) {
                         els.lbl.innerText = "대기중";
                         els.btn.style.opacity = 0.5;
                     } else {
+                        // Different logic based on tile type
                         if (code === 0) els.lbl.innerText = "이동";
                         else if (code === 1) els.lbl.innerText = "복귀";
-                        else els.lbl.innerText = "공격"; 
+                        else els.lbl.innerText = "공격"; // For 2, 3, 4 (Road attack?? Maybe move)
+                        
+                        // Check if walkable (simple check for now)
                         els.btn.style.opacity = 1;
                     }
                 } else {
@@ -800,25 +781,14 @@ class Game {
         document.getElementById('action-label').innerText = item.type >= 10 && item.type < 20 ? getText("sell") : els.lbl.innerText;
     }
 
-    selectActiveSquad(id) {
-        this.activeSquadId = id;
-        document.getElementById('btn-squad1').classList.toggle('active', id === 1);
-        document.getElementById('btn-squad2').classList.toggle('active', id === 2);
-        this.sound.playClick();
-        this.updateInfoPanel();
-        this.requestRender();
-    }
-
     handleAction() {
         // Field Action Logic: Squad Movement
         if (this.viewMode === 'FIELD') {
             if (this.selectedFieldTile) {
                 const { r, c, code } = this.selectedFieldTile;
-                const currentPos = this.activeSquadId === 1 ? this.squad1Pos : this.squad2Pos;
-                const currentSquad = this.activeSquadId === 1 ? this.squad1 : this.squad2;
-
+                
                 // 1. Check if same location
-                if (currentPos.r === r && currentPos.c === c) {
+                if (this.squad1Pos.r === r && this.squad1Pos.c === c) {
                     this.showToast("이미 해당 위치에 있습니다.");
                     return;
                 }
@@ -830,18 +800,16 @@ class Game {
                 }
 
                 // 3. Check if squad has units
-                const squadPower = this.getSquadPower(currentSquad);
+                const squadPower = this.getSquadPower(this.squad1);
                 if (squadPower <= 0) {
-                    this.showToast(`스쿼드 ${this.activeSquadId}에 배치된 유닛이 없습니다!`);
+                    this.showToast("스쿼드 1에 배치된 유닛이 없습니다!");
                     return;
                 }
 
                 // 4. Move Squad
-                if (this.activeSquadId === 1) this.squad1Pos = { r, c };
-                else this.squad2Pos = { r, c };
-
-                this.sound.playSpawn();
-                this.showToast(`스쿼드 ${this.activeSquadId} 이동 완료!`);
+                this.squad1Pos = { r, c };
+                this.sound.playSpawn(); // Use spawn sound as movement confirmation
+                this.showToast("부대가 이동했습니다!");
                 
                 // Visual Effect at destination
                 const cx = c * this.fieldTileSize + this.fieldTileSize / 2;
@@ -1239,16 +1207,11 @@ class Game {
             }
         }
 
-        // Draw Squad Markers
-        this.drawSquadMarker(1, this.squad1Pos, size, "#FFD700");
-        this.drawSquadMarker(2, this.squad2Pos, size, "#2196f3");
-
-        this.ctx.restore();
-    }
-
-    drawSquadMarker(id, pos, size, color) {
-        const sqX = pos.c * size + size/2;
-        const sqY = pos.r * size + size/2;
+        // Draw Squad Marker
+        const sqR = this.squad1Pos.r;
+        const sqC = this.squad1Pos.c;
+        const sqX = sqC * size + size/2;
+        const sqY = sqR * size + size/2;
         
         // Ensure Squad is visible
         if (sqX > this.fieldScroll.x && sqX < this.fieldScroll.x + this.width &&
@@ -1256,11 +1219,10 @@ class Game {
             
             // Pulsing effect
             const pulse = Math.sin(Date.now() / 200) * 5;
-            const isSelected = this.activeSquadId === id;
             
-            this.ctx.fillStyle = color;
+            this.ctx.fillStyle = "#FFD700"; // Gold
             this.ctx.beginPath();
-            this.ctx.arc(sqX, sqY - 20 + pulse, isSelected ? 18 : 14, 0, Math.PI*2);
+            this.ctx.arc(sqX, sqY - 20 + pulse, 15, 0, Math.PI*2);
             this.ctx.fill();
             this.ctx.strokeStyle = "#FFF";
             this.ctx.lineWidth = 2;
@@ -1268,7 +1230,7 @@ class Game {
             
             this.ctx.fillStyle = "#000";
             this.ctx.font = "bold 16px sans-serif";
-            this.ctx.fillText(id, sqX, sqY - 20 + pulse);
+            this.ctx.fillText("1", sqX, sqY - 20 + pulse);
             
             // Flag pole
             this.ctx.beginPath();
@@ -1278,6 +1240,8 @@ class Game {
             this.ctx.lineWidth = 3;
             this.ctx.stroke();
         }
+
+        this.ctx.restore();
     }
 
     getSquadPower(squad) {
@@ -1410,20 +1374,16 @@ class Game {
         document.getElementById('view-indicator').innerText = this.viewMode === 'MERGE' ? "" : "WORLD MAP";
         document.getElementById('view-indicator').classList.toggle('show', this.viewMode === 'FIELD');
         
-        // Show/Hide Squad Selector
-        const squadSelector = document.getElementById('squad-selector');
-        if (this.viewMode === 'FIELD') {
-            squadSelector.classList.add('show');
-            this.selectActiveSquad(this.activeSquadId); // Refresh state
-        } else {
-            squadSelector.classList.remove('show');
-        }
-
         // Reset selection when switching views
-        this.selectedItem = null;
-        this.selectedFieldTile = null;
-        this.updateInfoPanel();
-        
+        if (this.viewMode === 'FIELD') {
+            this.selectedItem = null;
+            this.selectedFieldTile = null;
+            this.updateInfoPanel();
+        } else {
+            this.selectedFieldTile = null;
+            this.selectedItem = null;
+            this.updateInfoPanel();
+        }
         this.requestRender();
     }
 
