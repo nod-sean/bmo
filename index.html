@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v82 - Syntax Fix Complete</title>
+    <title>KOV Prototype v83 - Logic & Localization Update</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -78,7 +78,7 @@
             <div class="text-[10px] text-gray-600 truncate mt-1" id="info-desc">오브젝트를 선택하세요.</div>
         </div>
         <button class="action-btn" id="btn-action" onclick="game.handleAction()"><span id="action-icon">💰</span><span id="action-label" style="font-size: 9px;">Sell</span></button>
-        <button class="action-btn world-btn" onclick="game.toggleFieldModal()" style="margin-left:5px;"><span>🌍</span><span style="font-size: 9px;">필드</span></button>
+        <button class="action-btn world-btn" onclick="game.toggleFieldModal()" style="margin-left:5px;"><span>🌍</span><span id="btn-field-label" style="font-size: 9px;">필드</span></button>
     </div>
 
     <div id="field-modal">
@@ -126,16 +126,25 @@ const CONFIG = {
 // --- DATA HANDLING ---
 let GAME_DATA = null;
 
-// Full Fallback Data Definition - Used if JSON load fails
+// Full Fallback Data Definition matching JSON structure
 const FALLBACK_GAME_DATA = {
-    level_data: [ 
-        { level: 1, xp: 10, maxEnergy: 50 }, { level: 2, xp: 22, maxEnergy: 52 }, { level: 3, xp: 37, maxEnergy: 54 }, 
-        { level: 4, xp: 55, maxEnergy: 56 }, { level: 5, xp: 77, maxEnergy: 58 }, { level: 6, xp: 103, maxEnergy: 60 }, 
-        { level: 7, xp: 134, maxEnergy: 62 }, { level: 8, xp: 169, maxEnergy: 64 }, { level: 9, xp: 209, maxEnergy: 66 }, 
-        { level: 10, xp: 254, maxEnergy: 68 }, { level: 11, xp: 304, maxEnergy: 70 }, { level: 12, xp: 359, maxEnergy: 72 }, 
-        { level: 13, xp: 420, maxEnergy: 74 }, { level: 14, xp: 486, maxEnergy: 76 }, { level: 15, xp: 558, maxEnergy: 78 } 
-    ],
+    level_xp: { "1": 10, "2": 22, "3": 37, "4": 55, "5": 77, "6": 103, "7": 134, "8": 169, "9": 209, "10": 254, "11": 304, "12": 359, "13": 420, "14": 486, "15": 558 },
+    level_energy: { "1": 50, "2": 52, "3": 54, "4": 56, "5": 58, "6": 60, "7": 62, "8": 64, "9": 66, "10": 68, "11": 70, "12": 72, "13": 74, "14": 76, "15": 78 },
     merge_xp: { "1":1, "2":2, "3":4, "4":5, "5":6, "6":8, "7":10, "8":15, "9":20, "10":0 },
+    localization: {
+        en: { sell: "Sell", field: "Field" },
+        ko: { 
+            sell: "판매", field: "필드",
+            desc_11xx: "보병 유닛입니다.\n방어력이 높고 기본적인 공격을 합니다.",
+            desc_12xx: "궁수 유닛입니다.\n사거리가 길지만 방어력이 낮습니다.",
+            desc_13xx: "기병 유닛입니다.\n이동 속도가 빠르고 공격력이 높습니다.",
+            desc_2101: "병영.\n보병 유닛을 생산합니다.",
+            desc_2201: "사격장.\n궁수 유닛을 생산합니다.",
+            desc_2301: "마구간.\n기병 유닛을 생산합니다.",
+            desc_3101: "막사.\n유닛을 보관합니다.",
+            desc_28xx: "보물상자.\n랜덤한 자원과 아이템이 들어있습니다."
+        }
+    },
     units: {
         "1101": { name: "Militia", name_kr: "민병", hp: 10, atk: 5, def: 10, spd: 5, range: 1, move: 1, sell: 0 },
         "1102": { name: "Infantry", name_kr: "보병", hp: 20, atk: 7, def: 15, spd: 7, range: 1, move: 1, sell: 1 },
@@ -224,6 +233,14 @@ async function initGameData() {
         console.error("Failed to load game_data.json, using fallback.", error);
         GAME_DATA = FALLBACK_GAME_DATA; // Simply assign the fallback data
     }
+}
+
+// Helper to get text from localization
+function getText(key) {
+    if (GAME_DATA && GAME_DATA.localization && GAME_DATA.localization.ko) {
+        return GAME_DATA.localization.ko[key] || key;
+    }
+    return key;
 }
 
 function getInfoFromCode(code) {
@@ -594,9 +611,13 @@ class Game {
     }
     updateLevelStats() {
         if (!GAME_DATA) return;
-        // Use GAME_DATA for Level Data
-        const d = GAME_DATA.level_data.find(d => d.level === this.lordLevel) || GAME_DATA.level_data[GAME_DATA.level_data.length - 1];
-        this.maxEnergy = d.maxEnergy; this.requiredXp = d.xp;
+        // Access Level Data via Key Lookup (String keys in JSON)
+        const lvlKey = String(this.lordLevel);
+        const xpReq = GAME_DATA.level_xp[lvlKey];
+        const maxEn = GAME_DATA.level_energy[lvlKey];
+        
+        if (xpReq !== undefined) this.requiredXp = xpReq;
+        if (maxEn !== undefined) this.maxEnergy = maxEn;
     }
 
     selectItem(item, location) {
@@ -621,15 +642,29 @@ class Game {
         if (!this.selectedItem) { els.name.innerText = "선택된 없음"; els.desc.innerText = "유닛이나 건물을 선택하세요."; return; }
 
         const item = this.selectedItem.item;
+        const code = getCode(item.type, item.level);
         const data = getData(item.type, item.level);
         els.name.innerText = `${data.name} LV.${item.level}`;
 
+        // Localization Description Lookup
+        let descKey = "";
+        if (code >= 1100 && code < 1200) descKey = "desc_11xx";
+        else if (code >= 1200 && code < 1300) descKey = "desc_12xx";
+        else if (code >= 1300 && code < 1400) descKey = "desc_13xx";
+        else if (item.type === ITEM_TYPE.BUILDING_BARRACKS) descKey = "desc_2101";
+        else if (item.type === ITEM_TYPE.BUILDING_RANGE) descKey = "desc_2201";
+        else if (item.type === ITEM_TYPE.BUILDING_STABLE) descKey = "desc_2301";
+        else if (item.type === ITEM_TYPE.BUILDING_CAMP) descKey = "desc_3101";
+        else if (item.type === ITEM_TYPE.BUILDING_CHEST) descKey = "desc_28xx";
+
         if (item.type < 10) { 
-            const campData = GAME_DATA.camps[getCode(item.type, item.level)] || {capacity: 4};
-            if (item.type === ITEM_TYPE.BUILDING_CHEST) els.desc.innerText = `남은 횟수: ${item.usage}회`;
-            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = `보관: ${item.storedUnit ? 1 : 0} / ${campData.capacity}`;
+            const campData = GAME_DATA.camps[code] || {capacity: 4};
+            
+            // Override desc text if special logic needs dynamic values
+            if (item.type === ITEM_TYPE.BUILDING_CHEST) els.desc.innerText = `${getText(descKey)}\n(남은 횟수: ${item.usage}회)`;
+            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = `${getText(descKey)}\n(보관: ${item.storedUnit ? 1 : 0} / ${campData.capacity})`;
             else {
-                els.desc.innerText = "유닛 생산";
+                els.desc.innerText = getText(descKey);
                 const cost = data.energy || 1;
                 els.lbl.innerText = `-${cost}⚡`; els.btn.style.opacity = 1; els.icon.innerText = ""; 
             }
@@ -637,13 +672,16 @@ class Game {
             els.desc.innerText = "클릭하여 획득"; els.lbl.innerText = "획득"; els.btn.style.opacity = 1;
         } else { 
             els.cls.innerText = data.class;
-            els.desc.innerText = "";
+            els.desc.innerText = getText(descKey);
             els.stats.classList.remove('hidden');
             document.getElementById('st-hp').innerText = data.hp; document.getElementById('st-atk').innerText = data.atk;
             document.getElementById('st-def').innerText = data.def; document.getElementById('st-spd').innerText = data.spd;
             document.getElementById('st-rng').innerText = data.rng; document.getElementById('st-mov').innerText = data.mov;
             els.lbl.innerText = `+${data.sell}`; els.icon.innerText = "💰"; els.btn.style.opacity = 1;
         }
+        
+        // Update Action Button Label from Localization
+        document.getElementById('action-label').innerText = item.type >= 10 && item.type < 20 ? getText("sell") : els.lbl.innerText;
     }
 
     handleAction() {
@@ -736,7 +774,7 @@ class Game {
                     if(canMerge && target.level < maxLvl) {
                         target.level++; target.scale=1.3;
                         if(target.type===ITEM_TYPE.BUILDING_CHEST) target.usage = Math.floor((target.usage+this.drag.item.usage)/2);
-                        const xp = GAME_DATA.merge_xp[target.level-1] || 1;
+                        const xp = GAME_DATA.merge_xp[String(target.level-1)] || 1;
                         this.addXp(xp); this.showFloatingImage('xp', hit.zone===ZONES.GRID ? this.gridStartX+hit.c*this.gridTileSize : this.drag.x, this.drag.y);
                         this.spawnParticles(this.drag.x, this.drag.y, "#FFD700", 30, "spark");
                         this.sound.playMerge();
@@ -1077,6 +1115,7 @@ class Game {
         document.getElementById('gold-display').innerText=this.gold;
         document.getElementById('gem-display').innerText=this.gem;
         document.getElementById('level-display').innerText=`LORD LV.${this.lordLevel}`;
+        document.getElementById('btn-field-label').innerText = getText("field");
         document.getElementById('xp-text').innerText=`${this.currentXp} / ${this.requiredXp}`;
         document.getElementById('xp-bar').style.width=`${(this.currentXp/this.requiredXp)*100}%`;
     }
