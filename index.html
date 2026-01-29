@@ -3,228 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v60 - Money Bag for Gold Locks</title>
+    <title>KOV Prototype v73 - Visual Polish</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-        
-        body {
-            background-color: #000;
-            touch-action: none;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            margin: 0; padding: 0;
-            display: flex; justify-content: center; align-items: center;
-            width: 100vw; height: 100dvh;
-        }
-
-        #game-container {
-            position: relative;
-            background-color: #4e342e;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            width: 100%; height: 100%;
-            max-width: 56.25vh;
-            display: flex; flex-direction: column;
-            overflow: hidden;
-        }
-
-        .header-panel {
-            flex: 0 0 auto;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.95), rgba(0,0,0,0.0));
-            color: white;
-            padding: 8px 12px;
-            padding-top: max(8px, env(safe-area-inset-top));
-            z-index: 20;
-        }
-
-        #canvas-wrapper {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background-color: #3e2723;
-            width: 100%;
-        }
-        
-        canvas {
-            display: block;
-            width: 100%; height: 100%;
-            image-rendering: pixelated;
-        }
-
-        .footer-panel {
-            flex: 0 0 auto;
-            background: #d7ccc8; 
-            border-top: 4px solid #8d6e63;
-            padding: 8px 12px;
-            padding-bottom: max(10px, env(safe-area-inset-bottom));
-            display: flex; align-items: center; justify-content: space-between;
-            min-height: 90px;
-            z-index: 20;
-        }
-
-        .res-pill {
-            background: rgba(0,0,0,0.6); border: 1px solid #555;
-            border-radius: 99px; padding: 2px 8px 2px 4px;
-            display: flex; align-items: center; gap: 4px;
-            font-weight: bold; font-size: 12px; color: #fff;
-        }
+        body { background-color: #000; touch-action: none; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100dvh; }
+        #game-container { position: relative; background-color: #4e342e; box-shadow: 0 0 50px rgba(0,0,0,0.5); width: 100%; height: 100%; max-width: 56.25vh; display: flex; flex-direction: column; overflow: hidden; }
+        .header-panel { flex: 0 0 auto; background: linear-gradient(to bottom, rgba(0,0,0,0.95), rgba(0,0,0,0.0)); color: white; padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); z-index: 20; }
+        #canvas-wrapper { flex: 1; position: relative; overflow: hidden; background-color: #3e2723; width: 100%; }
+        canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+        .footer-panel { flex: 0 0 auto; background: #d7ccc8; border-top: 4px solid #8d6e63; padding: 8px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; min-height: 90px; z-index: 20; }
+        .res-pill { background: rgba(0,0,0,0.6); border: 1px solid #555; border-radius: 99px; padding: 2px 8px 2px 4px; display: flex; align-items: center; gap: 4px; font-weight: bold; font-size: 12px; color: #fff; }
         .res-icon { width: 20px; height: 20px; object-fit: contain; }
-
-        .info-box {
-            flex: 1;
-            background: #f5f5f5;
-            border: 1px solid #8d6e63;
-            border-radius: 6px;
-            padding: 4px 8px;
-            height: 64px;
-            display: flex; flex-direction: column; justify-content: center;
-            color: #3e2723; margin: 0 6px; overflow: hidden;
-        }
-
-        .stat-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
-            font-size: 10px; font-weight: bold; color: #444; margin-top: 2px;
-        }
-        .stat-item { display: flex; align-items: center; gap: 2px; }
-        .stat-icon { font-size: 10px; }
-
-        .action-btn {
-            width: 50px; height: 50px;
-            background: linear-gradient(to bottom, #ffca28, #ff6f00);
-            border: 1px solid #e65100;
-            border-radius: 8px;
-            color: white; font-weight: bold;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 10px; box-shadow: 0 2px 0 #bf360c;
-        }
-        .action-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #bf360c; }
-        
-        .btn-open { background: linear-gradient(to bottom, #26a69a, #00695c); border-color: #004d40; box-shadow: 0 2px 0 #004d40; }
+        .info-box { flex: 1; background: #f5f5f5; border: 1px solid #8d6e63; border-radius: 6px; padding: 4px 8px; height: 64px; display: flex; flex-direction: column; justify-content: center; color: #3e2723; margin: 0 6px; overflow: hidden; }
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; font-size: 10px; font-weight: bold; color: #444; margin-top: 2px; }
+        .action-btn { width: 50px; height: 50px; background: linear-gradient(to bottom, #ffca28, #ff6f00); border: 1px solid #e65100; border-radius: 8px; color: white; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 0 #bf360c; }
         .world-btn { background: linear-gradient(to bottom, #42a5f5, #1565c0); border-color: #0d47a1; box-shadow: 0 2px 0 #0d47a1; }
-        .chat-btn { background: linear-gradient(to bottom, #78909c, #455a64); border-color:#37474f; box-shadow: 0 2px 0 #263238; }
-        .build-btn { background: linear-gradient(to bottom, #8d6e63, #5d4037); border-color: #3e2723; box-shadow: 0 2px 0 #3e2723; }
-
-        #shop-modal {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 50%;
-            background: rgba(30, 20, 15, 0.98);
-            border-top: 4px solid #8d6e63;
-            border-radius: 20px 20px 0 0;
-            z-index: 50;
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-            display: flex; flex-direction: column;
-            padding: 20px;
-            color: white;
-        }
-        #shop-modal.open { transform: translateY(0); }
-        
-        .shop-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-            overflow-y: auto;
-        }
-        .shop-item {
-            background: #4e342e; border: 2px solid #8d6e63; border-radius: 10px;
-            padding: 10px; display: flex; flex-direction: column; align-items: center;
-        }
-        .shop-btn {
-            background: #ffb300; color: black; font-weight: bold; padding: 5px 15px;
-            border-radius: 5px; margin-top: 5px; font-size: 12px;
-        }
-
-        #field-modal {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
-            background: rgba(30, 20, 15, 0.98);
-            border-top: 4px solid #8d6e63;
-            border-radius: 20px 20px 0 0;
-            z-index: 50;
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-            display: flex; flex-direction: column;
-            padding: 20px;
-            color: white;
-        }
+        #field-modal { position: absolute; bottom: 0; left: 0; width: 100%; height: 60%; background: rgba(30, 20, 15, 0.98); border-top: 4px solid #8d6e63; border-radius: 20px 20px 0 0; z-index: 50; transform: translateY(100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column; padding: 20px; color: white; }
         #field-modal.open { transform: translateY(0); }
-
-        #toast {
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9); color: #fff; padding: 10px 20px;
-            border-radius: 20px; font-size: 14px; font-weight: bold;
-            opacity: 0; transition: opacity 0.3s; pointer-events: none; border: 2px solid #ffd700;
-            white-space: nowrap; z-index: 100;
-        }
-
-        /* Level Up Banner Animation */
-        #levelup-banner {
-            position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            z-index: 150; pointer-events: none;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; overflow-y: auto; }
+        .shop-item { background: #4e342e; border: 2px solid #8d6e63; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        #toast { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 100; border: 2px solid #ffd700; white-space: nowrap; pointer-events: none; }
+        #levelup-banner { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0); z-index: 150; pointer-events: none; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #levelup-banner.show { transform: translate(-50%, -50%) scale(1); }
-        #levelup-banner img { width: 300px; max-width: 80vw; filter: drop-shadow(0 0 10px gold); }
-
-        /* DEBUG OVERLAY */
-        #debug-overlay {
-            position: absolute; top: 60px; left: 10px; right: 10px;
-            background: rgba(0, 0, 0, 0.7); color: white;
-            padding: 10px; border-radius: 8px; font-size: 11px;
-            pointer-events: none; z-index: 999;
-            display: none;
-            text-align: left;
-        }
-        
-        .float-text {
-            position: absolute; color: #ffd700; font-weight: bold; font-size: 16px;
-            text-shadow: 1px 1px 0 #000; pointer-events: none;
-            animation: floatUp 1s ease-out forwards; z-index: 50;
-            display: flex; align-items: center; gap: 4px;
-        }
-        .float-img {
-            position: absolute; pointer-events: none; z-index: 60;
-            animation: floatUpImg 1.2s ease-out forwards;
-            width: 60px; height: auto;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
-        }
-        @keyframes floatUpImg {
-            0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
-            100% { transform: translateY(-60px) scale(1); opacity: 0; }
-        }
+        .float-text { position: absolute; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 0 #000; pointer-events: none; animation: floatUp 1s ease-out forwards; z-index: 50; }
+        .float-img { position: absolute; pointer-events: none; z-index: 60; animation: floatUpImg 1.2s ease-out forwards; width: 60px; height: auto; }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
+        @keyframes floatUpImg { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { transform: translateY(-10px) scale(1.2); opacity: 1; } 100% { transform: translateY(-60px) scale(1); opacity: 0; } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <!-- Level Up Banner -->
-    <div id="levelup-banner">
-        <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/levelup.png" onerror="this.style.display='none'">
-    </div>
+    <div id="levelup-banner"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/levelup.png" onerror="this.style.display='none'"></div>
 
-    <!-- Header -->
     <div class="header-panel">
         <div class="flex justify-between mb-1">
-            <div class="res-pill">
-                <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/energy.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='⚡'+this.nextElementSibling.innerText">
-                <span id="energy-display">50/50</span>
-            </div>
-            <div class="res-pill">
-                <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/gold.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='💰'+this.nextElementSibling.innerText">
-                <span id="gold-display">3000</span>
-            </div>
-            <div class="res-pill">
-                <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/crystal.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='💎'+this.nextElementSibling.innerText">
-                <span id="gem-display">50</span>
-            </div>
+            <div class="res-pill"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/energy.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='⚡'+this.nextElementSibling.innerText"><span id="energy-display">50/50</span></div>
+            <div class="res-pill"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/gold.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='💰'+this.nextElementSibling.innerText"><span id="gold-display">3000</span></div>
+            <div class="res-pill"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/crystal.png" class="res-icon" onerror="this.style.display='none';this.nextElementSibling.innerText='💎'+this.nextElementSibling.innerText"><span id="gem-display">50</span></div>
         </div>
         <div class="flex flex-col w-full">
             <div class="flex justify-between items-end px-1">
                 <span class="font-bold text-yellow-400 text-xs" id="level-display">LORD LV.1</span>
-                <span class="font-bold text-gray-300 text-xs flex items-center gap-1">
-                    <span id="xp-text">0 / 10</span>
-                    <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/xp.png" class="h-3 object-contain" onerror="this.style.display='none';this.previousElementSibling.innerText+=' XP'">
-                </span>
+                <span class="font-bold text-gray-300 text-xs flex items-center gap-1"><span id="xp-text">0 / 10</span><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/xp.png" class="h-3 object-contain" onerror="this.style.display='none';this.previousElementSibling.innerText+=' XP'"></span>
             </div>
             <div class="w-full bg-gray-800 h-2 mt-1 rounded-full overflow-hidden border border-gray-600 relative">
                 <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
@@ -237,68 +59,39 @@
         </div>
     </div>
 
-    <!-- Canvas -->
     <div id="canvas-wrapper">
-        <div id="debug-overlay"></div>
         <canvas id="gameCanvas"></canvas>
     </div>
 
-    <!-- Footer -->
     <div class="footer-panel">
-        <button class="action-btn chat-btn" onclick="game.showToast('채팅 기능 준비 중')">
-            <span class="sell-icon">💬</span>
-        </button>
-        
+        <button class="action-btn chat-btn" onclick="game.showToast('채팅 준비 중')"><span>💬</span></button>
         <div class="info-box" id="info-panel">
-            <div class="flex justify-between items-center mb-0">
-                <span class="font-bold text-sm truncate" id="info-name">선택된 없음</span>
-                <span class="text-[10px] text-gray-500 font-bold" id="info-class"></span>
-            </div>
-            <!-- 상세 스탯 그리드 -->
+            <div class="flex justify-between items-center"><span class="font-bold text-sm truncate" id="info-name">선택 없음</span><span class="text-[10px] text-gray-500 font-bold" id="info-class"></span></div>
             <div class="stat-grid hidden" id="unit-stats-grid">
-                <div class="stat-item"><span class="stat-icon">❤</span><span id="st-hp">0</span></div>
-                <div class="stat-item"><span class="stat-icon">⚔</span><span id="st-atk">0</span></div>
-                <div class="stat-item"><span class="stat-icon">🛡️</span><span id="st-def">0</span></div>
-                <div class="stat-item"><span class="stat-icon">🦶</span><span id="st-spd">0</span></div>
-                <div class="stat-item"><span class="stat-icon">🎯</span><span id="st-rng">0</span></div>
-                <div class="stat-item"><span class="stat-icon">🏃</span><span id="st-mov">0</span></div>
+                <div class="stat-item">❤<span id="st-hp">0</span></div>
+                <div class="stat-item">⚔<span id="st-atk">0</span></div>
+                <div class="stat-item">🛡️<span id="st-def">0</span></div>
+                <div class="stat-item">🦶<span id="st-spd">0</span></div>
+                <div class="stat-item">🎯<span id="st-rng">0</span></div>
+                <div class="stat-item">🏃<span id="st-mov">0</span></div>
             </div>
-            <div class="text-[10px] text-gray-600 leading-tight truncate mt-1" id="info-desc">유닛이나 건물을 선택하세요.</div>
+            <div class="text-[10px] text-gray-600 truncate mt-1" id="info-desc">오브젝트를 선택하세요.</div>
         </div>
-
-        <button class="action-btn" id="btn-action" onclick="game.handleAction()">
-            <span class="sell-icon" id="action-icon">💰</span>
-            <span id="action-label" style="font-size: 9px;">Sell</span>
-        </button>
-        
-        <button class="action-btn world-btn" onclick="game.toggleFieldModal()" style="margin-left:5px;">
-            <span class="sell-icon">🌍</span><span style="font-size: 9px;">필드</span>
-        </button>
+        <button class="action-btn" id="btn-action" onclick="game.handleAction()"><span id="action-icon">💰</span><span id="action-label" style="font-size: 9px;">Sell</span></button>
+        <button class="action-btn world-btn" onclick="game.toggleFieldModal()" style="margin-left:5px;"><span>🌍</span><span style="font-size: 9px;">필드</span></button>
     </div>
 
-    <!-- Field/Construction Modal -->
     <div id="field-modal">
         <div class="flex justify-between items-center mb-2 border-b border-gray-600 pb-2">
-            <div>
-                <h2 class="text-xl font-bold text-yellow-400">필드 수집(미구현)</h2>
-                <p class="text-xs text-gray-400">건물을 건설하여 영지를 확장하세요.</p>
-            </div>
-            <button onclick="game.toggleFieldModal()" class="w-8 h-8">
-                <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/x.png" class="w-full h-full object-contain" onerror="this.style.display='none';this.parentNode.innerText='✖'">
-            </button>
+            <h2 class="text-xl font-bold text-yellow-400">건설 상점</h2>
+            <button onclick="game.toggleFieldModal()" class="w-8 h-8">✖</button>
         </div>
         <div class="shop-grid" id="shop-list"></div>
     </div>
-    
     <div id="toast">메시지</div>
 </div>
 
 <script>
-/**
- * KOV Prototype v60 - Money Bag for Gold Locks
- * FEATURE: Replaced lock icon with money bag (1804.png) for gold-unlockable slots.
- */
-
 // --- CONFIGURATION ---
 const GITHUB_REPO = "nod-sean/bmo";
 const GITHUB_BRANCH = "main";
@@ -306,52 +99,75 @@ const LOCAL_BASE_PATH = "./";
 const SEARCH_PATHS = ["", "img/", "assets/", "images/"];
 const EXTENSIONS = [".png", ".PNG", ".jpg", ".jpeg"];
 
-// --- ASSET KEYS ---
 const ASSET_KEYS = [
-    // Units: Infantry
     '1101', '1102', '1103', '1104', '1105', '1106', '1107', '1108', '1109', '1110',
-    // Units: Archer
     '1201', '1202', '1203', '1204', '1205', '1206', '1207', '1208', '1209', '1210',
-    // Buildings: Barracks
-    '2101', '2102', '2103', '2104', '2105',
-    // Buildings: Range
-    '2201', '2204', '2205',
-    // Buildings: Stable
-    '2301', '2302', '2303', '2304',
-    // Buildings: Chest
-    '2801', '2802', '2803', '2804', '2805',
-    // Resources: Gold
-    '1801', '1802', '1803', '1804', '1805', 
-    // Resources: Energy
-    '1811', '1812', '1813', '1814', '1815',
-    // Resources: Crystal
-    '1821', '1822', '1823', '1824', '1825',
-    // UI Elements
-    'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', '5xp', '10xp', 'x', 'LV'
+    '2101', '2102', '2103', '2104', '2105', '2201', '2204', '2205',
+    '2301', '2302', '2303', '2304', '2801', '2802', '2803', '2804', '2805',
+    '3101', '3102', '3103', '3104', '3105',
+    '1801', '1802', '1803', '1804', '1805', '1811', '1812', '1813', '1814', '1815',
+    '1821', '1822', '1823', '1824', '1825', 'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', '5xp', '10xp', 'x', 'LV'
 ];
 
-// --- DATA ---
 const LEVEL_DATA = [ { level: 1, xp: 10, maxEnergy: 50 }, { level: 2, xp: 22, maxEnergy: 52 }, { level: 3, xp: 37, maxEnergy: 54 }, { level: 4, xp: 55, maxEnergy: 56 }, { level: 5, xp: 77, maxEnergy: 58 }, { level: 6, xp: 103, maxEnergy: 60 }, { level: 7, xp: 134, maxEnergy: 62 }, { level: 8, xp: 169, maxEnergy: 64 }, { level: 9, xp: 209, maxEnergy: 66 }, { level: 10, xp: 254, maxEnergy: 68 }, { level: 11, xp: 304, maxEnergy: 70 }, { level: 12, xp: 359, maxEnergy: 72 }, { level: 13, xp: 420, maxEnergy: 74 }, { level: 14, xp: 486, maxEnergy: 76 }, { level: 15, xp: 558, maxEnergy: 78 }];
 const MERGE_XP_DATA = { 1:1, 2:2, 3:4, 4:5, 5:6, 6:8, 7:10, 8:15, 9:20, 10:0 };
 const BUILDING_STATS = { 1: { energy: 1, probs: [90, 10, 0, 0, 0] }, 2: { energy: 2, probs: [0, 90, 10, 0, 0] }, 3: { energy: 3, probs: [0, 45, 55, 0, 0] }, 4: { energy: 4, probs: [0, 0, 90, 10, 0] }, 5: { energy: 5, probs: [0, 0, 80, 10, 10] } };
 const ITEM_VALUES = { 1: 1, 2: 2, 3: 6, 4: 14, 5: 32 };
 const UNLOCK_GOLD_MAP = [[100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5,  5,  10, 40, 50], [30, 10, 0,  0,  0,  0,  10, 30], [20, 5,  0,  0,  0,  0,  5,  20], [20, 5,  0,  0,  0,  0,  5,  20], [30, 10, 0,  0,  0,  0,  10, 30], [50, 40, 10, 5,  5,  10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]];
 const UNLOCK_LEVEL_MAP = [[24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6,  2,  2,  6,  18, 21], [17, 8,  0,  0,  0,  0,  9,  15], [13, 5,  0,  0,  0,  0,  3,  11], [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]];
-
-const CHEST_DROP_TABLE = {
-    1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ],
-    2: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ],
-    3: [ {code: 1801, prob: 20}, {code: 1802, prob: 20}, {code: 1803, prob: 10}, {code: 1811, prob: 20}, {code: 1812, prob: 20}, {code: 1813, prob: 10} ],
-    4: [ {code: 1802, prob: 20}, {code: 1803, prob: 20}, {code: 1804, prob: 5}, {code: 1812, prob: 20}, {code: 1813, prob: 20}, {code: 1814, prob: 5}, {code: 1821, prob: 10} ],
-    5: [ {code: 1802, prob: 15}, {code: 1803, prob: 20}, {code: 1804, prob: 10}, {code: 1812, prob: 15}, {code: 1813, prob: 20}, {code: 1814, prob: 10}, {code: 1821, prob: 5}, {code: 1825, prob: 5} ] 
+const CHEST_DROP_TABLE = { 1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ], 2: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ], 3: [ {code: 1801, prob: 20}, {code: 1802, prob: 20}, {code: 1803, prob: 10}, {code: 1811, prob: 20}, {code: 1812, prob: 20}, {code: 1813, prob: 10} ], 4: [ {code: 1802, prob: 20}, {code: 1803, prob: 20}, {code: 1804, prob: 5}, {code: 1812, prob: 20}, {code: 1813, prob: 20}, {code: 1814, prob: 5}, {code: 1821, prob: 10} ], 5: [ {code: 1802, prob: 15}, {code: 1803, prob: 20}, {code: 1804, prob: 10}, {code: 1812, prob: 15}, {code: 1813, prob: 20}, {code: 1814, prob: 10}, {code: 1821, prob: 5}, {code: 1825, prob: 5} ] };
+const CONFIG = { 
+    gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, 
+    squadCols: 3, squadRows: 3, 
+    squadTopY: 55, 
+    squadGap: 80, 
+    squadCellSize: 130 
 };
-
-const CONFIG = { gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, squadCols: 3, squadRows: 3, squadTopY: 50, squadGap: 20, squadCellSize: 130 };
 const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5, UNIT_INFANTRY: 10, UNIT_ARCHER: 11, UNIT_CAVALRY: 12, ITEM_GOLD: 20, ITEM_ENERGY: 21, ITEM_CRYSTAL: 22 };
 const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
 const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
 const BUILDING_LIMITS = { [ITEM_TYPE.BUILDING_BARRACKS]: 3, [ITEM_TYPE.BUILDING_RANGE]: 2, [ITEM_TYPE.BUILDING_STABLE]: 2, [ITEM_TYPE.BUILDING_CAMP]: 2, [ITEM_TYPE.BUILDING_CHEST]: 99 };
 const SHOP_DATA = [ { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" }, { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" }, { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" }, { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" }, { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" } ];
+const CAMP_CAPACITY = {1:4, 2:6, 3:8, 4:12, 5:16};
+
+// --- UNIT STATS DATA (Synced with unit.csv) ---
+const UNIT_STATS = {
+    // Infantry (11xx)
+    1101: { name: "민병", hp: 10, atk: 5, def: 10, spd: 5, rng: 1, mov: 1, sell: 0 },
+    1102: { name: "보병", hp: 20, atk: 7, def: 15, spd: 7, rng: 1, mov: 1, sell: 1 },
+    1103: { name: "검병", hp: 30, atk: 9, def: 20, spd: 9, rng: 1, mov: 1, sell: 1 },
+    1104: { name: "방패병", hp: 40, atk: 11, def: 25, spd: 11, rng: 1, mov: 1, sell: 2 },
+    1105: { name: "중갑병", hp: 50, atk: 13, def: 30, spd: 13, rng: 1, mov: 1, sell: 3 },
+    1106: { name: "정예병", hp: 60, atk: 15, def: 35, spd: 15, rng: 1, mov: 1, sell: 6 },
+    1107: { name: "근위병", hp: 70, atk: 17, def: 40, spd: 17, rng: 1, mov: 1, sell: 12 },
+    1108: { name: "템플러", hp: 80, atk: 19, def: 45, spd: 19, rng: 1, mov: 1, sell: 25 },
+    1109: { name: "팔라딘", hp: 90, atk: 21, def: 50, spd: 21, rng: 1, mov: 1, sell: 50 },
+    1110: { name: "영웅", hp: 100, atk: 23, def: 55, spd: 23, rng: 1, mov: 1, sell: 100 },
+
+    // Archer (12xx)
+    1201: { name: "초보 궁수", hp: 8, atk: 8, def: 5, spd: 7, rng: 3, mov: 1, sell: 0 },
+    1202: { name: "궁수", hp: 16, atk: 11, def: 7, spd: 9, rng: 3, mov: 1, sell: 1 },
+    1203: { name: "사냥꾼", hp: 24, atk: 14, def: 9, spd: 11, rng: 3, mov: 1, sell: 1 },
+    1204: { name: "명사수", hp: 32, atk: 17, def: 11, spd: 13, rng: 4, mov: 1, sell: 2 },
+    1205: { name: "저격수", hp: 40, atk: 20, def: 13, spd: 15, rng: 4, mov: 1, sell: 3 },
+    1206: { name: "정예 궁수", hp: 48, atk: 23, def: 15, spd: 17, rng: 4, mov: 1, sell: 6 },
+    1207: { name: "데드아이", hp: 56, atk: 26, def: 17, spd: 19, rng: 5, mov: 1, sell: 12 },
+    1208: { name: "패스파인더", hp: 64, atk: 29, def: 19, spd: 21, rng: 5, mov: 1, sell: 25 },
+    1209: { name: "보우마스터", hp: 72, atk: 32, def: 21, spd: 23, rng: 5, mov: 1, sell: 50 },
+    1210: { name: "신궁", hp: 80, atk: 35, def: 23, spd: 25, rng: 6, mov: 1, sell: 100 },
+
+    // Cavalry (13xx)
+    1301: { name: "기병", hp: 12, atk: 6, def: 8, spd: 10, rng: 1, mov: 2, sell: 0 },
+    1302: { name: "경기병", hp: 24, atk: 9, def: 12, spd: 12, rng: 1, mov: 2, sell: 1 },
+    1303: { name: "창기병", hp: 36, atk: 12, def: 16, spd: 14, rng: 1, mov: 2, sell: 1 },
+    1304: { name: "기사", hp: 48, atk: 15, def: 20, spd: 16, rng: 1, mov: 2, sell: 2 },
+    1305: { name: "중기병", hp: 60, atk: 18, def: 24, spd: 18, rng: 1, mov: 2, sell: 3 },
+    1306: { name: "정예 기병", hp: 72, atk: 21, def: 28, spd: 20, rng: 1, mov: 2, sell: 6 },
+    1307: { name: "로얄 나이트", hp: 84, atk: 24, def: 32, spd: 22, rng: 1, mov: 2, sell: 12 },
+    1308: { name: "드래곤 나이트", hp: 96, atk: 27, def: 36, spd: 24, rng: 1, mov: 2, sell: 25 },
+    1309: { name: "발키리", hp: 108, atk: 30, def: 40, spd: 26, rng: 1, mov: 2, sell: 50 },
+    1310: { name: "전설의 기사", hp: 120, atk: 33, def: 44, spd: 28, rng: 1, mov: 2, sell: 100 }
+};
 
 function getInfoFromCode(code) {
     if (code >= 1100 && code < 1200) return { type: ITEM_TYPE.UNIT_INFANTRY, level: code % 100 };
@@ -364,16 +180,34 @@ function getInfoFromCode(code) {
 }
 
 function getData(type, level) {
-    const code = getCode(type, level);
-    if (DB.units[code]) return DB.units[code];
-    if (DB.buildings[code]) return DB.buildings[code];
-    if (DB.items[code]) return DB.items[code];
-    if (type >= 10 && type < 20) {
-        const base = DB.units[getCode(type, 1)];
-        if(base) return { name: base.name, class: base.class, hp: base.hp * level, atk: base.atk * level, def: base.def * level, spd: base.spd, rng: base.rng, mov: base.mov, sell: base.sell * level };
+    if (type >= 20) {
+        if(type === ITEM_TYPE.ITEM_GOLD) return { name: "골드", earn: ITEM_VALUES[level] };
+        if(type === ITEM_TYPE.ITEM_ENERGY) return { name: "에너지", earn: ITEM_VALUES[level] };
+        if(type === ITEM_TYPE.ITEM_CRYSTAL) return { name: "크리스탈", earn: ITEM_VALUES[level] };
     }
-    return { name: "알 수 없음", energy: 1, probs: [100], earn: 1, sell: 0 };
+    if (type < 10) {
+        if(type === ITEM_TYPE.BUILDING_BARRACKS) return { name: "병영", energy: BUILDING_STATS[level]?.energy };
+        if(type === ITEM_TYPE.BUILDING_RANGE) return { name: "사격장", energy: BUILDING_STATS[level]?.energy };
+        if(type === ITEM_TYPE.BUILDING_STABLE) return { name: "마구간", energy: BUILDING_STATS[level]?.energy };
+        if(type === ITEM_TYPE.BUILDING_CHEST) return { name: "보물상자" };
+        if(type === ITEM_TYPE.BUILDING_CAMP) return { name: "막사" };
+    }
+    // Updated to use UNIT_STATS lookup
+    if (type >= 10 && type < 20) {
+        const code = getCode(type, level);
+        const stat = UNIT_STATS[code];
+        if (stat) {
+            return { 
+                name: stat.name, 
+                class: type === 10 ? "보병" : (type === 11 ? "궁병" : "기병"),
+                hp: stat.hp, atk: stat.atk, def: stat.def, 
+                spd: stat.spd, rng: stat.rng, mov: stat.mov, sell: stat.sell 
+            };
+        }
+    }
+    return { name: "Unknown", earn: 0, sell: 0 };
 }
+
 function getCode(type, level) {
     if (type === ITEM_TYPE.UNIT_INFANTRY) return 1100 + level;
     if (type === ITEM_TYPE.UNIT_ARCHER) return 1200 + level;
@@ -382,118 +216,81 @@ function getCode(type, level) {
     if (type === ITEM_TYPE.BUILDING_RANGE) return 2200 + level;
     if (type === ITEM_TYPE.BUILDING_STABLE) return 2300 + level;
     if (type === ITEM_TYPE.BUILDING_CHEST) return 2800 + level;
-    if (type === ITEM_TYPE.BUILDING_CAMP) return 2810 + level;
+    if (type === ITEM_TYPE.BUILDING_CAMP) return 3100 + level;
     if (type === ITEM_TYPE.ITEM_GOLD) return 1800 + level;
     if (type === ITEM_TYPE.ITEM_ENERGY) return 1810 + level;
     if (type === ITEM_TYPE.ITEM_CRYSTAL) return 1820 + level;
     return 0;
 }
-const DB = {
-    units: { 
-        1101: { name:"민병", class:"보병", hp:10, atk:5, def:10, spd:5, rng:1, mov:1, sell:0 },
-        1201: { name:"궁병", class:"궁병", hp:8, atk:8, def:5, spd:7, rng:3, mov:1, sell:0 },
-        1301: { name:"기병", class:"기병", hp:15, atk:4, def:8, spd:9, rng:1, mov:1, sell:0 }
-    },
-    buildings: { 
-        2101: { name: "병영" }, 
-        2201: { name: "사격장" },
-        2301: { name: "마구간" },
-        2801: { name: "동 상자" }, 2802: { name: "은 상자" }, 2803: { name: "금 상자" }, 2804: { name: "백금 상자" }, 2805: { name: "다이아 상자" },
-        2811: { name: "캠프" } 
-    },
-    items: { 
-        1801: { name: "골드", earn: 1 }, 1802: { name: "골드", earn: 2 }, 1803: { name: "골드", earn: 6 }, 1804: { name: "골드", earn: 14 }, 1805: { name: "골드", earn: 32 },
-        1811: { name: "에너지", earn: 1 }, 1812: { name: "에너지", earn: 2 }, 1813: { name: "에너지", earn: 6 }, 1814: { name: "에너지", earn: 14 }, 1815: { name: "에너지", earn: 32 },
-        1821: { name: "크리스탈", earn: 1 }, 1822: { name: "크리스탈", earn: 2 }, 1823: { name: "크리스탈", earn: 6 }, 1824: { name: "크리스탈", earn: 14 }, 1825: { name: "크리스탈", earn: 32 }
-    }
-};
 
-// --- SMART ASSET LOADER ---
 class AssetLoader {
-    constructor() { 
-        this.images = {}; 
-        this.failedKeys = new Set();
-        this.successUrls = {}; 
-    }
-    
+    constructor() { this.images = {}; this.failedKeys = new Set(); }
     tryLoadImage(key, pathIndex, extIndex, useLocal) {
-        return new Promise((resolve, reject) => {
-            if (!useLocal && pathIndex >= SEARCH_PATHS.length) {
-                this.failedKeys.add(key);
-                resolve(null); 
-                return;
-            }
-
+        return new Promise((resolve) => {
+            if (!useLocal && pathIndex >= SEARCH_PATHS.length) { this.failedKeys.add(key); resolve(null); return; }
             const img = new Image();
-            if (!useLocal) img.crossOrigin = "Anonymous"; 
-
-            let url = "";
-            if (useLocal) {
-                if (extIndex >= EXTENSIONS.length) { resolve(null); return; }
-                url = `${LOCAL_BASE_PATH}${key}${EXTENSIONS[extIndex]}`;
-            } else {
-                if (extIndex >= EXTENSIONS.length) {
-                    this.tryLoadImage(key, pathIndex + 1, 0, false).then(resolve);
-                    return;
-                }
-                const folder = SEARCH_PATHS[pathIndex];
-                const ext = EXTENSIONS[extIndex];
-                url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${folder}${key}${ext}`;
-            }
-
-            img.onload = () => {
-                this.images[key] = img;
-                this.successUrls[key] = url;
-                resolve(img);
-            };
-
+            if (!useLocal) img.crossOrigin = "Anonymous";
+            let url = useLocal ? `${LOCAL_BASE_PATH}${key}${EXTENSIONS[extIndex]}` : `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${SEARCH_PATHS[pathIndex]}${key}${EXTENSIONS[extIndex]}`;
+            img.onload = () => resolve(img);
             img.onerror = () => {
-                this.tryLoadImage(key, pathIndex, extIndex + 1, useLocal).then(resolve);
+                if (extIndex + 1 < EXTENSIONS.length) this.tryLoadImage(key, pathIndex, extIndex + 1, useLocal).then(resolve);
+                else if (!useLocal) this.tryLoadImage(key, pathIndex + 1, 0, false).then(resolve);
+                else resolve(null);
             };
-
             img.src = url;
         });
     }
-
     async loadAll(callback) {
         this.failedKeys.clear();
-        const promises = ASSET_KEYS.map(async (key) => {
-            let result = await this.tryLoadImage(key, 0, 0, true);
-            if (result) return;
-            await this.tryLoadImage(key, 0, 0, false);
-        });
-        await Promise.all(promises);
-        this.reportStatus();
+        await Promise.all(ASSET_KEYS.map(async (key) => {
+            let img = await this.tryLoadImage(key, 0, 0, true);
+            if (!img) img = await this.tryLoadImage(key, 0, 0, false);
+            if (img) this.images[key] = img;
+        }));
         if (callback) callback();
     }
-
-    reportStatus() {
-        const overlay = document.getElementById('debug-overlay');
-        const failCount = this.failedKeys.size;
-        if (failCount > 0) {
-            overlay.style.display = 'block';
-            const missing = Array.from(this.failedKeys).join(', ');
-            overlay.innerHTML = `<strong style="color:#ff5252">⚠️ 이미지 로딩 실패 (${failCount}개)</strong><br><div style="margin-top:5px; color:#ddd; font-size:10px;">${missing}</div>`;
-        } else { overlay.style.display = 'none'; }
-    }
-
     getImage(type, level) {
-        if(typeof type === 'string') return this.images[type]; 
-        
+        if(typeof type === 'string') return this.images[type];
         const code = getCode(type, level);
-        if (this.images[code]) return this.images[code];
-        
-        if (level > 1) { 
-            for(let l=level-1; l>=1; l--) {
-                const lowerCode = getCode(type, l);
-                if(this.images[lowerCode]) return this.images[lowerCode];
-            }
+        return this.images[code] || (level > 1 ? this.getImage(type, level - 1) : null);
+    }
+}
+
+class Particle {
+    constructor(x, y, color, type) {
+        this.x = x; this.y = y;
+        this.vx = (Math.random() - 0.5) * 8;
+        this.vy = (Math.random() - 0.5) * 8;
+        this.life = 1.0;
+        this.decay = Math.random() * 0.03 + 0.02;
+        this.color = color;
+        this.size = Math.random() * 6 + 4;
+        this.type = type; // 'spark', 'smoke', 'confetti'
+        if (type === 'smoke') { this.vy = -Math.abs(this.vy) * 0.5; this.decay = 0.015; }
+    }
+    update() {
+        this.x += this.vx; this.y += this.vy;
+        this.life -= this.decay;
+        if(this.type === 'smoke') this.size += 0.3;
+        else this.vy += 0.2; // Gravity
+    }
+    draw(ctx) {
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.fillStyle = this.color;
+        if (this.type === 'confetti') {
+            ctx.translate(this.x, this.y); ctx.rotate(this.life * 5);
+            ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+            ctx.resetTransform();
+            // restore scale
+            const rect = ctx.canvas.getBoundingClientRect();
+            const scale = ctx.canvas.width / 1080; 
+            ctx.scale(scale, scale); 
+        } else if (this.type === 'smoke') {
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
+        } else {
+            ctx.fillRect(this.x, this.y, this.size, this.size);
         }
-        for(let l=level+1; l<=10; l++) {
-             const higherCode = getCode(type, l);
-             if(this.images[higherCode]) return this.images[higherCode];
-        }
-        return null;
+        ctx.globalAlpha = 1.0;
     }
 }
 
@@ -504,43 +301,50 @@ class Game {
         this.width = 1080; this.height = 1920;
         this.assets = new AssetLoader();
         
-        this.assets.loadAll(() => {
-            this.requestRender();
-        });
-
         this.grid = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
         this.gridState = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
         this.squad1 = Array(9).fill(null);
         this.squad2 = Array(9).fill(null);
+        this.particles = [];
         
         this.lordLevel = 1; this.currentXp = 0; this.updateLevelStats();
         this.energy = this.maxEnergy; this.gold = 3000; this.gem = 50; 
-        this.drag = null; this.hover = null; this.selectedItem = null;
-        this.potentialDrag = null;
+        
+        this.drag = null; this.hover = null; this.selectedItem = null; this.potentialDrag = null;
+        this.dpr = window.devicePixelRatio || 1;
 
         this.calcLayout();
         this.initGame();
         
-        this.dpr = window.devicePixelRatio || 1;
+        setInterval(() => this.regenEnergy(), 1000);
+
         window.addEventListener('resize', () => { this.resize(); this.requestRender(); });
         this.resize();
-
-        const start = e => this.handleInput(e, 'start');
-        const move = e => this.handleInput(e, 'move');
-        const end = e => this.handleInput(e, 'end');
-        this.canvas.addEventListener('mousedown', start);
-        window.addEventListener('mousemove', move);
-        window.addEventListener('mouseup', end);
-        this.canvas.addEventListener('touchstart', start, {passive: false});
-        window.addEventListener('touchmove', move, {passive: false});
-        window.addEventListener('touchend', end);
-
+        this.setupInput();
         this.initShopUI();
+        
+        this.assets.loadAll(() => { this.requestRender(); });
         this.loop();
         this.updateUI();
     }
 
     requestRender() { this.isDirty = true; }
+
+    spawnParticles(x, y, color, count, type) {
+        for(let i=0; i<count; i++) {
+            this.particles.push(new Particle(x, y, color, type));
+        }
+        this.isDirty = true;
+    }
+
+    regenEnergy() {
+        if (this.energy < this.maxEnergy) {
+            this.energyRegenAcc = (this.energyRegenAcc || 0) + 1;
+            if(this.energyRegenAcc >= 5) {
+                this.energy++; this.energyRegenAcc = 0; this.updateUI();
+            }
+        }
+    }
 
     calcLayout() {
         const gridAvailW = this.width - (CONFIG.gridPadding * 2);
@@ -558,14 +362,14 @@ class Game {
     initGame() {
         this.refreshLockState(); 
         this.grid[3][3] = { type: ITEM_TYPE.BUILDING_BARRACKS, level: 1, scale: 1 };
-        this.grid[4][4] = { type: ITEM_TYPE.BUILDING_CHEST, level: 1, scale: 1 };
+        this.grid[4][4] = { type: ITEM_TYPE.BUILDING_CHEST, level: 1, scale: 1, usage: 5 };
+        this.grid[5][5] = { type: ITEM_TYPE.BUILDING_CAMP, level: 1, scale: 1, storedUnit: null };
     }
 
     refreshLockState() {
         for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
             if (this.gridState[r][c] && this.gridState[r][c].type === LOCK_TYPE.OPEN) continue;
-            const lvlReq = UNLOCK_LEVEL_MAP[r][c];
-            const goldReq = UNLOCK_GOLD_MAP[r][c];
+            const lvlReq = UNLOCK_LEVEL_MAP[r][c], goldReq = UNLOCK_GOLD_MAP[r][c];
             if (this.lordLevel < lvlReq) this.gridState[r][c] = { type: LOCK_TYPE.LEVEL, value: lvlReq };
             else if (goldReq > 0) this.gridState[r][c] = { type: LOCK_TYPE.GOLD, value: goldReq };
             else this.gridState[r][c] = { type: LOCK_TYPE.OPEN };
@@ -584,9 +388,6 @@ class Game {
         });
     }
 
-    toggleFieldModal() { const modal = document.getElementById('field-modal'); modal.classList.toggle('open'); }
-    toggleShop() { this.toggleFieldModal(); }
-
     buyBuilding(type, price) {
         if (this.gold < price) { this.showToast("골드 부족!"); return; }
         const limit = BUILDING_LIMITS[type] || 999;
@@ -596,10 +397,16 @@ class Game {
         for(let r=0;r<8;r++) for(let c=0;c<8;c++) {
             if(this.gridState[r][c].type===LOCK_TYPE.OPEN && !this.grid[r][c]) {
                 this.gold -= price;
-                this.grid[r][c] = { type: type, level: 1, scale: 0 };
+                const newItem = { type: type, level: 1, scale: 0 };
+                if (type === ITEM_TYPE.BUILDING_CHEST) newItem.usage = 5;
+                if (type === ITEM_TYPE.BUILDING_CAMP) newItem.storedUnit = null;
+                this.grid[r][c] = newItem;
                 this.updateUI(); this.requestRender();
                 this.showToast("건설 완료!");
                 this.toggleFieldModal();
+                const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
+                const cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
+                this.spawnParticles(cx, cy, "#FFD700", 20, "confetti");
                 return;
             }
         }
@@ -615,30 +422,22 @@ class Game {
     getHighestBuildingLevel(unitType) {
         let bType = -1;
         if (unitType === ITEM_TYPE.UNIT_INFANTRY) bType = ITEM_TYPE.BUILDING_BARRACKS;
-        if (unitType === ITEM_TYPE.UNIT_ARCHER) bType = ITEM_TYPE.BUILDING_RANGE;
-        if (unitType === ITEM_TYPE.UNIT_CAVALRY) bType = ITEM_TYPE.BUILDING_STABLE;
-        if (bType === -1) return 10; 
+        else if (unitType === ITEM_TYPE.UNIT_ARCHER) bType = ITEM_TYPE.BUILDING_RANGE;
+        else if (unitType === ITEM_TYPE.UNIT_CAVALRY) bType = ITEM_TYPE.BUILDING_STABLE;
+        if (bType === -1) return 10;
         let maxLvl = 0;
-        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
-            if (this.grid[r][c] && this.grid[r][c].type === bType) {
-                if (this.grid[r][c].level > maxLvl) maxLvl = this.grid[r][c].level;
-            }
-        }
+        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) if (this.grid[r][c] && this.grid[r][c].type === bType) maxLvl = Math.max(maxLvl, this.grid[r][c].level);
         return maxLvl;
     }
 
     resize() {
-        const wrapper = document.getElementById('game-container');
-        const canvasWrap = document.getElementById('canvas-wrapper');
-        const width = canvasWrap.clientWidth;
-        const height = canvasWrap.clientHeight;
-        this.canvas.width = Math.floor(width * this.dpr);
-        this.canvas.height = Math.floor(height * this.dpr);
-        this.canvas.style.width = `${width}px`;
-        this.canvas.style.height = `${height}px`;
+        const wrap = document.getElementById('canvas-wrapper');
+        this.canvas.width = Math.floor(wrap.clientWidth * this.dpr);
+        this.canvas.height = Math.floor(wrap.clientHeight * this.dpr);
+        this.canvas.style.width = `${wrap.clientWidth}px`;
+        this.canvas.style.height = `${wrap.clientHeight}px`;
         this.ctx.resetTransform();
-        const scale = (width * this.dpr) / this.width;
-        this.ctx.scale(scale, scale);
+        this.ctx.scale(this.canvas.width / this.width, this.canvas.width / this.width);
         this.ctx.imageSmoothingEnabled = false;
         this.requestRender();
     }
@@ -649,25 +448,20 @@ class Game {
         this.updateUI();
     }
     levelUp() {
-        if (this.lordLevel >= 15) return; 
+        if (this.lordLevel >= 15) return;
         this.currentXp -= this.requiredXp;
         this.lordLevel++;
         this.updateLevelStats();
         this.energy = this.maxEnergy; 
         this.refreshLockState();
-        
-        // Show Level Up Banner
-        const banner = document.getElementById('levelup-banner');
-        banner.classList.add('show');
-        setTimeout(() => banner.classList.remove('show'), 2000);
-        
+        document.getElementById('levelup-banner').classList.add('show');
+        this.spawnParticles(this.width/2, this.height/2, "#FFD700", 100, "confetti");
+        setTimeout(() => document.getElementById('levelup-banner').classList.remove('show'), 2000);
         if (this.currentXp >= this.requiredXp) this.levelUp();
     }
-    cheatLevelUp() { this.addXp(this.requiredXp - this.currentXp); }
     updateLevelStats() {
-        const levelData = LEVEL_DATA.find(d => d.level === this.lordLevel) || LEVEL_DATA[LEVEL_DATA.length - 1];
-        this.maxEnergy = levelData.maxEnergy;
-        this.requiredXp = levelData.xp;
+        const d = LEVEL_DATA.find(d => d.level === this.lordLevel) || LEVEL_DATA[LEVEL_DATA.length - 1];
+        this.maxEnergy = d.maxEnergy; this.requiredXp = d.xp;
     }
 
     selectItem(item, location) {
@@ -677,424 +471,375 @@ class Game {
     }
 
     updateInfoPanel() {
-        const nameEl = document.getElementById('info-name');
-        const descEl = document.getElementById('info-desc');
-        const classEl = document.getElementById('info-class');
-        const statsGrid = document.getElementById('unit-stats-grid');
-        const actionBtn = document.getElementById('btn-action');
-        const actionLabel = document.getElementById('action-label');
-        const actionIcon = document.getElementById('action-icon');
-
-        statsGrid.classList.add('hidden');
-        classEl.innerText = "";
-        actionBtn.className = 'action-btn'; 
+        const els = {
+            name: document.getElementById('info-name'),
+            desc: document.getElementById('info-desc'),
+            cls: document.getElementById('info-class'),
+            stats: document.getElementById('unit-stats-grid'),
+            btn: document.getElementById('btn-action'),
+            lbl: document.getElementById('action-label'),
+            icon: document.getElementById('action-icon')
+        };
+        els.stats.classList.add('hidden'); els.cls.innerText = ""; els.btn.style.opacity = 0.5; els.lbl.innerText = "-";
         
-        if (!this.selectedItem || !this.selectedItem.item) {
-            nameEl.innerText = "선택된 없음";
-            descEl.innerText = "유닛이나 건물을 선택하세요.";
-            actionLabel.innerText = "-";
-            actionBtn.style.opacity = 0.5;
-            return;
-        }
+        if (!this.selectedItem) { els.name.innerText = "선택된 없음"; els.desc.innerText = "유닛이나 건물을 선택하세요."; return; }
 
         const item = this.selectedItem.item;
-        const data = getData(item.type, item.level); // Use DB
-        let desc = ""; let price = 0; let actionType = "sell"; 
+        const data = getData(item.type, item.level);
+        els.name.innerText = `${data.name} LV.${item.level}`;
 
         if (item.type < 10) { 
-            if(item.type === ITEM_TYPE.BUILDING_CHEST) { 
-                desc = "아이템 생산"; 
-                actionType = "none";
-            } else if (item.type === ITEM_TYPE.BUILDING_CAMP) {
-                desc = "유닛 보관";
-            } else {
-                desc = "유닛 생산";
+            if (item.type === ITEM_TYPE.BUILDING_CHEST) els.desc.innerText = `남은 횟수: ${item.usage}회`;
+            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = `보관: ${item.storedUnit ? 1 : 0} / ${CAMP_CAPACITY[item.level]}`;
+            else {
+                els.desc.innerText = "유닛 생산";
+                const cost = data.energy || 1;
+                els.lbl.innerText = `-${cost}⚡`; els.btn.style.opacity = 1; els.icon.innerText = ""; 
             }
-            if(item.type !== ITEM_TYPE.BUILDING_CHEST) {
-                 const energyCost = data.energy || 1;
-                 desc += ` (소모 ⚡${energyCost})`;
-            }
-            if (item.type === ITEM_TYPE.BUILDING_CAMP) desc += ` (보관:${item.storedUnit ? 'O' : 'X'})`;
-            
-        } else if (item.type >= 20) {
-            const val = data.earn || 1;
-            desc = `클릭하여 +${val} 획득`;
-        } else {
-            // Unit Stats
-            classEl.innerText = data.class;
-            desc = `${data.name} 부대`;
-            price = data.sell;
-            
-            statsGrid.classList.remove('hidden');
-            document.getElementById('st-hp').innerText = data.hp;
-            document.getElementById('st-atk').innerText = data.atk;
-            document.getElementById('st-def').innerText = data.def;
-            document.getElementById('st-spd').innerText = data.spd;
-            document.getElementById('st-rng').innerText = data.rng;
-            document.getElementById('st-mov').innerText = data.mov;
-        }
-
-        nameEl.innerText = data.name + (item.type < 20 ? ` LV.${item.level}` : ` LV.${item.level}`); 
-        if(!statsGrid.classList.contains('hidden')) desc = ""; 
-        descEl.innerText = desc;
-        
-        if (actionType === "open") {
-            // Deprecated flow, now chests behave like buildings
-            actionLabel.innerText = "-"; actionBtn.style.opacity = 0.5;
-        } else if (price > 0) { 
-            actionLabel.innerText = `+${price}`; actionIcon.innerText = "💰"; actionBtn.style.opacity = 1; 
+        } else if (item.type >= 20) { 
+            els.desc.innerText = "클릭하여 획득"; els.lbl.innerText = "획득"; els.btn.style.opacity = 1;
         } else { 
-            actionLabel.innerText = "-"; actionIcon.innerText = "💰"; actionBtn.style.opacity = 0.5; 
+            els.cls.innerText = data.class;
+            els.desc.innerText = "";
+            els.stats.classList.remove('hidden');
+            document.getElementById('st-hp').innerText = data.hp; document.getElementById('st-atk').innerText = data.atk;
+            document.getElementById('st-def').innerText = data.def; document.getElementById('st-spd').innerText = data.spd;
+            document.getElementById('st-rng').innerText = data.rng; document.getElementById('st-mov').innerText = data.mov;
+            els.lbl.innerText = `+${data.sell}`; els.icon.innerText = "💰"; els.btn.style.opacity = 1;
         }
     }
 
     handleAction() {
-        if (!this.selectedItem || !this.selectedItem.item) return;
-        const { item } = this.selectedItem;
-        if (item.type === ITEM_TYPE.BUILDING_CHEST) return;
-        this.sellSelectedItem();
-    }
-
-    sellSelectedItem() {
-        if (!this.selectedItem || !this.selectedItem.item) return;
+        if (!this.selectedItem) return;
         const { item, location } = this.selectedItem;
-        const data = getData(item.type, item.level);
-        let price = data.sell || 0;
-
-        if (price > 0) {
-            if (location.zone === ZONES.GRID) this.grid[location.r][location.c] = null;
-            else if (location.zone === ZONES.SQUAD1) this.squad1[location.idx] = null;
-            else if (location.zone === ZONES.SQUAD2) this.squad2[location.idx] = null;
-            this.gold += price; this.showToast(`${price} 골드 획득!`);
-            this.selectedItem = null; this.updateInfoPanel(); this.updateUI(); this.requestRender();
-        } else { this.showToast("판매 불가"); }
+        if (item.type >= 10 && item.type < 20) { 
+            if(location.zone===ZONES.GRID) this.grid[location.r][location.c]=null;
+            else if(location.zone===ZONES.SQUAD1) this.squad1[location.idx]=null;
+            else this.squad2[location.idx]=null;
+            const val = getData(item.type, item.level).sell;
+            this.gold += val; this.showToast(`+${val} G`);
+            this.selectItem(null); this.updateUI(); this.requestRender();
+        } else if (item.type < 10 && item.type !== ITEM_TYPE.BUILDING_CHEST && item.type !== ITEM_TYPE.BUILDING_CAMP) {
+            this.produce(item); 
+        }
     }
 
-    goToWorld() { this.toggleFieldModal(); }
-
-    getGamePos(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        const scaleX = this.width / rect.width;
-        return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleX };
-    }
-
-    getZoneAt(x, y) {
-        if (x >= this.squad1Rect.x && x < this.squad1Rect.x + this.squad1Rect.w && y >= this.squad1Rect.y && y < this.squad1Rect.y + this.squad1Rect.h) {
-            const c = Math.floor((x - this.squad1Rect.x) / this.squadCellSize);
-            const r = Math.floor((y - this.squad1Rect.y) / this.squadCellSize);
-            // BUG FIX: Boundary Check
-            if (c >= 0 && c < CONFIG.squadCols && r >= 0 && r < CONFIG.squadRows)
-                return { zone: ZONES.SQUAD1, idx: r * 3 + c, r, c };
-        }
-        if (x >= this.squad2Rect.x && x < this.squad2Rect.x + this.squad2Rect.w && y >= this.squad2Rect.y && y < this.squad2Rect.y + this.squad2Rect.h) {
-            const c = Math.floor((x - this.squad2Rect.x) / this.squadCellSize);
-            const r = Math.floor((y - this.squad2Rect.y) / this.squadCellSize);
-             if(c >= 0 && c < CONFIG.squadCols && r >= 0 && r < CONFIG.squadRows)
-                return { zone: ZONES.SQUAD2, idx: r * 3 + c, r, c };
-        }
-        if (x >= this.gridStartX && x < this.gridStartX + this.gridTileSize * CONFIG.gridCols && y >= this.gridStartY && y < this.gridStartY + this.gridTileSize * CONFIG.gridRows) {
-            const c = Math.floor((x - this.gridStartX) / this.gridTileSize);
-            const r = Math.floor((y - this.gridStartY) / this.gridTileSize);
-            if (c >= 0 && c < CONFIG.gridCols && r >= 0 && r < CONFIG.gridRows) {
-                return { zone: ZONES.GRID, r, c, idx: r*8+c };
-            }
-        }
-        return null;
-    }
-
-    handleInput(e, state) {
-        if(state === 'start') e.preventDefault();
-        let pos = (state !== 'end') ? this.getGamePos(e) : { x: this.drag?.x||0, y: this.drag?.y||0 };
-
-        if (state === 'start') {
-            const hit = this.getZoneAt(pos.x, pos.y);
-            
+    setupInput() {
+        const getPos = e => {
+            const r = this.canvas.getBoundingClientRect();
+            return { x: ((e.touches?e.touches[0].clientX:e.clientX)-r.left)*(this.width/r.width), y: ((e.touches?e.touches[0].clientY:e.clientY)-r.top)*(this.width/r.width) };
+        };
+        const start = e => {
+            const p = getPos(e); const hit = this.getZoneAt(p.x, p.y);
             if (hit) {
-                if (hit.zone === ZONES.GRID) {
-                    if (this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) { 
-                        this.tryUnlock(hit.r, hit.c); return; 
-                    }
-                }
-                
-                let item = null;
-                if(hit.zone === ZONES.GRID) item = this.grid[hit.r][hit.c];
-                else if(hit.zone === ZONES.SQUAD1) item = this.squad1[hit.idx];
-                else if(hit.zone === ZONES.SQUAD2) item = this.squad2[hit.idx];
-
-                this.potentialDrag = { startPos: pos, item: item, hit: hit };
-            } else {
-                this.selectItem(null); 
-            }
-        }
-        else if (state === 'move') {
+                if (hit.zone === ZONES.GRID && this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) { this.tryUnlock(hit.r, hit.c); return; }
+                let item = hit.zone===ZONES.GRID ? this.grid[hit.r][hit.c] : (hit.zone===ZONES.SQUAD1 ? this.squad1[hit.idx] : this.squad2[hit.idx]);
+                this.potentialDrag = { startPos: p, item, hit };
+            } else this.selectItem(null);
+        };
+        const move = e => {
             if (this.potentialDrag && !this.drag) {
-                const dist = Math.hypot(pos.x - this.potentialDrag.startPos.x, pos.y - this.potentialDrag.startPos.y);
-                if (dist > 10 && this.potentialDrag.item) {
-                    this.startDrag(this.potentialDrag.item, this.potentialDrag.hit, pos);
-                }
+                const p = getPos(e);
+                if (Math.hypot(p.x-this.potentialDrag.startPos.x, p.y-this.potentialDrag.startPos.y) > 10 && this.potentialDrag.item)
+                    this.startDrag(this.potentialDrag.item, this.potentialDrag.hit, p);
             }
-            if (this.drag) {
-                this.drag.x = pos.x; this.drag.y = pos.y; this.hover = this.getZoneAt(pos.x, pos.y); 
-                this.requestRender();
-            }
-        }
-        else if (state === 'end') {
-            if (this.drag) {
-                this.endDrag();
-            } else if (this.potentialDrag) {
-                // Click (Mouse Up without Drag)
-                this.handleClick(this.potentialDrag.item, this.potentialDrag.hit);
-            }
-            this.potentialDrag = null;
-            this.drag = null;
-        }
+            if (this.drag) { this.drag.x = getPos(e).x; this.drag.y = getPos(e).y; this.hover = this.getZoneAt(this.drag.x, this.drag.y); this.requestRender(); }
+        };
+        const end = e => {
+            if (this.drag) this.endDrag();
+            else if (this.potentialDrag) this.handleClick(this.potentialDrag.item, this.potentialDrag.hit);
+            this.potentialDrag = null; this.drag = null;
+        };
+        this.canvas.onmousedown = start; window.onmousemove = move; window.onmouseup = end;
+        this.canvas.ontouchstart = e => { start(e); e.preventDefault(); }; window.ontouchmove = e => { move(e); e.preventDefault(); }; window.ontouchend = end;
     }
 
     startDrag(item, hit, pos) {
-        let cellX, cellY, cellSize;
-        if (hit.zone === ZONES.GRID) {
-            cellX = this.gridStartX + hit.c * this.gridTileSize; cellY = this.gridStartY + hit.r * this.gridTileSize; cellSize = this.gridTileSize;
-        } else if (hit.zone === ZONES.SQUAD1) {
-            const c = hit.idx % 3, r = Math.floor(hit.idx / 3);
-            cellX = this.squad1Rect.x + c * this.squadCellSize; cellY = this.squad1Rect.y + r * this.squadCellSize; cellSize = this.squadCellSize;
-        } else {
-            const c = hit.idx % 3, r = Math.floor(hit.idx / 3);
-            cellX = this.squad2Rect.x + c * this.squadCellSize; cellY = this.squad2Rect.y + r * this.squadCellSize; cellSize = this.squadCellSize;
-        }
+        let cx, cy;
+        if(hit.zone===ZONES.GRID) { cx = this.gridStartX+hit.c*this.gridTileSize; cy = this.gridStartY+hit.r*this.gridTileSize; }
+        else if(hit.zone===ZONES.SQUAD1) { cx = this.squad1Rect.x+(hit.idx%3)*this.squadCellSize; cy = this.squad1Rect.y+Math.floor(hit.idx/3)*this.squadCellSize; }
+        else { cx = this.squad2Rect.x+(hit.idx%3)*this.squadCellSize; cy = this.squad2Rect.y+Math.floor(hit.idx/3)*this.squadCellSize; }
         
-        this.drag = { item: item, startZone: hit, x: pos.x, y: pos.y, offsetX: pos.x - cellX, offsetY: pos.y - cellY, size: cellSize };
-        this.hover = hit;
-        
-        if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = null;
-        else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = null;
-        else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = null;
-        
-        this.selectItem(item, hit);
-        this.requestRender();
+        this.drag = { item, startZone: hit, x: pos.x, y: pos.y, offsetX: pos.x-cx, offsetY: pos.y-cy, size: hit.zone===ZONES.GRID?this.gridTileSize:this.squadCellSize };
+        if(hit.zone===ZONES.GRID) this.grid[hit.r][hit.c]=null;
+        else if(hit.zone===ZONES.SQUAD1) this.squad1[hit.idx]=null;
+        else this.squad2[hit.idx]=null;
+        this.selectItem(item, hit); this.requestRender();
     }
 
     endDrag() {
         const hit = this.getZoneAt(this.drag.x, this.drag.y);
         let returned = false;
-        
         if (hit) {
             let target = null;
-            let isLocked = false;
-            if(hit.zone === ZONES.GRID) {
-                if(this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) isLocked = true;
-                else target = this.grid[hit.r][hit.c];
-            }
-            else if(hit.zone === ZONES.SQUAD1) target = this.squad1[hit.idx];
-            else if(hit.zone === ZONES.SQUAD2) target = this.squad2[hit.idx];
+            if(hit.zone===ZONES.GRID) { if(this.gridState[hit.r][hit.c].type!==LOCK_TYPE.OPEN) returned=true; else target=this.grid[hit.r][hit.c]; }
+            else if(hit.zone===ZONES.SQUAD1) target=this.squad1[hit.idx];
+            else target=this.squad2[hit.idx];
 
-            if (isLocked) returned = true;
-            else if (!target) {
-                // Move to empty
-                if(hit.zone === ZONES.GRID) this.grid[hit.r][hit.c] = this.drag.item;
-                else if(hit.zone === ZONES.SQUAD1) this.squad1[hit.idx] = this.drag.item;
-                else if(hit.zone === ZONES.SQUAD2) this.squad2[hit.idx] = this.drag.item;
-                this.selectItem(this.drag.item, hit);
-            }
-            else if (target) {
-                // Camp Logic
-                if (hit.zone === ZONES.GRID && target.type === ITEM_TYPE.BUILDING_CAMP && !target.storedUnit && this.drag.item.type >= 10 && this.drag.item.type < 20) {
-                    target.storedUnit = this.drag.item; this.showToast("보관 완료");
-                    this.selectItem(target, hit);
-                }
-                // MERGE LOGIC (Buildings & Units & Chests)
-                else if (target.type === this.drag.item.type && target.level === this.drag.item.level) {
-                    const isUnit = (target.type >= 10 && target.type < 20);
+            if (!returned) {
+                if (!target) {
+                    if(hit.zone===ZONES.GRID) this.grid[hit.r][hit.c]=this.drag.item;
+                    else if(hit.zone===ZONES.SQUAD1) this.squad1[hit.idx]=this.drag.item;
+                    else this.squad2[hit.idx]=this.drag.item;
+                    this.selectItem(this.drag.item, hit);
+                } else if (target.type===ITEM_TYPE.BUILDING_CAMP && !target.storedUnit && this.drag.item.type>=10 && this.drag.item.type<20 && hit.zone===ZONES.GRID) {
+                    target.storedUnit = this.drag.item; this.showToast("보관됨");
+                } else if (target.type===this.drag.item.type && target.level===this.drag.item.level) {
+                    // Merge
+                    const isUnit = target.type>=10 && target.type<20;
                     const maxLvl = isUnit ? 10 : 5;
-
-                    if (isUnit) {
-                        const buildingLvl = this.getHighestBuildingLevel(target.type);
-                        const unitCap = Math.min(10, buildingLvl + 5);
-                        if (target.level >= unitCap) { this.showToast(`성장 한계! (건물 Lv.${unitCap-5} 필요)`); returned = true; }
+                    let canMerge = true;
+                    if(isUnit) {
+                        const bLvl = this.getHighestBuildingLevel(target.type);
+                        if(target.level >= bLvl+5) { this.showToast(`합성 불가 (건물 Lv.${target.level-4} 필요)`); canMerge=false; returned=true; }
                     }
-
-                    if (!returned && target.level < maxLvl) {
-                        target.level++; target.scale = 1.3;
-                        if (isUnit) {
-                            const gain = MERGE_XP_DATA[target.level - 1] || 0;
-                            if (gain > 0) { 
-                                this.addXp(gain); 
-                                // Show Image Toast for XP
-                                if (gain === 5 || gain === 10) {
-                                    this.showFloatingImage(`${gain}xp`, hit.x, hit.y);
-                                } else {
-                                    this.showToast(`XP +${gain}`, hit.x, hit.y); 
-                                }
-                            } else { 
-                                this.showToast("Level Up!", hit.x, hit.y); 
-                            }
-                        } else { 
-                            this.showToast(`Upgraded!`, hit.x, hit.y); 
-                        }
-                        this.selectItem(target, hit);
-                    } else if (!returned) {
-                        this.showToast("최대 레벨입니다", hit.x, hit.y);
-                        returned = true;
-                    }
-                }
-                else returned = true; 
+                    if(canMerge && target.level < maxLvl) {
+                        target.level++; target.scale=1.3;
+                        if(target.type===ITEM_TYPE.BUILDING_CHEST) target.usage = Math.floor((target.usage+this.drag.item.usage)/2);
+                        const xp = MERGE_XP_DATA[target.level-1] || 1;
+                        this.addXp(xp); this.showFloatingImage('xp', hit.zone===ZONES.GRID ? this.gridStartX+hit.c*this.gridTileSize : this.drag.x, this.drag.y);
+                        this.spawnParticles(this.drag.x, this.drag.y, "#FFD700", 30, "spark");
+                    } else if(canMerge) { this.showToast("최대 레벨"); returned=true; }
+                } else returned=true;
             }
-        } else returned = true; 
+        } else returned=true;
 
         if (returned) {
-            const s = this.drag.startZone;
-            if(s.zone === ZONES.GRID) this.grid[s.r][s.c] = this.drag.item;
-            else if(s.zone === ZONES.SQUAD1) this.squad1[s.idx] = this.drag.item;
-            else if(s.zone === ZONES.SQUAD2) this.squad2[s.idx] = this.drag.item;
-            this.selectItem(this.drag.item, s);
+            const s=this.drag.startZone;
+            if(s.zone===ZONES.GRID) this.grid[s.r][s.c]=this.drag.item;
+            else if(s.zone===ZONES.SQUAD1) this.squad1[s.idx]=this.drag.item;
+            else this.squad2[s.idx]=this.drag.item;
         }
-        this.hover = null; 
-        this.updateUI(); 
-        this.requestRender();
+        this.hover=null; this.updateUI(); this.requestRender();
     }
 
     handleClick(item, hit) {
-        if (!item) { this.selectItem(null); return; }
+        if(!item) { this.selectItem(null); return; }
         this.selectItem(item, hit);
-        
-        if (item.type >= 20) { this.collectResource(item, hit.r, hit.c); return; }
-        if (item.type === ITEM_TYPE.BUILDING_CAMP) { this.ejectCamp(item, hit.r, hit.c); return; }
-        // Produce from Buildings AND Chests
-        if (item.type < 10 && item.type !== ITEM_TYPE.BUILDING_CAMP) { 
-            if (item.type === ITEM_TYPE.BUILDING_CHEST) this.produceFromChest(item, hit.r, hit.c);
-            else this.produce(item); 
-            return; 
+        if(item.type>=20) this.collectResource(item, hit.r, hit.c);
+        else if(item.type===ITEM_TYPE.BUILDING_CAMP) this.ejectCamp(item, hit.r, hit.c);
+        else if(item.type<10 && item.type!==ITEM_TYPE.BUILDING_CAMP) {
+            if(item.type===ITEM_TYPE.BUILDING_CHEST) this.produceFromChest(item, hit.r, hit.c);
+            else this.produce(item);
         }
     }
 
-    // --- Rendering ---
+    getZoneAt(x, y) {
+        const check = (rect, rows, cols, size) => {
+            if(x>=rect.x && x<rect.x+rect.w && y>=rect.y && y<rect.y+rect.h) {
+                const c=Math.floor((x-rect.x)/size), r=Math.floor((y-rect.y)/size);
+                if(c>=0 && c<cols && r>=0 && r<rows) return {c,r,idx:r*3+c};
+            }
+            return null;
+        };
+        let res = check(this.squad1Rect, CONFIG.squadRows, CONFIG.squadCols, this.squadCellSize);
+        if(res) return {zone:ZONES.SQUAD1, ...res};
+        res = check(this.squad2Rect, CONFIG.squadRows, CONFIG.squadCols, this.squadCellSize);
+        if(res) return {zone:ZONES.SQUAD2, ...res};
+        
+        if(x>=this.gridStartX && x<this.gridStartX+this.gridTileSize*CONFIG.gridCols && y>=this.gridStartY && y<this.gridStartY+this.gridTileSize*CONFIG.gridRows) {
+            const c=Math.floor((x-this.gridStartX)/this.gridTileSize), r=Math.floor((y-this.gridStartY)/this.gridTileSize);
+            if(c>=0 && c<CONFIG.gridCols && r>=0 && r<CONFIG.gridRows) return {zone:ZONES.GRID, r, c, idx:r*8+c};
+        }
+        return null;
+    }
+
+    // --- LOGIC ---
+    produce(building) {
+        const stats = BUILDING_STATS[building.level] || BUILDING_STATS[1];
+        if(this.energy < stats.energy) { this.showToast(`에너지 부족 (${stats.energy})`); return; }
+        let type = ITEM_TYPE.UNIT_INFANTRY;
+        if(building.type===ITEM_TYPE.BUILDING_RANGE) type=ITEM_TYPE.UNIT_ARCHER;
+        else if(building.type===ITEM_TYPE.BUILDING_STABLE) type=ITEM_TYPE.UNIT_CAVALRY;
+        
+        let lvl=1, r=Math.random()*100, sum=0;
+        for(let i=0; i<stats.probs.length; i++) { sum+=stats.probs[i]; if(r<sum){lvl=i+1;break;} }
+        
+        if(this.spawnItem({type, level:lvl, scale:0})) {
+            this.energy-=stats.energy; this.updateUI(); this.requestRender();
+        } else this.showToast("공간 부족");
+    }
+
+    produceFromChest(chest, r, c) {
+        if(chest.usage<=0) { this.showToast("빈 상자 (머지 필요)"); return; }
+        if(this.energy<1) { this.showToast("에너지 부족"); return; }
+        
+        const table = CHEST_DROP_TABLE[chest.level] || CHEST_DROP_TABLE[1];
+        let total=0; table.forEach(e=>total+=e.prob);
+        let rnd=Math.random()*total, code=table[0].code;
+        for(let e of table) { if(rnd<e.prob){code=e.code;break;} rnd-=e.prob; }
+        
+        const info = getInfoFromCode(code);
+        if(this.spawnItem({type:info.type, level:info.level, scale:0})) {
+            this.energy--; chest.usage--; chest.scale=1.2; this.updateUI(); this.requestRender();
+        } else this.showToast("공간 부족");
+    }
+
+    spawnItem(item) {
+        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) 
+            if(this.gridState[r][c].type===LOCK_TYPE.OPEN && !this.grid[r][c]) {
+                this.grid[r][c]=item; 
+                const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
+                const cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
+                this.spawnParticles(cx, cy, "#EEE", 10, "smoke");
+                return true;
+            }
+        return false;
+    }
+
+    ejectCamp(camp, r, c) {
+        if(!camp.storedUnit) { this.showToast("비어있음"); return; }
+        // Try neighbors
+        const moves = [[0,1],[0,-1],[1,0],[-1,0]];
+        for(let m of moves) {
+            const nr=r+m[0], nc=c+m[1];
+            if(nr>=0 && nr<8 && nc>=0 && nc<8 && this.gridState[nr][nc].type===LOCK_TYPE.OPEN && !this.grid[nr][nc]) {
+                this.grid[nr][nc]=camp.storedUnit; camp.storedUnit=null; this.requestRender(); return;
+            }
+        }
+        this.showToast("주변 공간 부족");
+    }
+
+    collectResource(item, r, c) {
+        const val = ITEM_VALUES[item.level] || 1;
+        let pColor = "#fff";
+        if(item.type===ITEM_TYPE.ITEM_GOLD) { this.gold+=val; this.showToast(`+${val}G`); pColor="#FFD700"; }
+        else if(item.type===ITEM_TYPE.ITEM_ENERGY) { this.energy=Math.min(this.energy+val, this.maxEnergy); this.showToast(`+${val}⚡`); pColor="#00FFFF"; }
+        else { this.gem+=val; this.showToast(`+${val}💎`); pColor="#FF00FF"; }
+        
+        const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
+        const cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
+        this.spawnParticles(cx, cy, pColor, 15, "spark");
+        
+        this.grid[r][c]=null; this.updateUI(); this.requestRender();
+    }
+
+    tryUnlock(r, c) {
+        const l = this.gridState[r][c];
+        if(l.type===LOCK_TYPE.GOLD) {
+            if(this.gold>=l.value) { 
+                this.gold-=l.value; this.gridState[r][c]={type:LOCK_TYPE.OPEN}; this.showToast("해금!"); 
+                const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
+                const cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
+                this.spawnParticles(cx, cy, "#FFF", 20, "confetti");
+            }
+            else this.showToast("골드 부족");
+        } else if(l.type===LOCK_TYPE.LEVEL) {
+            if(this.lordLevel>=l.value) { 
+                this.gridState[r][c]={type:LOCK_TYPE.OPEN}; this.showToast("해금!");
+                const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
+                const cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
+                this.spawnParticles(cx, cy, "#FFF", 20, "confetti");
+            }
+            else this.showToast(`LV.${l.value} 필요`);
+        }
+        this.updateUI(); this.requestRender();
+    }
+
+    // --- DRAWING ---
     loop() {
-        if (!this.isDirty && !this.drag) {
-            requestAnimationFrame(() => this.loop());
-            return;
-        }
+        if(this.isDirty || this.drag) {
+            this.ctx.clearRect(0,0,this.width,this.height);
+            this.drawSquad(this.squad1, this.squad1Rect, "SQUAD 1", "#4caf50", ZONES.SQUAD1);
+            this.drawSquad(this.squad2, this.squad2Rect, "SQUAD 2", "#2196f3", ZONES.SQUAD2);
+            for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
+                const x = this.gridStartX+c*this.gridTileSize, y = this.gridStartY+r*this.gridTileSize;
+                const isHover = this.hover && this.hover.zone===ZONES.GRID && this.hover.r===r && this.hover.c===c;
+                const isSel = this.selectedItem && this.selectedItem.location.zone===ZONES.GRID && this.selectedItem.location.r===r && this.selectedItem.location.c===c;
+                this.drawCell(x, y, this.gridTileSize, this.grid[r][c], this.gridState[r][c], isHover, isSel);
+            }
+            if(this.drag) this.drawItem(this.drag.x-this.drag.size/2, this.drag.y-this.drag.size/2, this.drag.size, this.drag.item, true);
+            
+            // Update Particles
+            for(let i=this.particles.length-1; i>=0; i--) {
+                this.particles[i].update();
+                this.particles[i].draw(this.ctx);
+                if(this.particles[i].life <= 0) this.particles.splice(i, 1);
+            }
 
-        this.ctx.clearRect(0, 0, this.width, this.height);
-        this.drawSquad(this.squad1, this.squad1Rect, "SQUAD 1", "#4caf50", ZONES.SQUAD1);
-        this.drawSquad(this.squad2, this.squad2Rect, "SQUAD 2", "#2196f3", ZONES.SQUAD2);
-        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
-            const x = this.gridStartX + c * this.gridTileSize;
-            const y = this.gridStartY + r * this.gridTileSize;
-            const isHover = (this.hover && this.hover.zone === ZONES.GRID && this.hover.r === r && this.hover.c === c);
-            const isSelected = (this.selectedItem && this.selectedItem.location && this.selectedItem.location.zone === ZONES.GRID && this.selectedItem.location.r === r && this.selectedItem.location.c === c);
-            this.drawCell(x, y, this.gridTileSize, this.grid[r][c], this.gridState[r][c], isHover, isSelected);
+            let anim = false;
+            this.grid.flat().forEach(i=>{ if(i&&i.scale!==1){ i.scale+=(i.scale<1?0.1:-0.05); if(Math.abs(i.scale-1)<0.05)i.scale=1; anim=true; } });
+            
+            this.isDirty = anim || !!this.drag || this.particles.length > 0;
         }
-        if(this.drag) {
-            const dx = Math.floor(this.drag.x - this.drag.offsetX);
-            const dy = Math.floor(this.drag.y - this.drag.offsetY);
-            this.drawItem(dx, dy, this.drag.size, this.drag.item, true);
-        }
-        let animating = false;
-        this.grid.flat().forEach(i => { if(i && i.scale!==1) { this.anim(i); animating=true; } });
-        this.isDirty = animating || !!this.drag;
-        requestAnimationFrame(() => this.loop());
-    }
-    anim(i) { 
-        if (i.scale === 1) return;
-        if (i.scale < 1) { i.scale += 0.1; if (i.scale >= 1) i.scale = 1; } 
-        else if (i.scale > 1) { i.scale -= 0.05; if (i.scale <= 1) i.scale = 1; }
+        requestAnimationFrame(()=>this.loop());
     }
 
-    drawSquad(d, r, l, c, zoneName) {
-        this.ctx.fillStyle = c; this.ctx.font = "bold 30px sans-serif"; this.ctx.textAlign="center"; 
-        this.ctx.fillText(l, Math.floor(r.x + r.w/2), Math.floor(r.y - 15));
-        this.ctx.fillStyle = c + "33"; this.ctx.fillRect(Math.floor(r.x-5), Math.floor(r.y-5), Math.floor(r.w+10), Math.floor(r.h+10));
+    getSquadPower(squad) {
+        let power = 0;
+        for(let unit of squad) {
+            if(unit && unit.type >= 10 && unit.type < 20) {
+                const stats = getData(unit.type, unit.level);
+                if(stats.hp) power += (stats.hp + stats.atk + stats.def);
+            }
+        }
+        return power;
+    }
+
+    drawSquad(data, rect, label, color, zone) {
+        const cp = this.getSquadPower(data);
+        
+        this.ctx.fillStyle = color; 
+        this.ctx.font="bold 40px sans-serif"; 
+        this.ctx.textAlign="center";
+        this.ctx.fillText(`${label}`, rect.x+rect.w/2, rect.y-20);
+        
+        this.ctx.fillStyle = color+"11"; 
+        this.ctx.fillRect(rect.x-5, rect.y-5, rect.w+10, rect.h+10);
+        
+        // CP Display - 2x Size
+        this.ctx.font="bold 40px sans-serif"; 
+        this.ctx.fillStyle = "#fff";
+        this.ctx.fillText(`⚔️ ${cp}`, rect.x+rect.w/2, rect.y + rect.h + 45); // Adjusted Y
+
         for(let i=0; i<9; i++) {
-            const cx = r.x + (i%3)*this.squadCellSize; const cy = r.y + Math.floor(i/3)*this.squadCellSize;
-            const isHover = (this.hover && this.hover.zone === zoneName && this.hover.idx === i);
-            const isSelected = (this.selectedItem && this.selectedItem.location && this.selectedItem.location.zone === zoneName && this.selectedItem.location.idx === i);
-            this.drawCell(cx, cy, this.squadCellSize, d[i], {type:LOCK_TYPE.OPEN}, isHover, isSelected);
+            const x = rect.x+(i%3)*this.squadCellSize, y = rect.y+Math.floor(i/3)*this.squadCellSize;
+            const isHover = this.hover && this.hover.zone===zone && this.hover.idx===i;
+            const isSel = this.selectedItem && this.selectedItem.location.zone===zone && this.selectedItem.location.idx===i;
+            this.drawCell(x, y, this.squadCellSize, data[i], {type:LOCK_TYPE.OPEN}, isHover, isSel);
         }
     }
 
-    drawCell(x, y, s, i, l, isHover, isSelected) {
-        const p = 2; const is = s - p*2;
-        
-        // Background
-        this.ctx.fillStyle = (l.type !== LOCK_TYPE.OPEN) ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.1)";
-        this.ctx.fillRect(Math.floor(x+p), Math.floor(y+p), Math.floor(is), Math.floor(is));
-        
-        // Border
-        if (isSelected) { this.ctx.strokeStyle = "#00ff00"; this.ctx.lineWidth = 6; }
-        else if (isHover) { this.ctx.strokeStyle = "#ffff00"; this.ctx.lineWidth = 4; }
-        else { this.ctx.strokeStyle = "rgba(0,0,0,0.3)"; this.ctx.lineWidth = 2; }
-        this.ctx.strokeRect(Math.floor(x+p), Math.floor(y+p), Math.floor(is), Math.floor(is));
+    drawCell(x, y, s, item, lock, isHover, isSel) {
+        const p=2, size=s-p*2;
+        this.ctx.fillStyle = lock.type===LOCK_TYPE.OPEN ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.5)";
+        this.ctx.fillRect(x+p, y+p, size, size);
+        if(isSel) { this.ctx.lineWidth=6; this.ctx.strokeStyle="#0f0"; this.ctx.strokeRect(x+p, y+p, size, size); }
+        else if(isHover) { this.ctx.lineWidth=4; this.ctx.strokeStyle="#ff0"; this.ctx.strokeRect(x+p, y+p, size, size); }
+        else { this.ctx.lineWidth=2; this.ctx.strokeStyle="rgba(0,0,0,0.3)"; this.ctx.strokeRect(x+p, y+p, size, size); }
 
-        // Content
-        if(l.type !== LOCK_TYPE.OPEN) {
-            // Determine which icon to draw
-            let iconKey = 'lock'; // Default to lock
-            if (l.type === LOCK_TYPE.GOLD) {
-                iconKey = '1804'; // Use Gold Bag for gold unlocks
+        if(lock.type!==LOCK_TYPE.OPEN) {
+            const img = this.assets.getImage(lock.type===LOCK_TYPE.GOLD?'1804':'lock');
+            if(img && img.complete && img.naturalWidth>0) {
+                const isz = size*0.6;
+                this.ctx.drawImage(img, x+(s-isz)/2, y+(s-isz)/2, isz, isz);
+                this.ctx.fillStyle=lock.type===LOCK_TYPE.GOLD?"#ffd700":"#fff"; this.ctx.font="bold 20px sans-serif"; this.ctx.textAlign="center";
+                this.ctx.strokeStyle="black"; this.ctx.lineWidth=4;
+                const txt = lock.type===LOCK_TYPE.GOLD ? `💰${lock.value}` : `LV.${lock.value}`;
+                this.ctx.strokeText(txt, x+s/2, y+s/2); this.ctx.fillText(txt, x+s/2, y+s/2);
             }
-
-            const iconImg = this.assets.getImage(iconKey);
-            const lvImg = this.assets.getImage('LV');
-            
-            if (iconImg && iconImg.complete) {
-                const iconSize = is * 0.8; 
-                this.ctx.drawImage(iconImg, x + (is-iconSize)/2, y + (is-iconSize)/2, iconSize, iconSize);
-                
-                // Text styling
-                this.ctx.fillStyle = "#FFFFFF"; 
-                this.ctx.font = "bold 22px sans-serif"; // Slightly larger font
-                this.ctx.textAlign = "center"; 
-                this.ctx.textBaseline = "middle";
-                this.ctx.shadowColor = "black";
-                this.ctx.shadowBlur = 4;
-                this.ctx.lineWidth = 5; // Thicker stroke
-                this.ctx.strokeStyle = "black"; 
-                
-                let text = `${l.value}`;
-                
-                if(l.type === LOCK_TYPE.GOLD) {
-                    this.ctx.fillStyle = "#FFD700"; // Gold text color
-                    text = `💰${l.value}`; 
-                }
-
-                // Adjust Y for text based on icon type
-                // For lock, we want it in the screen area (center).
-                // For money bag, we want it clearly visible over the bag.
-                const textY = y + s/2;
-                
-                this.ctx.strokeText(text, x + s/2, textY);
-                this.ctx.fillText(text, x + s/2, textY);
-                
-                this.ctx.shadowBlur = 0;
-            } else {
-                // Fallback if image not loaded
-                this.ctx.fillStyle = "white"; this.ctx.font = "24px sans-serif"; this.ctx.textAlign = "center";
-                const fallbackIcon = (l.type === LOCK_TYPE.GOLD) ? "💰" : "🔒";
-                this.ctx.fillText(fallbackIcon, x+s/2, y+s/2 - 10);
-                
-                const text = (l.type === LOCK_TYPE.GOLD) ? `💰${l.value}` : `LV.${l.value}`;
-                this.ctx.fillText(text, x+s/2, y+s/2 + 25);
-            }
-            
-        } else if(i && i !== this.drag?.item) this.drawItem(x, y, s, i);
+        } else if(item && item !== this.drag?.item) {
+            this.drawItem(x, y, s, item);
+        }
     }
 
-    drawItem(x, y, size, item, isDrag=false) {
-        x = Math.floor(x); y = Math.floor(y); size = Math.floor(size);
-        const scale = isDrag ? 1.0 : item.scale;
-        const pad = 4; const ds = Math.floor((size - pad * 2) * scale);
-        const offset = Math.floor((size - ds) / 2);
-        const dx = x + offset; const dy = y + offset;
-        const cx = x + size/2; const cy = y + size/2;
-
-        if(isDrag) { this.ctx.shadowColor = "black"; this.ctx.shadowBlur = 20; }
-
+    drawItem(x, y, s, item, isDrag=false) {
+        const sc=isDrag?1.1:item.scale, p=4, ds=(s-p*2)*sc, offset=(s-ds)/2;
         const img = this.assets.getImage(item.type, item.level);
-        if(img && img.complete && img.naturalWidth !== 0) {
-            this.ctx.drawImage(img, dx, dy, ds, ds);
+        
+        // Image Size Multiplier
+        const imageScale = 1.2;
+        
+        if(img && img.complete && img.naturalWidth>0) {
+            if(isDrag) { this.ctx.shadowColor="black"; this.ctx.shadowBlur=15; }
+            
+            // Calculate new dimensions
+            const drawSize = ds * imageScale;
+            const drawOffset = (s - drawSize) / 2;
+            
+            this.ctx.drawImage(img, x + drawOffset, y + drawOffset, drawSize, drawSize);
+            this.ctx.shadowBlur=0;
         } else {
-            // Fallback render
             let c = "#cfd8dc"; let sym = "❓";
             if(item.type===ITEM_TYPE.BUILDING_BARRACKS) { c="#795548"; sym="🏠"; }
             else if(item.type===ITEM_TYPE.BUILDING_RANGE) { c="#388e3c"; sym="🎯"; }
@@ -1107,189 +852,58 @@ class Game {
             else if(item.type===ITEM_TYPE.ITEM_GOLD) { c="#fff176"; sym="💰"; }
             else if(item.type===ITEM_TYPE.ITEM_ENERGY) { c="#80deea"; sym="⚡"; }
             else if(item.type===ITEM_TYPE.ITEM_CRYSTAL) { c="#e1bee7"; sym="💎"; }
-            this.ctx.fillStyle = c; this.roundRect(dx, dy, ds, ds, 12); this.ctx.fill();
-            this.ctx.strokeStyle = "rgba(0,0,0,0.4)"; this.ctx.lineWidth = 2; this.ctx.stroke();
-            this.ctx.fillStyle = "rgba(0,0,0,0.6)"; this.ctx.font = `${Math.floor(ds*0.5)}px sans-serif`;
-            this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
-            this.ctx.fillText(sym, cx, cy);
-        }
-        this.drawLabel(item, cx, dy, ds);
-        this.ctx.shadowBlur = 0;
-    }
-
-    drawLabel(item, cx, dy, ds) {
-        let label = "";
-        
-        if ((item.type >= 10 && item.type < 20) || (item.type < 10 && item.type > 0)) { 
-            // Level Badge Circle
-            const badgeX = cx;
-            const badgeY = dy + ds - 12; // Adjusted position (-10 -> -12)
-            const badgeRadius = 11;
-
-            this.ctx.fillStyle = "rgba(0,0,0,0.85)"; // Darker background
-            this.ctx.beginPath(); 
-            this.ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI*2); 
-            this.ctx.fill();
             
-            // Border for visibility
-            this.ctx.strokeStyle = "white";
-            this.ctx.lineWidth = 1;
-            this.ctx.stroke();
-
-            this.ctx.fillStyle = "white"; 
-            this.ctx.font = "bold 14px sans-serif"; 
-            this.ctx.textAlign = "center"; 
-            this.ctx.textBaseline = "middle";
-            this.ctx.fillText(item.level, badgeX, badgeY + 1); // +1 Y 보정
+            // Apply scale to fallback rect as well
+            const drawSize = ds * imageScale;
+            const drawOffset = (s - drawSize) / 2;
+            
+            this.ctx.fillStyle = c; this.roundRect(x + drawOffset, y + drawOffset, drawSize, drawSize, 12); this.ctx.fill();
+            this.ctx.strokeStyle = "rgba(0,0,0,0.4)"; this.ctx.lineWidth = 2; this.ctx.stroke();
+            this.ctx.fillStyle = "rgba(0,0,0,0.6)"; this.ctx.font = `${Math.floor(drawSize*0.5)}px sans-serif`;
+            this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle";
+            this.ctx.fillText(sym, x+s/2, y+s/2);
         }
-        if (item.type === ITEM_TYPE.BUILDING_CAMP && item.storedUnit) {
-            this.ctx.fillStyle = "#ff5252"; this.ctx.font="bold 20px sans-serif"; this.ctx.fillText("IN", cx, Math.floor(dy + ds/2));
+
+        // Badges
+        const bx=x+s/2, by=y+ds; // Keep badge position relative to original cell size to avoid covering too much
+        if(item.type>=10 || item.type<10) { 
+            this.ctx.fillStyle="rgba(0,0,0,0.8)"; this.ctx.beginPath(); this.ctx.arc(bx, by-10, 10, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.strokeStyle="#fff"; this.ctx.lineWidth=1; this.ctx.stroke();
+            this.ctx.fillStyle="#fff"; this.ctx.font="bold 12px sans-serif"; this.ctx.textAlign="center";
+            this.ctx.fillText(item.level, bx, by-6);
+        }
+        if(item.type===ITEM_TYPE.BUILDING_CAMP && item.storedUnit) {
+            this.ctx.fillStyle="#f00"; this.ctx.font="bold 16px sans-serif"; this.ctx.fillText("IN", bx, y+s/2);
         }
     }
 
     roundRect(x,y,w,h,r){this.ctx.beginPath();this.ctx.moveTo(x+r,y);this.ctx.arcTo(x+w,y,x+w,y+h,r);this.ctx.arcTo(x+w,y+h,x,y+h,r);this.ctx.arcTo(x,y+h,x,y,r);this.ctx.arcTo(x,y,x+w,y,r);this.ctx.closePath();}
-    
-    showToast(msg, x, y, color='#ffd700') { 
-        if (x && y) {
-            const rect = this.canvas.getBoundingClientRect();
-            const scale = rect.width / this.width;
-            const screenX = x * scale;
-            const screenY = y * scale;
-            const el = document.createElement('div');
-            el.className = 'float-text';
-            el.style.left = `${screenX}px`; el.style.top = `${screenY}px`;
-            el.innerText = msg;
-            el.style.color = color; // Apply dynamic color
-            document.getElementById('canvas-wrapper').appendChild(el);
-            setTimeout(() => el.remove(), 1000);
-        } else {
-            const t = document.getElementById('toast'); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,1000); 
-        }
-    }
 
+    toggleFieldModal() { document.getElementById('field-modal').classList.toggle('open'); }
+    cheatEnergy() { this.energy = Math.min(this.energy+30, this.maxEnergy); this.updateUI(); }
+    cheatLevelUp() { this.addXp(this.requiredXp-this.currentXp); }
+    spawnChest() { this.spawnItem({type:ITEM_TYPE.BUILDING_CHEST, level:1, scale:0, usage:5}); this.requestRender(); }
+    
+    showToast(msg) {
+        const t = document.getElementById('toast'); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,1000);
+    }
     showFloatingImage(key, x, y) {
-        const imgObj = this.assets.getImage(key);
-        if (!imgObj) return;
-
-        const rect = this.canvas.getBoundingClientRect();
-        const scale = rect.width / this.width;
-        const screenX = x * scale;
-        const screenY = y * scale;
-
-        const el = document.createElement('img');
-        el.className = 'float-img';
-        el.src = imgObj.src;
-        el.style.left = `${screenX - 30}px`; // Center align adjustment
-        el.style.top = `${screenY}px`;
-        document.getElementById('canvas-wrapper').appendChild(el);
-        setTimeout(() => el.remove(), 1200);
+        const img = this.assets.getImage(key);
+        if(!img) return;
+        const el = document.createElement('img'); el.src = img.src; el.className='float-img';
+        const r = this.canvas.getBoundingClientRect();
+        el.style.left = ((x/this.width)*r.width)+"px"; el.style.top = ((y/this.height)*r.height)+"px";
+        document.getElementById('canvas-wrapper').appendChild(el); setTimeout(()=>el.remove(), 1000);
     }
-
-    updateUI(){ 
-        document.getElementById('energy-display').innerText = `${this.energy}/${this.maxEnergy}`;
-        document.getElementById('gold-display').innerText = this.gold;
-        document.getElementById('gem-display').innerText = this.gem;
-        document.getElementById('level-display').innerText = `LORD LV.${this.lordLevel}`;
-        document.getElementById('xp-text').innerText = `${this.currentXp} / ${this.requiredXp}`;
-        document.getElementById('xp-bar').style.width = `${Math.min(100, (this.currentXp/this.requiredXp)*100)}%`;
-    }
-    cheatEnergy(){ this.energy = Math.min(this.energy+30, this.maxEnergy); this.updateUI(); }
-    spawnChest(){ for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(this.gridState[r][c].type===LOCK_TYPE.OPEN&&!this.grid[r][c]){ this.grid[r][c]={type:ITEM_TYPE.BUILDING_CHEST,level:1,scale:0}; this.requestRender(); return; } }
-    
-    produce(building) {
-        const stats = BUILDING_STATS[building.level] || BUILDING_STATS[1];
-        if(this.energy < stats.energy) { this.showToast(`에너지 부족 (${stats.energy} 필요)`); return; }
-        let unitType = ITEM_TYPE.UNIT_INFANTRY;
-        if(building.type === ITEM_TYPE.BUILDING_RANGE) unitType = ITEM_TYPE.UNIT_ARCHER;
-        if(building.type === ITEM_TYPE.BUILDING_STABLE) unitType = ITEM_TYPE.UNIT_CAVALRY;
-        let spawnLevel = 1;
-        const rand = Math.random() * 100;
-        let cum = 0;
-        for(let i=0; i<stats.probs.length; i++) {
-            cum += stats.probs[i];
-            if(rand < cum) { spawnLevel = i + 1; break; }
-        }
-        for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
-            if(this.gridState[r][c].type === LOCK_TYPE.OPEN && !this.grid[r][c]) {
-                this.energy -= stats.energy;
-                this.grid[r][c] = { type: unitType, level: spawnLevel, scale: 0 };
-                this.updateUI(); this.requestRender(); return;
-            }
-        }
-        this.showToast("공간 부족!");
-    }
-
-    produceFromChest(chest, r, c) {
-        const cost = 1; 
-        if(this.energy < cost) { this.showToast(`에너지 부족 (${cost} 필요)`); return; }
-        const table = CHEST_DROP_TABLE[chest.level] || CHEST_DROP_TABLE[1];
-        let totalWeight = 0;
-        table.forEach(entry => totalWeight += entry.prob);
-        let rand = Math.random() * totalWeight;
-        let selectedCode = table[0].code;
-        for(let entry of table) {
-            if(rand < entry.prob) { selectedCode = entry.code; break; }
-            rand -= entry.prob;
-        }
-        const info = getInfoFromCode(selectedCode);
-        for(let tr=0; tr<CONFIG.gridRows; tr++) for(let tc=0; tc<CONFIG.gridCols; tc++) {
-            if(this.gridState[tr][tc].type === LOCK_TYPE.OPEN && !this.grid[tr][tc]) {
-                this.energy -= cost;
-                this.grid[tr][tc] = { type: info.type, level: info.level, scale: 0 };
-                chest.scale = 1.3; 
-                this.updateUI(); this.requestRender(); return;
-            }
-        }
-        this.showToast("공간 부족!");
-    }
-
-    collectResource(item, r, c) {
-        const val = ITEM_VALUES[item.level] || 1;
-        let msg = "";
-        let color = "#fff"; // Default white
-        const cellX = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2;
-        const cellY = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
-
-        if(item.type === ITEM_TYPE.ITEM_GOLD) { 
-            this.gold += val; msg = `+${val} Gold`; color = "#ffd700"; // Yellow
-        }
-        if(item.type === ITEM_TYPE.ITEM_ENERGY) { 
-            this.energy = Math.min(this.energy + val, this.maxEnergy); msg = `+${val} Energy`; color = "#00bfff"; // Deep Sky Blue
-        }
-        if(item.type === ITEM_TYPE.ITEM_CRYSTAL) { 
-            this.gem += val; msg = `+${val} Gem`; color = "#ff69b4"; // Hot Pink
-        }
-        
-        this.showToast(msg, cellX, cellY, color);
-        this.grid[r][c] = null; 
-        this.updateUI(); this.requestRender();
-    }
-    
-    ejectCamp(item, r, c) {
-        if(!item.storedUnit) { this.showToast("비어있음"); return; }
-        const n = [[0,1],[0,-1],[1,0],[-1,0]];
-        for(let o of n) {
-            const nr=r+o[0], nc=c+o[1];
-            if(nr>=0 && nr<8 && nc>=0 && nc<8 && !this.grid[nr][nc] && this.gridState[nr][nc].type===LOCK_TYPE.OPEN) {
-                this.grid[nr][nc] = item.storedUnit; item.storedUnit = null; 
-                this.requestRender(); return;
-            }
-        }
-        this.showToast("공간 부족");
-    }
-    tryUnlock(r, c) {
-        const lock = this.gridState[r][c];
-        if(lock.type === LOCK_TYPE.GOLD) {
-            if(this.gold >= lock.value) { this.gold -= lock.value; this.gridState[r][c] = { type: LOCK_TYPE.OPEN }; this.showToast("해금 완료!"); }
-            else this.showToast("골드 부족");
-        } else if(lock.type === LOCK_TYPE.LEVEL) {
-            if(this.lordLevel >= lock.value) { this.gridState[r][c] = { type: LOCK_TYPE.OPEN }; this.showToast("해금 완료!"); }
-            else this.showToast(`LV.${lock.value} 필요`);
-        }
-        this.updateUI(); this.requestRender();
+    updateUI() {
+        document.getElementById('energy-display').innerText=`${this.energy}/${this.maxEnergy}`;
+        document.getElementById('gold-display').innerText=this.gold;
+        document.getElementById('gem-display').innerText=this.gem;
+        document.getElementById('level-display').innerText=`LORD LV.${this.lordLevel}`;
+        document.getElementById('xp-text').innerText=`${this.currentXp} / ${this.requiredXp}`;
+        document.getElementById('xp-bar').style.width=`${(this.currentXp/this.requiredXp)*100}%`;
     }
 }
-
 const game = new Game();
 </script>
 </body>
