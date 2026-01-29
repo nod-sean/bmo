@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype v90 - Field Interaction</title>
+    <title>KOV Prototype v93 - Field Map & Resource Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -240,13 +240,34 @@ const GAME_DATA = {
         level: [[24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6,  2,  2,  6,  18, 21], [17, 8,  0,  0,  0,  0,  9,  15], [13, 5,  0,  0,  0,  0,  3,  11], [13, 5,  0,  0,  0,  0,  3,  11], [17, 8,  0,  0,  0,  0,  9,  15], [23, 19, 7,  4,  4,  7,  19, 21], [25, 22, 16, 12, 12, 16, 22, 25]],
         gold: [[100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5,  5,  10, 40, 50], [30, 10, 0,  0,  0,  0,  10, 30], [20, 5,  0,  0,  0,  0,  5,  20], [20, 5,  0,  0,  0,  0,  5,  20], [30, 10, 0,  0,  0,  0,  10, 30], [50, 40, 10, 5,  5,  10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]]
     },
-    field_map: Array(25).fill().map(() => Array(25).fill(0))
+    field_map: [
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,3,4,2,4,4,1,4,4,2,4,3,4,2,4,4,1,4,4,2,0,3,0,0],
+        [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0],
+        [0,0,2,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,2,0],
+        [0,0,4,0,0,0,0,2,0,0,0,0,2,0,0,0,0,2,0,0,0,0,4,0,0],
+        [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,4,0],
+        [0,1,4,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,4,1],
+        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0],
+        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0],
+        [0,2,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,2,0],
+        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0],
+        [0,4,3,0,0,2,0,0,0,0,0,0,1,0,0,0,0,0,0,2,0,0,3,4,0],
+        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0],
+        [0,2,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,2,0],
+        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0],
+        [0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0],
+        [0,1,4,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,4,1],
+        [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,4,0],
+        [0,0,4,0,0,0,0,2,0,0,0,0,2,0,0,0,0,2,0,0,0,0,4,0,0],
+        [0,0,2,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,2,0],
+        [0,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0],
+        [0,0,3,4,2,4,4,1,4,4,2,4,3,4,2,4,4,1,4,4,2,0,3,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    ]
 };
-
-// Fallback Field map population with some dummy data if JSON fails
-GAME_DATA.field_map[12][12] = 1; // Center Castle
-GAME_DATA.field_map[10][10] = 2; // Gate
-GAME_DATA.field_map[14][14] = 3; // Fortress
 
 function initGameData() {
     // Return a promise that resolves immediately since data is embedded
@@ -485,6 +506,9 @@ class Game {
         this.selectedFieldTile = null; 
         this.isDraggingMap = false;
 
+        // Squad Movement State
+        this.squad1Pos = { r: 12, c: 12 }; // Starting at center (My Castle)
+
         this.calcLayout();
         this.initGame();
         
@@ -689,20 +713,28 @@ class Game {
                 els.name.innerText = `${tileInfo.name} (${c}, ${r})`;
                 els.desc.innerText = tileInfo.desc;
                 
-                // Placeholder actions for Field
-                if (code === 0) { // Empty Land
-                    els.lbl.innerText = "점령";
-                    els.btn.style.opacity = 0.5; // Disable until logic exists
-                } else if (code === 1) { // My Castle
-                    els.lbl.innerText = "관리";
-                    els.btn.style.opacity = 1;
-                } else { // Enemy/Neutral
-                    els.lbl.innerText = "정찰";
-                    els.btn.style.opacity = 1;
+                // Movement logic: enable button if not mountain (5)
+                if (code !== 5) {
+                    // Check if squad is already here
+                    if (this.squad1Pos.r === r && this.squad1Pos.c === c) {
+                        els.lbl.innerText = "대기중";
+                        els.btn.style.opacity = 0.5;
+                    } else {
+                        // Different logic based on tile type
+                        if (code === 0) els.lbl.innerText = "이동";
+                        else if (code === 1) els.lbl.innerText = "복귀";
+                        else els.lbl.innerText = "공격"; // For 2, 3, 4 (Road attack?? Maybe move)
+                        
+                        // Check if walkable (simple check for now)
+                        els.btn.style.opacity = 1;
+                    }
+                } else {
+                    els.lbl.innerText = "이동불가";
+                    els.btn.style.opacity = 0.5;
                 }
             } else {
                 els.name.innerText = "월드맵";
-                els.desc.innerText = "타일을 선택하여 정보를 확인하세요.";
+                els.desc.innerText = "타일을 선택하여 정보를 확인하거나 부대를 이동하세요.";
                 els.lbl.innerText = "-";
             }
             return;
@@ -750,10 +782,42 @@ class Game {
     }
 
     handleAction() {
-        // Field Action Logic Placeholder
+        // Field Action Logic: Squad Movement
         if (this.viewMode === 'FIELD') {
             if (this.selectedFieldTile) {
-                this.showToast("아직 구현되지 않은 기능입니다.");
+                const { r, c, code } = this.selectedFieldTile;
+                
+                // 1. Check if same location
+                if (this.squad1Pos.r === r && this.squad1Pos.c === c) {
+                    this.showToast("이미 해당 위치에 있습니다.");
+                    return;
+                }
+
+                // 2. Check if moveable (Mountain check)
+                if (code === 5) {
+                    this.showToast("산으로는 이동할 수 없습니다.");
+                    return;
+                }
+
+                // 3. Check if squad has units
+                const squadPower = this.getSquadPower(this.squad1);
+                if (squadPower <= 0) {
+                    this.showToast("스쿼드 1에 배치된 유닛이 없습니다!");
+                    return;
+                }
+
+                // 4. Move Squad
+                this.squad1Pos = { r, c };
+                this.sound.playSpawn(); // Use spawn sound as movement confirmation
+                this.showToast("부대가 이동했습니다!");
+                
+                // Visual Effect at destination
+                const cx = c * this.fieldTileSize + this.fieldTileSize / 2;
+                const cy = r * this.fieldTileSize + this.fieldTileSize / 2;
+                this.spawnParticles(cx - this.fieldScroll.x, cy - this.fieldScroll.y, "#3498db", 20, "spark");
+                
+                this.updateInfoPanel();
+                this.requestRender();
             }
             return;
         }
@@ -1004,7 +1068,11 @@ class Game {
     }
 
     collectResource(item, r, c) {
-        const val = ITEM_VALUES[item.level] || 1;
+        // Updated Logic to use GAME_DATA
+        const code = getCode(item.type, item.level);
+        const data = GAME_DATA.items[code];
+        const val = data ? data.earn : 1;
+
         let pColor = "#fff";
         if(item.type===ITEM_TYPE.ITEM_GOLD) { this.gold+=val; this.showToast(`+${val}G`); pColor="#FFD700"; }
         else if(item.type===ITEM_TYPE.ITEM_ENERGY) { this.energy=Math.min(this.energy+val, this.maxEnergy); this.showToast(`+${val}⚡`); pColor="#00FFFF"; }
@@ -1138,6 +1206,41 @@ class Game {
                 }
             }
         }
+
+        // Draw Squad Marker
+        const sqR = this.squad1Pos.r;
+        const sqC = this.squad1Pos.c;
+        const sqX = sqC * size + size/2;
+        const sqY = sqR * size + size/2;
+        
+        // Ensure Squad is visible
+        if (sqX > this.fieldScroll.x && sqX < this.fieldScroll.x + this.width &&
+            sqY > this.fieldScroll.y && sqY < this.fieldScroll.y + this.height) {
+            
+            // Pulsing effect
+            const pulse = Math.sin(Date.now() / 200) * 5;
+            
+            this.ctx.fillStyle = "#FFD700"; // Gold
+            this.ctx.beginPath();
+            this.ctx.arc(sqX, sqY - 20 + pulse, 15, 0, Math.PI*2);
+            this.ctx.fill();
+            this.ctx.strokeStyle = "#FFF";
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+            
+            this.ctx.fillStyle = "#000";
+            this.ctx.font = "bold 16px sans-serif";
+            this.ctx.fillText("1", sqX, sqY - 20 + pulse);
+            
+            // Flag pole
+            this.ctx.beginPath();
+            this.ctx.moveTo(sqX - 10, sqY - 20 + pulse);
+            this.ctx.lineTo(sqX - 10, sqY + 20);
+            this.ctx.strokeStyle = "#FFF";
+            this.ctx.lineWidth = 3;
+            this.ctx.stroke();
+        }
+
         this.ctx.restore();
     }
 
