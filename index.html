@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV - Fog of War</title>
+    <title>KOV - Field Marching Update</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -214,7 +214,7 @@
                 </div>
                 <div class="bg-gray-800 p-3 rounded text-xs text-gray-400">
                     <p>UID: <span id="settings-uid" class="text-gray-200">User_1234</span></p>
-                    <p>Version: 0.2.3 (Fog of War Fix)</p>
+                    <p>Version: 0.2.4 (Marching 4X)</p>
                 </div>
             </div>
             <div class="mt-6 flex gap-2">
@@ -491,7 +491,9 @@ class Game {
                 grid: this.grid, gridState: this.gridState, squad1: this.squad1, squad2: this.squad2,
                 lordLevel: this.lordLevel, currentXp: this.currentXp, energy: this.energy, gold: this.gold, gem: this.gem,
                 occupiedTiles: Array.from(this.occupiedTiles), settings: this.settings,
-                visibilityMap: Array.from(this.visibilityMap) // Save Fog State
+                visibilityMap: Array.from(this.visibilityMap), // Save Fog State
+                // Save Army State
+                armies: this.armies 
             };
             localStorage.setItem('kov_save_v1', JSON.stringify(data));
         } catch(e) {}
@@ -507,6 +509,8 @@ class Game {
             if(data.occupiedTiles) this.occupiedTiles = new Set(data.occupiedTiles);
             if(data.visibilityMap) this.visibilityMap = new Set(data.visibilityMap); // Load Fog State
             if(data.settings) { this.settings = data.settings; this.applySettings(); }
+            if(data.armies) this.armies = data.armies; // Load Army State
+            
             // Ensure starting area is always visible (Radius 3)
             this.revealFog(PLAYER_START.r, PLAYER_START.c, 3);
             return true;
@@ -667,6 +671,7 @@ class Game {
 
     // --- Fog of War Logic ---
     revealFog(r, c, radius = 3) {
+        // 반경 3칸 (Radius 3)
         for(let i = -radius; i <= radius; i++) {
             for(let j = -radius; j <= radius; j++) {
                 const nr = r + i;
@@ -680,11 +685,11 @@ class Game {
                         const cell = document.getElementById(`field-cell-${nr}-${nc}`);
                         if(cell) {
                             cell.classList.remove('field-fog');
-                            // 안개가 걷혔을 때의 스타일 보정
+                            // 안개가 걷혔을 때의 스타일 보정 (점령지도 아니고 인접지도 아닌 경우 Dim 처리)
                             if (!cell.classList.contains('field-occupied') && !cell.classList.contains('field-adjacent')) {
-                                cell.style.opacity = 0.3; // 탐험했지만 갈 수 없는 곳
+                                cell.style.opacity = 0.3; // 탐험했지만 갈 수 없는 곳은 어둡게
                             } else if (cell.classList.contains('field-adjacent')) {
-                                cell.style.opacity = 0.6; 
+                                cell.style.opacity = 0.6; // 인접 타일은 원래 투명도 복구
                             }
                         }
                     }
@@ -761,6 +766,7 @@ class Game {
             for (let c = 0; c < MAP_SIZE; c++) {
                 const cell = document.createElement('div');
                 cell.className = 'field-cell';
+                // ID는 안개 여부와 상관없이 항상 부여 (실시간 업데이트를 위해)
                 cell.id = `field-cell-${r}-${c}`;
                 
                 const type = FIELD_MAP_DATA[r][c];
@@ -778,16 +784,15 @@ class Game {
                     }
                 }
 
-                // 1. 기본 지형 스타일 (안개 아래)
+                // 1. 기본 지형 스타일 적용 (안개 아래에 깔아둠)
                 let color = '#2e3b23';
                 if (type === 1) { color = '#4285f4'; cell.classList.add('field-castle'); }
                 else if (type === 2) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); }
                 else if (type === 3) { color = '#fbbc05'; cell.classList.add('field-fortress'); }
                 else if (type === 4) color = '#555';
-                
                 cell.style.backgroundColor = color;
 
-                // 2. 상태별 스타일
+                // 2. 상태별 스타일 및 이벤트 적용
                 if (isOccupied) {
                     cell.classList.add('field-occupied');
                 } else if (isAdjacent) {
@@ -800,10 +805,13 @@ class Game {
                         }
                     };
                 } else {
-                    cell.style.opacity = 0.3; // 탐험 완료, 접근 불가
+                    // 점령 안됨 + 인접 안함 (탐험은 했지만 갈 수 없는 곳)
+                    cell.style.opacity = 0.3; 
+                    // 빈 공간 클릭시 이동 기능 추가 (선택사항, 일단은 인접 점령 로직 유지)
+                    // 현재는 '점령'이 이동을 포함하므로, 인접하지 않은 곳은 클릭 불가로 둠
                 }
 
-                // 3. 안개 처리 (가장 마지막에 덮어씌움)
+                // 3. 안개 덮어쓰기 (가장 마지막에 처리)
                 if (!isVisible) {
                     cell.classList.add('field-fog');
                     cell.style.opacity = 1; // 안개는 불투명 (CSS에서 bg: black)
@@ -839,6 +847,7 @@ class Game {
             
             if (!isIdle) {
                 card.classList.add('disabled');
+                // 현재 위치 표시
                 card.innerHTML = `<div class="font-bold text-white">${army.name}</div><div class="squad-status">이동중...</div>`;
             } else if (power < 10) {
                  card.innerHTML = `<div class="font-bold text-white">${army.name}</div><div class="squad-status text-red-400">병력 부족</div>`;
@@ -877,6 +886,7 @@ class Game {
 
         const army = this.armies[armyId];
         army.state = 'MOVING_TO';
+        // 현재 위치를 출발점으로 설정 (성이나 이전 위치)
         army.startR = army.r;
         army.startC = army.c;
         army.target = { r, c, type };
@@ -894,10 +904,15 @@ class Game {
         const TILE_SIZE = 13;
         
         this.armies.forEach(army => {
-            if (army.state === 'IDLE') return;
-
+            // IDLE 상태라도 위치 업데이트 (초기 로딩 시 등)
             const el = document.getElementById(`army-marker-${army.id}`);
-            if (!el) return;
+            if (el) {
+                 const x = 50 + (army.c * TILE_SIZE);
+                 const y = 50 + (army.r * TILE_SIZE);
+                 el.style.transform = `translate(${x}px, ${y}px)`;
+            }
+
+            if (army.state === 'IDLE') return;
 
             const elapsed = now - army.startTime;
             const progress = Math.min(1, elapsed / army.duration);
@@ -914,36 +929,24 @@ class Game {
                 this.revealFog(discreteR, discreteC, 3);
 
                 if (progress >= 1) {
+                    // 도착 완료
+                    army.r = army.target.r;
+                    army.c = army.target.c;
                     this.handleArrival(army);
+                } else {
+                    // 이동 중 좌표 업데이트
+                    army.r = currentR;
+                    army.c = currentC;
                 }
-            } else if (army.state === 'RETURNING') {
-                currentR = army.startR + (PLAYER_START.r - army.startR) * progress;
-                currentC = army.startC + (PLAYER_START.c - army.startC) * progress;
-
-                // Fog Reveal Real-time (Radius 3)
-                const discreteR = Math.round(currentR);
-                const discreteC = Math.round(currentC);
-                this.revealFog(discreteR, discreteC, 3);
-
-                if (progress >= 1) {
-                    army.state = 'IDLE';
-                    army.r = PLAYER_START.r;
-                    army.c = PLAYER_START.c;
-                    this.showToast(`${army.name} 귀환 완료`);
-                }
-            }
-
-            army.r = currentR;
-            army.c = currentC;
-            const x = 50 + (currentC * TILE_SIZE);
-            const y = 50 + (currentR * TILE_SIZE);
-            el.style.transform = `translate(${x}px, ${y}px)`;
+            } 
+            // RETURNING 상태 제거 (현위치 대기)
         });
     }
 
     handleArrival(army) {
         const { r, c, type } = army.target;
         
+        // 점령 로직
         if (!this.occupiedTiles.has(`${r},${c}`)) {
             this.occupiedTiles.add(`${r},${c}`);
             
@@ -960,15 +963,16 @@ class Game {
             if (document.getElementById('field-modal').classList.contains('open')) {
                 this.renderFieldMap(); 
             }
+        } else {
+             this.showToast(`${army.name} 도착 완료`);
         }
 
-        army.state = 'RETURNING';
-        army.startR = r;
-        army.startC = c;
-        const dist = Math.sqrt(Math.pow(PLAYER_START.r - r, 2) + Math.pow(PLAYER_START.c - c, 2));
-        army.duration = Math.max(1000, dist * 300); 
-        army.startTime = Date.now();
+        // 상태를 IDLE로 변경하여 해당 위치에 대기
+        army.state = 'IDLE';
+        // 위치는 updateArmies에서 이미 target으로 설정됨
+        
         this.updateUI();
+        this.saveGame(); // 위치 저장
     }
 
     moveCameraTo(targetX, targetY, viewport, mapLayer) {
