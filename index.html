@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV Prototype - Field Rollback</title>
+    <title>KOV - Save & Reset</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -28,6 +28,26 @@
         #levelup-banner.show { transform: translate(-50%, -50%) scale(1); }
         .float-img { position: absolute; pointer-events: none; z-index: 60; animation: floatUpImg 1.2s ease-out forwards; width: 60px; height: auto; }
         @keyframes floatUpImg { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { transform: translateY(-10px) scale(1.2); opacity: 1; } 100% { transform: translateY(-60px) scale(1); opacity: 0; } }
+        
+        /* Field Specific Styles */
+        .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; }
+        .field-cell:active { transform: scale(0.8); }
+        .field-occupied { border: 1px solid #42a5f5 !important; box-shadow: 0 0 2px #42a5f5; z-index: 10; }
+        .field-adjacent { cursor: pointer; border: 1px dashed rgba(255,255,255,0.7); animation: pulse 2s infinite; }
+        .field-fog { opacity: 0.15; filter: grayscale(1); }
+        .field-hidden { background-color: #000 !important; border: none; cursor: default; }
+        .field-hidden::after { content: ''; }
+        
+        .field-gate { border: 1px solid #ef4444; }
+        .field-gate.locked::after { content: '🔒'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .field-gate.unlocked::after { content: '👐'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .field-castle::after { content: '🏰'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .field-fortress::after { content: '🏯'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 0.8; } 100% { opacity: 0.4; } }
+        
+        #income-float { position:absolute; color:#ffd700; font-weight:bold; font-size:12px; pointer-events:none; animation: floatUp 1s forwards; z-index: 200; text-shadow: 1px 1px 0 #000; }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity:1; } 100% { transform: translateY(-20px); opacity:0; } }
     </style>
 </head>
 <body>
@@ -50,7 +70,8 @@
                 <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
             </div>
         </div>
-        <div class="flex gap-2 mt-1 opacity-30 hover:opacity-100 transition-opacity justify-end">
+        <div class="flex gap-2 mt-1 opacity-30 hover:opacity-100 transition-opacity justify-end items-center">
+            <button onclick="game.resetGame()" class="bg-red-800 text-white px-2 py-1 rounded text-[10px] border border-red-500 hover:bg-red-600">🔄리셋</button>
             <button onclick="game.cheatEnergy()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⚡+30</button>
             <button onclick="game.spawnChest()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">🎁상자</button>
             <button onclick="game.cheatLevelUp()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⬆️LvUP</button>
@@ -85,7 +106,7 @@
             <h2 class="text-xl font-bold text-yellow-400" id="modal-title">메뉴</h2>
             <button onclick="game.closeModal()" class="w-8 h-8 text-gray-400 font-bold">✖</button>
         </div>
-        <div class="flex-1 overflow-auto bg-gray-800 p-2" id="modal-content">
+        <div class="flex-1 overflow-auto bg-gray-800 p-2 relative" id="modal-content">
             <!-- Content injected via JS -->
         </div>
     </div>
@@ -115,22 +136,14 @@ const LEVEL_DATA = [
     { level: 10, xp: 242, maxEnergy: 68 }, { level: 11, xp: 292, maxEnergy: 70 }, { level: 12, xp: 347, maxEnergy: 72 },
     { level: 13, xp: 408, maxEnergy: 74 }, { level: 14, xp: 474, maxEnergy: 76 }, { level: 15, xp: 546, maxEnergy: 78 }
 ];
-
 const MERGE_XP_DATA = { 1:1, 2:2, 3:4, 4:5, 5:6, 6:8, 7:10, 8:15, 9:20, 10:0 };
-const BUILDING_STATS = { 
-    1: { energy: 1, probs: [90, 10, 0, 0, 0] }, 2: { energy: 2, probs: [0, 90, 10, 0, 0] }, 
-    3: { energy: 3, probs: [0, 45, 55, 0, 0] }, 4: { energy: 4, probs: [0, 0, 90, 10, 0] }, 
-    5: { energy: 5, probs: [0, 0, 80, 10, 10] } 
-};
+const BUILDING_STATS = { 1: { energy: 1, probs: [90, 10, 0, 0, 0] }, 2: { energy: 2, probs: [0, 90, 10, 0, 0] }, 3: { energy: 3, probs: [0, 45, 55, 0, 0] }, 4: { energy: 4, probs: [0, 0, 90, 10, 0] }, 5: { energy: 5, probs: [0, 0, 80, 10, 10] } };
 const ITEM_VALUES = { 1: 1, 2: 2, 3: 6, 4: 14, 5: 32 };
 const UNLOCK_GOLD_MAP = [[100, 50, 30, 20, 20, 30, 50, 100], [50, 40, 10, 5, 5, 10, 40, 50], [30, 10, 0, 0, 0, 0, 10, 30], [20, 5, 0, 0, 0, 0, 5, 20], [20, 5, 0, 0, 0, 0, 5, 20], [30, 10, 0, 0, 0, 0, 10, 30], [50, 40, 10, 5, 5, 10, 40, 50], [100, 50, 30, 20, 20, 30, 50, 100]];
 const UNLOCK_LEVEL_MAP = [[24, 20, 14, 10, 10, 14, 20, 24], [23, 18, 6, 2, 2, 6, 18, 21], [17, 8, 0, 0, 0, 0, 9, 15], [13, 5, 0, 0, 0, 0, 3, 11], [13, 5, 0, 0, 0, 0, 3, 11], [17, 8, 0, 0, 0, 0, 9, 15], [23, 19, 7, 4, 4, 7, 19, 21], [25, 22, 16, 12, 12, 16, 22, 25]];
 const CHEST_DROP_TABLE = { 1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ], 2: [ {code: 1801, prob: 25}, {code: 1802, prob: 25}, {code: 1811, prob: 25}, {code: 1812, prob: 25} ], 3: [ {code: 1801, prob: 20}, {code: 1802, prob: 20}, {code: 1803, prob: 10}, {code: 1811, prob: 20}, {code: 1812, prob: 20}, {code: 1813, prob: 10} ], 4: [ {code: 1802, prob: 20}, {code: 1803, prob: 20}, {code: 1804, prob: 5}, {code: 1812, prob: 20}, {code: 1813, prob: 20}, {code: 1814, prob: 5}, {code: 1821, prob: 10} ], 5: [ {code: 1802, prob: 15}, {code: 1803, prob: 20}, {code: 1804, prob: 10}, {code: 1812, prob: 15}, {code: 1813, prob: 20}, {code: 1814, prob: 10}, {code: 1821, prob: 5}, {code: 1825, prob: 5} ] };
 
-const CONFIG = { 
-    gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, 
-    squadCols: 3, squadRows: 3, squadTopY: 55, squadGap: 80, squadCellSize: 130 
-};
+const CONFIG = { gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, squadCols: 3, squadRows: 3, squadTopY: 55, squadGap: 80, squadCellSize: 130 };
 const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5, UNIT_INFANTRY: 10, UNIT_ARCHER: 11, UNIT_CAVALRY: 12, ITEM_GOLD: 20, ITEM_ENERGY: 21, ITEM_CRYSTAL: 22 };
 const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
 const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
@@ -164,7 +177,7 @@ const UNIT_STATS = {
     1210: { name: "신궁", hp: 80, atk: 35, def: 23, spd: 25, rng: 6, mov: 1, sell: 100 },
     // Cavalry
     1301: { name: "기병", hp: 12, atk: 6, def: 8, spd: 10, rng: 1, mov: 2, sell: 0 },
-    1302: { name: "경기병", hp: 24, atk: 9, def: 12, spd: 12, rng: 1, mov: 2, sell: 1 },
+    1302: { name: "경기병", hp: 24, atk: 9, def: 12, spd: 12, rng: 1, mov: 1, sell: 1 },
     1303: { name: "창기병", hp: 36, atk: 12, def: 16, spd: 14, rng: 1, mov: 2, sell: 1 },
     1304: { name: "기사", hp: 48, atk: 15, def: 20, spd: 16, rng: 1, mov: 2, sell: 2 },
     1305: { name: "중기병", hp: 60, atk: 18, def: 24, spd: 18, rng: 1, mov: 2, sell: 3 },
@@ -174,6 +187,48 @@ const UNIT_STATS = {
     1309: { name: "발키리", hp: 108, atk: 30, def: 40, spd: 26, rng: 1, mov: 2, sell: 50 },
     1310: { name: "전설의 기사", hp: 120, atk: 33, def: 44, spd: 28, rng: 1, mov: 2, sell: 100 }
 };
+
+// Phase 2 Map Data (Based on snippet + expanded 25x25 logic)
+const FIELD_MAP_DATA = [];
+const MAP_SIZE = 25;
+const PLAYER_START = { r: 22, c: 7 };
+
+function initFieldData() {
+    // Generate base map with empty (0)
+    for(let i=0; i<MAP_SIZE; i++) FIELD_MAP_DATA.push(new Array(MAP_SIZE).fill(0));
+
+    // Hardcode snippet data (User area) - Row 22
+    // 0,0,3,4,2,4,4,1,4,4,2,4,3,4,2,4,4,1,4,4,2,0,3,0,0
+    const row22 = [0,0,3,4,2,4,4,1,4,4,2,4,3,4,2,4,4,1,4,4,2,0,3,0,0];
+    for(let c=0; c<row22.length; c++) FIELD_MAP_DATA[22][c] = row22[c];
+
+    // Procedural fill for the rest to mimic the style
+    // Pattern: Grid roads (4) with Gates (2) at intersections and Fortresses (3) in hubs
+    for(let r=0; r<MAP_SIZE; r++) {
+        if(r === 22) continue; // Skip hardcoded row
+        for(let c=0; c<MAP_SIZE; c++) {
+            let type = 0;
+            const distCenter = Math.abs(r-12) + Math.abs(c-12);
+            
+            // Central Fortress Area
+            if (r >= 10 && r <= 14 && c >= 10 && c <= 14) {
+                if (r===12 && c===12) type = 3; // Center Fortress
+                else type = 4; // Roads around center
+            }
+            // Road Network
+            else if (r % 5 === 2 || c % 5 === 2) {
+                type = 4; // Main Roads
+                // Intersections act as Gates or Fortresses
+                if (r % 5 === 2 && c % 5 === 2) {
+                    type = (Math.random() > 0.7) ? 3 : 2; 
+                }
+            }
+            
+            FIELD_MAP_DATA[r][c] = type;
+        }
+    }
+}
+initFieldData();
 
 function getCode(type, level) {
     if (type === ITEM_TYPE.UNIT_INFANTRY) return 1100 + level;
@@ -282,21 +337,115 @@ class Game {
         this.gridState = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
         this.squad1 = Array(9).fill(null); this.squad2 = Array(9).fill(null);
         this.particles = [];
-        this.lordLevel = 1; this.currentXp = 0; this.updateLevelStats();
-        this.energy = this.maxEnergy; this.gold = 3000; this.gem = 50; 
+        this.lordLevel = 1; this.currentXp = 0; 
+        this.energy = 50; this.gold = 3000; this.gem = 50; 
+        
+        // Phase 2 Field State
+        this.occupiedTiles = new Set();
+        this.occupiedTiles.add(`${PLAYER_START.r},${PLAYER_START.c}`); // My Castle is owned
+        this.income = 0;
+        this.lastTaxTime = 0;
+
         this.drag = null; this.hover = null; this.selectedItem = null; this.potentialDrag = null; this.dpr = window.devicePixelRatio || 1;
         
-        this.calcLayout(); this.initGame();
+        this.calcLayout(); 
+        
+        // Load or Init
+        if(!this.loadGame()) {
+            this.initGame();
+        } else {
+            this.updateLevelStats(); // Re-calc max energy etc based on loaded level
+            this.updateUI();
+        }
+
         setInterval(() => this.regenEnergy(), 1000);
+        setInterval(() => this.collectTerritoryIncome(), 3000); // Tax tick every 3 seconds for better feedback
         window.addEventListener('resize', () => { this.resize(); this.requestRender(); });
         this.resize(); this.setupInput();
         this.assets.loadAll(() => { this.requestRender(); });
         this.loop(); this.updateUI();
     }
+
+    saveGame() {
+        try {
+            const data = {
+                grid: this.grid,
+                gridState: this.gridState,
+                squad1: this.squad1,
+                squad2: this.squad2,
+                lordLevel: this.lordLevel,
+                currentXp: this.currentXp,
+                energy: this.energy,
+                gold: this.gold,
+                gem: this.gem,
+                occupiedTiles: Array.from(this.occupiedTiles)
+            };
+            localStorage.setItem('kov_save_v1', JSON.stringify(data));
+        } catch(e) { console.error("Save failed", e); }
+    }
+
+    loadGame() {
+        try {
+            const saved = localStorage.getItem('kov_save_v1');
+            if(!saved) return false;
+            const data = JSON.parse(saved);
+            this.grid = data.grid || this.grid;
+            this.gridState = data.gridState || this.gridState;
+            this.squad1 = data.squad1 || this.squad1;
+            this.squad2 = data.squad2 || this.squad2;
+            this.lordLevel = data.lordLevel || 1;
+            this.currentXp = data.currentXp || 0;
+            this.energy = data.energy !== undefined ? data.energy : 50;
+            this.gold = data.gold !== undefined ? data.gold : 3000;
+            this.gem = data.gem !== undefined ? data.gem : 50;
+            if(data.occupiedTiles) this.occupiedTiles = new Set(data.occupiedTiles);
+            return true;
+        } catch(e) { console.error("Load failed", e); return false; }
+    }
+
+    resetGame() {
+        if(confirm("정말 게임을 초기화 하시겠습니까? 모든 진행 상황이 삭제됩니다.")) {
+            localStorage.removeItem('kov_save_v1');
+            location.reload();
+        }
+    }
+
     requestRender() { this.isDirty = true; }
     spawnParticles(x, y, color, count, type) { for(let i=0;i<count;i++) this.particles.push(new Particle(x,y,color,type)); this.isDirty=true; }
-    regenEnergy() { if (this.energy < this.maxEnergy) { this.energyRegenAcc = (this.energyRegenAcc || 0) + 1; if(this.energyRegenAcc >= 5) { this.energy++; this.energyRegenAcc = 0; this.updateUI(); } } }
+    regenEnergy() { 
+        if (this.energy < this.maxEnergy) { 
+            this.energyRegenAcc = (this.energyRegenAcc || 0) + 1; 
+            if(this.energyRegenAcc >= 5) { this.energy++; this.energyRegenAcc = 0; this.updateUI(); } 
+        } 
+    }
     
+    // Phase 2: Territory Income (Tax) with Visuals & Differential Tax
+    getTaxRate(type) {
+        if (type === 2) return 3; // Gate: High Value
+        if (type === 3) return 5; // Fortress: Very High Value
+        return 1; // Default
+    }
+
+    collectTerritoryIncome() {
+        if (this.occupiedTiles.size > 0) {
+            let totalTax = 0;
+            this.occupiedTiles.forEach(key => {
+                const [r, c] = key.split(',').map(Number);
+                const type = FIELD_MAP_DATA[r][c];
+                totalTax += this.getTaxRate(type);
+            });
+
+            this.income = totalTax;
+            this.gold += totalTax;
+            this.updateUI();
+            
+            // Visual feedback - Show "Tax Collected" if modal is open
+            if (document.getElementById('field-modal').classList.contains('open')) {
+                this.showFloatingText(`+${totalTax} G (Tax)`, this.width/2, this.height/4, '#ffd700');
+            }
+        }
+    }
+
     calcLayout() {
         const gw = this.width - (CONFIG.gridPadding * 2); this.gridTileSize = Math.floor(gw / CONFIG.gridCols);
         this.gridStartX = CONFIG.gridPadding; this.gridStartY = CONFIG.gridTopY; this.squadCellSize = CONFIG.squadCellSize; 
@@ -308,6 +457,7 @@ class Game {
         this.grid[3][3] = { type: ITEM_TYPE.BUILDING_BARRACKS, level: 1, scale: 1 };
         this.grid[4][4] = { type: ITEM_TYPE.BUILDING_CHEST, level: 1, scale: 1, usage: 5 };
         this.grid[5][5] = { type: ITEM_TYPE.BUILDING_CAMP, level: 1, scale: 1, storedUnit: null };
+        this.updateLevelStats();
     }
     refreshLockState() {
         for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
@@ -338,42 +488,122 @@ class Game {
         if (modal.classList.contains('open') && modal.dataset.mode === 'field') { this.closeModal(); return; }
         modal.dataset.mode = 'field'; modal.classList.add('open');
         
+        // Income Info Header
+        const headerDiv = document.createElement('div');
+        headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-20 shadow-md";
+        headerDiv.innerHTML = `
+            <div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div>
+            <div>💰 세금: <span class="text-yellow-400 font-bold">+${this.income}/3sec</span></div>
+        `;
+        content.appendChild(headerDiv);
+
         const mapContainer = document.createElement('div');
         mapContainer.style.display = 'grid'; 
         mapContainer.style.gridTemplateColumns = 'repeat(25, 12px)'; 
         mapContainer.style.gap = '1px'; 
         mapContainer.style.justifyContent = 'center'; 
-        mapContainer.style.margin = '20px';
+        mapContainer.style.margin = '10px 0';
+        mapContainer.style.padding = '10px';
         
-        // Reverting to procedural generation for better visualization
-        for(let r=0; r<25; r++) {
-            for(let c=0; c<25; c++) {
+        // Render 25x25 Map based on FIELD_MAP_DATA and Occupied State
+        for(let r=0; r<MAP_SIZE; r++) {
+            for(let c=0; c<MAP_SIZE; c++) {
                 const cell = document.createElement('div');
-                cell.style.width='12px'; cell.style.height='12px';
+                cell.className = 'field-cell';
+                const type = FIELD_MAP_DATA[r][c];
+                const key = `${r},${c}`;
+                const isOccupied = this.occupiedTiles.has(key);
                 
-                let type = 0; // Empty
-                if (r === 22 && c === 7) type = 1; // My Castle (User Start)
-                else if (r === 12 && c === 12) type = 3; // Center Fortress
-                else if (r === 12 || c === 12) type = 4; // Main Roads
-                else if (r % 6 === 0 && c % 6 === 0) type = 2; // Gates (Mock distribution)
-                else if ((r+c)%7 === 0) type = 4; // Random roads
+                // Determine Adjacent (Up, Down, Left, Right)
+                let isAdjacent = false;
+                const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+                if (!isOccupied) {
+                    for(let d of dirs) {
+                        const nr = r+d[0], nc = c+d[1];
+                        if(this.occupiedTiles.has(`${nr},${nc}`)) { isAdjacent = true; break; }
+                    }
+                }
 
-                let color = '#2e3b23'; // Terrain
-                if(type===1) color='#4285f4'; 
-                else if(type===2) color='#ea4335';
-                else if(type===3) color='#fbbc05'; 
-                else if(type===4) color='#555';
-                
-                cell.style.backgroundColor = color;
-                if (r === 22 && c === 7) cell.style.border = '1px solid white';
+                if (!isOccupied && !isAdjacent) {
+                    // True Fog of War: Hide non-adjacent tiles completely
+                    cell.className += ' field-hidden';
+                } else {
+                    let color = '#2e3b23'; // Base Terrain
+                    if(type===1) { color='#4285f4'; cell.classList.add('field-castle'); } // Castle
+                    else if(type===2) { 
+                        color='#ea4335'; 
+                        cell.classList.add('field-gate');
+                        cell.classList.add(isOccupied ? 'unlocked' : 'locked');
+                    } // Gate
+                    else if(type===3) { color='#fbbc05'; cell.classList.add('field-fortress'); } // Fortress
+                    else if(type===4) color='#555'; // Road
+                    
+                    cell.style.backgroundColor = color;
+                    
+                    if (isOccupied) {
+                        cell.classList.add('field-occupied');
+                        cell.style.opacity = 1.0;
+                    } else if (isAdjacent) {
+                        cell.classList.add('field-adjacent');
+                        cell.style.opacity = 0.6;
+                        cell.onclick = () => this.handleFieldClick(r, c, type);
+                    }
+                }
                 
                 mapContainer.appendChild(cell);
             }
         }
         content.appendChild(mapContainer);
-        const legend = document.createElement('div'); legend.className="text-xs text-gray-400 text-center mt-2"; legend.innerText = "🟦성 🟥관문 🟨성채 ⬛도로";
-        content.appendChild(legend);
+        
+        const infoDiv = document.createElement('div');
+        infoDiv.className = "text-center mt-2 p-2 bg-gray-800 rounded text-xs";
+        infoDiv.innerHTML = `
+            <h3 class="text-yellow-400 font-bold mb-1">Phase 2: 세력 확장</h3>
+            <p class="text-gray-300">
+                🟦내 성 🟥관문(고비용, +3G) 🟨성채(+5G)<br>
+                <span class="text-gray-400">검은색 지역은 점령하여 시야를 확보하세요.</span>
+            </p>`;
+        content.appendChild(infoDiv);
     }
+    
+    handleFieldClick(r, c, type) {
+        // Phase 2: Differentiated Cost Logic
+        let energyCost = 1;
+        let goldCost = 0;
+
+        if (type === 2) { // Gate (High Value Target)
+            energyCost = 5;
+            goldCost = 100;
+        }
+
+        if(this.energy < energyCost) { this.showToast(`에너지 부족 (${energyCost} 필요)`); return; }
+        if(this.gold < goldCost) { this.showToast(`골드 부족 (${goldCost} 필요)`); return; }
+        
+        // Cost Deduction
+        this.energy -= energyCost;
+        this.gold -= goldCost;
+        
+        // Effect
+        this.occupiedTiles.add(`${r},${c}`);
+        
+        if (type === 2) {
+            this.showToast("⚔️ 관문 돌파 성공!");
+            this.sound.playUnlock(); 
+            this.spawnParticles(this.width/2, this.height/2, "#FF0000", 50, "confetti");
+        } else {
+            this.showToast("점령 완료!");
+            this.sound.playCollect();
+        }
+        
+        this.updateUI();
+        
+        // Refresh Field UI by re-rendering
+        if (document.getElementById('field-modal').classList.contains('open')) {
+            this.toggleField(); 
+            document.getElementById('field-modal').classList.add('open');
+        }
+    }
+
     closeModal() { document.getElementById('field-modal').classList.remove('open'); }
     
     buyBuilding(type, price) {
@@ -415,9 +645,6 @@ class Game {
         const d = LEVEL_DATA.find(d => d.level === this.lordLevel);
         const nextD = LEVEL_DATA.find(d => d.level === this.lordLevel + 1);
         this.maxEnergy = d ? d.maxEnergy : 50;
-        // Cumulative XP Logic: XP in level.csv is cumulative.
-        // Level 1 starts at 0. Level 2 needs 10 total. So L1->L2 needs 10.
-        // Level 3 needs 25 total. So L2->L3 needs 15 (25-10).
         this.requiredXp = nextD ? (nextD.xp - d.xp) : 999999;
     }
     selectItem(item, location) { if (this.selectedItem?.item !== item) this.sound.playClick(); this.selectedItem = item ? { item, location } : null; this.updateInfoPanel(); this.requestRender(); }
@@ -609,8 +836,17 @@ class Game {
         const img = this.assets.getImage(key); if(!img) return; const el = document.createElement('img'); el.src = img.src; el.className='float-img';
         const r = this.canvas.getBoundingClientRect(); el.style.left = ((x/this.width)*r.width)+"px"; el.style.top = ((y/this.height)*r.height)+"px"; document.getElementById('canvas-wrapper').appendChild(el); setTimeout(()=>el.remove(), 1000);
     }
+    showFloatingText(text, x, y, color) {
+        const el = document.createElement('div');
+        el.innerText = text; el.id = 'income-float'; el.style.color = color;
+        // Simple positioning relative to container
+        el.style.left = '50%'; el.style.top = '20%'; el.style.transform = 'translate(-50%, 0)';
+        document.getElementById('canvas-wrapper').appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
     updateUI() {
         document.getElementById('energy-display').innerText=`${this.energy}/${this.maxEnergy}`; document.getElementById('gold-display').innerText=this.gold; document.getElementById('gem-display').innerText=this.gem; document.getElementById('level-display').innerText=`LORD LV.${this.lordLevel}`; document.getElementById('xp-text').innerText=`${this.currentXp} / ${this.requiredXp}`; document.getElementById('xp-bar').style.width=`${(this.currentXp/this.requiredXp)*100}%`;
+        this.saveGame();
     }
 }
 const game = new Game();
