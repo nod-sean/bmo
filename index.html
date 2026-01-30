@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV - Fix UI & Logic</title>
+    <title>KOV - Field Render Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -47,9 +47,13 @@
 
         /* Field Styles */
         .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; }
-        .field-occupied { border: 1px solid #42a5f5 !important; box-shadow: 0 0 2px #42a5f5; z-index: 10; }
+        /* Removed !important to allow border overrides if needed, but increased specificity or z-index */
+        .field-occupied { border: 1px solid #42a5f5; box-shadow: 0 0 2px #42a5f5; z-index: 10; opacity: 1.0 !important; }
         .field-adjacent { cursor: pointer; border: 1px dashed rgba(255,255,255,0.7); animation: pulse 2s infinite; }
         .field-hidden { background-color: #000 !important; border: none; cursor: default; }
+        .field-hidden::after { content: ''; }
+        
+        /* Icons for field objects */
         .field-gate { border: 1px solid #ef4444; }
         .field-gate.locked::after { content: '🔒'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-gate.unlocked::after { content: '👐'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
@@ -200,7 +204,7 @@
                 </div>
                 <div class="bg-gray-800 p-3 rounded text-xs text-gray-400">
                     <p>UID: <span id="settings-uid" class="text-gray-200">User_1234</span></p>
-                    <p>Version: 0.2.1 (Phase 2)</p>
+                    <p>Version: 0.2.2 (Phase 2 Fix)</p>
                 </div>
             </div>
             <div class="mt-6 flex gap-2">
@@ -626,16 +630,33 @@ class Game {
         content.appendChild(grid);
     }
     toggleField() {
-        const modal = document.getElementById('field-modal'); const content = document.getElementById('modal-content'); const title = document.getElementById('modal-title');
-        title.innerText = "월드 맵 (Field)"; content.innerHTML = "";
-        if (modal.classList.contains('open') && modal.dataset.mode === 'field') { this.closeModal(); return; }
-        modal.dataset.mode = 'field'; modal.classList.add('open');
+        const modal = document.getElementById('field-modal');
+        if (modal.classList.contains('open') && modal.dataset.mode === 'field') { 
+            this.closeModal(); 
+            return; 
+        }
+        this.renderFieldMap();
+    }
+
+    renderFieldMap() {
+        const modal = document.getElementById('field-modal'); 
+        const content = document.getElementById('modal-content'); 
+        const title = document.getElementById('modal-title');
+        
+        modal.dataset.mode = 'field'; 
+        modal.classList.add('open');
+        
+        title.innerText = "월드 맵 (Field)"; 
+        content.innerHTML = "";
+        
         const headerDiv = document.createElement('div');
         headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-20 shadow-md";
         headerDiv.innerHTML = `<div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>💰 세금: <span class="text-yellow-400 font-bold">+${this.income}/3sec</span></div>`;
         content.appendChild(headerDiv);
+        
         const mapContainer = document.createElement('div');
         mapContainer.style.display = 'grid'; mapContainer.style.gridTemplateColumns = 'repeat(25, 12px)'; mapContainer.style.gap = '1px'; mapContainer.style.justifyContent = 'center'; mapContainer.style.margin = '10px 0'; mapContainer.style.padding = '10px';
+        
         for(let r=0; r<MAP_SIZE; r++) {
             for(let c=0; c<MAP_SIZE; c++) {
                 const cell = document.createElement('div'); cell.className = 'field-cell';
@@ -645,16 +666,18 @@ class Game {
                 if (!isOccupied && !isAdjacent) { cell.className += ' field-hidden'; } else {
                     let color = '#2e3b23'; if(type===1) { color='#4285f4'; cell.classList.add('field-castle'); } else if(type===2) { color='#ea4335'; cell.classList.add('field-gate'); cell.classList.add(isOccupied ? 'unlocked' : 'locked'); } else if(type===3) { color='#fbbc05'; cell.classList.add('field-fortress'); } else if(type===4) color='#555';
                     cell.style.backgroundColor = color;
-                    if (isOccupied) { cell.classList.add('field-occupied'); cell.style.opacity = 1.0; } else if (isAdjacent) { cell.classList.add('field-adjacent'); cell.style.opacity = 0.6; cell.onclick = () => this.handleFieldClick(r, c, type); }
+                    if (isOccupied) { cell.classList.add('field-occupied'); } else if (isAdjacent) { cell.classList.add('field-adjacent'); cell.style.opacity = 0.6; cell.onclick = () => this.handleFieldClick(r, c, type); }
                 }
                 mapContainer.appendChild(cell);
             }
         }
         content.appendChild(mapContainer);
+        
         const infoDiv = document.createElement('div'); infoDiv.className = "text-center mt-2 p-2 bg-gray-800 rounded text-xs";
         infoDiv.innerHTML = `<h3 class="text-yellow-400 font-bold mb-1">Phase 2: 세력 확장</h3><p class="text-gray-300">🟦내 성 🟥관문(고비용, +3G) 🟨성채(+5G)<br><span class="text-gray-400">검은색 지역은 점령하여 시야를 확보하세요.</span></p>`;
         content.appendChild(infoDiv);
     }
+
     handleFieldClick(r, c, type) {
         let energyCost = 1; let goldCost = 0; if (type === 2) { energyCost = 5; goldCost = 100; }
         if(this.energy < energyCost) { this.showToast(`에너지 부족 (${energyCost} 필요)`); return; }
@@ -663,7 +686,9 @@ class Game {
         this.occupiedTiles.add(`${r},${c}`);
         if (type === 2) { this.showToast("⚔️ 관문 돌파 성공!"); this.sound.playUnlock(); this.spawnParticles(this.width/2, this.height/2, "#FF0000", 50, "confetti"); } else { this.showToast("점령 완료!"); this.sound.playCollect(); }
         this.updateUI();
-        if (document.getElementById('field-modal').classList.contains('open')) { this.toggleField(); document.getElementById('field-modal').classList.add('open'); }
+        if (document.getElementById('field-modal').classList.contains('open')) { 
+            this.renderFieldMap(); // Re-render without toggling (closing/opening)
+        }
     }
     closeModal() { document.getElementById('field-modal').classList.remove('open'); document.getElementById('modal-refill').classList.remove('open'); document.getElementById('modal-settings').classList.remove('open'); }
     buyBuilding(type, price) {
