@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV - Field Marching Update</title>
+    <title>KOV - Advanced Marching</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -48,20 +48,18 @@
         /* Field Styles */
         .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; }
         .field-occupied { border: 1px solid #42a5f5; box-shadow: 0 0 2px #42a5f5; z-index: 10; opacity: 1.0 !important; }
-        .field-adjacent { cursor: pointer; border: 1px dashed rgba(255,255,255,0.7); animation: pulse 2s infinite; }
+        /* .field-adjacent class removed as we allow global movement based on range */
         
         /* Fog of War Styles */
         .field-fog { background-color: #000 !important; border: none; cursor: default; }
         .field-fog::after { content: ''; }
-        /* .field-dim { opacity: 0.5; filter: grayscale(80%); } */
-
-        /* Icons for field objects */
+        
+        /* Icons */
         .field-gate { border: 1px solid #ef4444; }
         .field-gate.locked::after { content: '🔒'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-gate.unlocked::after { content: '👐'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-castle::after { content: '🏰'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-fortress::after { content: '🏯'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 0.8; } 100% { opacity: 0.4; } }
         
         #income-float { position:absolute; color:#ffd700; font-weight:bold; font-size:12px; pointer-events:none; animation: floatUp 1s forwards; z-index: 200; text-shadow: 1px 1px 0 #000; }
         @keyframes floatUp { 0% { transform: translateY(0); opacity:1; } 100% { transform: translateY(-20px); opacity:0; } }
@@ -71,10 +69,11 @@
         /* Army Marker & Selector */
         .army-marker { position: absolute; width: 10px; height: 10px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.8); transition: transform 0.1s linear; z-index: 50; pointer-events: none; display: flex; justify-content: center; align-items: center; font-size: 8px; font-weight: bold; color: black; }
         .squad-selector { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(30, 30, 30, 0.95); border: 2px solid #8d6e63; border-radius: 12px; padding: 10px; display: flex; gap: 10px; z-index: 100; width: 90%; max-width: 300px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .squad-card { flex: 1; background: #3e2723; border: 1px solid #555; border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .squad-card { flex: 1; background: #3e2723; border: 1px solid #555; border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
         .squad-card:active { transform: scale(0.95); }
         .squad-card.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
         .squad-status { font-size: 10px; color: #aaa; margin-top: 2px; }
+        .path-dot { position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; pointer-events: none; z-index: 40; transform: translate(-50%, -50%); }
 
         /* Level Up Banner & Modal */
         #levelup-banner { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0); z-index: 150; pointer-events: none; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -214,7 +213,7 @@
                 </div>
                 <div class="bg-gray-800 p-3 rounded text-xs text-gray-400">
                     <p>UID: <span id="settings-uid" class="text-gray-200">User_1234</span></p>
-                    <p>Version: 0.2.4 (Marching 4X)</p>
+                    <p>Version: 0.2.7 (Road Fix)</p>
                 </div>
             </div>
             <div class="mt-6 flex gap-2">
@@ -234,6 +233,7 @@ const GITHUB_BRANCH = "main";
 const ASSET_KEYS = [
     '1101', '1102', '1103', '1104', '1105', '1106', '1107', '1108', '1109', '1110',
     '1201', '1202', '1203', '1204', '1205', '1206', '1207', '1208', '1209', '1210',
+    '1301', '1302', '1303', '1304', '1305', '1306', '1307', '1308', '1309', '1310',
     '2101', '2102', '2103', '2104', '2105', '2201', '2204', '2205',
     '2301', '2302', '2303', '2304', '2801', '2802', '2803', '2804', '2805',
     '3101', '3102', '3103', '3104', '3105',
@@ -279,9 +279,8 @@ const BUILDING_LIMITS = { [ITEM_TYPE.BUILDING_BARRACKS]: 3, [ITEM_TYPE.BUILDING_
 const SHOP_DATA = [ { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" }, { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" }, { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" }, { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" }, { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" } ];
 const CAMP_CAPACITY = {1:4, 2:6, 3:8, 4:12, 5:16};
 
-// unit.csv Data Sync
+// unit.csv Data Sync (Reused)
 const UNIT_STATS = {
-    // Infantry
     1101: { name: "민병", hp: 10, atk: 5, def: 10, spd: 5, rng: 1, mov: 1, sell: 0 },
     1102: { name: "보병", hp: 20, atk: 7, def: 15, spd: 7, rng: 1, mov: 1, sell: 1 },
     1103: { name: "검병", hp: 30, atk: 9, def: 20, spd: 9, rng: 1, mov: 1, sell: 1 },
@@ -292,7 +291,6 @@ const UNIT_STATS = {
     1108: { name: "템플러", hp: 80, atk: 19, def: 45, spd: 19, rng: 1, mov: 1, sell: 25 },
     1109: { name: "팔라딘", hp: 90, atk: 21, def: 50, spd: 21, rng: 1, mov: 1, sell: 50 },
     1110: { name: "영웅", hp: 100, atk: 23, def: 55, spd: 23, rng: 1, mov: 1, sell: 100 },
-    // Archer
     1201: { name: "초보 궁수", hp: 8, atk: 8, def: 5, spd: 7, rng: 3, mov: 1, sell: 0 },
     1202: { name: "궁수", hp: 16, atk: 11, def: 7, spd: 9, rng: 3, mov: 1, sell: 1 },
     1203: { name: "사냥꾼", hp: 24, atk: 14, def: 9, spd: 11, rng: 3, mov: 1, sell: 1 },
@@ -303,7 +301,6 @@ const UNIT_STATS = {
     1208: { name: "패스파인더", hp: 64, atk: 29, def: 19, spd: 21, rng: 5, mov: 1, sell: 25 },
     1209: { name: "보우마스터", hp: 72, atk: 32, def: 21, spd: 23, rng: 5, mov: 1, sell: 50 },
     1210: { name: "신궁", hp: 80, atk: 35, def: 23, spd: 25, rng: 6, mov: 1, sell: 100 },
-    // Cavalry
     1301: { name: "기병", hp: 12, atk: 6, def: 8, spd: 10, rng: 1, mov: 2, sell: 0 },
     1302: { name: "경기병", hp: 24, atk: 9, def: 12, spd: 12, rng: 1, mov: 1, sell: 1 },
     1303: { name: "창기병", hp: 36, atk: 12, def: 16, spd: 14, rng: 1, mov: 2, sell: 1 },
@@ -338,6 +335,7 @@ function initFieldData() {
             FIELD_MAP_DATA[r][c] = type;
         }
     }
+    // Remove forced path clearing since type 4 is now walkable
 }
 initFieldData();
 
@@ -439,6 +437,62 @@ class Particle {
     draw(ctx) { ctx.globalAlpha=Math.max(0,this.life); ctx.fillStyle=this.color; if(this.type==='confetti'){ ctx.translate(this.x,this.y); ctx.rotate(this.life*5); ctx.fillRect(-this.size/2,-this.size/2,this.size,this.size); ctx.resetTransform(); const s=ctx.canvas.width/1080; ctx.scale(s,s); } else if(this.type==='smoke'){ ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); } else ctx.fillRect(this.x,this.y,this.size,this.size); ctx.globalAlpha=1.0; }
 }
 
+class AStar {
+    static findPath(start, end, mapData, occupiedTiles) {
+        const rows = MAP_SIZE, cols = MAP_SIZE;
+        const openSet = [], closedSet = new Set();
+        const startNode = { r: start.r, c: start.c, g: 0, h: 0, f: 0, parent: null };
+        openSet.push(startNode);
+        
+        while(openSet.length > 0) {
+            let lowInd = 0;
+            for(let i=0; i<openSet.length; i++) if(openSet[i].f < openSet[lowInd].f) lowInd = i;
+            const current = openSet[lowInd];
+            
+            if(current.r === end.r && current.c === end.c) {
+                const path = []; let temp = current;
+                while(temp) { path.push({r: temp.r, c: temp.c}); temp = temp.parent; }
+                return path.reverse();
+            }
+            
+            openSet.splice(lowInd, 1);
+            closedSet.add(`${current.r},${current.c}`);
+            
+            const neighbors = [[0,1], [0,-1], [1,0], [-1,0]];
+            for(let i=0; i<neighbors.length; i++) {
+                const nr = current.r + neighbors[i][0], nc = current.c + neighbors[i][1];
+                if(nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                    if(closedSet.has(`${nr},${nc}`)) continue;
+                    
+                    const type = mapData[nr][nc];
+                    const isTarget = (nr === end.r && nc === end.c);
+                    const isOccupied = occupiedTiles.has(`${nr},${nc}`);
+                    
+                    // Obstacle logic: 
+                    // Type 4 (Road) -> Walkable
+                    // Type 2 (Gate) / 3 (Fortress) -> Blocked if not occupied AND not target
+                    let isWalkable = true;
+                    if ((type === 2 || type === 3) && !isOccupied && !isTarget) isWalkable = false;
+                    
+                    if(!isWalkable) continue;
+                    
+                    const gScore = current.g + 1;
+                    let neighbor = openSet.find(n => n.r === nr && n.c === nc);
+                    
+                    if(!neighbor) {
+                        neighbor = { r: nr, c: nc, g: gScore, h: Math.abs(nr-end.r)+Math.abs(nc-end.c), f: 0, parent: current };
+                        neighbor.f = neighbor.g + neighbor.h;
+                        openSet.push(neighbor);
+                    } else if(gScore < neighbor.g) {
+                        neighbor.g = gScore; neighbor.f = neighbor.g + neighbor.h; neighbor.parent = current;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+}
+
 class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas'); this.ctx = this.canvas.getContext('2d');
@@ -454,19 +508,17 @@ class Game {
         this.occupiedTiles.add(`${PLAYER_START.r},${PLAYER_START.c}`); 
         this.income = 0;
         
-        // Fog of War Data
         this.visibilityMap = new Set();
-        // Initial reveal around start (radius 3)
         this.revealFog(PLAYER_START.r, PLAYER_START.c, 3);
 
         this.settings = { bgm: true, sfx: true };
 
         this.drag = null; this.hover = null; this.selectedItem = null; this.potentialDrag = null; this.dpr = window.devicePixelRatio || 1;
         
-        // 부대 데이터 초기화 (Marching 시스템)
+        // Army structure updated for path movement
         this.armies = [
-            { id: 0, name: "제1부대", color: "#4caf50", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, target: null, startTime: 0, duration: 0, startR: 0, startC: 0 },
-            { id: 1, name: "제2부대", color: "#2196f3", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, target: null, startTime: 0, duration: 0, startR: 0, startC: 0 }
+            { id: 0, name: "제1부대", color: "#4caf50", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
+            { id: 1, name: "제2부대", color: "#2196f3", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 }
         ];
 
         this.calcLayout(); 
@@ -480,7 +532,6 @@ class Game {
         this.assets.loadAll(() => { this.requestRender(); });
         this.loop(); this.updateUI();
         
-        // UID Generation
         if(!localStorage.getItem('kov_uid')) localStorage.setItem('kov_uid', 'U' + Math.floor(Math.random()*1000000));
         document.getElementById('settings-uid').innerText = localStorage.getItem('kov_uid');
     }
@@ -491,8 +542,7 @@ class Game {
                 grid: this.grid, gridState: this.gridState, squad1: this.squad1, squad2: this.squad2,
                 lordLevel: this.lordLevel, currentXp: this.currentXp, energy: this.energy, gold: this.gold, gem: this.gem,
                 occupiedTiles: Array.from(this.occupiedTiles), settings: this.settings,
-                visibilityMap: Array.from(this.visibilityMap), // Save Fog State
-                // Save Army State
+                visibilityMap: Array.from(this.visibilityMap),
                 armies: this.armies 
             };
             localStorage.setItem('kov_save_v1', JSON.stringify(data));
@@ -507,11 +557,9 @@ class Game {
             this.lordLevel = data.lordLevel || 1; this.currentXp = data.currentXp || 0;
             this.energy = data.energy ?? 50; this.gold = data.gold ?? 3000; this.gem = data.gem ?? 50;
             if(data.occupiedTiles) this.occupiedTiles = new Set(data.occupiedTiles);
-            if(data.visibilityMap) this.visibilityMap = new Set(data.visibilityMap); // Load Fog State
+            if(data.visibilityMap) this.visibilityMap = new Set(data.visibilityMap);
             if(data.settings) { this.settings = data.settings; this.applySettings(); }
-            if(data.armies) this.armies = data.armies; // Load Army State
-            
-            // Ensure starting area is always visible (Radius 3)
+            if(data.armies) this.armies = data.armies;
             this.revealFog(PLAYER_START.r, PLAYER_START.c, 3);
             return true;
         } catch(e) { return false; }
@@ -519,107 +567,49 @@ class Game {
     resetGame() {
         if(confirm("정말 게임을 초기화 하시겠습니까?")) { 
             localStorage.removeItem('kov_save_v1'); 
-            window.location.reload(); // Force reload
+            window.location.reload(); 
         }
     }
 
-    // UI & Modal Logic
-    openSettings() {
-        document.getElementById('modal-settings').classList.add('open');
-    }
+    // UI & Modal Logic (Standard implementations...)
+    openSettings() { document.getElementById('modal-settings').classList.add('open'); }
     toggleSetting(key, el) {
-        this.settings[key] = !this.settings[key];
-        el.classList.toggle('on');
-        const knob = el.querySelector('.toggle-knob');
-        if(this.settings[key]) knob.style.left = '22px'; else knob.style.left = '2px';
-        
-        if (key === 'bgm') {
-            if(this.settings.bgm) this.sound.files.bgm.play().catch(()=>{}); else this.sound.files.bgm.pause();
-        }
-        this.sound.enabled = this.settings.sfx; // Simple logic
-        this.saveGame();
+        this.settings[key] = !this.settings[key]; el.classList.toggle('on');
+        const knob = el.querySelector('.toggle-knob'); knob.style.left = this.settings[key] ? '22px' : '2px';
+        if (key === 'bgm') { if(this.settings.bgm) this.sound.files.bgm.play().catch(()=>{}); else this.sound.files.bgm.pause(); }
+        this.sound.enabled = this.settings.sfx; this.saveGame();
     }
-    applySettings() {
-        // Apply loaded settings to UI
-        const bgmSwitch = document.querySelector('#modal-settings .toggle-switch:nth-child(1)'); // bit hacky
-        // ... (Omitting full hydration for brevity, assumes default ON for now)
-        this.sound.enabled = this.settings.sfx;
-    }
-
+    applySettings() { this.sound.enabled = this.settings.sfx; }
     openRefill(type) {
-        const modal = document.getElementById('modal-refill');
-        const content = document.getElementById('refill-options');
-        const title = document.getElementById('refill-title');
-        content.innerHTML = "";
-        modal.classList.add('open');
-        
-        let data = REFILL_DATA[type];
-        let titleText = "";
-        if (type === 'energy') titleText = "에너지 충전";
-        else if (type === 'gold') titleText = "골드 구매";
-        else titleText = "크리스탈 상점";
-        
-        title.innerText = titleText;
-        
+        const modal = document.getElementById('modal-refill'); const content = document.getElementById('refill-options'); const title = document.getElementById('refill-title');
+        content.innerHTML = ""; modal.classList.add('open');
+        let data = REFILL_DATA[type]; title.innerText = type === 'energy' ? "에너지 충전" : (type === 'gold' ? "골드 구매" : "크리스탈 상점");
         data.forEach(item => {
-            const btn = document.createElement('button');
-            btn.className = "bg-gray-700 hover:bg-gray-600 p-4 rounded-lg flex justify-between items-center text-white border border-gray-600";
-            const costText = item.currency === 'usd' ? `$${item.cost}` : `💎 ${item.cost}`;
-            btn.innerHTML = `<span class="font-bold">${item.name}</span><span class="bg-blue-600 px-3 py-1 rounded text-sm">${costText}</span>`;
-            
+            const btn = document.createElement('button'); btn.className = "bg-gray-700 hover:bg-gray-600 p-4 rounded-lg flex justify-between items-center text-white border border-gray-600";
+            btn.innerHTML = `<span class="font-bold">${item.name}</span><span class="bg-blue-600 px-3 py-1 rounded text-sm">${item.currency==='usd'?'$'+item.cost:'💎 '+item.cost}</span>`;
             btn.onclick = () => {
                 if (item.currency === 'crystal') {
-                    if (this.gem >= item.cost) {
-                        this.gem -= item.cost;
-                        if (type === 'energy') { this.energy += item.amount; this.showToast(`⚡ ${item.amount} 충전 완료`); }
-                        if (type === 'gold') { this.gold += item.amount; this.showToast(`💰 ${item.amount} 구매 완료`); }
-                        this.sound.playCollect();
-                        this.updateUI();
-                        modal.classList.remove('open');
-                    } else {
-                        this.showToast("💎 크리스탈이 부족합니다.");
-                        this.sound.playError();
-                    }
-                } else {
-                    this.showToast("인앱 결제 준비 중입니다."); // Mock for USD
-                }
-            };
-            content.appendChild(btn);
+                    if (this.gem >= item.cost) { this.gem -= item.cost; if (type === 'energy') this.energy += item.amount; else this.gold += item.amount; this.sound.playCollect(); this.updateUI(); modal.classList.remove('open'); }
+                    else { this.showToast("💎 크리스탈이 부족합니다."); this.sound.playError(); }
+                } else this.showToast("인앱 결제 준비 중입니다.");
+            }; content.appendChild(btn);
         });
     }
-
     showLevelUpModal(prevLv, prevEn) {
-        document.getElementById('lv-old').innerText = prevLv;
-        document.getElementById('lv-new').innerText = this.lordLevel;
-        document.getElementById('en-old').innerText = prevEn;
-        const d = LEVEL_DATA.find(d => d.level === this.lordLevel);
-        document.getElementById('en-new').innerText = d ? d.maxEnergy : 50;
-        document.getElementById('modal-levelup').classList.add('open');
-        
-        // Restore Banner Animation
-        const banner = document.getElementById('levelup-banner');
-        banner.classList.remove('show');
-        void banner.offsetWidth; // Trigger reflow
-        banner.classList.add('show');
-        setTimeout(() => banner.classList.remove('show'), 2500);
+        document.getElementById('lv-old').innerText = prevLv; document.getElementById('lv-new').innerText = this.lordLevel;
+        document.getElementById('en-old').innerText = prevEn; const d = LEVEL_DATA.find(d => d.level === this.lordLevel); document.getElementById('en-new').innerText = d ? d.maxEnergy : 50;
+        document.getElementById('modal-levelup').classList.add('open'); const banner = document.getElementById('levelup-banner'); banner.classList.remove('show'); void banner.offsetWidth; banner.classList.add('show'); setTimeout(() => banner.classList.remove('show'), 2500);
     }
 
     // --- GAME LOGIC ---
     requestRender() { this.isDirty = true; }
     spawnParticles(x, y, color, count, type) { for(let i=0;i<count;i++) this.particles.push(new Particle(x,y,color,type)); this.isDirty=true; }
-    regenEnergy() { 
-        if (this.energy < this.maxEnergy) { 
-            this.energyRegenAcc = (this.energyRegenAcc || 0) + 1; 
-            if(this.energyRegenAcc >= 5) { this.energy++; this.energyRegenAcc = 0; this.updateUI(); } 
-        } 
-    }
+    regenEnergy() { if (this.energy < this.maxEnergy) { this.energyRegenAcc = (this.energyRegenAcc || 0) + 1; if(this.energyRegenAcc >= 5) { this.energy++; this.energyRegenAcc = 0; this.updateUI(); } } }
     getTaxRate(type) { if (type === 2) return 3; if (type === 3) return 5; return 1; }
     collectTerritoryIncome() {
         if (this.occupiedTiles.size > 0) {
-            let totalTax = 0;
-            this.occupiedTiles.forEach(key => { const [r, c] = key.split(',').map(Number); totalTax += this.getTaxRate(FIELD_MAP_DATA[r][c]); });
-            this.income = totalTax; this.gold += totalTax; this.updateUI();
-            if (document.getElementById('field-modal').classList.contains('open')) this.showFloatingText(`+${totalTax} G (Tax)`, this.width/2, this.height/4, '#ffd700');
+            let totalTax = 0; this.occupiedTiles.forEach(key => { const [r, c] = key.split(',').map(Number); totalTax += this.getTaxRate(FIELD_MAP_DATA[r][c]); });
+            this.income = totalTax; this.gold += totalTax; this.updateUI(); if (document.getElementById('field-modal').classList.contains('open')) this.showFloatingText(`+${totalTax} G (Tax)`, this.width/2, this.height/4, '#ffd700');
         }
     }
     calcLayout() {
@@ -629,8 +619,7 @@ class Game {
         this.squad1Rect = { x: sx, y: CONFIG.squadTopY, w: sw, h: sw }; this.squad2Rect = { x: sx + sw + CONFIG.squadGap, y: CONFIG.squadTopY, w: sw, h: sw };
     }
     initGame() {
-        this.refreshLockState(); 
-        this.grid[3][3] = { type: ITEM_TYPE.BUILDING_BARRACKS, level: 1, scale: 1 };
+        this.refreshLockState(); this.grid[3][3] = { type: ITEM_TYPE.BUILDING_BARRACKS, level: 1, scale: 1 };
         this.grid[4][4] = { type: ITEM_TYPE.BUILDING_CHEST, level: 1, scale: 1, usage: 5 };
         this.grid[5][5] = { type: ITEM_TYPE.BUILDING_CAMP, level: 1, scale: 1, storedUnit: null };
         this.updateLevelStats();
@@ -660,37 +649,23 @@ class Game {
     }
     toggleField() {
         const modal = document.getElementById('field-modal');
-        if (modal.classList.contains('open') && modal.dataset.mode === 'field') { 
-            this.closeModal(); 
-            return; 
-        }
-        // 카메라 초기화 (내 성 중심)
-        this.camera = null; 
-        this.renderFieldMap();
+        if (modal.classList.contains('open') && modal.dataset.mode === 'field') { this.closeModal(); return; }
+        this.camera = null; this.renderFieldMap();
     }
 
-    // --- Fog of War Logic ---
     revealFog(r, c, radius = 3) {
-        // 반경 3칸 (Radius 3)
         for(let i = -radius; i <= radius; i++) {
             for(let j = -radius; j <= radius; j++) {
-                const nr = r + i;
-                const nc = c + j;
+                const nr = r + i, nc = c + j;
                 if(nr >= 0 && nr < MAP_SIZE && nc >= 0 && nc < MAP_SIZE) {
                     const key = `${nr},${nc}`;
                     if(!this.visibilityMap.has(key)) {
                         this.visibilityMap.add(key);
-                        
-                        // 실시간 DOM 업데이트 (리렌더링 없이 클래스만 제거)
                         const cell = document.getElementById(`field-cell-${nr}-${nc}`);
                         if(cell) {
                             cell.classList.remove('field-fog');
-                            // 안개가 걷혔을 때의 스타일 보정 (점령지도 아니고 인접지도 아닌 경우 Dim 처리)
-                            if (!cell.classList.contains('field-occupied') && !cell.classList.contains('field-adjacent')) {
-                                cell.style.opacity = 0.3; // 탐험했지만 갈 수 없는 곳은 어둡게
-                            } else if (cell.classList.contains('field-adjacent')) {
-                                cell.style.opacity = 0.6; // 인접 타일은 원래 투명도 복구
-                            }
+                            if (!cell.classList.contains('field-occupied') && !cell.classList.contains('field-adjacent')) cell.style.opacity = 0.3;
+                            else if (cell.classList.contains('field-adjacent')) cell.style.opacity = 0.6;
                         }
                     }
                 }
@@ -699,203 +674,138 @@ class Game {
     }
 
     renderFieldMap() {
-        const modal = document.getElementById('field-modal');
-        const content = document.getElementById('modal-content');
-        const title = document.getElementById('modal-title');
+        const modal = document.getElementById('field-modal'); const content = document.getElementById('modal-content'); const title = document.getElementById('modal-title');
+        modal.dataset.mode = 'field'; modal.classList.add('open'); title.innerText = "월드 맵 (Field)"; content.innerHTML = ""; content.style.overflow = "hidden";
+        const headerDiv = document.createElement('div'); headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-30 shadow-md";
+        headerDiv.innerHTML = `<div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>💰 세금: <span class="text-yellow-400 font-bold">+${this.income}/3sec</span></div>`; content.appendChild(headerDiv);
+        const viewport = document.createElement('div'); viewport.id = 'map-viewport'; viewport.style.position = 'relative'; viewport.style.width = '100%'; viewport.style.height = 'calc(100% - 50px)'; viewport.style.overflow = 'hidden'; viewport.style.background = '#1a1a1a'; viewport.style.touchAction = 'none';
+        const mapLayer = document.createElement('div'); mapLayer.id = 'map-layer'; mapLayer.style.position = 'absolute'; mapLayer.style.transformOrigin = '0 0'; mapLayer.style.display = 'grid'; mapLayer.style.gridTemplateColumns = `repeat(${MAP_SIZE}, 12px)`; mapLayer.style.gap = '1px'; mapLayer.style.padding = '50px';
+        const armyLayer = document.createElement('div'); armyLayer.id = 'army-layer'; armyLayer.style.position = 'absolute'; armyLayer.style.top = '0'; armyLayer.style.left = '0'; armyLayer.style.width = '100%'; armyLayer.style.height = '100%'; armyLayer.style.pointerEvents = 'none'; armyLayer.style.zIndex = '50'; mapLayer.appendChild(armyLayer);
 
-        modal.dataset.mode = 'field';
-        modal.classList.add('open');
-        title.innerText = "월드 맵 (Field)";
-        content.innerHTML = "";
-        content.style.overflow = "hidden";
-
-        // 상단 정보창
-        const headerDiv = document.createElement('div');
-        headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-30 shadow-md";
-        headerDiv.innerHTML = `<div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>💰 세금: <span class="text-yellow-400 font-bold">+${this.income}/3sec</span></div>`;
-        content.appendChild(headerDiv);
-
-        // 맵 뷰포트
-        const viewport = document.createElement('div');
-        viewport.id = 'map-viewport';
-        viewport.style.position = 'relative';
-        viewport.style.width = '100%';
-        viewport.style.height = 'calc(100% - 50px)';
-        viewport.style.overflow = 'hidden';
-        viewport.style.background = '#1a1a1a';
-        viewport.style.touchAction = 'none';
-
-        // 맵 레이어
-        const mapLayer = document.createElement('div');
-        mapLayer.id = 'map-layer';
-        mapLayer.style.position = 'absolute';
-        mapLayer.style.transformOrigin = '0 0';
-        mapLayer.style.display = 'grid';
-        mapLayer.style.gridTemplateColumns = `repeat(${MAP_SIZE}, 12px)`;
-        mapLayer.style.gap = '1px';
-        mapLayer.style.padding = '50px';
-
-        // 부대 레이어
-        const armyLayer = document.createElement('div');
-        armyLayer.id = 'army-layer';
-        armyLayer.style.position = 'absolute';
-        armyLayer.style.top = '0';
-        armyLayer.style.left = '0';
-        armyLayer.style.width = '100%';
-        armyLayer.style.height = '100%';
-        armyLayer.style.pointerEvents = 'none';
-        armyLayer.style.zIndex = '50';
-        mapLayer.appendChild(armyLayer);
-
-        // 부대 마커 생성
         this.armies.forEach(army => {
-            const marker = document.createElement('div');
-            marker.className = 'army-marker';
-            marker.id = `army-marker-${army.id}`;
-            marker.style.backgroundColor = army.color;
-            marker.innerText = army.id + 1;
-            const TILE_SIZE = 13;
-            const x = 50 + (army.c * TILE_SIZE);
-            const y = 50 + (army.r * TILE_SIZE);
-            marker.style.transform = `translate(${x}px, ${y}px)`;
-            armyLayer.appendChild(marker);
+            const marker = document.createElement('div'); marker.className = 'army-marker'; marker.id = `army-marker-${army.id}`; marker.style.backgroundColor = army.color; marker.innerText = army.id + 1;
+            const TILE_SIZE = 13, x = 50 + (army.c * TILE_SIZE), y = 50 + (army.r * TILE_SIZE); marker.style.transform = `translate(${x}px, ${y}px)`; armyLayer.appendChild(marker);
         });
 
-        // 맵 타일 생성
         for (let r = 0; r < MAP_SIZE; r++) {
             for (let c = 0; c < MAP_SIZE; c++) {
-                const cell = document.createElement('div');
-                cell.className = 'field-cell';
-                // ID는 안개 여부와 상관없이 항상 부여 (실시간 업데이트를 위해)
-                cell.id = `field-cell-${r}-${c}`;
+                const cell = document.createElement('div'); cell.className = 'field-cell'; cell.id = `field-cell-${r}-${c}`;
+                const type = FIELD_MAP_DATA[r][c], key = `${r},${c}`, isOccupied = this.occupiedTiles.has(key), isVisible = this.visibilityMap.has(key);
+                let isAdjacent = false; const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+                if (!isOccupied) { for (let d of dirs) { const nr = r + d[0], nc = c + d[1]; if (this.occupiedTiles.has(`${nr},${nc}`)) { isAdjacent = true; break; } } }
                 
-                const type = FIELD_MAP_DATA[r][c];
-                const key = `${r},${c}`;
-                const isOccupied = this.occupiedTiles.has(key);
-                const isVisible = this.visibilityMap.has(key);
-                
-                // 인접 타일 계산
-                let isAdjacent = false;
-                const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-                if (!isOccupied) {
-                    for (let d of dirs) {
-                        const nr = r + d[0], nc = c + d[1];
-                        if (this.occupiedTiles.has(`${nr},${nc}`)) { isAdjacent = true; break; }
-                    }
-                }
-
-                // 1. 기본 지형 스타일 적용 (안개 아래에 깔아둠)
                 let color = '#2e3b23';
-                if (type === 1) { color = '#4285f4'; cell.classList.add('field-castle'); }
-                else if (type === 2) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); }
-                else if (type === 3) { color = '#fbbc05'; cell.classList.add('field-fortress'); }
-                else if (type === 4) color = '#555';
+                if (type === 1) { color = '#4285f4'; cell.classList.add('field-castle'); } else if (type === 2) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); } else if (type === 3) { color = '#fbbc05'; cell.classList.add('field-fortress'); } 
+                else if (type === 4) { color = '#8d6e63'; } // Road color
+                else { color = '#555'; } // Default fallback
                 cell.style.backgroundColor = color;
 
-                // 2. 상태별 스타일 및 이벤트 적용
-                if (isOccupied) {
-                    cell.classList.add('field-occupied');
-                } else if (isAdjacent) {
-                    cell.classList.add('field-adjacent');
-                    cell.style.opacity = 0.6;
-                    cell.onclick = (e) => {
-                        e.stopPropagation();
-                        if(!this.isDraggingMap) {
-                            this.openSquadSelector(r, c, type);
-                        }
-                    };
-                } else {
-                    // 점령 안됨 + 인접 안함 (탐험은 했지만 갈 수 없는 곳)
-                    cell.style.opacity = 0.3; 
-                    // 빈 공간 클릭시 이동 기능 추가 (선택사항, 일단은 인접 점령 로직 유지)
-                    // 현재는 '점령'이 이동을 포함하므로, 인접하지 않은 곳은 클릭 불가로 둠
-                }
+                if (isOccupied) cell.classList.add('field-occupied');
+                else if (isAdjacent) { cell.classList.add('field-adjacent'); cell.style.opacity = 0.6; }
+                else cell.style.opacity = 0.3;
 
-                // 3. 안개 덮어쓰기 (가장 마지막에 처리)
-                if (!isVisible) {
-                    cell.classList.add('field-fog');
-                    cell.style.opacity = 1; // 안개는 불투명 (CSS에서 bg: black)
-                }
+                // 클릭 이벤트: 점령 여부와 상관없이 클릭 가능 (이동 목적지 설정)
+                cell.onclick = (e) => {
+                    e.stopPropagation();
+                    if(!this.isDraggingMap) this.openSquadSelector(r, c, type);
+                };
 
+                if (!isVisible) { cell.classList.add('field-fog'); cell.style.opacity = 1; }
                 mapLayer.appendChild(cell);
             }
         }
-        viewport.appendChild(mapLayer);
-        content.appendChild(viewport);
+        viewport.appendChild(mapLayer); content.appendChild(viewport); this.initFieldCamera(viewport, mapLayer);
+    }
 
-        this.initFieldCamera(viewport, mapLayer);
+    getSquadStats(squadData) {
+        let count = 0, totalMov = 0, minMov = 99;
+        squadData.forEach(u => {
+            if(u) {
+                count++;
+                const stats = getData(u.type, u.level);
+                if(stats.mov) {
+                    totalMov += stats.mov;
+                    minMov = Math.min(minMov, stats.mov);
+                }
+            }
+        });
+        if(count === 0) return { power: 0, range: 0, speed: 0 };
+        
+        // 이동 거리 계산 로직: 기본 5칸 + 최소 이동력 * 2 + (기병이 많으면 보너스?)
+        // 간단하게: Min Mov가 2(기병)이면 Range 10, 1이면 Range 6
+        const baseRange = 4;
+        const range = baseRange + (minMov * 2);
+        
+        // 이동 속도: 기본적으로 1칸당 500ms, Mov가 높으면 300ms
+        const speed = (minMov >= 2) ? 300 : 500;
+        
+        return { power: this.getSquadPower(squadData), range, speed };
     }
 
     openSquadSelector(targetR, targetC, tileType) {
-        const existing = document.querySelector('.squad-selector');
-        if(existing) existing.remove();
-
-        const viewport = document.getElementById('map-viewport');
-        const selector = document.createElement('div');
-        selector.className = 'squad-selector';
+        const existing = document.querySelector('.squad-selector'); if(existing) existing.remove();
+        const viewport = document.getElementById('map-viewport'); const selector = document.createElement('div'); selector.className = 'squad-selector';
         
-        let energyCost = 1; let goldCost = 0; 
-        if (tileType === 2) { energyCost = 5; goldCost = 100; }
+        // Obstacle Check for destination (No obstacles now, but keep logic if needed)
+        // if (tileType === 4) { ... } 
 
         this.armies.forEach(army => {
-            const card = document.createElement('div');
-            card.className = 'squad-card';
-            
+            const card = document.createElement('div'); card.className = 'squad-card';
             const isIdle = army.state === 'IDLE';
             const squadData = army.id === 0 ? this.squad1 : this.squad2;
-            const power = this.getSquadPower(squadData);
+            const stats = this.getSquadStats(squadData);
             
-            if (!isIdle) {
-                card.classList.add('disabled');
-                // 현재 위치 표시
-                card.innerHTML = `<div class="font-bold text-white">${army.name}</div><div class="squad-status">이동중...</div>`;
-            } else if (power < 10) {
-                 card.innerHTML = `<div class="font-bold text-white">${army.name}</div><div class="squad-status text-red-400">병력 부족</div>`;
-            } else {
-                card.innerHTML = `<div class="font-bold text-white">${army.name}</div><div class="squad-status text-green-400">⚔️ ${power}</div>`;
+            // Calculate Path & Distance
+            const path = AStar.findPath({r: army.r, c: army.c}, {r: targetR, c: targetC}, FIELD_MAP_DATA, this.occupiedTiles);
+            const dist = path ? path.length - 1 : 999;
+            const reachable = path && dist <= stats.range;
+            
+            let statusHtml = "";
+            if (!isIdle) statusHtml = `<div class="squad-status">이동중...</div>`;
+            else if (stats.power < 10) statusHtml = `<div class="squad-status text-red-400">병력 부족</div>`;
+            else if (!path) statusHtml = `<div class="squad-status text-red-400">갈 수 없음</div>`;
+            else if (!reachable) statusHtml = `<div class="squad-status text-orange-400">거리 초과 (${dist}/${stats.range})</div>`;
+            else statusHtml = `<div class="squad-status text-green-400">거리: ${dist} / ⏳ ${((dist*stats.speed)/1000).toFixed(1)}s</div>`;
+
+            if (!isIdle || stats.power < 10 || !reachable || !path) card.classList.add('disabled');
+            
+            card.innerHTML = `<div class="font-bold text-white">${army.name}</div>${statusHtml}`;
+            if(!card.classList.contains('disabled')) {
                 card.onclick = (e) => {
                     e.stopPropagation();
-                    this.startMarch(army.id, targetR, targetC, tileType, energyCost, goldCost);
+                    // Energy cost based on distance? Or flat? Using flat for now based on tile type
+                    let energyCost = 1; let goldCost = 0;
+                    if (tileType === 2) { energyCost = 5; goldCost = 100; }
+                    this.startMarch(army.id, targetR, targetC, tileType, energyCost, goldCost, path, stats.speed);
                     selector.remove();
                 };
             }
             selector.appendChild(card);
         });
 
-        const closeBtn = document.createElement('div');
-        closeBtn.className = 'squad-card bg-red-900 border-red-700';
-        closeBtn.innerHTML = '<div class="font-bold text-red-200">취소</div>';
-        closeBtn.onclick = (e) => { e.stopPropagation(); selector.remove(); };
-        selector.appendChild(closeBtn);
-
+        const closeBtn = document.createElement('div'); closeBtn.className = 'squad-card bg-red-900 border-red-700'; closeBtn.innerHTML = '<div class="font-bold text-red-200">취소</div>';
+        closeBtn.onclick = (e) => { e.stopPropagation(); selector.remove(); }; selector.appendChild(closeBtn);
         viewport.appendChild(selector);
         
-        const TILE_SIZE = 13;
-        const tx = 50 + (targetC * TILE_SIZE) + 6.5;
-        const ty = 50 + (targetR * TILE_SIZE) + 6.5;
+        const TILE_SIZE = 13; const tx = 50 + (targetC * TILE_SIZE) + 6.5; const ty = 50 + (targetR * TILE_SIZE) + 6.5;
         this.moveCameraTo(tx, ty, viewport, document.getElementById('map-layer'));
     }
 
-    startMarch(armyId, r, c, type, energyCost, goldCost) {
+    startMarch(armyId, r, c, type, energyCost, goldCost, path, moveSpeed) {
         if(this.energy < energyCost) { this.showToast(`에너지 부족 (${energyCost})`); return; }
         if(this.gold < goldCost) { this.showToast(`골드 부족 (${goldCost})`); return; }
 
-        this.energy -= energyCost;
-        this.gold -= goldCost;
-        this.updateUI();
+        this.energy -= energyCost; this.gold -= goldCost; this.updateUI();
 
         const army = this.armies[armyId];
         army.state = 'MOVING_TO';
-        // 현재 위치를 출발점으로 설정 (성이나 이전 위치)
-        army.startR = army.r;
-        army.startC = army.c;
+        army.path = path;
+        army.nextStepIndex = 1; // Start from 1 (0 is current pos)
+        army.moveInterval = moveSpeed;
+        army.lastMoveTime = Date.now();
         army.target = { r, c, type };
         
-        const dist = Math.sqrt(Math.pow(r - army.startR, 2) + Math.pow(c - army.startC, 2));
-        army.duration = Math.max(1000, dist * 500); 
-        army.startTime = Date.now();
-        
-        this.showToast(`${army.name} 출격!`);
+        this.showToast(`${army.name} 행군 시작!`);
         this.sound.playSpawn(); 
     }
 
@@ -904,7 +814,6 @@ class Game {
         const TILE_SIZE = 13;
         
         this.armies.forEach(army => {
-            // IDLE 상태라도 위치 업데이트 (초기 로딩 시 등)
             const el = document.getElementById(`army-marker-${army.id}`);
             if (el) {
                  const x = 50 + (army.c * TILE_SIZE);
@@ -914,42 +823,28 @@ class Game {
 
             if (army.state === 'IDLE') return;
 
-            const elapsed = now - army.startTime;
-            const progress = Math.min(1, elapsed / army.duration);
-
-            let currentR, currentC;
-
             if (army.state === 'MOVING_TO') {
-                currentR = army.startR + (army.target.r - army.startR) * progress;
-                currentC = army.startC + (army.target.c - army.startC) * progress;
-
-                // Fog Reveal Real-time (Radius 3)
-                const discreteR = Math.round(currentR);
-                const discreteC = Math.round(currentC);
-                this.revealFog(discreteR, discreteC, 3);
-
-                if (progress >= 1) {
-                    // 도착 완료
-                    army.r = army.target.r;
-                    army.c = army.target.c;
-                    this.handleArrival(army);
-                } else {
-                    // 이동 중 좌표 업데이트
-                    army.r = currentR;
-                    army.c = currentC;
+                if (now - army.lastMoveTime >= army.moveInterval) {
+                    army.lastMoveTime = now;
+                    if (army.nextStepIndex < army.path.length) {
+                        const nextPos = army.path[army.nextStepIndex];
+                        army.r = nextPos.r;
+                        army.c = nextPos.c;
+                        army.nextStepIndex++;
+                        this.revealFog(army.r, army.c, 3); // Reveal fog as we move
+                    } else {
+                        // Arrived
+                        this.handleArrival(army);
+                    }
                 }
-            } 
-            // RETURNING 상태 제거 (현위치 대기)
+            }
         });
     }
 
     handleArrival(army) {
         const { r, c, type } = army.target;
-        
-        // 점령 로직
         if (!this.occupiedTiles.has(`${r},${c}`)) {
             this.occupiedTiles.add(`${r},${c}`);
-            
             if (type === 2) { 
                 this.showToast(`⚔️ ${army.name} 관문 돌파!`); 
                 this.sound.playUnlock();
@@ -958,155 +853,75 @@ class Game {
                 this.showToast(`🚩 ${army.name} 점령 성공!`); 
                 this.sound.playCollect(); 
             }
-            
-            // 점령 성공 시 맵 리렌더링 (인접 타일 클릭 이벤트 갱신 등을 위해 필요)
-            if (document.getElementById('field-modal').classList.contains('open')) {
-                this.renderFieldMap(); 
-            }
+            if (document.getElementById('field-modal').classList.contains('open')) this.renderFieldMap(); 
         } else {
              this.showToast(`${army.name} 도착 완료`);
         }
-
-        // 상태를 IDLE로 변경하여 해당 위치에 대기
         army.state = 'IDLE';
-        // 위치는 updateArmies에서 이미 target으로 설정됨
-        
-        this.updateUI();
-        this.saveGame(); // 위치 저장
+        this.updateUI(); this.saveGame();
     }
 
     moveCameraTo(targetX, targetY, viewport, mapLayer) {
-        const viewportWidth = viewport.clientWidth;
-        const viewportHeight = viewport.clientHeight;
-        const newX = (viewportWidth / 2) - (targetX * this.camera.scale);
-        const newY = (viewportHeight / 2) - (targetY * this.camera.scale);
-
+        const viewportWidth = viewport.clientWidth; const viewportHeight = viewport.clientHeight;
+        const newX = (viewportWidth / 2) - (targetX * this.camera.scale); const newY = (viewportHeight / 2) - (targetY * this.camera.scale);
         mapLayer.style.transition = 'transform 0.3s ease-out';
-        this.camera.x = newX;
-        this.camera.y = newY;
+        this.camera.x = newX; this.camera.y = newY;
         mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`;
-        
-        setTimeout(() => {
-            mapLayer.style.transition = 'none';
-        }, 300);
+        setTimeout(() => { mapLayer.style.transition = 'none'; }, 300);
     }
 
     initFieldCamera(viewport, mapLayer) {
-        const TILE_SIZE = 13; 
-        const VIEW_TILES = 9;
-        const vw = viewport.clientWidth || viewport.getBoundingClientRect().width || 300;
-        const vh = viewport.clientHeight || viewport.getBoundingClientRect().height || 300;
-
-        let scale;
-        if (this.camera && this.camera.scale) {
-            scale = this.camera.scale;
-        } else {
-            scale = vw / (TILE_SIZE * VIEW_TILES);
-        }
-
-        let targetR, targetC;
-        let shouldRecenter = false;
-
-        if (!this.camera) {
-            targetR = PLAYER_START.r;
-            targetC = PLAYER_START.c;
-            shouldRecenter = true;
-        }
-
+        const TILE_SIZE = 13; const VIEW_TILES = 9;
+        const vw = viewport.clientWidth || 300; const vh = viewport.clientHeight || 300;
+        let scale; if (this.camera && this.camera.scale) scale = this.camera.scale; else scale = vw / (TILE_SIZE * VIEW_TILES);
+        let targetR, targetC; let shouldRecenter = false;
+        if (!this.camera) { targetR = PLAYER_START.r; targetC = PLAYER_START.c; shouldRecenter = true; }
         if (shouldRecenter) {
-            const targetX = 50 + (targetC * TILE_SIZE) + (TILE_SIZE / 2);
-            const targetY = 50 + (targetR * TILE_SIZE) + (TILE_SIZE / 2);
-            const x = (vw / 2) - (targetX * scale);
-            const y = (vh / 2) - (targetY * scale);
+            const targetX = 50 + (targetC * TILE_SIZE) + (TILE_SIZE / 2); const targetY = 50 + (targetR * TILE_SIZE) + (TILE_SIZE / 2);
+            const x = (vw / 2) - (targetX * scale); const y = (vh / 2) - (targetY * scale);
             this.camera = { x, y, scale };
         }
-
-        const updateTransform = () => {
-            mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`;
-        };
+        const updateTransform = () => { mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`; };
         setTimeout(updateTransform, 0);
 
-        let isDragging = false;
-        let lastX = 0, lastY = 0;
-        let initialPinchDist = 0;
-        let initialPinchScale = 1;
+        let isDragging = false, lastX = 0, lastY = 0, initialPinchDist = 0, initialPinchScale = 1;
 
         viewport.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const zoomSpeed = 0.1;
-            const newScale = this.camera.scale + (e.deltaY > 0 ? -zoomSpeed : zoomSpeed) * this.camera.scale;
+            e.preventDefault(); const zoomSpeed = 0.1; const newScale = this.camera.scale + (e.deltaY > 0 ? -zoomSpeed : zoomSpeed) * this.camera.scale;
             if (newScale > 0.2 && newScale < 5) { 
-                const rect = viewport.getBoundingClientRect();
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
+                const centerX = viewport.clientWidth / 2; const centerY = viewport.clientHeight / 2;
                 const scaleRatio = newScale / this.camera.scale;
-                this.camera.x = centerX - (centerX - this.camera.x) * scaleRatio;
-                this.camera.y = centerY - (centerY - this.camera.y) * scaleRatio;
-                this.camera.scale = newScale;
-                updateTransform();
+                this.camera.x = centerX - (centerX - this.camera.x) * scaleRatio; this.camera.y = centerY - (centerY - this.camera.y) * scaleRatio;
+                this.camera.scale = newScale; updateTransform();
             }
         });
-
-        viewport.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            this.isDraggingMap = false;
-            lastX = e.clientX;
-            lastY = e.clientY;
-        });
+        viewport.addEventListener('mousedown', (e) => { isDragging = true; this.isDraggingMap = false; lastX = e.clientX; lastY = e.clientY; });
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            const dx = e.clientX - lastX;
-            const dy = e.clientY - lastY;
-            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) this.isDraggingMap = true;
-            this.camera.x += dx;
-            this.camera.y += dy;
-            lastX = e.clientX;
-            lastY = e.clientY;
-            updateTransform();
+            if (Math.abs(e.clientX - lastX) > 5 || Math.abs(e.clientY - lastY) > 5) this.isDraggingMap = true;
+            this.camera.x += e.clientX - lastX; this.camera.y += e.clientY - lastY; lastX = e.clientX; lastY = e.clientY; updateTransform();
         });
         window.addEventListener('mouseup', () => { isDragging = false; });
-
         viewport.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                isDragging = true;
-                this.isDraggingMap = false;
-                lastX = e.touches[0].clientX;
-                lastY = e.touches[0].clientY;
-            } else if (e.touches.length === 2) {
-                isDragging = false;
-                initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                initialPinchScale = this.camera.scale;
-            }
+            if (e.touches.length === 1) { isDragging = true; this.isDraggingMap = false; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; }
+            else if (e.touches.length === 2) { isDragging = false; initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); initialPinchScale = this.camera.scale; }
         }, { passive: false });
-
         viewport.addEventListener('touchmove', (e) => {
             e.preventDefault();
             if (e.touches.length === 1 && isDragging) {
-                const dx = e.touches[0].clientX - lastX;
-                const dy = e.touches[0].clientY - lastY;
-                if (Math.abs(dx) > 5 || Math.abs(dy) > 5) this.isDraggingMap = true;
-                this.camera.x += dx;
-                this.camera.y += dy;
-                lastX = e.touches[0].clientX;
-                lastY = e.touches[0].clientY;
-                updateTransform();
+                if (Math.abs(e.touches[0].clientX - lastX) > 5 || Math.abs(e.touches[0].clientY - lastY) > 5) this.isDraggingMap = true;
+                this.camera.x += e.touches[0].clientX - lastX; this.camera.y += e.touches[0].clientY - lastY; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; updateTransform();
             } else if (e.touches.length === 2) {
                 const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                const scaleFactor = dist / initialPinchDist;
-                const newScale = initialPinchScale * scaleFactor;
+                const newScale = initialPinchScale * (dist / initialPinchDist);
                 if (newScale > 0.2 && newScale < 5) {
-                    const rect = viewport.getBoundingClientRect();
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
+                    const centerX = viewport.clientWidth / 2; const centerY = viewport.clientHeight / 2;
                     const scaleRatio = newScale / this.camera.scale;
-                    this.camera.x = centerX - (centerX - this.camera.x) * scaleRatio;
-                    this.camera.y = centerY - (centerY - this.camera.y) * scaleRatio;
-                    this.camera.scale = newScale;
-                    updateTransform();
+                    this.camera.x = centerX - (centerX - this.camera.x) * scaleRatio; this.camera.y = centerY - (centerY - this.camera.y) * scaleRatio;
+                    this.camera.scale = newScale; updateTransform();
                 }
             }
         }, { passive: false });
-
         viewport.addEventListener('touchend', () => { isDragging = false; });
     }
 
@@ -1143,7 +958,6 @@ class Game {
             const prevLv = this.lordLevel;
             const prevEn = this.maxEnergy;
             this.currentXp -= nextReq; this.lordLevel++; this.updateLevelStats(); this.energy = this.maxEnergy; this.refreshLockState();
-            // Show new modal instead of just banner
             this.showLevelUpModal(prevLv, prevEn);
             this.sound.playLevelUp();
             if (this.currentXp >= this.requiredXp) this.levelUp();
