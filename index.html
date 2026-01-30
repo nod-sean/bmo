@@ -66,6 +66,14 @@
         
         #toast { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 200; border: 2px solid #ffd700; white-space: nowrap; pointer-events: none; }
         
+        /* Army Marker & Selector */
+        .army-marker { position: absolute; width: 10px; height: 10px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.8); transition: transform 0.1s linear; z-index: 50; pointer-events: none; display: flex; justify-content: center; align-items: center; font-size: 8px; font-weight: bold; color: black; }
+        .squad-selector { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(30, 30, 30, 0.95); border: 2px solid #8d6e63; border-radius: 12px; padding: 10px; display: flex; gap: 10px; z-index: 100; width: 90%; max-width: 300px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .squad-card { flex: 1; background: #3e2723; border: 1px solid #555; border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .squad-card:active { transform: scale(0.95); }
+        .squad-card.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
+        .squad-status { font-size: 10px; color: #aaa; margin-top: 2px; }
+
         /* Level Up Banner & Modal */
         #levelup-banner { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0); z-index: 150; pointer-events: none; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #levelup-banner.show { transform: translate(-50%, -50%) scale(1); }
@@ -204,7 +212,7 @@
                 </div>
                 <div class="bg-gray-800 p-3 rounded text-xs text-gray-400">
                     <p>UID: <span id="settings-uid" class="text-gray-200">User_1234</span></p>
-                    <p>Version: 0.2.2 (Phase 2 Fix)</p>
+                    <p>Version: 0.2.2 (Marching Update)</p>
                 </div>
             </div>
             <div class="mt-6 flex gap-2">
@@ -448,6 +456,12 @@ class Game {
 
         this.drag = null; this.hover = null; this.selectedItem = null; this.potentialDrag = null; this.dpr = window.devicePixelRatio || 1;
         
+        // 부대 데이터 초기화 (Marching 시스템)
+        this.armies = [
+            { id: 0, name: "제1부대", color: "#4caf50", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, target: null, startTime: 0, duration: 0, startR: 0, startC: 0 },
+            { id: 1, name: "제2부대", color: "#2196f3", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, target: null, startTime: 0, duration: 0, startR: 0, startC: 0 }
+        ];
+
         this.calcLayout(); 
         if(!this.loadGame()) this.initGame();
         else { this.updateLevelStats(); this.updateUI(); }
@@ -635,61 +649,404 @@ class Game {
             this.closeModal(); 
             return; 
         }
+        // 카메라 초기화 (내 성 중심)
+        this.camera = null; 
         this.renderFieldMap();
     }
 
     renderFieldMap() {
-        const modal = document.getElementById('field-modal'); 
-        const content = document.getElementById('modal-content'); 
+        const modal = document.getElementById('field-modal');
+        const content = document.getElementById('modal-content');
         const title = document.getElementById('modal-title');
-        
-        modal.dataset.mode = 'field'; 
+
+        modal.dataset.mode = 'field';
         modal.classList.add('open');
-        
-        title.innerText = "월드 맵 (Field)"; 
+        title.innerText = "월드 맵 (Field)";
         content.innerHTML = "";
-        
+        content.style.overflow = "hidden";
+
+        // 상단 정보창
         const headerDiv = document.createElement('div');
-        headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-20 shadow-md";
+        headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-30 shadow-md";
         headerDiv.innerHTML = `<div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>💰 세금: <span class="text-yellow-400 font-bold">+${this.income}/3sec</span></div>`;
         content.appendChild(headerDiv);
-        
-        const mapContainer = document.createElement('div');
-        mapContainer.style.display = 'grid'; mapContainer.style.gridTemplateColumns = 'repeat(25, 12px)'; mapContainer.style.gap = '1px'; mapContainer.style.justifyContent = 'center'; mapContainer.style.margin = '10px 0'; mapContainer.style.padding = '10px';
-        
-        for(let r=0; r<MAP_SIZE; r++) {
-            for(let c=0; c<MAP_SIZE; c++) {
-                const cell = document.createElement('div'); cell.className = 'field-cell';
-                const type = FIELD_MAP_DATA[r][c]; const key = `${r},${c}`; const isOccupied = this.occupiedTiles.has(key);
-                let isAdjacent = false; const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
-                if (!isOccupied) { for(let d of dirs) { const nr = r+d[0], nc = c+d[1]; if(this.occupiedTiles.has(`${nr},${nc}`)) { isAdjacent = true; break; } } }
-                if (!isOccupied && !isAdjacent) { cell.className += ' field-hidden'; } else {
-                    let color = '#2e3b23'; if(type===1) { color='#4285f4'; cell.classList.add('field-castle'); } else if(type===2) { color='#ea4335'; cell.classList.add('field-gate'); cell.classList.add(isOccupied ? 'unlocked' : 'locked'); } else if(type===3) { color='#fbbc05'; cell.classList.add('field-fortress'); } else if(type===4) color='#555';
-                    cell.style.backgroundColor = color;
-                    if (isOccupied) { cell.classList.add('field-occupied'); } else if (isAdjacent) { cell.classList.add('field-adjacent'); cell.style.opacity = 0.6; cell.onclick = () => this.handleFieldClick(r, c, type); }
+
+        // 맵 뷰포트
+        const viewport = document.createElement('div');
+        viewport.id = 'map-viewport';
+        viewport.style.position = 'relative';
+        viewport.style.width = '100%';
+        viewport.style.height = 'calc(100% - 50px)';
+        viewport.style.overflow = 'hidden';
+        viewport.style.background = '#1a1a1a';
+        viewport.style.touchAction = 'none';
+
+        // 맵 레이어
+        const mapLayer = document.createElement('div');
+        mapLayer.id = 'map-layer';
+        mapLayer.style.position = 'absolute';
+        mapLayer.style.transformOrigin = '0 0';
+        mapLayer.style.display = 'grid';
+        mapLayer.style.gridTemplateColumns = `repeat(${MAP_SIZE}, 12px)`;
+        mapLayer.style.gap = '1px';
+        mapLayer.style.padding = '50px';
+
+        // 부대 레이어
+        const armyLayer = document.createElement('div');
+        armyLayer.id = 'army-layer';
+        armyLayer.style.position = 'absolute';
+        armyLayer.style.top = '0';
+        armyLayer.style.left = '0';
+        armyLayer.style.width = '100%';
+        armyLayer.style.height = '100%';
+        armyLayer.style.pointerEvents = 'none';
+        armyLayer.style.zIndex = '50';
+        mapLayer.appendChild(armyLayer);
+
+        // 부대 마커 생성
+        this.armies.forEach(army => {
+            const marker = document.createElement('div');
+            marker.className = 'army-marker';
+            marker.id = `army-marker-${army.id}`;
+            marker.style.backgroundColor = army.color;
+            marker.innerText = army.id + 1;
+            const TILE_SIZE = 13;
+            const x = 50 + (army.c * TILE_SIZE);
+            const y = 50 + (army.r * TILE_SIZE);
+            marker.style.transform = `translate(${x}px, ${y}px)`;
+            armyLayer.appendChild(marker);
+        });
+
+        // 맵 타일 생성
+        for (let r = 0; r < MAP_SIZE; r++) {
+            for (let c = 0; c < MAP_SIZE; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'field-cell';
+                const type = FIELD_MAP_DATA[r][c];
+                const key = `${r},${c}`;
+                const isOccupied = this.occupiedTiles.has(key);
+                
+                let isAdjacent = false;
+                const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+                if (!isOccupied) {
+                    for (let d of dirs) {
+                        const nr = r + d[0], nc = c + d[1];
+                        if (this.occupiedTiles.has(`${nr},${nc}`)) { isAdjacent = true; break; }
+                    }
                 }
-                mapContainer.appendChild(cell);
+
+                if (!isOccupied && !isAdjacent) {
+                    cell.className += ' field-hidden';
+                } else {
+                    let color = '#2e3b23';
+                    if (type === 1) { color = '#4285f4'; cell.classList.add('field-castle'); }
+                    else if (type === 2) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); }
+                    else if (type === 3) { color = '#fbbc05'; cell.classList.add('field-fortress'); }
+                    else if (type === 4) color = '#555';
+                    
+                    cell.style.backgroundColor = color;
+                    if (isOccupied) cell.classList.add('field-occupied');
+                    else if (isAdjacent) {
+                        cell.classList.add('field-adjacent');
+                        cell.style.opacity = 0.6;
+                        cell.onclick = (e) => {
+                            e.stopPropagation();
+                            if(!this.isDraggingMap) {
+                                this.openSquadSelector(r, c, type);
+                            }
+                        };
+                    }
+                }
+                mapLayer.appendChild(cell);
             }
         }
-        content.appendChild(mapContainer);
-        
-        const infoDiv = document.createElement('div'); infoDiv.className = "text-center mt-2 p-2 bg-gray-800 rounded text-xs";
-        infoDiv.innerHTML = `<h3 class="text-yellow-400 font-bold mb-1">Phase 2: 세력 확장</h3><p class="text-gray-300">🟦내 성 🟥관문(고비용, +3G) 🟨성채(+5G)<br><span class="text-gray-400">검은색 지역은 점령하여 시야를 확보하세요.</span></p>`;
-        content.appendChild(infoDiv);
+        viewport.appendChild(mapLayer);
+        content.appendChild(viewport);
+
+        this.initFieldCamera(viewport, mapLayer);
     }
 
-    handleFieldClick(r, c, type) {
-        let energyCost = 1; let goldCost = 0; if (type === 2) { energyCost = 5; goldCost = 100; }
-        if(this.energy < energyCost) { this.showToast(`에너지 부족 (${energyCost} 필요)`); return; }
-        if(this.gold < goldCost) { this.showToast(`골드 부족 (${goldCost} 필요)`); return; }
-        this.energy -= energyCost; this.gold -= goldCost;
-        this.occupiedTiles.add(`${r},${c}`);
-        if (type === 2) { this.showToast("⚔️ 관문 돌파 성공!"); this.sound.playUnlock(); this.spawnParticles(this.width/2, this.height/2, "#FF0000", 50, "confetti"); } else { this.showToast("점령 완료!"); this.sound.playCollect(); }
-        this.updateUI();
-        if (document.getElementById('field-modal').classList.contains('open')) { 
-            this.renderFieldMap(); // Re-render without toggling (closing/opening)
-        }
+    openSquadSelector(targetR, targetC, tileType) {
+        const existing = document.querySelector('.squad-selector');
+        if(existing) existing.remove();
+
+        const viewport = document.getElementById('map-viewport');
+        const selector = document.createElement('div');
+        selector.className = 'squad-selector';
+        
+        let energyCost = 1; let goldCost = 0; 
+        if (tileType === 2) { energyCost = 5; goldCost = 100; }
+
+        this.armies.forEach(army => {
+            const card = document.createElement('div');
+            card.className = 'squad-card';
+            
+            const isIdle = army.state === 'IDLE';
+            const squadData = army.id === 0 ? this.squad1 : this.squad2;
+            const power = this.getSquadPower(squadData);
+            
+            if (!isIdle) {
+                card.classList.add('disabled');
+                card.innerHTML = `<div class="font-bold text-white">${army.name}</div><div class="squad-status">이동중...</div>`;
+            } else if (power < 10) {
+                 card.innerHTML = `<div class="font-bold text-white">${army.name}</div><div class="squad-status text-red-400">병력 부족</div>`;
+            } else {
+                card.innerHTML = `<div class="font-bold text-white">${army.name}</div><div class="squad-status text-green-400">⚔️ ${power}</div>`;
+                card.onclick = (e) => {
+                    e.stopPropagation();
+                    this.startMarch(army.id, targetR, targetC, tileType, energyCost, goldCost);
+                    selector.remove();
+                };
+            }
+            selector.appendChild(card);
+        });
+
+        const closeBtn = document.createElement('div');
+        closeBtn.className = 'squad-card bg-red-900 border-red-700';
+        closeBtn.innerHTML = '<div class="font-bold text-red-200">취소</div>';
+        closeBtn.onclick = (e) => { e.stopPropagation(); selector.remove(); };
+        selector.appendChild(closeBtn);
+
+        viewport.appendChild(selector);
+        
+        const TILE_SIZE = 13;
+        const tx = 50 + (targetC * TILE_SIZE) + 6.5;
+        const ty = 50 + (targetR * TILE_SIZE) + 6.5;
+        this.moveCameraTo(tx, ty, viewport, document.getElementById('map-layer'));
     }
+
+    startMarch(armyId, r, c, type, energyCost, goldCost) {
+        if(this.energy < energyCost) { this.showToast(`에너지 부족 (${energyCost})`); return; }
+        if(this.gold < goldCost) { this.showToast(`골드 부족 (${goldCost})`); return; }
+
+        this.energy -= energyCost;
+        this.gold -= goldCost;
+        this.updateUI();
+
+        const army = this.armies[armyId];
+        army.state = 'MOVING_TO';
+        army.startR = army.r;
+        army.startC = army.c;
+        army.target = { r, c, type };
+        
+        const dist = Math.sqrt(Math.pow(r - army.startR, 2) + Math.pow(c - army.startC, 2));
+        army.duration = Math.max(1000, dist * 500); 
+        army.startTime = Date.now();
+        
+        this.showToast(`${army.name} 출격!`);
+        this.sound.playSpawn(); 
+    }
+
+    updateArmies() {
+        const now = Date.now();
+        const TILE_SIZE = 13;
+        
+        this.armies.forEach(army => {
+            if (army.state === 'IDLE') return;
+
+            const el = document.getElementById(`army-marker-${army.id}`);
+            if (!el) return;
+
+            const elapsed = now - army.startTime;
+            const progress = Math.min(1, elapsed / army.duration);
+
+            let currentR, currentC;
+
+            if (army.state === 'MOVING_TO') {
+                currentR = army.startR + (army.target.r - army.startR) * progress;
+                currentC = army.startC + (army.target.c - army.startC) * progress;
+
+                if (progress >= 1) {
+                    this.handleArrival(army);
+                }
+            } else if (army.state === 'RETURNING') {
+                currentR = army.startR + (PLAYER_START.r - army.startR) * progress;
+                currentC = army.startC + (PLAYER_START.c - army.startC) * progress;
+
+                if (progress >= 1) {
+                    army.state = 'IDLE';
+                    army.r = PLAYER_START.r;
+                    army.c = PLAYER_START.c;
+                    this.showToast(`${army.name} 귀환 완료`);
+                }
+            }
+
+            army.r = currentR;
+            army.c = currentC;
+            const x = 50 + (currentC * TILE_SIZE);
+            const y = 50 + (currentR * TILE_SIZE);
+            el.style.transform = `translate(${x}px, ${y}px)`;
+        });
+    }
+
+    handleArrival(army) {
+        const { r, c, type } = army.target;
+        
+        if (!this.occupiedTiles.has(`${r},${c}`)) {
+            this.occupiedTiles.add(`${r},${c}`);
+            if (type === 2) { 
+                this.showToast(`⚔️ ${army.name} 관문 돌파!`); 
+                this.sound.playUnlock();
+                this.spawnParticles(this.width/2, this.height/2, "#FF0000", 50, "confetti");
+            } else { 
+                this.showToast(`🚩 ${army.name} 점령 성공!`); 
+                this.sound.playCollect(); 
+            }
+            
+            if (document.getElementById('field-modal').classList.contains('open')) {
+                // DOM 갱신 (전체 리렌더링 대신 타일만 업데이트하면 좋겠지만, 
+                // 지금 구조상 리렌더링이 가장 안전함. 
+                // 다만 리렌더링 시 army 마커도 재생성되어 애니메이션이 끊기므로 
+                // 마커는 updateArmies에서 다시 잡힘)
+                this.renderFieldMap(); 
+                // 리렌더링 후 카메라 복구 로직이 initFieldCamera에 있음 (camera 객체 존재 시 유지)
+            }
+        }
+
+        army.state = 'RETURNING';
+        army.startR = r;
+        army.startC = c;
+        const dist = Math.sqrt(Math.pow(PLAYER_START.r - r, 2) + Math.pow(PLAYER_START.c - c, 2));
+        army.duration = Math.max(1000, dist * 300); 
+        army.startTime = Date.now();
+        this.updateUI();
+    }
+
+    moveCameraTo(targetX, targetY, viewport, mapLayer) {
+        const viewportWidth = viewport.clientWidth;
+        const viewportHeight = viewport.clientHeight;
+        const newX = (viewportWidth / 2) - (targetX * this.camera.scale);
+        const newY = (viewportHeight / 2) - (targetY * this.camera.scale);
+
+        mapLayer.style.transition = 'transform 0.3s ease-out';
+        this.camera.x = newX;
+        this.camera.y = newY;
+        mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`;
+        
+        setTimeout(() => {
+            mapLayer.style.transition = 'none';
+        }, 300);
+    }
+
+    initFieldCamera(viewport, mapLayer) {
+        const TILE_SIZE = 13; 
+        const VIEW_TILES = 9;
+        const vw = viewport.clientWidth || viewport.getBoundingClientRect().width || 300;
+        const vh = viewport.clientHeight || viewport.getBoundingClientRect().height || 300;
+
+        let scale;
+        if (this.camera && this.camera.scale) {
+            scale = this.camera.scale;
+        } else {
+            scale = vw / (TILE_SIZE * VIEW_TILES);
+        }
+
+        let targetR, targetC;
+        let shouldRecenter = false;
+
+        if (!this.camera) {
+            targetR = PLAYER_START.r;
+            targetC = PLAYER_START.c;
+            shouldRecenter = true;
+        }
+
+        if (shouldRecenter) {
+            const targetX = 50 + (targetC * TILE_SIZE) + (TILE_SIZE / 2);
+            const targetY = 50 + (targetR * TILE_SIZE) + (TILE_SIZE / 2);
+            const x = (vw / 2) - (targetX * scale);
+            const y = (vh / 2) - (targetY * scale);
+            this.camera = { x, y, scale };
+        }
+
+        const updateTransform = () => {
+            mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`;
+        };
+        setTimeout(updateTransform, 0);
+
+        let isDragging = false;
+        let lastX = 0, lastY = 0;
+        let initialPinchDist = 0;
+        let initialPinchScale = 1;
+
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomSpeed = 0.1;
+            const newScale = this.camera.scale + (e.deltaY > 0 ? -zoomSpeed : zoomSpeed) * this.camera.scale;
+            if (newScale > 0.2 && newScale < 5) { 
+                const rect = viewport.getBoundingClientRect();
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const scaleRatio = newScale / this.camera.scale;
+                this.camera.x = centerX - (centerX - this.camera.x) * scaleRatio;
+                this.camera.y = centerY - (centerY - this.camera.y) * scaleRatio;
+                this.camera.scale = newScale;
+                updateTransform();
+            }
+        });
+
+        viewport.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            this.isDraggingMap = false;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) this.isDraggingMap = true;
+            this.camera.x += dx;
+            this.camera.y += dy;
+            lastX = e.clientX;
+            lastY = e.clientY;
+            updateTransform();
+        });
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        viewport.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                this.isDraggingMap = false;
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                initialPinchScale = this.camera.scale;
+            }
+        }, { passive: false });
+
+        viewport.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length === 1 && isDragging) {
+                const dx = e.touches[0].clientX - lastX;
+                const dy = e.touches[0].clientY - lastY;
+                if (Math.abs(dx) > 5 || Math.abs(dy) > 5) this.isDraggingMap = true;
+                this.camera.x += dx;
+                this.camera.y += dy;
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+                updateTransform();
+            } else if (e.touches.length === 2) {
+                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                const scaleFactor = dist / initialPinchDist;
+                const newScale = initialPinchScale * scaleFactor;
+                if (newScale > 0.2 && newScale < 5) {
+                    const rect = viewport.getBoundingClientRect();
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const scaleRatio = newScale / this.camera.scale;
+                    this.camera.x = centerX - (centerX - this.camera.x) * scaleRatio;
+                    this.camera.y = centerY - (centerY - this.camera.y) * scaleRatio;
+                    this.camera.scale = newScale;
+                    updateTransform();
+                }
+            }
+        }, { passive: false });
+
+        viewport.addEventListener('touchend', () => { isDragging = false; });
+    }
+
     closeModal() { document.getElementById('field-modal').classList.remove('open'); document.getElementById('modal-refill').classList.remove('open'); document.getElementById('modal-settings').classList.remove('open'); }
     buyBuilding(type, price) {
         if (this.gold < price) { this.showToast("골드 부족!"); return; }
@@ -862,6 +1219,9 @@ class Game {
         this.updateUI(); this.requestRender();
     }
     loop() {
+        // 스쿼드 이동 업데이트 (매 프레임)
+        this.updateArmies();
+
         if(this.isDirty || this.drag) {
             this.ctx.clearRect(0,0,this.width,this.height);
             this.drawSquad(this.squad1, this.squad1Rect, "SQUAD 1", "#4caf50", ZONES.SQUAD1); this.drawSquad(this.squad2, this.squad2Rect, "SQUAD 2", "#2196f3", ZONES.SQUAD2);
