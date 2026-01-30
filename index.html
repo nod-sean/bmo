@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV - Advanced Marching</title>
+    <title>KOV - Persistent Selection</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* ... existing styles ... */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background-color: #000; touch-action: none; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100dvh; }
         #game-container { position: relative; background-color: #4e342e; box-shadow: 0 0 50px rgba(0,0,0,0.5); width: 100%; height: 100%; max-width: 56.25vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -48,7 +49,6 @@
         /* Field Styles */
         .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; }
         .field-occupied { border: 1px solid #42a5f5; box-shadow: 0 0 2px #42a5f5; z-index: 10; opacity: 1.0 !important; }
-        /* .field-adjacent class removed as we allow global movement based on range */
         
         /* Fog of War Styles */
         .field-fog { background-color: #000 !important; border: none; cursor: default; }
@@ -68,14 +68,20 @@
         
         /* Army Marker & Selector */
         .army-marker { position: absolute; width: 10px; height: 10px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.8); transition: transform 0.1s linear; z-index: 50; pointer-events: none; display: flex; justify-content: center; align-items: center; font-size: 8px; font-weight: bold; color: black; }
+        .army-marker.selected { border-color: #ffd700; box-shadow: 0 0 8px #ffd700, 0 0 4px #ffd700 inset; transform: scale(1.3); z-index: 51; }
+        
         .squad-selector { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(30, 30, 30, 0.95); border: 2px solid #8d6e63; border-radius: 12px; padding: 10px; display: flex; gap: 10px; z-index: 100; width: 90%; max-width: 300px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .squad-card { flex: 1; background: #3e2723; border: 1px solid #555; border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
         .squad-card:active { transform: scale(0.95); }
         .squad-card.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
         .squad-status { font-size: 10px; color: #aaa; margin-top: 2px; }
-        .path-dot { position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; pointer-events: none; z-index: 40; transform: translate(-50%, -50%); }
-
-        /* Level Up Banner & Modal */
+        
+        /* Selected Army HUD */
+        .selected-army-hud { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(30, 30, 30, 0.9); border: 1px solid #ffd700; border-radius: 30px; padding: 8px 20px; z-index: 95; display: flex; gap: 15px; align-items: center; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.6); }
+        .hud-name { font-weight: bold; color: #ffd700; font-size: 14px; }
+        .hud-btn { background: #d32f2f; border: none; border-radius: 12px; padding: 4px 12px; font-size: 10px; font-weight: bold; cursor: pointer; color: white; }
+        
+        /* Level Up Banner */
         #levelup-banner { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0); z-index: 150; pointer-events: none; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #levelup-banner.show { transform: translate(-50%, -50%) scale(1); }
         .levelup-stat { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
@@ -87,7 +93,6 @@
 <body>
 
 <div id="game-container">
-    <!-- Level Up Banner (Restored) -->
     <div id="levelup-banner"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/levelup.png" onerror="this.style.display='none'"></div>
 
     <!-- Header -->
@@ -213,7 +218,7 @@
                 </div>
                 <div class="bg-gray-800 p-3 rounded text-xs text-gray-400">
                     <p>UID: <span id="settings-uid" class="text-gray-200">User_1234</span></p>
-                    <p>Version: 0.2.7 (Road Fix)</p>
+                    <p>Version: 0.2.8 (Persistent Selection)</p>
                 </div>
             </div>
             <div class="mt-6 flex gap-2">
@@ -335,7 +340,6 @@ function initFieldData() {
             FIELD_MAP_DATA[r][c] = type;
         }
     }
-    // Remove forced path clearing since type 4 is now walkable
 }
 initFieldData();
 
@@ -508,6 +512,9 @@ class Game {
         this.occupiedTiles.add(`${PLAYER_START.r},${PLAYER_START.c}`); 
         this.income = 0;
         
+        // Add Persistent Selection State
+        this.selectedArmyId = null;
+
         this.visibilityMap = new Set();
         this.revealFog(PLAYER_START.r, PLAYER_START.c, 3);
 
@@ -676,6 +683,19 @@ class Game {
     renderFieldMap() {
         const modal = document.getElementById('field-modal'); const content = document.getElementById('modal-content'); const title = document.getElementById('modal-title');
         modal.dataset.mode = 'field'; modal.classList.add('open'); title.innerText = "월드 맵 (Field)"; content.innerHTML = ""; content.style.overflow = "hidden";
+        
+        // Show selected army HUD if any
+        if (this.selectedArmyId !== null) {
+            const existingHud = document.querySelector('.selected-army-hud');
+            if (existingHud) existingHud.remove();
+            
+            const armyName = this.armies[this.selectedArmyId].name;
+            const hud = document.createElement('div');
+            hud.className = 'selected-army-hud';
+            hud.innerHTML = `<span class="hud-name">${armyName} 선택됨</span><button class="hud-btn" onclick="game.deselectArmy()">선택 해제</button>`;
+            content.appendChild(hud);
+        }
+
         const headerDiv = document.createElement('div'); headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-30 shadow-md";
         headerDiv.innerHTML = `<div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>💰 세금: <span class="text-yellow-400 font-bold">+${this.income}/3sec</span></div>`; content.appendChild(headerDiv);
         const viewport = document.createElement('div'); viewport.id = 'map-viewport'; viewport.style.position = 'relative'; viewport.style.width = '100%'; viewport.style.height = 'calc(100% - 50px)'; viewport.style.overflow = 'hidden'; viewport.style.background = '#1a1a1a'; viewport.style.touchAction = 'none';
@@ -683,7 +703,12 @@ class Game {
         const armyLayer = document.createElement('div'); armyLayer.id = 'army-layer'; armyLayer.style.position = 'absolute'; armyLayer.style.top = '0'; armyLayer.style.left = '0'; armyLayer.style.width = '100%'; armyLayer.style.height = '100%'; armyLayer.style.pointerEvents = 'none'; armyLayer.style.zIndex = '50'; mapLayer.appendChild(armyLayer);
 
         this.armies.forEach(army => {
-            const marker = document.createElement('div'); marker.className = 'army-marker'; marker.id = `army-marker-${army.id}`; marker.style.backgroundColor = army.color; marker.innerText = army.id + 1;
+            const marker = document.createElement('div'); 
+            marker.className = 'army-marker'; 
+            if (this.selectedArmyId === army.id) marker.classList.add('selected'); // Highlight selected
+            marker.id = `army-marker-${army.id}`; 
+            marker.style.backgroundColor = army.color; 
+            marker.innerText = army.id + 1;
             const TILE_SIZE = 13, x = 50 + (army.c * TILE_SIZE), y = 50 + (army.r * TILE_SIZE); marker.style.transform = `translate(${x}px, ${y}px)`; armyLayer.appendChild(marker);
         });
 
@@ -704,10 +729,18 @@ class Game {
                 else if (isAdjacent) { cell.classList.add('field-adjacent'); cell.style.opacity = 0.6; }
                 else cell.style.opacity = 0.3;
 
-                // 클릭 이벤트: 점령 여부와 상관없이 클릭 가능 (이동 목적지 설정)
+                // Click Logic
                 cell.onclick = (e) => {
                     e.stopPropagation();
-                    if(!this.isDraggingMap) this.openSquadSelector(r, c, type);
+                    if(!this.isDraggingMap) {
+                        if (this.selectedArmyId !== null) {
+                            // Persistent Selection: Try to move currently selected army
+                            this.commandArmy(this.selectedArmyId, r, c, type);
+                        } else {
+                            // No selection: Open menu
+                            this.openSquadSelector(r, c, type);
+                        }
+                    }
                 };
 
                 if (!isVisible) { cell.classList.add('field-fog'); cell.style.opacity = 1; }
@@ -715,6 +748,35 @@ class Game {
             }
         }
         viewport.appendChild(mapLayer); content.appendChild(viewport); this.initFieldCamera(viewport, mapLayer);
+    }
+    
+    deselectArmy() {
+        this.selectedArmyId = null;
+        this.renderFieldMap(); // Re-render to remove highlight and HUD
+    }
+
+    commandArmy(armyId, targetR, targetC, tileType) {
+        const army = this.armies[armyId];
+        
+        // Basic Checks
+        if (army.state !== 'IDLE') { this.showToast("부대가 이동 중입니다."); return; }
+        
+        let energyCost = 1; let goldCost = 0;
+        if (tileType === 2) { energyCost = 5; goldCost = 100; }
+        
+        const squadData = army.id === 0 ? this.squad1 : this.squad2;
+        const stats = this.getSquadStats(squadData);
+        
+        if (stats.power < 10) { this.showToast("병력이 부족합니다."); return; }
+
+        const path = AStar.findPath({r: army.r, c: army.c}, {r: targetR, c: targetC}, FIELD_MAP_DATA, this.occupiedTiles);
+        
+        if (!path) { this.showToast("갈 수 없는 지역입니다."); return; }
+        const dist = path.length - 1;
+        if (dist > stats.range) { this.showToast(`거리 초과 (${dist}/${stats.range})`); return; }
+
+        // Execute Move
+        this.startMarch(armyId, targetR, targetC, tileType, energyCost, goldCost, path, stats.speed);
     }
 
     getSquadStats(squadData) {
@@ -746,9 +808,6 @@ class Game {
         const existing = document.querySelector('.squad-selector'); if(existing) existing.remove();
         const viewport = document.getElementById('map-viewport'); const selector = document.createElement('div'); selector.className = 'squad-selector';
         
-        // Obstacle Check for destination (No obstacles now, but keep logic if needed)
-        // if (tileType === 4) { ... } 
-
         this.armies.forEach(army => {
             const card = document.createElement('div'); card.className = 'squad-card';
             const isIdle = army.state === 'IDLE';
@@ -773,11 +832,14 @@ class Game {
             if(!card.classList.contains('disabled')) {
                 card.onclick = (e) => {
                     e.stopPropagation();
-                    // Energy cost based on distance? Or flat? Using flat for now based on tile type
                     let energyCost = 1; let goldCost = 0;
                     if (tileType === 2) { energyCost = 5; goldCost = 100; }
+                    
+                    // Set Persistent Selection here
+                    this.selectedArmyId = army.id;
                     this.startMarch(army.id, targetR, targetC, tileType, energyCost, goldCost, path, stats.speed);
                     selector.remove();
+                    this.renderFieldMap(); // Re-render to show HUD
                 };
             }
             selector.appendChild(card);
