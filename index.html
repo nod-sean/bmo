@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV - Field Render Fix</title>
+    <title>KOV - Fog of War</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -47,12 +47,14 @@
 
         /* Field Styles */
         .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; }
-        /* Removed !important to allow border overrides if needed, but increased specificity or z-index */
         .field-occupied { border: 1px solid #42a5f5; box-shadow: 0 0 2px #42a5f5; z-index: 10; opacity: 1.0 !important; }
         .field-adjacent { cursor: pointer; border: 1px dashed rgba(255,255,255,0.7); animation: pulse 2s infinite; }
-        .field-hidden { background-color: #000 !important; border: none; cursor: default; }
-        .field-hidden::after { content: ''; }
         
+        /* Fog of War Styles */
+        .field-fog { background-color: #000 !important; border: none; cursor: default; }
+        .field-fog::after { content: ''; }
+        /* .field-dim { opacity: 0.5; filter: grayscale(80%); } */
+
         /* Icons for field objects */
         .field-gate { border: 1px solid #ef4444; }
         .field-gate.locked::after { content: '🔒'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
@@ -117,7 +119,7 @@
                 <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
             </div>
         </div>
-        <!-- Dev Tools (Rolled back to previous UI style) -->
+        <!-- Dev Tools -->
         <div class="flex gap-2 mt-1 opacity-30 hover:opacity-100 transition-opacity justify-end items-center">
             <button onclick="game.resetGame()" class="bg-red-800 text-white px-2 py-1 rounded text-[10px] border border-red-500 hover:bg-red-600">🔄리셋</button>
             <button onclick="game.cheatEnergy()" class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⚡+30</button>
@@ -212,7 +214,7 @@
                 </div>
                 <div class="bg-gray-800 p-3 rounded text-xs text-gray-400">
                     <p>UID: <span id="settings-uid" class="text-gray-200">User_1234</span></p>
-                    <p>Version: 0.2.2 (Marching Update)</p>
+                    <p>Version: 0.2.3 (Fog of War Fix)</p>
                 </div>
             </div>
             <div class="mt-6 flex gap-2">
@@ -452,6 +454,11 @@ class Game {
         this.occupiedTiles.add(`${PLAYER_START.r},${PLAYER_START.c}`); 
         this.income = 0;
         
+        // Fog of War Data
+        this.visibilityMap = new Set();
+        // Initial reveal around start (radius 3)
+        this.revealFog(PLAYER_START.r, PLAYER_START.c, 3);
+
         this.settings = { bgm: true, sfx: true };
 
         this.drag = null; this.hover = null; this.selectedItem = null; this.potentialDrag = null; this.dpr = window.devicePixelRatio || 1;
@@ -483,7 +490,8 @@ class Game {
             const data = {
                 grid: this.grid, gridState: this.gridState, squad1: this.squad1, squad2: this.squad2,
                 lordLevel: this.lordLevel, currentXp: this.currentXp, energy: this.energy, gold: this.gold, gem: this.gem,
-                occupiedTiles: Array.from(this.occupiedTiles), settings: this.settings
+                occupiedTiles: Array.from(this.occupiedTiles), settings: this.settings,
+                visibilityMap: Array.from(this.visibilityMap) // Save Fog State
             };
             localStorage.setItem('kov_save_v1', JSON.stringify(data));
         } catch(e) {}
@@ -497,7 +505,10 @@ class Game {
             this.lordLevel = data.lordLevel || 1; this.currentXp = data.currentXp || 0;
             this.energy = data.energy ?? 50; this.gold = data.gold ?? 3000; this.gem = data.gem ?? 50;
             if(data.occupiedTiles) this.occupiedTiles = new Set(data.occupiedTiles);
+            if(data.visibilityMap) this.visibilityMap = new Set(data.visibilityMap); // Load Fog State
             if(data.settings) { this.settings = data.settings; this.applySettings(); }
+            // Ensure starting area is always visible (Radius 3)
+            this.revealFog(PLAYER_START.r, PLAYER_START.c, 3);
             return true;
         } catch(e) { return false; }
     }
@@ -654,6 +665,34 @@ class Game {
         this.renderFieldMap();
     }
 
+    // --- Fog of War Logic ---
+    revealFog(r, c, radius = 3) {
+        for(let i = -radius; i <= radius; i++) {
+            for(let j = -radius; j <= radius; j++) {
+                const nr = r + i;
+                const nc = c + j;
+                if(nr >= 0 && nr < MAP_SIZE && nc >= 0 && nc < MAP_SIZE) {
+                    const key = `${nr},${nc}`;
+                    if(!this.visibilityMap.has(key)) {
+                        this.visibilityMap.add(key);
+                        
+                        // 실시간 DOM 업데이트 (리렌더링 없이 클래스만 제거)
+                        const cell = document.getElementById(`field-cell-${nr}-${nc}`);
+                        if(cell) {
+                            cell.classList.remove('field-fog');
+                            // 안개가 걷혔을 때의 스타일 보정
+                            if (!cell.classList.contains('field-occupied') && !cell.classList.contains('field-adjacent')) {
+                                cell.style.opacity = 0.3; // 탐험했지만 갈 수 없는 곳
+                            } else if (cell.classList.contains('field-adjacent')) {
+                                cell.style.opacity = 0.6; 
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     renderFieldMap() {
         const modal = document.getElementById('field-modal');
         const content = document.getElementById('modal-content');
@@ -722,10 +761,14 @@ class Game {
             for (let c = 0; c < MAP_SIZE; c++) {
                 const cell = document.createElement('div');
                 cell.className = 'field-cell';
+                cell.id = `field-cell-${r}-${c}`;
+                
                 const type = FIELD_MAP_DATA[r][c];
                 const key = `${r},${c}`;
                 const isOccupied = this.occupiedTiles.has(key);
+                const isVisible = this.visibilityMap.has(key);
                 
+                // 인접 타일 계산
                 let isAdjacent = false;
                 const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
                 if (!isOccupied) {
@@ -735,28 +778,37 @@ class Game {
                     }
                 }
 
-                if (!isOccupied && !isAdjacent) {
-                    cell.className += ' field-hidden';
+                // 1. 기본 지형 스타일 (안개 아래)
+                let color = '#2e3b23';
+                if (type === 1) { color = '#4285f4'; cell.classList.add('field-castle'); }
+                else if (type === 2) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); }
+                else if (type === 3) { color = '#fbbc05'; cell.classList.add('field-fortress'); }
+                else if (type === 4) color = '#555';
+                
+                cell.style.backgroundColor = color;
+
+                // 2. 상태별 스타일
+                if (isOccupied) {
+                    cell.classList.add('field-occupied');
+                } else if (isAdjacent) {
+                    cell.classList.add('field-adjacent');
+                    cell.style.opacity = 0.6;
+                    cell.onclick = (e) => {
+                        e.stopPropagation();
+                        if(!this.isDraggingMap) {
+                            this.openSquadSelector(r, c, type);
+                        }
+                    };
                 } else {
-                    let color = '#2e3b23';
-                    if (type === 1) { color = '#4285f4'; cell.classList.add('field-castle'); }
-                    else if (type === 2) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); }
-                    else if (type === 3) { color = '#fbbc05'; cell.classList.add('field-fortress'); }
-                    else if (type === 4) color = '#555';
-                    
-                    cell.style.backgroundColor = color;
-                    if (isOccupied) cell.classList.add('field-occupied');
-                    else if (isAdjacent) {
-                        cell.classList.add('field-adjacent');
-                        cell.style.opacity = 0.6;
-                        cell.onclick = (e) => {
-                            e.stopPropagation();
-                            if(!this.isDraggingMap) {
-                                this.openSquadSelector(r, c, type);
-                            }
-                        };
-                    }
+                    cell.style.opacity = 0.3; // 탐험 완료, 접근 불가
                 }
+
+                // 3. 안개 처리 (가장 마지막에 덮어씌움)
+                if (!isVisible) {
+                    cell.classList.add('field-fog');
+                    cell.style.opacity = 1; // 안개는 불투명 (CSS에서 bg: black)
+                }
+
                 mapLayer.appendChild(cell);
             }
         }
@@ -856,12 +908,22 @@ class Game {
                 currentR = army.startR + (army.target.r - army.startR) * progress;
                 currentC = army.startC + (army.target.c - army.startC) * progress;
 
+                // Fog Reveal Real-time (Radius 3)
+                const discreteR = Math.round(currentR);
+                const discreteC = Math.round(currentC);
+                this.revealFog(discreteR, discreteC, 3);
+
                 if (progress >= 1) {
                     this.handleArrival(army);
                 }
             } else if (army.state === 'RETURNING') {
                 currentR = army.startR + (PLAYER_START.r - army.startR) * progress;
                 currentC = army.startC + (PLAYER_START.c - army.startC) * progress;
+
+                // Fog Reveal Real-time (Radius 3)
+                const discreteR = Math.round(currentR);
+                const discreteC = Math.round(currentC);
+                this.revealFog(discreteR, discreteC, 3);
 
                 if (progress >= 1) {
                     army.state = 'IDLE';
@@ -884,6 +946,7 @@ class Game {
         
         if (!this.occupiedTiles.has(`${r},${c}`)) {
             this.occupiedTiles.add(`${r},${c}`);
+            
             if (type === 2) { 
                 this.showToast(`⚔️ ${army.name} 관문 돌파!`); 
                 this.sound.playUnlock();
@@ -893,13 +956,9 @@ class Game {
                 this.sound.playCollect(); 
             }
             
+            // 점령 성공 시 맵 리렌더링 (인접 타일 클릭 이벤트 갱신 등을 위해 필요)
             if (document.getElementById('field-modal').classList.contains('open')) {
-                // DOM 갱신 (전체 리렌더링 대신 타일만 업데이트하면 좋겠지만, 
-                // 지금 구조상 리렌더링이 가장 안전함. 
-                // 다만 리렌더링 시 army 마커도 재생성되어 애니메이션이 끊기므로 
-                // 마커는 updateArmies에서 다시 잡힘)
                 this.renderFieldMap(); 
-                // 리렌더링 후 카메라 복구 로직이 initFieldCamera에 있음 (camera 객체 존재 시 유지)
             }
         }
 
