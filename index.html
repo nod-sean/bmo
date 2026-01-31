@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV - Field Graphics Update</title>
+    <title>KOV - Fog of War Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* ... (기존 스타일 유지) ... */
@@ -61,7 +61,6 @@
         #field-modal { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: #222; z-index: 90; transform: translateY(100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column; color: white; }
         #field-modal.open { transform: translateY(0); }
         
-        /* ... (나머지 스타일 동일) ... */
         .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; overflow-y: auto; padding: 10px; }
         .shop-item { background: #4e342e; border: 2px solid #8d6e63; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; position: relative; }
         .toggle-switch { width: 40px; height: 20px; background: #555; border-radius: 20px; position: relative; transition: 0.3s; }
@@ -72,7 +71,15 @@
         /* Field Styles */
         .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; }
         .field-occupied { border: 1px solid #42a5f5; box-shadow: 0 0 2px #42a5f5; z-index: 10; opacity: 1.0 !important; }
-        .field-fog { background-color: #000 !important; border: none; cursor: default; }
+        
+        /* Fog of War: Z-Index increased to cover content */
+        .field-fog { 
+            background-color: #000 !important; 
+            border: none; 
+            cursor: default; 
+            z-index: 100; /* Ensure fog covers everything */
+            opacity: 1 !important;
+        }
         .field-fog::after { content: ''; }
         
         .field-gate { border: 1px solid #ef4444; }
@@ -86,6 +93,7 @@
         
         #toast { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 200; border: 2px solid #ffd700; white-space: nowrap; pointer-events: none; }
         
+        /* Army Marker & Selector */
         .army-marker { 
             position: absolute; width: 12px; height: 12px; 
             box-shadow: 0 0 4px rgba(0,0,0,0.5); 
@@ -247,7 +255,7 @@
                 </div>
                 <div class="bg-gray-800 p-3 rounded text-xs text-gray-400">
                     <p>UID: <span id="settings-uid" class="text-gray-200">User_1234</span></p>
-                    <p>Version: 0.2.12 (Field Graphics)</p>
+                    <p>Version: 0.2.14 (Fog Logic Fix)</p>
                 </div>
             </div>
             <div class="mt-6 flex gap-2">
@@ -272,7 +280,7 @@ const ASSET_KEYS = [
     '2301', '2302', '2303', '2304', '2801', '2802', '2803', '2804', '2805',
     '3101', '3102', '3103', '3104', '3105',
     '1801', '1802', '1803', '1804', '1805', '1811', '1812', '1813', '1814', '1815',
-    '1821', '1822', '1823', '1824', '1825', 'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup'
+    '1821', '1822', '1823', '1824', '1825', 'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', 'field_bg'
 ];
 
 // --- GAME DATA ---
@@ -369,7 +377,6 @@ function initFieldData() {
             FIELD_MAP_DATA[r][c] = type;
         }
     }
-    // Remove forced path clearing since type 4 is now walkable
 }
 initFieldData();
 
@@ -549,7 +556,7 @@ class Game {
         // Initial reveal around start (radius 3)
         this.revealFog(PLAYER_START.r, PLAYER_START.c, 3);
         
-        // Create grass texture
+        // Create grass texture (if needed, otherwise relying on field_bg)
         this.grassTexture = this.createGrassPattern();
 
         this.settings = { bgm: true, sfx: true };
@@ -581,13 +588,15 @@ class Game {
         const c = document.createElement('canvas');
         c.width = 32; c.height = 32;
         const x = c.getContext('2d');
-        // Base grass color
-        x.fillStyle = '#2e3b23'; // Darker green base
+        // Better grass texture
+        x.fillStyle = '#4a6e3a'; // Base grass green
         x.fillRect(0,0,32,32);
-        // Add pixel noise
-        for(let i=0; i<24; i++) {
-            x.fillStyle = Math.random() > 0.5 ? '#3a4b2c' : '#25301b'; // Variations
-            x.fillRect(Math.floor(Math.random()*16)*2, Math.floor(Math.random()*16)*2, 2, 2);
+        // Add random noise for texture
+        for(let i=0; i<30; i++) {
+            x.fillStyle = Math.random() > 0.5 ? '#567d46' : '#3e5c30'; 
+            const px = Math.floor(Math.random()*32);
+            const py = Math.floor(Math.random()*32);
+            x.fillRect(px, py, 1, 1);
         }
         return c.toDataURL();
     }
@@ -748,13 +757,18 @@ class Game {
         const headerDiv = document.createElement('div'); headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-30 shadow-md";
         headerDiv.innerHTML = `<div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>💰 세금: <span class="text-yellow-400 font-bold">+${this.income}/3sec</span></div>`; content.appendChild(headerDiv);
         const viewport = document.createElement('div'); viewport.id = 'map-viewport'; viewport.style.position = 'relative'; viewport.style.width = '100%'; viewport.style.height = 'calc(100% - 50px)'; viewport.style.overflow = 'hidden'; 
-        viewport.style.backgroundColor = '#1a2f1a'; // Changed background to darker green for meadow effect base
+        viewport.style.backgroundColor = '#2e3b23'; 
         viewport.style.touchAction = 'none';
         
         const mapLayer = document.createElement('div'); mapLayer.id = 'map-layer'; mapLayer.style.position = 'absolute'; mapLayer.style.transformOrigin = '0 0'; mapLayer.style.display = 'grid'; mapLayer.style.gridTemplateColumns = `repeat(${MAP_SIZE}, 12px)`; mapLayer.style.gap = '1px'; mapLayer.style.padding = '50px';
         
-        // Apply Grass Pattern Background
-        mapLayer.style.backgroundImage = `url(${this.grassTexture})`;
+        // Use custom background image (or fallback to generated one)
+        const bgImg = this.assets.getImage('field_bg');
+        if(bgImg && bgImg.src) {
+             mapLayer.style.backgroundImage = `url(${bgImg.src})`;
+        } else {
+             mapLayer.style.backgroundImage = `url(${this.grassTexture})`;
+        }
         mapLayer.style.backgroundRepeat = 'repeat';
 
         const armyLayer = document.createElement('div'); armyLayer.id = 'army-layer'; armyLayer.style.position = 'absolute'; armyLayer.style.top = '0'; armyLayer.style.left = '0'; armyLayer.style.width = '100%'; armyLayer.style.height = '100%'; armyLayer.style.pointerEvents = 'none'; armyLayer.style.zIndex = '50'; mapLayer.appendChild(armyLayer);
@@ -801,19 +815,33 @@ class Game {
                 let isAdjacent = false; const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
                 if (!isOccupied) { for (let d of dirs) { const nr = r + d[0], nc = c + d[1]; if (this.occupiedTiles.has(`${nr},${nc}`)) { isAdjacent = true; break; } } }
                 
+                // --- FOG CHECK MOVED TO TOP ---
+                if (!isVisible) { 
+                    cell.classList.add('field-fog'); 
+                    mapLayer.appendChild(cell);
+                    continue; // Skip styling for fogged cells
+                }
+
                 // Transparency applied here for background texture visibility
                 let color = 'rgba(0, 0, 0, 0)'; 
-                if (type === 1) { color = 'rgba(66, 133, 244, 0.8)'; cell.classList.add('field-castle'); } 
-                else if (type === 2) { color = 'rgba(234, 67, 53, 0.8)'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); } 
-                else if (type === 3) { color = 'rgba(251, 188, 5, 0.8)'; cell.classList.add('field-fortress'); } 
-                else if (type === 4) { color = 'rgba(141, 110, 99, 0.6)'; } // Semi-transparent Road
+                if (type === 1) { color = '#4285f4'; cell.classList.add('field-castle'); } 
+                else if (type === 2) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); } 
+                else if (type === 3) { color = '#fbbc05'; cell.classList.add('field-fortress'); } 
+                else if (type === 4) { color = 'rgba(139, 69, 19, 0.4)'; } // Semi-transparent Road (Brown) - Keep road semi-transparent
                 else { color = 'transparent'; } // Empty Grass
                 
                 cell.style.backgroundColor = color;
 
-                if (isOccupied) cell.classList.add('field-occupied');
-                else if (isAdjacent) { cell.classList.add('field-adjacent'); cell.style.opacity = 0.6; }
-                else cell.style.opacity = 0.3;
+                // Opacity Logic
+                if (isOccupied) {
+                    cell.classList.add('field-occupied');
+                    cell.style.opacity = 1.0; // Fully visible when occupied
+                } else if (isAdjacent) { 
+                    cell.classList.add('field-adjacent'); 
+                    cell.style.opacity = 0.6; // Semi-transparent for potential next move
+                } else { 
+                    cell.style.opacity = 0.3; // Dim for explored but distant
+                }
 
                 // Click Logic
                 cell.onclick = (e) => {
@@ -829,7 +857,6 @@ class Game {
                     }
                 };
 
-                if (!isVisible) { cell.classList.add('field-fog'); cell.style.opacity = 1; }
                 mapLayer.appendChild(cell);
             }
         }
