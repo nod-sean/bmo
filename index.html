@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV - Field UI Fix</title>
+    <title>KOV - Field Graphics Update</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ... existing styles ... */
+        /* ... (기존 스타일 유지) ... */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background-color: #000; touch-action: none; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100dvh; }
         #game-container { position: relative; background-color: #4e342e; box-shadow: 0 0 50px rgba(0,0,0,0.5); width: 100%; height: 100%; max-width: 56.25vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -23,12 +23,35 @@
 
         /* Footer */
         .footer-panel { flex: 0 0 auto; background: #d7ccc8; border-top: 4px solid #8d6e63; padding: 8px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; min-height: 90px; z-index: 20; }
-        .info-box { flex: 1; background: #f5f5f5; border: 1px solid #8d6e63; border-radius: 6px; padding: 4px 8px; height: 64px; display: flex; flex-direction: column; justify-content: center; color: #3e2723; margin: 0 6px; overflow: hidden; }
+        .info-box { flex: 1; background: #f5f5f5; border: 1px solid #8d6e63; border-radius: 6px; padding: 4px 8px; height: 60px; display: flex; flex-direction: column; justify-content: center; color: #3e2723; margin: 0 6px; overflow: hidden; }
         .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; font-size: 10px; font-weight: bold; color: #444; margin-top: 2px; }
-        .action-btn { width: 50px; height: 50px; background: linear-gradient(to bottom, #ffca28, #ff6f00); border: 1px solid #e65100; border-radius: 8px; color: white; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 0 #bf360c; }
-        .action-btn:active { transform: translateY(2px); box-shadow: none; }
-        .world-btn { background: linear-gradient(to bottom, #42a5f5, #1565c0); border-color: #0d47a1; box-shadow: 0 2px 0 #0d47a1; }
         
+        /* Action Buttons (Polished) */
+        .action-btn { 
+            width: 56px; 
+            height: 56px; 
+            background: linear-gradient(to bottom, #ffca28, #ff6f00); 
+            border: 1px solid #e65100; 
+            border-radius: 10px; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 3px 0 #bf360c, 0 5px 5px rgba(0,0,0,0.3); 
+            transition: all 0.1s;
+            position: relative;
+            padding-bottom: 2px; /* 텍스트 시각적 중심 보정 */
+        }
+        .action-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #bf360c, 0 0 0 rgba(0,0,0,0); border-bottom-width: 0; }
+        .world-btn { background: linear-gradient(to bottom, #42a5f5, #1565c0); border-color: #0d47a1; box-shadow: 0 3px 0 #0d47a1, 0 5px 5px rgba(0,0,0,0.3); }
+        .world-btn:active { box-shadow: 0 0 0 #0d47a1; }
+        .build-btn { background: linear-gradient(to bottom, #8d6e63, #5d4037); border-color: #3e2723; box-shadow: 0 3px 0 #3e2723, 0 5px 5px rgba(0,0,0,0.3); }
+        .build-btn:active { box-shadow: 0 0 0 #3e2723; }
+        
+        .btn-icon { font-size: 22px; line-height: 1; margin-bottom: 2px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); }
+        .btn-label { font-size: 11px; font-weight: bold; line-height: 1; text-shadow: 0 1px 1px rgba(0,0,0,0.4); letter-spacing: -0.5px; }
+
         /* Modals & Popups */
         .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; backdrop-filter: blur(2px); }
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
@@ -38,7 +61,7 @@
         #field-modal { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: #222; z-index: 90; transform: translateY(100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column; color: white; }
         #field-modal.open { transform: translateY(0); }
         
-        /* Specific UI Elements */
+        /* ... (나머지 스타일 동일) ... */
         .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; overflow-y: auto; padding: 10px; }
         .shop-item { background: #4e342e; border: 2px solid #8d6e63; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; position: relative; }
         .toggle-switch { width: 40px; height: 20px; background: #555; border-radius: 20px; position: relative; transition: 0.3s; }
@@ -49,12 +72,9 @@
         /* Field Styles */
         .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; }
         .field-occupied { border: 1px solid #42a5f5; box-shadow: 0 0 2px #42a5f5; z-index: 10; opacity: 1.0 !important; }
-        
-        /* Fog of War Styles */
         .field-fog { background-color: #000 !important; border: none; cursor: default; }
         .field-fog::after { content: ''; }
         
-        /* Icons */
         .field-gate { border: 1px solid #ef4444; }
         .field-gate.locked::after { content: '🔒'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-gate.unlocked::after { content: '👐'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
@@ -66,27 +86,16 @@
         
         #toast { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 200; border: 2px solid #ffd700; white-space: nowrap; pointer-events: none; }
         
-        /* Army Marker & Selector */
         .army-marker { 
-            position: absolute; 
-            width: 12px; height: 12px; /* Adjusted to fit the cell exactly */
-            /* border: 2px solid white; Removed */
+            position: absolute; width: 12px; height: 12px; 
             box-shadow: 0 0 4px rgba(0,0,0,0.5); 
             transition: transform 0.1s linear; 
-            z-index: 50; 
-            pointer-events: none; 
+            z-index: 50; pointer-events: none; 
             display: flex; justify-content: center; align-items: center; 
             font-size: 8px; font-weight: bold; color: black; 
-            overflow: visible; 
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
+            overflow: visible; background-size: contain; background-repeat: no-repeat; background-position: center;
         }
-        .army-marker.selected { 
-            box-shadow: 0 0 15px 2px #ffd700; /* Glow effect */
-            transform: scale(1.3); 
-            z-index: 51; 
-        }
+        .army-marker.selected { box-shadow: 0 0 15px 2px #ffd700; transform: scale(1.3); z-index: 51; }
         
         .squad-selector { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(30, 30, 30, 0.95); border: 2px solid #8d6e63; border-radius: 12px; padding: 10px; display: flex; gap: 10px; z-index: 100; width: 90%; max-width: 300px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .squad-card { flex: 1; background: #3e2723; border: 1px solid #555; border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
@@ -94,12 +103,10 @@
         .squad-card.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
         .squad-status { font-size: 10px; color: #aaa; margin-top: 2px; }
         
-        /* Selected Army HUD */
         .selected-army-hud { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(30, 30, 30, 0.9); border: 1px solid #ffd700; border-radius: 30px; padding: 8px 20px; z-index: 95; display: flex; gap: 15px; align-items: center; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.6); }
         .hud-name { font-weight: bold; color: #ffd700; font-size: 14px; }
         .hud-btn { background: #d32f2f; border: none; border-radius: 12px; padding: 4px 12px; font-size: 10px; font-weight: bold; cursor: pointer; color: white; }
         
-        /* Level Up Banner */
         #levelup-banner { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0); z-index: 150; pointer-events: none; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #levelup-banner.show { transform: translate(-50%, -50%) scale(1); }
         .levelup-stat { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
@@ -158,7 +165,7 @@
     <!-- Footer -->
     <div class="footer-panel">
         <button class="action-btn chat-btn bg-gray-700 border-gray-600" onclick="game.openSettings()">
-            <span class="text-xl">⚙️</span>
+            <span class="text-2xl filter drop-shadow">⚙️</span>
         </button>
         
         <div class="info-box" id="info-panel">
@@ -174,14 +181,21 @@
             <div class="text-[10px] text-gray-600 truncate mt-1" id="info-desc">오브젝트를 선택하세요.</div>
         </div>
         
-        <button class="action-btn" id="btn-action" onclick="game.handleAction()"><span id="action-icon">💰</span><span id="action-label" style="font-size: 9px;">Sell</span></button>
-        <button class="action-btn" style="margin-left:5px; background:linear-gradient(to bottom, #8d6e63, #5d4037); border-color:#3e2723" onclick="game.toggleShop()">
-            <span>🏠</span><span style="font-size: 9px;">건설</span>
+        <button class="action-btn" id="btn-action" onclick="game.handleAction()">
+            <span class="btn-icon" id="action-icon">💰</span>
+            <span class="btn-label" id="action-label">Sell</span>
         </button>
-        <button class="action-btn world-btn" onclick="game.toggleField()" style="margin-left:5px;"><span>🌍</span><span style="font-size: 9px;">필드</span></button>
+        <button class="action-btn build-btn" style="margin-left:5px;" onclick="game.toggleShop()">
+            <span class="btn-icon">🏠</span>
+            <span class="btn-label">건설</span>
+        </button>
+        <button class="action-btn world-btn" style="margin-left:5px;" onclick="game.toggleField()">
+            <span class="btn-icon">🌍</span>
+            <span class="btn-label">필드</span>
+        </button>
     </div>
 
-    <!-- Modals -->
+    <!-- Modals (내용 동일) -->
     <div id="field-modal">
         <div class="flex justify-between items-center p-4 border-b border-gray-600 bg-gray-900">
             <h2 class="text-xl font-bold text-yellow-400" id="modal-title">메뉴</h2>
@@ -189,8 +203,7 @@
         </div>
         <div class="flex-1 overflow-auto bg-gray-800 p-2 relative" id="modal-content"></div>
     </div>
-
-    <!-- Level Up Modal -->
+    <!-- LevelUp, Refill, Settings Modals (동일) -->
     <div id="modal-levelup" class="modal-overlay">
         <div class="modal-content">
             <h2 class="text-2xl font-bold text-yellow-400 mb-4">LEVEL UP!</h2>
@@ -210,7 +223,6 @@
         </div>
     </div>
 
-    <!-- Refill/Shop Modal -->
     <div id="modal-refill" class="modal-overlay">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
@@ -221,7 +233,6 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
     <div id="modal-settings" class="modal-overlay">
         <div class="modal-content">
             <h2 class="text-xl font-bold text-gray-200 mb-6">설정 (Settings)</h2>
@@ -236,7 +247,7 @@
                 </div>
                 <div class="bg-gray-800 p-3 rounded text-xs text-gray-400">
                     <p>UID: <span id="settings-uid" class="text-gray-200">User_1234</span></p>
-                    <p>Version: 0.2.11 (UI Fix)</p>
+                    <p>Version: 0.2.12 (Field Graphics)</p>
                 </div>
             </div>
             <div class="mt-6 flex gap-2">
@@ -535,7 +546,11 @@ class Game {
         this.selectedArmyId = null;
 
         this.visibilityMap = new Set();
+        // Initial reveal around start (radius 3)
         this.revealFog(PLAYER_START.r, PLAYER_START.c, 3);
+        
+        // Create grass texture
+        this.grassTexture = this.createGrassPattern();
 
         this.settings = { bgm: true, sfx: true };
 
@@ -560,6 +575,21 @@ class Game {
         
         if(!localStorage.getItem('kov_uid')) localStorage.setItem('kov_uid', 'U' + Math.floor(Math.random()*1000000));
         document.getElementById('settings-uid').innerText = localStorage.getItem('kov_uid');
+    }
+    
+    createGrassPattern() {
+        const c = document.createElement('canvas');
+        c.width = 32; c.height = 32;
+        const x = c.getContext('2d');
+        // Base grass color
+        x.fillStyle = '#2e3b23'; // Darker green base
+        x.fillRect(0,0,32,32);
+        // Add pixel noise
+        for(let i=0; i<24; i++) {
+            x.fillStyle = Math.random() > 0.5 ? '#3a4b2c' : '#25301b'; // Variations
+            x.fillRect(Math.floor(Math.random()*16)*2, Math.floor(Math.random()*16)*2, 2, 2);
+        }
+        return c.toDataURL();
     }
 
     saveGame() {
@@ -717,8 +747,16 @@ class Game {
 
         const headerDiv = document.createElement('div'); headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-30 shadow-md";
         headerDiv.innerHTML = `<div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>💰 세금: <span class="text-yellow-400 font-bold">+${this.income}/3sec</span></div>`; content.appendChild(headerDiv);
-        const viewport = document.createElement('div'); viewport.id = 'map-viewport'; viewport.style.position = 'relative'; viewport.style.width = '100%'; viewport.style.height = 'calc(100% - 50px)'; viewport.style.overflow = 'hidden'; viewport.style.background = '#1a1a1a'; viewport.style.touchAction = 'none';
+        const viewport = document.createElement('div'); viewport.id = 'map-viewport'; viewport.style.position = 'relative'; viewport.style.width = '100%'; viewport.style.height = 'calc(100% - 50px)'; viewport.style.overflow = 'hidden'; 
+        viewport.style.backgroundColor = '#1a2f1a'; // Changed background to darker green for meadow effect base
+        viewport.style.touchAction = 'none';
+        
         const mapLayer = document.createElement('div'); mapLayer.id = 'map-layer'; mapLayer.style.position = 'absolute'; mapLayer.style.transformOrigin = '0 0'; mapLayer.style.display = 'grid'; mapLayer.style.gridTemplateColumns = `repeat(${MAP_SIZE}, 12px)`; mapLayer.style.gap = '1px'; mapLayer.style.padding = '50px';
+        
+        // Apply Grass Pattern Background
+        mapLayer.style.backgroundImage = `url(${this.grassTexture})`;
+        mapLayer.style.backgroundRepeat = 'repeat';
+
         const armyLayer = document.createElement('div'); armyLayer.id = 'army-layer'; armyLayer.style.position = 'absolute'; armyLayer.style.top = '0'; armyLayer.style.left = '0'; armyLayer.style.width = '100%'; armyLayer.style.height = '100%'; armyLayer.style.pointerEvents = 'none'; armyLayer.style.zIndex = '50'; mapLayer.appendChild(armyLayer);
 
         this.armies.forEach(army => {
@@ -763,10 +801,14 @@ class Game {
                 let isAdjacent = false; const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
                 if (!isOccupied) { for (let d of dirs) { const nr = r + d[0], nc = c + d[1]; if (this.occupiedTiles.has(`${nr},${nc}`)) { isAdjacent = true; break; } } }
                 
-                let color = '#2e3b23';
-                if (type === 1) { color = '#4285f4'; cell.classList.add('field-castle'); } else if (type === 2) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); } else if (type === 3) { color = '#fbbc05'; cell.classList.add('field-fortress'); } 
-                else if (type === 4) { color = '#8d6e63'; } // Road color
-                else { color = '#555'; } // Default fallback
+                // Transparency applied here for background texture visibility
+                let color = 'rgba(0, 0, 0, 0)'; 
+                if (type === 1) { color = 'rgba(66, 133, 244, 0.8)'; cell.classList.add('field-castle'); } 
+                else if (type === 2) { color = 'rgba(234, 67, 53, 0.8)'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); } 
+                else if (type === 3) { color = 'rgba(251, 188, 5, 0.8)'; cell.classList.add('field-fortress'); } 
+                else if (type === 4) { color = 'rgba(141, 110, 99, 0.6)'; } // Semi-transparent Road
+                else { color = 'transparent'; } // Empty Grass
+                
                 cell.style.backgroundColor = color;
 
                 if (isOccupied) cell.classList.add('field-occupied');
@@ -1175,11 +1217,36 @@ class Game {
         if(this.spawnItem({type, level:lvl, scale:0})) { this.energy-=stats.energy; this.updateUI(); this.requestRender(); this.sound.playSpawn(); } else this.showToast("공간 부족");
     }
     produceFromChest(chest, r, c) {
-        if(chest.usage<=0) { this.showToast("빈 상자 (머지 필요)"); return; }
         if(this.energy<1) { this.showToast("에너지 부족"); return; }
-        const table = CHEST_DROP_TABLE[chest.level] || CHEST_DROP_TABLE[1]; let total=0; table.forEach(e=>total+=e.prob); let rnd=Math.random()*total, code=table[0].code; for(let e of table) { if(rnd<e.prob){code=e.code;break;} rnd-=e.prob; }
+        
+        // Drop logic
+        const table = CHEST_DROP_TABLE[chest.level] || CHEST_DROP_TABLE[1]; 
+        let total=0; 
+        table.forEach(e=>total+=e.prob); 
+        let rnd=Math.random()*total, code=table[0].code; 
+        for(let e of table) { if(rnd<e.prob){code=e.code;break;} rnd-=e.prob; }
         const info = getInfoFromCode(code);
-        if(this.spawnItem({type:info.type, level:info.level, scale:0})) { this.energy--; chest.usage--; chest.scale=1.2; this.updateUI(); this.requestRender(); this.sound.playSpawn(); } else this.showToast("공간 부족");
+
+        if(this.spawnItem({type:info.type, level:info.level, scale:0})) { 
+            this.energy--; 
+            chest.usage--; 
+            chest.scale=1.2; 
+            
+            // Check usage
+            if (chest.usage <= 0) {
+                this.grid[r][c] = null; // Remove from grid
+                if (this.selectedItem && this.selectedItem.item === chest) {
+                    this.selectItem(null); // Deselect
+                }
+                this.showToast("상자가 사라졌습니다.");
+            }
+            
+            this.updateUI(); 
+            this.requestRender(); 
+            this.sound.playSpawn(); 
+        } else {
+            this.showToast("공간 부족");
+        }
     }
     spawnItem(item) {
         for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) if(this.gridState[r][c].type===LOCK_TYPE.OPEN && !this.grid[r][c]) { this.grid[r][c]=item; const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2, cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2; this.spawnParticles(cx, cy, "#EEE", 10, "smoke"); return true; }
