@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV - Fog of War Fixed</title>
+    <title>KOV - Clarity Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* ... (기존 스타일 유지) ... */
@@ -41,7 +41,7 @@
             box-shadow: 0 3px 0 #bf360c, 0 5px 5px rgba(0,0,0,0.3); 
             transition: all 0.1s;
             position: relative;
-            padding-bottom: 2px; /* 텍스트 시각적 중심 보정 */
+            padding-bottom: 2px;
         }
         .action-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #bf360c, 0 0 0 rgba(0,0,0,0); border-bottom-width: 0; }
         .world-btn { background: linear-gradient(to bottom, #42a5f5, #1565c0); border-color: #0d47a1; box-shadow: 0 3px 0 #0d47a1, 0 5px 5px rgba(0,0,0,0.3); }
@@ -72,12 +72,12 @@
         .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; }
         .field-occupied { border: 1px solid #42a5f5; box-shadow: 0 0 2px #42a5f5; z-index: 10; opacity: 1.0 !important; }
         
-        /* Fog of War: Z-Index increased to cover content */
+        /* Fog of War */
         .field-fog { 
             background-color: #000 !important; 
             border: none; 
             cursor: default; 
-            z-index: 100; /* Ensure fog covers everything */
+            z-index: 100; 
             opacity: 1 !important;
         }
         .field-fog::after { content: ''; }
@@ -93,7 +93,7 @@
         
         #toast { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 200; border: 2px solid #ffd700; white-space: nowrap; pointer-events: none; }
         
-        /* Army Marker & Selector */
+        /* Army Marker */
         .army-marker { 
             position: absolute; width: 12px; height: 12px; 
             box-shadow: 0 0 4px rgba(0,0,0,0.5); 
@@ -255,7 +255,7 @@
                 </div>
                 <div class="bg-gray-800 p-3 rounded text-xs text-gray-400">
                     <p>UID: <span id="settings-uid" class="text-gray-200">User_1234</span></p>
-                    <p>Version: 0.2.14 (Fog Logic Fix)</p>
+                    <p>Version: 0.2.14 (Field Clarity Fix)</p>
                 </div>
             </div>
             <div class="mt-6 flex gap-2">
@@ -377,6 +377,7 @@ function initFieldData() {
             FIELD_MAP_DATA[r][c] = type;
         }
     }
+    // Remove forced path clearing since type 4 is now walkable
 }
 initFieldData();
 
@@ -824,10 +825,10 @@ class Game {
 
                 // Transparency applied here for background texture visibility
                 let color = 'rgba(0, 0, 0, 0)'; 
-                if (type === 1) { color = '#4285f4'; cell.classList.add('field-castle'); } 
-                else if (type === 2) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); } 
-                else if (type === 3) { color = '#fbbc05'; cell.classList.add('field-fortress'); } 
-                else if (type === 4) { color = 'rgba(139, 69, 19, 0.4)'; } // Semi-transparent Road (Brown) - Keep road semi-transparent
+                if (type === 1) { color = '#4285f4'; cell.classList.add('field-castle'); } // Solid
+                else if (type === 2) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); } // Solid
+                else if (type === 3) { color = '#fbbc05'; cell.classList.add('field-fortress'); } // Solid
+                else if (type === 4) { color = 'rgba(139, 69, 19, 0.4)'; } // Semi-transparent Road (Brown) - Keep road semi-transparent for better blend
                 else { color = 'transparent'; } // Empty Grass
                 
                 cell.style.backgroundColor = color;
@@ -840,7 +841,13 @@ class Game {
                     cell.classList.add('field-adjacent'); 
                     cell.style.opacity = 0.6; // Semi-transparent for potential next move
                 } else { 
-                    cell.style.opacity = 0.3; // Dim for explored but distant
+                    // Explored but not occupied/adjacent
+                    // IF it's an object (1-4), make it clearer (1.0), else dim (0.3)
+                    if (type >= 1 && type <= 4) {
+                        cell.style.opacity = 1.0; 
+                    } else {
+                        cell.style.opacity = 0.3; 
+                    }
                 }
 
                 // Click Logic
