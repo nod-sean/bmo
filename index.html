@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV - Clarity Fix</title>
+    <title>KOV - Field Clarity Update</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* ... (기존 스타일 유지) ... */
@@ -72,12 +72,12 @@
         .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; }
         .field-occupied { border: 1px solid #42a5f5; box-shadow: 0 0 2px #42a5f5; z-index: 10; opacity: 1.0 !important; }
         
-        /* Fog of War */
+        /* Fog of War: Z-Index increased to cover content */
         .field-fog { 
             background-color: #000 !important; 
             border: none; 
             cursor: default; 
-            z-index: 100; 
+            z-index: 100; /* Ensure fog covers everything */
             opacity: 1 !important;
         }
         .field-fog::after { content: ''; }
@@ -93,7 +93,7 @@
         
         #toast { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 200; border: 2px solid #ffd700; white-space: nowrap; pointer-events: none; }
         
-        /* Army Marker */
+        /* Army Marker & Selector */
         .army-marker { 
             position: absolute; width: 12px; height: 12px; 
             box-shadow: 0 0 4px rgba(0,0,0,0.5); 
@@ -255,7 +255,7 @@
                 </div>
                 <div class="bg-gray-800 p-3 rounded text-xs text-gray-400">
                     <p>UID: <span id="settings-uid" class="text-gray-200">User_1234</span></p>
-                    <p>Version: 0.2.14 (Field Clarity Fix)</p>
+                    <p>Version: 0.2.14 (Field Object Clarity)</p>
                 </div>
             </div>
             <div class="mt-6 flex gap-2">
@@ -836,18 +836,13 @@ class Game {
                 // Opacity Logic
                 if (isOccupied) {
                     cell.classList.add('field-occupied');
-                    cell.style.opacity = 1.0; // Fully visible when occupied
+                    cell.style.opacity = 1.0; // Fully visible when occupied (Clarity Fix)
                 } else if (isAdjacent) { 
                     cell.classList.add('field-adjacent'); 
                     cell.style.opacity = 0.6; // Semi-transparent for potential next move
                 } else { 
                     // Explored but not occupied/adjacent
-                    // IF it's an object (1-4), make it clearer (1.0), else dim (0.3)
-                    if (type >= 1 && type <= 4) {
-                        cell.style.opacity = 1.0; 
-                    } else {
-                        cell.style.opacity = 0.3; 
-                    }
+                    cell.style.opacity = 1.0; // Fully visible for explored tiles (Requested Change)
                 }
 
                 // Click Logic
