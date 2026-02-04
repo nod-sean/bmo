@@ -57,6 +57,7 @@
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
         .modal-content { background: #3e2723; border: 2px solid #8d6e63; border-radius: 12px; padding: 20px; width: 85%; max-width: 320px; text-align: center; color: white; transform: scale(0.9); transition: transform 0.2s; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .modal-overlay.open .modal-content { transform: scale(1); }
+        .modal-content.wide { max-width: 360px; }
         
         #field-modal { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: #222; z-index: 90; transform: translateY(100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column; color: white; }
         #field-modal.open { transform: translateY(0); }
@@ -113,12 +114,33 @@
         .field-eta-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: #e5e7eb; padding: 3px 6px; border-radius: 6px; font-size: 11px; text-align: left; }
         .field-eta-btn.active { border-color: #fbbf24; color: #fbbf24; box-shadow: 0 0 0 1px rgba(251,191,36,0.4); }
         .field-eta-btn.disabled { opacity: 0.5; }
+        .field-action-btn.disabled { opacity: 0.5; }
+        .field-info-bar { height: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; margin-top: 2px; }
+        .field-info-bar-fill { height: 100%; background: #fbbf24; }
+        .shop-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+        .shop-card { background: #2b2b2b; border: 1px solid #4b4b4b; border-radius: 10px; padding: 8px; text-align: left; font-size: 11px; display: flex; flex-direction: column; gap: 6px; }
+        .shop-card .name { font-weight: bold; color: #f8fafc; }
+        .shop-card .meta { color: #cbd5f5; font-size: 10px; }
+        .shop-card .price-btn { align-self: stretch; background: #f59e0b; color: #111827; border-radius: 8px; padding: 6px 0; font-weight: bold; font-size: 11px; }
+        .shop-card .price-btn:active { transform: scale(0.98); }
+        .shop-card.disabled { opacity: 0.45; }
+        .shop-card.disabled .price-btn { background: #374151; color: #9ca3af; }
+        .shop-icon { width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .shop-icon-img { width: 100%; height: 100%; object-fit: contain; }
+        .shop-row { display: flex; align-items: center; gap: 6px; }
+        .shop-card.restock { animation: restockPulse 0.8s ease-out; box-shadow: 0 0 0 2px rgba(34,197,94,0.6); }
+        @keyframes restockPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0.0); }
+            50% { transform: scale(1.03); box-shadow: 0 0 0 3px rgba(34,197,94,0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0.0); }
+        }
         .field-action-menu { position: absolute; background: rgba(15,15,15,0.95); border: 1px solid #666; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 6px; z-index: 120; min-width: 90px; box-shadow: 0 6px 14px rgba(0,0,0,0.5); }
         .field-action-btn { background: #2f2f2f; border: 1px solid #555; color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
         .field-action-btn:active { transform: scale(0.97); }
         
         #income-float { position:absolute; color:#ffd700; font-weight:bold; font-size:12px; pointer-events:none; animation: floatUp 1s forwards; z-index: 200; text-shadow: 1px 1px 0 #000; }
         @keyframes floatUp { 0% { transform: translateY(0); opacity:1; } 100% { transform: translateY(-20px); opacity:0; } }
+        .join-float { position: absolute; left: 50%; bottom: 18%; transform: translateX(-50%); color: #4ade80; font-weight: bold; font-size: 12px; pointer-events: none; animation: floatUp 1s forwards; z-index: 220; text-shadow: 1px 1px 0 #000; }
         
         #toast { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 200; border: 2px solid #ffd700; white-space: nowrap; pointer-events: none; }
         
@@ -290,6 +312,17 @@
         </div>
     </div>
 
+    <div id="modal-object" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-white" id="object-modal-title">오브젝트</h2>
+            <button onclick="document.getElementById('modal-object').classList.remove('open'); document.querySelector('#modal-object .modal-content')?.classList.remove('wide')" class="text-gray-400">✖</button>
+            </div>
+            <div id="object-modal-body" class="text-left text-sm text-gray-200 space-y-2"></div>
+            <button onclick="document.getElementById('modal-object').classList.remove('open'); document.querySelector('#modal-object .modal-content')?.classList.remove('wide')" class="w-full bg-gray-700 hover:bg-gray-600 py-2 rounded text-xs border border-gray-600 mt-4">닫기</button>
+        </div>
+    </div>
+
     <div id="toast">메시지</div>
 </div>
 
@@ -308,10 +341,10 @@ const ASSET_KEYS = [
     '1821', '1822', '1823', '1824', '1825', 'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', 'field_bg'
 ];
 
-const CONFIG = { gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, squadCols: 3, squadRows: 3, squadTopY: 55, squadGap: 80, squadCellSize: 130 };
+const CONFIG = { gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, squadCols: 3, squadRows: 3, squadTopY: 55, squadGap: 80, squadCellSize: 130, squadGap3: 24, squadCellSize3: 110 };
 const ITEM_TYPE = { EMPTY: 0, BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5, UNIT_INFANTRY: 10, UNIT_ARCHER: 11, UNIT_CAVALRY: 12, ITEM_GOLD: 20, ITEM_ENERGY: 21, ITEM_CRYSTAL: 22 };
 const LOCK_TYPE = { OPEN: 0, GOLD: 1, LEVEL: 2 };
-const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2' };
+const ZONES = { GRID: 'grid', SQUAD1: 'squad1', SQUAD2: 'squad2', SQUAD3: 'squad3' };
 const BUILDING_LIMITS = { [ITEM_TYPE.BUILDING_BARRACKS]: 3, [ITEM_TYPE.BUILDING_RANGE]: 2, [ITEM_TYPE.BUILDING_STABLE]: 2, [ITEM_TYPE.BUILDING_CAMP]: 2, [ITEM_TYPE.BUILDING_CHEST]: 99 };
 const SHOP_DATA = [ { type: ITEM_TYPE.BUILDING_BARRACKS, name: "병영", price: 100, icon: "🏠" }, { type: ITEM_TYPE.BUILDING_RANGE, name: "사격장", price: 200, icon: "🎯" }, { type: ITEM_TYPE.BUILDING_STABLE, name: "마구간", price: 500, icon: "🐴" }, { type: ITEM_TYPE.BUILDING_CAMP, name: "캠프", price: 300, icon: "⛺" }, { type: ITEM_TYPE.BUILDING_CHEST, name: "보물상자", price: 500, icon: "🎁" } ];
 const CAMP_CAPACITY = {1:4, 2:6, 3:8, 4:12, 5:16};
@@ -343,6 +376,22 @@ function isTavernTile(code) { return code === 5231; }
 function isRuinsTile(code) { return code === 5241 || code === 5242; }
 function isStatueTile(code) { return code >= 5301 && code <= 5332; }
 function isBlockingField(code) { return isGateTile(code) || isCitadelTile(code) || isDragonTile(code); }
+function getStatueKind(code) {
+    if (code >= 5301 && code <= 5302) return "atk";
+    if (code >= 5311 && code <= 5312) return "def";
+    if (code >= 5321 && code <= 5322) return "hp";
+    if (code >= 5331 && code <= 5332) return "spd";
+    return null;
+}
+function getObjectLevelFromCode(type) {
+    if (isGateTile(type)) return Math.max(1, type - 5110);
+    if (isCitadelTile(type)) return Math.max(1, type - 5120);
+    if (isGoldMineTile(type)) return Math.max(1, type - 5200);
+    if (isFountainTile(type)) return Math.max(1, type - 5210);
+    if (isRuinsTile(type)) return Math.max(1, type - 5240);
+    if (isStatueTile(type)) return type % 10;
+    return 1;
+}
 
 const FIELD_DEFENDERS = {
     1: [ { code: 1104, count: 3 }, { code: 1204, count: 3 }, { code: 1304, count: 3 } ],
@@ -383,6 +432,66 @@ const REFILL_DATA = {
         { cost: 0.99, amount: 100, currency: 'usd', name: "💎 100 (소매)" },
         { cost: 4.99, amount: 550, currency: 'usd', name: "💎 550 (포대)" }
     ]
+};
+
+const ABILITY_CODES = {
+    GOLD_CAP: 1,
+    GOLD_REGEN: 2,
+    ENERGY_CAP: 3,
+    ENERGY_REGEN: 4,
+    CP_CAP: 5,
+    CP_REGEN: 6
+};
+
+const FIELD_OBJECT_DATA = {
+  5101: { name: "성", level: 1, defenders: [], abilities: [] },
+  5111: { name: "관문", level: 1, defenders: [{ code: 1104, count: 3 }, { code: 1204, count: 3 }, { code: 1304, count: 3 }], abilities: [] },
+  5112: { name: "관문", level: 2, defenders: [{ code: 1105, count: 3 }, { code: 1205, count: 3 }, { code: 1305, count: 3 }], abilities: [] },
+  5113: { name: "관문", level: 3, defenders: [{ code: 1106, count: 3 }, { code: 1206, count: 3 }, { code: 1306, count: 3 }], abilities: [] },
+  5114: { name: "관문", level: 4, defenders: [{ code: 1107, count: 3 }, { code: 1207, count: 3 }, { code: 1307, count: 3 }], abilities: [] },
+  5121: { name: "성채", level: 1, defenders: [{ code: 1105, count: 3 }, { code: 1205, count: 3 }, { code: 1305, count: 3 }], abilities: [] },
+  5122: { name: "성채", level: 2, defenders: [{ code: 1106, count: 3 }, { code: 1206, count: 3 }, { code: 1306, count: 3 }], abilities: [] },
+  5123: { name: "성채", level: 3, defenders: [{ code: 1107, count: 3 }, { code: 1207, count: 3 }, { code: 1307, count: 3 }], abilities: [] },
+  5131: { name: "용", level: 1, defenders: [], abilities: [] },
+  5201: { name: "금광", level: 1, defenders: [{ code: 1104, count: 3 }, { code: 1204, count: 3 }, { code: 1304, count: 3 }], abilities: [{ code: 1, value: 10 }, { code: 2, value: 1 }] },
+  5202: { name: "금광", level: 2, defenders: [{ code: 1106, count: 3 }, { code: 1206, count: 3 }, { code: 1306, count: 3 }], abilities: [{ code: 1, value: 20 }, { code: 2, value: 1 }] },
+  5211: { name: "에너지 분수", level: 1, defenders: [{ code: 1104, count: 3 }, { code: 1204, count: 3 }, { code: 1304, count: 3 }], abilities: [{ code: 3, value: 10 }, { code: 4, value: 1 }] },
+  5212: { name: "에너지 분수", level: 2, defenders: [{ code: 1106, count: 3 }, { code: 1206, count: 3 }, { code: 1306, count: 3 }], abilities: [{ code: 3, value: 20 }, { code: 4, value: 1 }] },
+  5221: { name: "상점", level: 1, defenders: [{ code: 1104, count: 3 }, { code: 1204, count: 3 }, { code: 1304, count: 3 }], abilities: [] },
+  5231: { name: "주점", level: 1, defenders: [{ code: 1104, count: 3 }, { code: 1204, count: 3 }, { code: 1304, count: 3 }], abilities: [] },
+  5241: { name: "유적", level: 1, defenders: [{ code: 1104, count: 3 }, { code: 1204, count: 3 }, { code: 1304, count: 3 }], abilities: [{ code: 5, value: 5 }, { code: 6, value: 1 }] },
+  5242: { name: "유적", level: 2, defenders: [{ code: 1106, count: 3 }, { code: 1206, count: 3 }, { code: 1306, count: 3 }], abilities: [{ code: 5, value: 10 }, { code: 6, value: 1 }] },
+  5301: { name: "공격력 석상", level: 1, defenders: [], abilities: [], statue: { kind: "atk", value: 0.05 } },
+  5302: { name: "공격력 석상", level: 2, defenders: [], abilities: [], statue: { kind: "atk", value: 0.1 } },
+  5311: { name: "방어력 석상", level: 1, defenders: [], abilities: [], statue: { kind: "def", value: 0.05 } },
+  5312: { name: "방어력 석상", level: 2, defenders: [], abilities: [], statue: { kind: "def", value: 0.1 } },
+  5321: { name: "체력 석상", level: 1, defenders: [], abilities: [], statue: { kind: "hp", value: 0.05 } },
+  5322: { name: "체력 석상", level: 2, defenders: [], abilities: [], statue: { kind: "hp", value: 0.1 } },
+  5331: { name: "속도 석상", level: 1, defenders: [], abilities: [], statue: { kind: "spd", value: 0.05 } },
+  5332: { name: "속도 석상", level: 2, defenders: [], abilities: [], statue: { kind: "spd", value: 0.1 } },
+};
+
+const STATUE_BUFF_FALLBACK = { 1: 0.05, 2: 0.10 };
+const CITADEL_CP_BONUS = 0;
+const GATE_UPKEEP_PER_LEVEL = 1;
+const CITADEL_UPKEEP_PER_LEVEL = 2;
+
+const ITEM_TABLE = {
+    1801: { name_kr: "골드", name: "Gold", earn: 1 },
+    1802: { name_kr: "골드", name: "Gold", earn: 2 },
+    1803: { name_kr: "골드", name: "Gold", earn: 6 },
+    1804: { name_kr: "골드", name: "Gold", earn: 14 },
+    1805: { name_kr: "골드", name: "Gold", earn: 32 },
+    1811: { name_kr: "에너지", name: "Energy", earn: 1 },
+    1812: { name_kr: "에너지", name: "Energy", earn: 2 },
+    1813: { name_kr: "에너지", name: "Energy", earn: 6 },
+    1814: { name_kr: "에너지", name: "Energy", earn: 14 },
+    1815: { name_kr: "에너지", name: "Energy", earn: 32 },
+    1821: { name_kr: "크리스탈", name: "Crystal", earn: 1 },
+    1822: { name_kr: "크리스탈", name: "Crystal", earn: 2 },
+    1823: { name_kr: "크리스탈", name: "Crystal", earn: 6 },
+    1824: { name_kr: "크리스탈", name: "Crystal", earn: 14 },
+    1825: { name_kr: "크리스탈", name: "Crystal", earn: 32 }
 };
 
 // --- DATA INTEGRATION (From CSV) ---
@@ -477,9 +586,157 @@ const FIELD_MAP_DATA = [
   [200, 200, 200, 200, 201, 101, 5221, 100, 5231, 101, 201, 200, 200, 200, 201, 101, 5231, 100, 5221, 101, 201, 200, 200, 200, 200],
   [200, 200, 200, 200, 201, 101, 100, 100, 100, 101, 201, 200, 200, 200, 201, 101, 100, 100, 100, 101, 201, 200, 200, 200, 200]
 ];
+const FIELD_TERRAIN_DATA = FIELD_MAP_DATA.map(row => row.slice());
 const MAP_SIZE = 25;
 const PLAYER_START = { r: 22, c: 7 };
 const FOG_RADIUS = 8;
+
+const FIELD_OBJECT_PROB = [
+  { code: 5301, fields: [0, 50, 50, 0, 0], min: 1, max: 2 },
+  { code: 5302, fields: [0, 0, 30, 70, 0], min: 1, max: 2 },
+  { code: 5311, fields: [0, 50, 50, 0, 0], min: 1, max: 2 },
+  { code: 5312, fields: [0, 0, 30, 70, 0], min: 1, max: 2 },
+  { code: 5321, fields: [0, 50, 50, 0, 0], min: 1, max: 2 },
+  { code: 5322, fields: [0, 0, 30, 70, 0], min: 1, max: 2 },
+  { code: 5331, fields: [0, 50, 50, 0, 0], min: 1, max: 2 },
+  { code: 5332, fields: [0, 0, 30, 70, 0], min: 1, max: 2 },
+  { code: 1801, fields: [50, 50, 0, 0, 0], min: 24, max: 32 },
+  { code: 1802, fields: [0, 50, 50, 0, 0], min: 12, max: 16 },
+  { code: 1803, fields: [0, 0, 50, 50, 0], min: 6, max: 8 },
+  { code: 1804, fields: [0, 0, 0, 50, 50], min: 3, max: 5 },
+  { code: 1805, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 1811, fields: [50, 50, 0, 0, 0], min: 24, max: 32 },
+  { code: 1812, fields: [0, 50, 50, 0, 0], min: 12, max: 16 },
+  { code: 1813, fields: [0, 0, 50, 50, 0], min: 6, max: 8 },
+  { code: 1814, fields: [0, 0, 0, 50, 50], min: 3, max: 5 },
+  { code: 1815, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 1821, fields: [0, 0, 50, 50, 0], min: 8, max: 12 },
+  { code: 1822, fields: [0, 0, 0, 50, 50], min: 4, max: 6 },
+  { code: 1823, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 1824, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 1825, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2101, fields: [0, 20, 20, 30, 30], min: 8, max: 16 },
+  { code: 2102, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2103, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2104, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2105, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2201, fields: [0, 20, 20, 30, 30], min: 8, max: 16 },
+  { code: 2202, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2203, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2204, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2205, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2301, fields: [0, 20, 20, 30, 30], min: 8, max: 16 },
+  { code: 2302, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2303, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2304, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2305, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2801, fields: [0, 30, 30, 40, 0], min: 10, max: 20 },
+  { code: 2802, fields: [0, 10, 20, 30, 40], min: 5, max: 10 },
+  { code: 2803, fields: [0, 0, 0, 30, 70], min: 2, max: 5 },
+  { code: 2804, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2805, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 3101, fields: [0, 20, 20, 30, 30], min: 15, max: 30 },
+  { code: 3102, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 3103, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 3104, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 3105, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+];
+
+function getTerrainGroupFromCode(code) {
+    const base = getTerrainBase(code);
+    if (base === 100) return 1;
+    if (base === 200) return 2;
+    if (base === 300) return 3;
+    if (base === 400) return 4;
+    if (base === 500) return 5;
+    return null;
+}
+
+function pickWeightedGroup(weights, pools) {
+    const candidates = weights.map((weight, idx) => ({ group: idx + 1, weight, size: pools[idx + 1]?.length || 0 }));
+    const eligible = candidates.filter(c => c.weight > 0 && c.size > 0);
+    if (eligible.length === 0) {
+        const fallback = candidates.filter(c => c.size > 0);
+        if (fallback.length === 0) return null;
+        return fallback[Math.floor(Math.random() * fallback.length)].group;
+    }
+    const total = eligible.reduce((sum, c) => sum + c.weight, 0);
+    let roll = Math.random() * total;
+    for (const c of eligible) {
+        roll -= c.weight;
+        if (roll <= 0) return c.group;
+    }
+    return eligible[eligible.length - 1].group;
+}
+
+function pickFromPool(group, pools) {
+    const pool = pools[group];
+    if (!pool || pool.length === 0) return null;
+    const idx = Math.floor(Math.random() * pool.length);
+    return pool.splice(idx, 1)[0];
+}
+
+function buildTerrainPools() {
+    const pools = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    for (let r = 0; r < FIELD_MAP_DATA.length; r++) {
+        for (let c = 0; c < FIELD_MAP_DATA[r].length; c++) {
+            const type = FIELD_MAP_DATA[r][c];
+            if (!isTerrainCode(type)) continue;
+            const group = getTerrainGroupFromCode(type);
+            if (group) pools[group].push({ r, c });
+        }
+    }
+    return pools;
+}
+
+function applyObjectProbPlacements() {
+    const pools = buildTerrainPools();
+    const placements = [];
+    FIELD_OBJECT_PROB.forEach(entry => {
+        const min = entry.min || 0;
+        const max = entry.max || 0;
+        if (max <= 0) return;
+        const count = min === max ? min : (min + Math.floor(Math.random() * (max - min + 1)));
+        for (let i = 0; i < count; i++) {
+            const group = pickWeightedGroup(entry.fields, pools);
+            let cell = group ? pickFromPool(group, pools) : null;
+            if (!cell) {
+                const fallback = Object.keys(pools).map(n => parseInt(n, 10)).filter(g => pools[g].length > 0);
+                if (fallback.length === 0) break;
+                const g = fallback[Math.floor(Math.random() * fallback.length)];
+                cell = pickFromPool(g, pools);
+            }
+            if (!cell) break;
+            FIELD_MAP_DATA[cell.r][cell.c] = entry.code;
+            placements.push({ r: cell.r, c: cell.c, code: entry.code });
+        }
+    });
+    return placements;
+}
+
+function applyObjectProbToMap() {
+    if (typeof window === 'undefined') return;
+    const key = 'kov_field_object_prob_v1';
+    let placements = null;
+    try {
+        const raw = localStorage.getItem(key);
+        if (raw) placements = JSON.parse(raw);
+    } catch (e) {}
+    if (!Array.isArray(placements)) {
+        placements = applyObjectProbPlacements();
+        try {
+            localStorage.setItem(key, JSON.stringify(placements));
+        } catch (e) {}
+    } else {
+        placements.forEach(p => {
+            if (!FIELD_MAP_DATA[p.r] || typeof FIELD_MAP_DATA[p.r][p.c] === 'undefined') return;
+            if (!isTerrainCode(FIELD_MAP_DATA[p.r][p.c])) return;
+            FIELD_MAP_DATA[p.r][p.c] = p.code;
+        });
+    }
+}
+
+applyObjectProbToMap();
 
 // Helper Functions
 function getCode(type, level) {
@@ -500,10 +757,15 @@ function getInfoFromCode(code) {
     if (code >= 1100 && code < 1200) return { type: ITEM_TYPE.UNIT_INFANTRY, level: code % 100 };
     if (code >= 1200 && code < 1300) return { type: ITEM_TYPE.UNIT_ARCHER, level: code % 100 };
     if (code >= 1300 && code < 1400) return { type: ITEM_TYPE.UNIT_CAVALRY, level: code % 100 };
+    if (code >= 2100 && code < 2110) return { type: ITEM_TYPE.BUILDING_BARRACKS, level: code - 2100 };
+    if (code >= 2200 && code < 2210) return { type: ITEM_TYPE.BUILDING_RANGE, level: code - 2200 };
+    if (code >= 2300 && code < 2310) return { type: ITEM_TYPE.BUILDING_STABLE, level: code - 2300 };
+    if (code >= 2800 && code < 2810) return { type: ITEM_TYPE.BUILDING_CHEST, level: code - 2800 };
+    if (code >= 3100 && code < 3110) return { type: ITEM_TYPE.BUILDING_CAMP, level: code - 3100 };
     if (code >= 1800 && code < 1810) return { type: ITEM_TYPE.ITEM_GOLD, level: code - 1800 };
     if (code >= 1810 && code < 1820) return { type: ITEM_TYPE.ITEM_ENERGY, level: code - 1810 };
     if (code >= 1820 && code < 1830) return { type: ITEM_TYPE.ITEM_CRYSTAL, level: code - 1820 };
-    return { type: ITEM_TYPE.ITEM_GOLD, level: 1 };
+    return null;
 }
 function getData(type, level) {
     if (type >= 20) {
@@ -639,11 +901,14 @@ class Game {
         this.width = 1080; this.height = 1920; this.assets = new AssetLoader(); this.sound = new SoundManager();
         this.grid = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
         this.gridState = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
-        this.squad1 = Array(9).fill(null); this.squad2 = Array(9).fill(null);
+        this.squad1 = Array(9).fill(null); this.squad2 = Array(9).fill(null); this.squad3 = Array(9).fill(null);
         this.particles = [];
         this.lordLevel = 1; this.currentXp = 0; 
         this.energy = 50; this.gold = 3000; this.gem = 50; 
-        this.cp = 20; this.maxCp = 20; this.cpRegen = 1;
+        this.cp = 20;
+        this.baseMaxCp = 20; this.baseCpRegen = 1;
+        this.cpBonus = 0; this.cpRegenBonus = 0;
+        this.maxCp = this.baseMaxCp; this.cpRegen = this.baseCpRegen;
         
         this.occupiedTiles = new Set();
         this.occupiedTiles.add(`${PLAYER_START.r},${PLAYER_START.c}`); 
@@ -653,6 +918,14 @@ class Game {
         this.lastSelectedArmyId = null;
         this.currentFieldTargetKey = null;
         this.currentFieldTargetType = null;
+        this.fieldResourceState = {};
+        this.fieldShopState = {};
+        this.currentShopContext = null;
+        this.shopTimer = null;
+        this.fieldObjectState = {};
+        this.fieldBuffs = { atk: 0, def: 0, hp: 0, spd: 0 };
+        this.citadelCount = 0;
+        this.thirdSquadUnlocked = false;
         this.moveTargetMode = null;
         this.previewPath = null;
         this.movePreviewText = "";
@@ -668,12 +941,15 @@ class Game {
         
         this.armies = [
             { id: 0, name: "제1부대", color: "#4caf50", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
-            { id: 1, name: "제2부대", color: "#2196f3", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 }
+            { id: 1, name: "제2부대", color: "#2196f3", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
+            { id: 2, name: "제3부대", color: "#f59e0b", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 }
         ];
 
         this.calcLayout(); 
         if(!this.loadGame()) this.initGame();
-        else { this.updateLevelStats(); this.updateUI(); }
+        else { this.updateLevelStats(); }
+        this.recalcFieldBonuses();
+        this.updateUI();
 
         setInterval(() => this.regenEnergy(), 1000);
         setInterval(() => this.regenCp(), 1000);
@@ -705,12 +981,16 @@ class Game {
     saveGame() {
         try {
             const data = {
-                grid: this.grid, gridState: this.gridState, squad1: this.squad1, squad2: this.squad2,
+                grid: this.grid, gridState: this.gridState, squad1: this.squad1, squad2: this.squad2, squad3: this.squad3,
                 lordLevel: this.lordLevel, currentXp: this.currentXp, energy: this.energy, gold: this.gold, gem: this.gem,
                 cp: this.cp, maxCp: this.maxCp,
                 occupiedTiles: Array.from(this.occupiedTiles), settings: this.settings,
                 visibilityMap: Array.from(this.visibilityMap),
                 lastSelectedArmyId: this.lastSelectedArmyId,
+                fieldResourceState: this.fieldResourceState,
+                fieldShopState: this.fieldShopState,
+                fieldObjectState: this.fieldObjectState,
+                fieldBuffs: this.fieldBuffs,
                 armies: this.armies 
             };
             localStorage.setItem('kov_save_v1', JSON.stringify(data));
@@ -721,15 +1001,24 @@ class Game {
             const saved = localStorage.getItem('kov_save_v1'); if(!saved) return false;
             const data = JSON.parse(saved);
             this.grid = data.grid || this.grid; this.gridState = data.gridState || this.gridState;
-            this.squad1 = data.squad1 || this.squad1; this.squad2 = data.squad2 || this.squad2;
+            this.squad1 = data.squad1 || this.squad1; this.squad2 = data.squad2 || this.squad2; this.squad3 = data.squad3 || this.squad3;
             this.lordLevel = data.lordLevel || 1; this.currentXp = data.currentXp || 0;
             this.energy = data.energy ?? 50; this.gold = data.gold ?? 3000; this.gem = data.gem ?? 50;
             this.cp = data.cp ?? 20; this.maxCp = data.maxCp ?? 20;
             if(data.occupiedTiles) this.occupiedTiles = new Set(data.occupiedTiles);
             if(data.visibilityMap) this.visibilityMap = new Set(data.visibilityMap);
             if(data.lastSelectedArmyId !== undefined) this.lastSelectedArmyId = data.lastSelectedArmyId;
+            if(data.fieldResourceState) this.fieldResourceState = data.fieldResourceState;
+            if(data.fieldShopState) this.fieldShopState = data.fieldShopState;
+            if(data.fieldObjectState) this.fieldObjectState = data.fieldObjectState;
+            if(data.fieldBuffs) this.fieldBuffs = data.fieldBuffs;
             if(data.settings) { this.settings = data.settings; this.applySettings(); }
-            if(data.armies) this.armies = data.armies;
+            if(data.armies) {
+                this.armies = data.armies;
+                if (this.armies.length < 3) {
+                    this.armies.push({ id: 2, name: "제3부대", color: "#f59e0b", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 });
+                }
+            }
             this.revealFog(PLAYER_START.r, PLAYER_START.c, FOG_RADIUS);
             return true;
         } catch(e) { return false; }
@@ -737,6 +1026,7 @@ class Game {
     resetGame() {
         if(confirm("정말 게임을 초기화 하시겠습니까?")) { 
             localStorage.removeItem('kov_save_v1'); 
+            localStorage.removeItem('kov_field_object_prob_v1');
             window.location.reload(); 
         }
     }
@@ -809,30 +1099,48 @@ class Game {
         if (isShopTile(type) || isTavernTile(type)) return 5;
         return 1; 
     }
-    getTileMoveTime(type) {
-        // 지원: 기존 FIELD_MAP_DATA(0~6) + 최신 지형 코드(100~501)
-        if (isTerrainCode(type)) {
-            const base = getTerrainBase(type);
-            if (base === 100) return 3; // 평원
-            if (base === 200) return 5; // 숲
-            if (base === 300) return 4; // 고원
-            if (base === 400) return 5; // 산악
-            if (base === 500) return 6; // 화산
-            return 3;
-        }
-        if (type === 4) return 1; // 도로(데모)
+    getUpkeepCost(type) {
+        if (isGateTile(type)) return this.getFieldLevel(type) * GATE_UPKEEP_PER_LEVEL;
+        if (isCitadelTile(type)) return this.getFieldLevel(type) * CITADEL_UPKEEP_PER_LEVEL;
+        return 0;
+    }
+    getTileMoveTime(type, r, c) {
+        // ??: ?? FIELD_MAP_DATA(0~6) + ?? ?? ??(100~501)
         if (isGateTile(type) || isCitadelTile(type)) return 5;
         if (isDragonTile(type)) return 6;
-        return 3; // 기본 평원
+        if (type === 4) return 1; // ??(?)
+
+        let evalType = type;
+        if (!isTerrainCode(type) && typeof r === "number" && typeof c === "number") {
+            const base = FIELD_TERRAIN_DATA?.[r]?.[c];
+            if (isTerrainCode(base)) evalType = base;
+        }
+        if (isTerrainCode(evalType)) {
+            const base = getTerrainBase(evalType);
+            if (base === 100) return 3; // ??
+            if (base === 200) return 5; // ?
+            if (base === 300) return 4; // ??
+            if (base === 400) return 5; // ??
+            if (base === 500) return 6; // ??
+            return 3;
+        }
+        return 3; // ?? ??
     }
-    getTileMoveMeta(type) {
-        let name = "평원";
-        if (type === 4) name = "도로";
-        else if (isGateTile(type)) name = "관문";
-        else if (isCitadelTile(type)) name = "성채";
-        else if (isDragonTile(type)) name = "드래곤";
-        else if (isTerrainCode(type)) name = getTerrainBaseName(type);
-        return { name, min: this.getTileMoveTime(type) };
+    getTileMoveMeta(type, r, c) {
+        let name = "??";
+        if (type === 4) name = "??";
+        else if (isGateTile(type)) name = "??";
+        else if (isCitadelTile(type)) name = "??";
+        else if (isDragonTile(type)) name = "???";
+        else {
+            let evalType = type;
+            if (!isTerrainCode(type) && typeof r === "number" && typeof c === "number") {
+                const base = FIELD_TERRAIN_DATA?.[r]?.[c];
+                if (isTerrainCode(base)) evalType = base;
+            }
+            if (isTerrainCode(evalType)) name = getTerrainBaseName(evalType);
+        }
+        return { name, min: this.getTileMoveTime(type, r, c) };
     }
     getPathTimeMin(path, speedFactor = 1) {
         if (!path || path.length <= 1) return 0;
@@ -840,7 +1148,7 @@ class Game {
         for (let i = 1; i < path.length; i++) {
             const step = path[i];
             const tileType = FIELD_MAP_DATA[step.r][step.c];
-            total += this.getTileMoveTime(tileType);
+            total += this.getTileMoveTime(tileType, step.r, step.c);
         }
         return total * speedFactor;
     }
@@ -851,7 +1159,7 @@ class Game {
         for (let i = 1; i < path.length; i++) {
             const step = path[i];
             const tileType = FIELD_MAP_DATA[step.r][step.c];
-            const meta = this.getTileMoveMeta(tileType);
+            const meta = this.getTileMoveMeta(tileType, step.r, step.c);
             total += meta.min;
             counts[meta.name] = (counts[meta.name] || 0) + 1;
         }
@@ -864,7 +1172,7 @@ class Game {
         for (let i = 1; i < path.length; i++) {
             const step = path[i];
             const tileType = FIELD_MAP_DATA[step.r][step.c];
-            const mins = this.getTileMoveTime(tileType) * speedFactor;
+            const mins = this.getTileMoveTime(tileType, step.r, step.c) * speedFactor;
             times[i] = Math.max(30, Math.floor(mins * MOVE_MS_PER_MIN));
         }
         return times;
@@ -872,22 +1180,42 @@ class Game {
     collectTerritoryIncome() {
         if (this.occupiedTiles.size > 0) {
             let totalTax = 0; 
+            let totalUpkeep = 0;
             this.occupiedTiles.forEach(key => { 
                 const [r, c] = key.split(',').map(Number); 
-                totalTax += this.getTaxRate(FIELD_MAP_DATA[r][c]); 
+                const type = FIELD_MAP_DATA[r][c];
+                totalTax += this.getTaxRate(type);
+                totalUpkeep += this.getUpkeepCost(type);
             });
-            this.income = totalTax; this.gold += totalTax; 
+            const net = totalTax - totalUpkeep;
+            this.income = net; this.gold += net; 
             this.updateUI(); 
             if (document.getElementById('field-modal').classList.contains('open')) {
-                this.showFloatingText(`+${totalTax} G (Tax)`, this.width/2, this.height/4, '#ffd700');
+                const sign = net >= 0 ? "+" : "";
+                this.showFloatingText(`${sign}${net} G (Tax)`, this.width/2, this.height/4, net >= 0 ? '#ffd700' : '#f87171');
             }
+        } else {
+            this.income = 0;
         }
     }
     calcLayout() {
         const gw = this.width - (CONFIG.gridPadding * 2); this.gridTileSize = Math.floor(gw / CONFIG.gridCols);
-        this.gridStartX = CONFIG.gridPadding; this.gridStartY = CONFIG.gridTopY; this.squadCellSize = CONFIG.squadCellSize; 
-        const sw = this.squadCellSize * 3; const totalSw = (sw * 2) + CONFIG.squadGap; const sx = Math.floor((this.width - totalSw) / 2);
-        this.squad1Rect = { x: sx, y: CONFIG.squadTopY, w: sw, h: sw }; this.squad2Rect = { x: sx + sw + CONFIG.squadGap, y: CONFIG.squadTopY, w: sw, h: sw };
+        this.gridStartX = CONFIG.gridPadding; this.gridStartY = CONFIG.gridTopY;
+        const useThird = this.thirdSquadUnlocked;
+        const squadSize = useThird ? CONFIG.squadCellSize3 : CONFIG.squadCellSize;
+        const squadGap = useThird ? CONFIG.squadGap3 : CONFIG.squadGap;
+        this.squadCellSize = squadSize;
+        const sw = this.squadCellSize * 3;
+        const squadCount = useThird ? 3 : 2;
+        const totalSw = (sw * squadCount) + (squadGap * (squadCount - 1));
+        const sx = Math.floor((this.width - totalSw) / 2);
+        this.squad1Rect = { x: sx, y: CONFIG.squadTopY, w: sw, h: sw };
+        this.squad2Rect = { x: sx + sw + squadGap, y: CONFIG.squadTopY, w: sw, h: sw };
+        if (useThird) {
+            this.squad3Rect = { x: sx + (sw + squadGap) * 2, y: CONFIG.squadTopY, w: sw, h: sw };
+        } else {
+            this.squad3Rect = null;
+        }
     }
     initGame() {
         this.refreshLockState(); this.grid[3][3] = { type: ITEM_TYPE.BUILDING_BARRACKS, level: 1, scale: 1 };
@@ -950,12 +1278,451 @@ class Game {
         if (el) el.innerText = this.movePreviewText || '이동할 타일을 선택하세요.';
     }
 
+    openObjectModal(title, bodyHtml) {
+        const modal = document.getElementById('modal-object');
+        const t = document.getElementById('object-modal-title');
+        const b = document.getElementById('object-modal-body');
+        if (!modal || !t || !b) return;
+        modal.querySelector('.modal-content')?.classList.add('wide');
+        t.innerText = title;
+        b.innerHTML = bodyHtml;
+        modal.classList.add('open');
+    }
+
+    formatTimeLeft(ms) {
+        if (ms <= 0) return "갱신됨";
+        const totalMin = Math.ceil(ms / 60000);
+        const h = Math.floor(totalMin / 60);
+        const m = totalMin % 60;
+        if (h <= 0) return `${m}분`;
+        return `${h}시간 ${m}분`;
+    }
+
+    formatPercent(value) {
+        return `${Math.round(value * 100)}%`;
+    }
+
+    getFieldObjectData(type) {
+        if (FIELD_OBJECT_DATA[type]) return FIELD_OBJECT_DATA[type];
+        if (isGateTile(type)) {
+            const level = getObjectLevelFromCode(type);
+            const defenders = FIELD_DEFENDERS[Math.min(4, level)] || [];
+            return { name: "관문", level, defenders, abilities: [] };
+        }
+        if (isCitadelTile(type)) {
+            const level = getObjectLevelFromCode(type);
+            const defenders = FIELD_DEFENDERS[Math.min(4, level + 1)] || FIELD_DEFENDERS[2] || [];
+            return { name: "성채", level, defenders, abilities: [] };
+        }
+        if (isDragonTile(type)) return { name: "용", level: 1, defenders: [], abilities: [] };
+        return null;
+    }
+
+    getAbilityValue(data, abilityCode) {
+        if (!data || !data.abilities) return 0;
+        const found = data.abilities.find(a => a.code === abilityCode);
+        return found ? Number(found.value) : 0;
+    }
+
+    getFieldLevel(type) {
+        const data = this.getFieldObjectData(type);
+        if (data && data.level) return data.level;
+        return getObjectLevelFromCode(type);
+    }
+
+    getStatueBuff(type) {
+        const data = this.getFieldObjectData(type);
+        if (data?.statue) return data.statue;
+        const kind = getStatueKind(type);
+        if (!kind) return null;
+        const level = this.getFieldLevel(type);
+        const value = STATUE_BUFF_FALLBACK[level] || 0;
+        return value ? { kind, value } : null;
+    }
+
+    getRuinsBonus(type) {
+        if (!isRuinsTile(type)) return null;
+        const data = this.getFieldObjectData(type);
+        if (!data) return null;
+        const cpCap = this.getAbilityValue(data, ABILITY_CODES.CP_CAP);
+        const cpRegen = this.getAbilityValue(data, ABILITY_CODES.CP_REGEN);
+        if (!cpCap && !cpRegen) return null;
+        return { level: data.level || this.getFieldLevel(type), cpCap, cpRegen };
+    }
+
+    getFieldResourceConfig(type) {
+        const data = this.getFieldObjectData(type);
+        if (!data) return null;
+        const goldCap = this.getAbilityValue(data, ABILITY_CODES.GOLD_CAP);
+        const goldRegen = this.getAbilityValue(data, ABILITY_CODES.GOLD_REGEN);
+        if (goldCap || goldRegen) return { kind: "gold", cap: goldCap, regen5: goldRegen };
+        const energyCap = this.getAbilityValue(data, ABILITY_CODES.ENERGY_CAP);
+        const energyRegen = this.getAbilityValue(data, ABILITY_CODES.ENERGY_REGEN);
+        if (energyCap || energyRegen) return { kind: "energy", cap: energyCap, regen5: energyRegen };
+        return null;
+    }
+
+    getFieldResourceState(type, r, c) {
+        const cfg = this.getFieldResourceConfig(type);
+        if (!cfg) return null;
+        const key = `${r},${c}`;
+        const now = Date.now();
+        const state = this.fieldResourceState[key] || { last: now, stored: 0 };
+        const regenMs = cfg.regen5 / (5 * 60 * 1000);
+        if (regenMs > 0) {
+            const elapsed = now - state.last;
+            if (elapsed > 0) {
+                const gained = Math.floor(elapsed * regenMs);
+                if (gained > 0) {
+                    state.stored = Math.min(cfg.cap, state.stored + gained);
+                    const consumedMs = gained / regenMs;
+                    state.last = Math.min(now, state.last + consumedMs);
+                }
+            }
+        }
+        if (state.stored >= cfg.cap) {
+            if (!state.capNotified) {
+                state.capNotified = true;
+                if (document.getElementById('field-modal').classList.contains('open')) {
+                    const kind = cfg.kind === "gold" ? "금광" : "분수";
+                    this.showToast(`${kind} 최대치 도달`);
+                }
+            }
+        } else {
+            state.capNotified = false;
+        }
+        this.fieldResourceState[key] = state;
+        return { key, state, cfg };
+    }
+
+    collectFieldResource(type, r, c) {
+        const key = `${r},${c}`;
+        if (!this.occupiedTiles.has(key)) { this.showToast("점령 후 수령 가능"); return; }
+        const info = this.getFieldResourceState(type, r, c);
+        if (!info || info.state.stored <= 0) { this.showToast("생산 중"); return; }
+        if (info.cfg.kind === "gold") {
+            this.gold += info.state.stored;
+            this.showToast(`+${info.state.stored}G`);
+        } else if (info.cfg.kind === "energy") {
+            this.energy = Math.min(this.maxEnergy, this.energy + info.state.stored);
+            this.showToast(`+${info.state.stored}⚡`);
+        }
+        info.state.stored = 0;
+        info.state.capNotified = false;
+        info.state.last = Date.now();
+        this.fieldResourceState[key] = info.state;
+        this.updateUI();
+    }
+
+    applyCpBonuses() {
+        const baseMax = this.baseMaxCp ?? this.maxCp ?? 20;
+        const baseRegen = this.baseCpRegen ?? this.cpRegen ?? 1;
+        this.maxCp = baseMax + (this.cpBonus || 0);
+        this.cpRegen = Math.max(0.2, baseRegen + (this.cpRegenBonus || 0));
+        if (this.cp > this.maxCp) this.cp = this.maxCp;
+    }
+
+    recalcFieldBonuses() {
+        const buffs = { atk: 0, def: 0, hp: 0, spd: 0 };
+        let cpCapBonus = 0;
+        let cpRegenBonus = 0;
+        let citadelCount = 0;
+
+        this.occupiedTiles.forEach(key => {
+            const [r, c] = key.split(',').map(Number);
+            const type = FIELD_MAP_DATA[r][c];
+            if (isStatueTile(type)) {
+                const buff = this.getStatueBuff(type);
+                if (buff && buff.value) buffs[buff.kind] += buff.value;
+            }
+            if (isRuinsTile(type)) {
+                const bonus = this.getRuinsBonus(type);
+                if (bonus) {
+                    cpCapBonus += bonus.cpCap;
+                    cpRegenBonus += bonus.cpRegen;
+                }
+            }
+            if (isCitadelTile(type)) citadelCount += 1;
+        });
+
+        this.fieldBuffs = buffs;
+        this.citadelCount = citadelCount;
+        this.cpBonus = cpCapBonus + (citadelCount * CITADEL_CP_BONUS);
+        this.cpRegenBonus = cpRegenBonus;
+        const prevThird = this.thirdSquadUnlocked;
+        this.thirdSquadUnlocked = citadelCount > 0;
+        if (!this.thirdSquadUnlocked) {
+            if (this.selectedArmyId === 2) this.selectedArmyId = null;
+            if (this.lastSelectedArmyId === 2) this.lastSelectedArmyId = null;
+        }
+        if (prevThird !== this.thirdSquadUnlocked) {
+            this.calcLayout();
+            this.requestRender();
+        }
+        this.applyCpBonuses();
+    }
+
+    calcItemPrice(type, level) {
+        const base = ITEM_VALUES[level] || 1;
+        if (type === ITEM_TYPE.ITEM_GOLD) return base * 40;
+        if (type === ITEM_TYPE.ITEM_ENERGY) return base * 50;
+        if (type === ITEM_TYPE.ITEM_CRYSTAL) return base * 80;
+        return base * 50;
+    }
+
+    getItemIcon(type) {
+        if (type === ITEM_TYPE.ITEM_GOLD) return "💰";
+        if (type === ITEM_TYPE.ITEM_ENERGY) return "⚡";
+        if (type === ITEM_TYPE.ITEM_CRYSTAL) return "💎";
+        return "📦";
+    }
+
+    getAssetSrc(type, level) {
+        const img = this.assets.getImage(type, level);
+        return img && img.src ? img.src : "";
+    }
+
+    placeUnitInSquad(item, squad) {
+        for (let i = 0; i < squad.length; i++) {
+            if (!squad[i]) { item.scale = 1.3; squad[i] = item; return i; }
+        }
+        return -1;
+    }
+
+    placeUnitPreferred(item) {
+        let idx = this.placeUnitInSquad(item, this.squad1);
+        if (idx !== -1) return { placed: true, zone: ZONES.SQUAD1, idx };
+        idx = this.placeUnitInSquad(item, this.squad2);
+        if (idx !== -1) return { placed: true, zone: ZONES.SQUAD2, idx };
+        if (this.thirdSquadUnlocked) {
+            idx = this.placeUnitInSquad(item, this.squad3);
+            if (idx !== -1) return { placed: true, zone: ZONES.SQUAD3, idx };
+        }
+        if (this.spawnItem(item)) return { placed: true, zone: ZONES.GRID, idx: null };
+        return { placed: false };
+    }
+
+    calcMercPrice(code) {
+        const info = getInfoFromCode(code);
+        const stats = UNIT_STATS[code];
+        const lv = info.level || 1;
+        if (!stats) return lv * 120;
+        return Math.max(80, (stats.sell + 1) * 100);
+    }
+
+    buildShopCatalog(type) {
+        const level = this.getFieldLevel(type);
+        if (isShopTile(type)) {
+            const codes = Object.keys(ITEM_TABLE).map(n => parseInt(n, 10));
+            codes.sort(() => Math.random() - 0.5);
+            return codes.slice(0, 3).map(code => {
+                const info = getInfoFromCode(code);
+                const data = ITEM_TABLE[code];
+                return {
+                    kind: "item",
+                    code,
+                    name: data.name_kr || data.name,
+                    icon: this.getItemIcon(info.type),
+                    type: info.type,
+                    level: info.level,
+                    earn: data.earn,
+                    price: this.calcItemPrice(info.type, info.level)
+                };
+            });
+        }
+        if (isTavernTile(type)) {
+            const pool = Object.keys(UNIT_STATS).map(n => parseInt(n, 10))
+                .filter(code => {
+                    const info = getInfoFromCode(code);
+                    return info.type >= 10 && info.level <= 5;
+                });
+            pool.sort(() => Math.random() - 0.5);
+            return pool.slice(0, 3).map(code => {
+                const info = getInfoFromCode(code);
+                const stat = UNIT_STATS[code];
+                return {
+                    kind: "unit",
+                    code,
+                    name: stat ? stat.name : `용병 Lv.${info.level}`,
+                    level: info.level,
+                    price: this.calcMercPrice(code)
+                };
+            });
+        }
+        return [];
+    }
+
+    buyFieldItem(item) {
+        if (item.sold) { this.showToast("품절"); return; }
+        if (this.gold < item.price) { this.showToast("골드 부족"); return; }
+        if (!this.spawnItem({ type: item.type, level: item.level, scale: 0 })) { this.showToast("공간 부족"); return; }
+        this.gold -= item.price;
+        this.sound.playCollect();
+        this.updateUI();
+        this.showToast("구매 완료");
+        item.sold = true;
+        this.refreshShopModal();
+    }
+
+    hireMercenary(item) {
+        if (item.sold) { this.showToast("품절"); return; }
+        if (this.gold < item.price) { this.showToast("골드 부족"); return; }
+        const info = getInfoFromCode(item.code);
+        const placed = this.placeUnitPreferred({ type: info.type, level: info.level, scale: 0 });
+        if (!placed.placed) { this.showToast("공간 부족"); return; }
+        this.gold -= item.price;
+        this.sound.playSpawn();
+        this.updateUI();
+        if (placed.zone === ZONES.SQUAD1 || placed.zone === ZONES.SQUAD2) {
+            this.playSquadJoinFx(placed.zone, placed.idx);
+        }
+        this.showToast("고용 완료");
+        item.sold = true;
+        this.refreshShopModal();
+    }
+
+    refreshShopModal() {
+        if (!this.currentShopContext) return;
+        const { type, r, c } = this.currentShopContext;
+        const key = `${r},${c}`;
+        const state = this.fieldShopState[key];
+        if (!state) return;
+        if (!document.getElementById('modal-object')?.classList.contains('open')) return;
+        const now = Date.now();
+        const interval = 3 * 60 * 60 * 1000;
+        if (now - state.lastRefresh >= interval) {
+            state.lastRefresh = now;
+            state.items = this.buildShopCatalog(type);
+            state.justRefreshed = true;
+            this.fieldShopState[key] = state;
+        }
+        this.renderShopModal(type, r, c, state);
+    }
+
+    openShopOrTavern(type, r, c) {
+        const key = `${r},${c}`;
+        if (!this.occupiedTiles.has(key)) { this.showToast("점령 후 이용 가능"); return; }
+        const state = this.fieldShopState[key] || { lastRefresh: Date.now(), items: [] };
+        const interval = 3 * 60 * 60 * 1000;
+        const now = Date.now();
+        if (now - state.lastRefresh >= interval || !state.items || state.items.length === 0) {
+            state.lastRefresh = now;
+            state.items = this.buildShopCatalog(type);
+        }
+        this.fieldShopState[key] = state;
+        this.currentShopContext = { type, r, c };
+        this.renderShopModal(type, r, c, state);
+    }
+
+    renderShopModal(type, r, c, state) {
+        const interval = 3 * 60 * 60 * 1000;
+        const now = Date.now();
+        const next = state.lastRefresh + interval;
+        const remain = this.formatTimeLeft(next - now);
+        const name = isShopTile(type) ? "상점" : "주점";
+        const level = this.getFieldLevel(type);
+
+        const modal = document.getElementById('modal-object');
+        const t = document.getElementById('object-modal-title');
+        const b = document.getElementById('object-modal-body');
+        if (!modal || !t || !b) return;
+        t.innerText = name;
+        b.innerHTML = "";
+        modal.querySelector('.modal-content')?.classList.add('wide');
+
+        const header = document.createElement('div');
+        header.innerHTML = `<div>${name} Lv.${level}</div><div class="text-gray-400 text-xs">갱신까지: <span id="shop-refresh-timer">${remain}</span></div>`;
+        b.appendChild(header);
+
+        const list = document.createElement('div');
+        list.className = "shop-list";
+
+        state.items.forEach(item => {
+            const row = document.createElement('div');
+            row.className = "shop-card";
+            if (state.justRefreshed) row.classList.add('restock');
+
+            if (item.kind === "item") {
+                const imgSrc = this.getAssetSrc(item.type, item.level);
+                const iconHtml = imgSrc
+                    ? `<div class="shop-icon"><img class="shop-icon-img" src="${imgSrc}" alt=""></div>`
+                    : `<div class="shop-icon">${item.icon || this.getItemIcon(item.type)}</div>`;
+                row.innerHTML = `
+                    <div class="shop-row">${iconHtml}<div><div class="name">${item.name} Lv.${item.level}</div><div class="meta">획득량 +${item.earn}</div></div></div>
+                    <button class="price-btn">${item.sold ? "SOLD OUT" : `💰 ${item.price}`}</button>
+                `;
+                const btn = row.querySelector('.price-btn');
+                const affordable = this.gold >= item.price;
+                if (item.sold || !affordable) row.classList.add('disabled');
+                btn.onclick = () => {
+                    if (item.sold) { this.showToast("품절"); return; }
+                    if (!affordable) { this.showToast("골드 부족"); return; }
+                    this.buyFieldItem(item);
+                };
+            } else {
+                const info = getInfoFromCode(item.code);
+                const imgSrc = this.getAssetSrc(info.type, info.level);
+                const iconHtml = imgSrc
+                    ? `<div class="shop-icon"><img class="shop-icon-img" src="${imgSrc}" alt=""></div>`
+                    : `<div class="shop-icon">⚔</div>`;
+                row.innerHTML = `
+                    <div class="shop-row">${iconHtml}<div><div class="name">${item.name} Lv.${item.level}</div><div class="meta">용병 고용</div></div></div>
+                    <button class="price-btn">${item.sold ? "SOLD OUT" : `💰 ${item.price}`}</button>
+                `;
+                const btn = row.querySelector('.price-btn');
+                const affordable = this.gold >= item.price;
+                if (item.sold || !affordable) row.classList.add('disabled');
+                btn.onclick = () => {
+                    if (item.sold) { this.showToast("품절"); return; }
+                    if (!affordable) { this.showToast("골드 부족"); return; }
+                    this.hireMercenary(item);
+                };
+            }
+            list.appendChild(row);
+        });
+
+        state.justRefreshed = false;
+        b.appendChild(list);
+        modal.classList.add('open');
+
+        if (this.shopTimer) clearInterval(this.shopTimer);
+        this.shopTimer = setInterval(() => {
+            if (!modal.classList.contains('open')) { clearInterval(this.shopTimer); this.shopTimer = null; return; }
+            const el = document.getElementById('shop-refresh-timer');
+            if (el) el.innerText = this.formatTimeLeft(next - Date.now());
+            this.refreshShopModal();
+        }, 1000);
+    }
+
+    playSquadJoinFx(zone, idx) {
+        if (idx === null || idx === undefined) return;
+        const rect = zone === ZONES.SQUAD1 ? this.squad1Rect : (zone === ZONES.SQUAD2 ? this.squad2Rect : this.squad3Rect);
+        const size = this.squadCellSize;
+        const x = rect.x + (idx % 3) * size + size / 2;
+        const y = rect.y + Math.floor(idx / 3) * size + size / 2;
+        this.spawnParticles(x, y, "#4ade80", 16, "spark");
+        const name = zone === ZONES.SQUAD1 ? "제1부대 합류" : (zone === ZONES.SQUAD2 ? "제2부대 합류" : "제3부대 합류");
+        this.showJoinNotice(name);
+        this.requestRender();
+    }
+
+    getSquadByArmyId(armyId) {
+        if (armyId === 0) return this.squad1;
+        if (armyId === 1) return this.squad2;
+        return this.squad3;
+    }
+
+    getAvailableArmies() {
+        return this.thirdSquadUnlocked ? this.armies : this.armies.filter(a => a.id !== 2);
+    }
+
     enterMoveTargetMode(armyId) {
         const army = this.armies[armyId];
         if (!army) return;
+        if (!this.getAvailableArmies().some(a => a.id === armyId)) { this.showToast("성채 점령 필요"); return; }
         if (army.state !== 'IDLE') { this.showToast("부대가 이동 중입니다."); return; }
 
-        const squadData = army.id === 0 ? this.squad1 : this.squad2;
+        const squadData = this.getSquadByArmyId(army.id);
         const stats = this.getSquadStats(squadData);
         if (stats.power < 10) { this.showToast("병력이 부족합니다."); return; }
 
@@ -1090,22 +1857,38 @@ class Game {
         if (isTerrainCode(type)) {
             return { name: getTerrainName(type), level: "-", owner: "-", defenders: [] };
         }
-        let name = "미확인", level = 1, defenders = [];
-        if (isCastleTile(type)) { name = "성"; level = 1; }
-        else if (isGateTile(type)) { name = "관문"; level = Math.max(1, type - 5110); defenders = FIELD_DEFENDERS[Math.min(4, level)] || []; }
-        else if (isCitadelTile(type)) { name = "성채"; level = Math.max(1, type - 5120); defenders = FIELD_DEFENDERS[Math.min(4, level + 1)] || FIELD_DEFENDERS[2]; }
-        else if (isDragonTile(type)) { name = "드래곤 둥지"; level = 1; }
-        else if (isGoldMineTile(type)) { name = "금광"; level = Math.max(1, type - 5200); defenders = FIELD_DEFENDERS[Math.min(4, level)] || []; }
-        else if (isFountainTile(type)) { name = "에너지 분수"; level = Math.max(1, type - 5210); defenders = FIELD_DEFENDERS[Math.min(4, level)] || []; }
+        let name = "알 수 없음";
+        let level = 1;
+        let defenders = [];
+        const data = this.getFieldObjectData(type);
+        const overlay = data ? null : getInfoFromCode(type);
+        if (data) {
+            name = data.name || name;
+            level = data.level || level;
+            defenders = data.defenders || [];
+        } else if (overlay) {
+            const base = getData(overlay.type, overlay.level);
+            if (base && base.name) {
+                name = base.name;
+                level = overlay.level ?? level;
+            }
+        } else if (isCastleTile(type)) { name = "성"; level = 1; }
+        else if (isGateTile(type)) { name = "관문"; level = getObjectLevelFromCode(type); defenders = FIELD_DEFENDERS[Math.min(4, level)] || []; }
+        else if (isCitadelTile(type)) { name = "성채"; level = getObjectLevelFromCode(type); defenders = FIELD_DEFENDERS[Math.min(4, level + 1)] || FIELD_DEFENDERS[2]; }
+        else if (isDragonTile(type)) { name = "용"; level = 1; }
+        else if (isGoldMineTile(type)) { name = "금광"; level = getObjectLevelFromCode(type); defenders = FIELD_DEFENDERS[Math.min(4, level)] || []; }
+        else if (isFountainTile(type)) { name = "에너지 분수"; level = getObjectLevelFromCode(type); defenders = FIELD_DEFENDERS[Math.min(4, level)] || []; }
         else if (isShopTile(type)) { name = "상점"; level = 1; defenders = FIELD_DEFENDERS[1]; }
         else if (isTavernTile(type)) { name = "주점"; level = 1; defenders = FIELD_DEFENDERS[1]; }
-        else if (isRuinsTile(type)) { name = "폐허"; level = Math.max(1, type - 5240); defenders = FIELD_DEFENDERS[Math.min(4, level)] || []; }
-        else if (isStatueTile(type)) { name = "석상"; level = type % 10; }
-        else if (type === 4) { name = "도로"; level = "-"; }
+        else if (isRuinsTile(type)) { name = "유적"; level = getObjectLevelFromCode(type); defenders = FIELD_DEFENDERS[Math.min(4, level)] || []; }
+        else if (isStatueTile(type)) { name = "석상"; level = getObjectLevelFromCode(type); }
+        else if (type === 4) { name = "길"; level = "-"; }
 
-        const owner = this.occupiedTiles.has(`${r},${c}`) ? "점령" : "미점령";
+        const owner = this.occupiedTiles.has(`${r},${c}`) ? "점령" : "-";
         return { name, level, owner, defenders };
     }
+
+
 
     formatDefenders(defenders) {
         if (!defenders || defenders.length === 0) return "-";
@@ -1114,6 +1897,23 @@ class Game {
             const nm = stat ? stat.name : d.code;
             return `${nm} x${d.count}`;
         }).join(" / ");
+    }
+
+    getCaptureEffectToast(type) {
+        if (isGateTile(type)) return "관문 돌파: 이동로 개방";
+        if (isCitadelTile(type)) return "성채 효과: 추가 스쿼드 +1";
+        if (isRuinsTile(type)) {
+            const bonus = this.getRuinsBonus(type);
+            if (bonus) return `유적 효과: 지휘력 +${bonus.cpCap}, 리젠 +${bonus.cpRegen}/5분`;
+        }
+        if (isStatueTile(type)) {
+            const buff = this.getStatueBuff(type);
+            if (buff) {
+                const label = buff.kind === "atk" ? "공격" : (buff.kind === "def" ? "방어" : (buff.kind === "hp" ? "체력" : "속도"));
+                return `${label} 석상 효과: +${this.formatPercent(buff.value)}`;
+            }
+        }
+        return "";
     }
 
     setFieldInfo(type, r, c) {
@@ -1134,10 +1934,49 @@ class Game {
             if (cell) cell.classList.add('field-selected');
         }
         const info = this.getFieldObjectInfo(type, r, c);
+        let extraRows = "";
+        if (isGoldMineTile(type) || isFountainTile(type)) {
+            const res = this.getFieldResourceState(type, r, c);
+            if (res) {
+                const kind = isGoldMineTile(type) ? "골드" : "에너지";
+                extraRows += `<div class="field-info-row"><span>누적 ${kind}</span><span>${res.state.stored}/${res.cfg.cap}</span></div>`;
+                extraRows += `<div class="field-info-row"><span>리젠</span><span>5분당 ${res.cfg.regen5}</span></div>`;
+                const ratio = res.cfg.cap > 0 ? Math.min(100, Math.round((res.state.stored / res.cfg.cap) * 100)) : 0;
+                const barColor = isGoldMineTile(type) ? "#fbbf24" : "#38bdf8";
+                extraRows += `<div class="field-info-bar"><div class="field-info-bar-fill" style="width:${ratio}%;background:${barColor};"></div></div>`;
+            }
+        }
+        let effectRows = "";
+        if (isGateTile(type)) {
+            effectRows += `<div class="field-info-row"><span>효과</span><span>통로 개방</span></div>`;
+        }
+        if (isCitadelTile(type)) {
+            effectRows += `<div class="field-info-row"><span>효과</span><span>추가 스쿼드 +1</span></div>`;
+        }
+        if (isRuinsTile(type)) {
+            const bonus = this.getRuinsBonus(type);
+            if (bonus) {
+                effectRows += `<div class="field-info-row"><span>지휘력 최대</span><span>+${bonus.cpCap}</span></div>`;
+                effectRows += `<div class="field-info-row"><span>지휘력 리젠</span><span>5분당 +${bonus.cpRegen}</span></div>`;
+            }
+        }
+        if (isStatueTile(type)) {
+            const buff = this.getStatueBuff(type);
+            if (buff) {
+                const label = buff.kind === "atk" ? "공격" : (buff.kind === "def" ? "방어" : (buff.kind === "hp" ? "체력" : "속도"));
+                effectRows += `<div class="field-info-row"><span>${label} 버프</span><span>+${this.formatPercent(buff.value)}</span></div>`;
+            }
+        }
+        const upkeep = this.getUpkeepCost(type);
+        if (upkeep > 0) {
+            effectRows += `<div class="field-info-row"><span>유지비</span><span>-${upkeep}/3초</span></div>`;
+        }
         panel.innerHTML = `
             <div class="field-info-title">${info.name}${info.level !== "-" ? ` Lv.${info.level}` : ""}</div>
             <div class="field-info-row"><span>소유자</span><span>${info.owner}</span></div>
             <div class="field-info-row"><span>수비병</span><span>${this.formatDefenders(info.defenders)}</span></div>
+            ${extraRows}
+            ${effectRows}
             <div class="field-info-small">좌표: ${r},${c}</div>
             <div id="field-move-options" class="field-move-options"></div>
         `;
@@ -1145,7 +1984,7 @@ class Game {
     }
 
     getArmyMoveInfo(army, targetR, targetC) {
-        const squadData = army.id === 0 ? this.squad1 : this.squad2;
+        const squadData = this.getSquadByArmyId(army.id);
         const stats = this.getSquadStats(squadData);
         if (stats.power < 10) return { armyId: army.id, canMove: false, reason: "병력 부족", stats };
         if (army.state !== 'IDLE') return { armyId: army.id, canMove: false, reason: "이동중", stats };
@@ -1174,7 +2013,7 @@ class Game {
         title.innerText = "부대 이동 ETA";
         wrap.appendChild(title);
 
-        const infos = this.armies.map(army => this.getArmyMoveInfo(army, r, c, type));
+        const infos = this.getAvailableArmies().map(army => this.getArmyMoveInfo(army, r, c, type));
 
         if (isNewTarget) {
             let preferred = this.lastSelectedArmyId;
@@ -1219,6 +2058,18 @@ class Game {
         });
     }
 
+    applyFieldBuffsToStats(stats) {
+        if (!stats) return stats;
+        const buffs = this.fieldBuffs || { atk: 0, def: 0, hp: 0, spd: 0 };
+        return {
+            ...stats,
+            hp: stats.hp ? Math.round(stats.hp * (1 + buffs.hp)) : stats.hp,
+            atk: stats.atk ? Math.round(stats.atk * (1 + buffs.atk)) : stats.atk,
+            def: stats.def ? Math.round(stats.def * (1 + buffs.def)) : stats.def,
+            spd: stats.spd ? Math.round(stats.spd * (1 + buffs.spd)) : stats.spd
+        };
+    }
+
     getSquadInfo(squadData) {
         let count = 0, totalLevel = 0, power = 0;
         let totalHp = 0, totalAtk = 0, totalDef = 0;
@@ -1229,18 +2080,19 @@ class Game {
             if (!u) return;
             count++;
             totalLevel += u.level;
-            const data = getData(u.type, u.level);
-            if (data.hp) {
+            const base = getData(u.type, u.level);
+            const data = this.applyFieldBuffsToStats(base);
+            if (data && data.hp) {
                 power += data.hp + data.atk + data.def;
                 totalHp += data.hp; totalAtk += data.atk; totalDef += data.def;
             }
-            if (data.spd) totalSpd += data.spd;
-            if (data.rng) totalRng += data.rng;
-            if (data.mov) { minMov = Math.min(minMov, data.mov); maxMov = Math.max(maxMov, data.mov); }
+            if (data && data.spd) totalSpd += data.spd;
+            if (data && data.rng) totalRng += data.rng;
+            if (base && base.mov) { minMov = Math.min(minMov, base.mov); maxMov = Math.max(maxMov, base.mov); }
             units.push({
-                name: data.name, level: u.level,
-                hp: data.hp || 0, atk: data.atk || 0, def: data.def || 0,
-                spd: data.spd || 0, rng: data.rng || 0, mov: data.mov || 0
+                name: base.name, level: u.level,
+                hp: data?.hp || 0, atk: data?.atk || 0, def: data?.def || 0,
+                spd: data?.spd || 0, rng: data?.rng || 0, mov: base?.mov || 0
             });
         });
         if (minMov === 99) minMov = 0;
@@ -1252,13 +2104,19 @@ class Game {
     setSquadInfoPanel(army) {
         const panel = document.getElementById('field-info-panel');
         if (!panel) return;
-        const squadData = army.id === 0 ? this.squad1 : this.squad2;
+        const squadData = this.getSquadByArmyId(army.id);
         const info = this.getSquadInfo(squadData);
         const stats = this.getSquadStats(squadData);
         const moveText = info.minMov ? `${info.minMov}~${info.maxMov}` : "-";
         const avgSpd = info.avgSpd ? info.avgSpd.toFixed(1) : "0.0";
         const avgRng = info.avgRng ? info.avgRng.toFixed(1) : "0.0";
         const speedFactorText = `x${stats.speedFactor.toFixed(2)}`;
+        const buffParts = [];
+        if (this.fieldBuffs?.atk) buffParts.push(`ATK +${this.formatPercent(this.fieldBuffs.atk)}`);
+        if (this.fieldBuffs?.def) buffParts.push(`DEF +${this.formatPercent(this.fieldBuffs.def)}`);
+        if (this.fieldBuffs?.hp) buffParts.push(`HP +${this.formatPercent(this.fieldBuffs.hp)}`);
+        if (this.fieldBuffs?.spd) buffParts.push(`SPD +${this.formatPercent(this.fieldBuffs.spd)}`);
+        const buffText = buffParts.length ? buffParts.join(" / ") : "-";
         const unitHtml = info.units.length
             ? info.units.map(u => `<div>${u.name} Lv.${u.level} · HP ${u.hp} ATK ${u.atk} DEF ${u.def} SPD ${u.spd} RNG ${u.rng} MOV ${u.mov}</div>`).join("")
             : "<div>없음</div>";
@@ -1272,6 +2130,7 @@ class Game {
             <div class="field-info-row"><span>이동력(최소~최대)</span><span>${moveText}</span></div>
             <div class="field-info-row"><span>이동 범위</span><span>${stats.range}</span></div>
             <div class="field-info-row"><span>속도 보정</span><span>${speedFactorText}</span></div>
+            <div class="field-info-row"><span>?? ??</span><span>${buffText}</span></div>
             <div class="field-info-small">${unitHtml}</div>
         `;
     }
@@ -1315,6 +2174,40 @@ class Game {
 
         menu.appendChild(moveBtn);
         menu.appendChild(infoBtn);
+
+        const key = `${r},${c}`;
+        if (isGoldMineTile(type)) {
+            const btn = document.createElement('button');
+            btn.className = 'field-action-btn';
+            btn.innerText = '골드 수령';
+            btn.onclick = (e) => { e.stopPropagation(); this.collectFieldResource(type, r, c); };
+            if (!this.occupiedTiles.has(key)) btn.classList.add('disabled');
+            menu.appendChild(btn);
+        }
+        if (isFountainTile(type)) {
+            const btn = document.createElement('button');
+            btn.className = 'field-action-btn';
+            btn.innerText = '에너지 수령';
+            btn.onclick = (e) => { e.stopPropagation(); this.collectFieldResource(type, r, c); };
+            if (!this.occupiedTiles.has(key)) btn.classList.add('disabled');
+            menu.appendChild(btn);
+        }
+        if (isShopTile(type)) {
+            const btn = document.createElement('button');
+            btn.className = 'field-action-btn';
+            btn.innerText = '상점 이용';
+            btn.onclick = (e) => { e.stopPropagation(); this.openShopOrTavern(type, r, c); };
+            if (!this.occupiedTiles.has(key)) btn.classList.add('disabled');
+            menu.appendChild(btn);
+        }
+        if (isTavernTile(type)) {
+            const btn = document.createElement('button');
+            btn.className = 'field-action-btn';
+            btn.innerText = '주점 이용';
+            btn.onclick = (e) => { e.stopPropagation(); this.openShopOrTavern(type, r, c); };
+            if (!this.occupiedTiles.has(key)) btn.classList.add('disabled');
+            menu.appendChild(btn);
+        }
         viewport.appendChild(menu);
 
         const rect = viewport.getBoundingClientRect();
@@ -1344,7 +2237,8 @@ class Game {
         }
 
         const headerDiv = document.createElement('div'); headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-30 shadow-md";
-        headerDiv.innerHTML = `<div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>💰 세금: <span class="text-yellow-400 font-bold">+${this.income}/3sec</span></div><div>🧭 CP: <span id="field-cp-display" class="text-white font-bold">${this.cp}/${this.maxCp}</span></div>`; content.appendChild(headerDiv);
+        const incomeSign = this.income >= 0 ? "+" : "";
+        headerDiv.innerHTML = `<div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>💰 세금: <span class="text-yellow-400 font-bold">${incomeSign}${this.income}/3sec</span></div><div>🧭 CP: <span id="field-cp-display" class="text-white font-bold">${this.cp}/${this.maxCp}</span></div>`; content.appendChild(headerDiv);
         const moveInfo = document.createElement('div'); moveInfo.id = 'field-move-info'; moveInfo.className = 'field-move-info';
         moveInfo.innerText = this.movePreviewText || '이동할 타일을 선택하세요.';
         moveInfo.onclick = () => { if (this.moveTargetMode) this.exitMoveTargetMode(); };
@@ -1377,13 +2271,13 @@ class Game {
 
         const armyLayer = document.createElement('div'); armyLayer.id = 'army-layer'; armyLayer.style.position = 'absolute'; armyLayer.style.top = '0'; armyLayer.style.left = '0'; armyLayer.style.width = '100%'; armyLayer.style.height = '100%'; armyLayer.style.pointerEvents = 'none'; armyLayer.style.zIndex = '50'; mapLayer.appendChild(armyLayer);
 
-        this.armies.forEach(army => {
+        this.getAvailableArmies().forEach(army => {
             const marker = document.createElement('div'); 
             marker.className = 'army-marker'; 
             if (this.selectedArmyId === army.id) marker.classList.add('selected');
             marker.id = `army-marker-${army.id}`; 
             
-            const squadData = army.id === 0 ? this.squad1 : this.squad2;
+            const squadData = this.getSquadByArmyId(army.id);
             let maxLevel = -1;
             let bestUnit = null;
             
@@ -1440,9 +2334,31 @@ class Game {
                     const isBorder = type % 100 === 1;
                     color = (isBorder ? TERRAIN_COLORS_BORDER[base] : TERRAIN_COLORS[base]) || '#2e3b23';
                 } else if (type === 4) { color = 'rgba(139, 69, 19, 0.4)'; }
-                else { color = 'transparent'; }
+                else {
+                    const base = FIELD_TERRAIN_DATA?.[r]?.[c];
+                    if (isTerrainCode(base)) {
+                        const baseType = getTerrainBase(base);
+                        const isBorder = base % 100 === 1;
+                        color = (isBorder ? TERRAIN_COLORS_BORDER[baseType] : TERRAIN_COLORS[baseType]) || '#2e3b23';
+                    } else {
+                        color = 'transparent';
+                    }
+                }
                 
                 cell.style.backgroundColor = color;
+
+                const isKnownObject = isCastleTile(type) || isGateTile(type) || isCitadelTile(type) || isDragonTile(type)
+                    || isGoldMineTile(type) || isFountainTile(type) || isShopTile(type) || isTavernTile(type)
+                    || isRuinsTile(type) || isStatueTile(type);
+                if (!isTerrainCode(type) && !isKnownObject) {
+                    const icon = this.assets.getImage(String(type));
+                    if (icon && icon.src) {
+                        cell.style.backgroundImage = `url(${icon.src})`;
+                        cell.style.backgroundSize = 'contain';
+                        cell.style.backgroundRepeat = 'no-repeat';
+                        cell.style.backgroundPosition = 'center';
+                    }
+                }
 
                 if (isOccupied) {
                     cell.classList.add('field-occupied');
@@ -1489,7 +2405,7 @@ class Game {
         let energyCost = 1; let goldCost = 0;
         if (isGateTile(tileType)) { energyCost = 5; goldCost = 100; }
         
-        const squadData = army.id === 0 ? this.squad1 : this.squad2;
+        const squadData = this.getSquadByArmyId(army.id);
         const stats = this.getSquadStats(squadData);
         
         if (stats.power < 10) { this.showToast("병력이 부족합니다."); return; }
@@ -1521,7 +2437,9 @@ class Game {
         
         const baseRange = 4;
         const range = baseRange + (minMov * 2);
-        const speedFactor = Math.max(0.5, 1 - (minMov - 1) * 0.2);
+        const baseSpeedFactor = Math.max(0.5, 1 - (minMov - 1) * 0.2);
+        const spdBuff = this.fieldBuffs?.spd || 0;
+        const speedFactor = Math.max(0.3, baseSpeedFactor * (1 - spdBuff));
         
         return { power: this.getSquadPower(squadData), range, speedFactor };
     }
@@ -1555,10 +2473,10 @@ class Game {
         const selector = document.createElement('div'); selector.className = 'squad-selector';
         this.setMovePreview("이동할 부대를 선택하세요.");
 
-        this.armies.forEach(army => {
+        this.getAvailableArmies().forEach(army => {
             const card = document.createElement('div'); card.className = 'squad-card';
             const isIdle = army.state === 'IDLE';
-            const squadData = army.id === 0 ? this.squad1 : this.squad2;
+            const squadData = this.getSquadByArmyId(army.id);
             const stats = this.getSquadStats(squadData);
 
             let statusHtml = "";
@@ -1594,10 +2512,10 @@ class Game {
         let previewPath = null; let previewText = "";
         let defaultInfoSet = false;
 
-        this.armies.forEach(army => {
+        this.getAvailableArmies().forEach(army => {
             const card = document.createElement('div'); card.className = 'squad-card';
             const isIdle = army.state === 'IDLE';
-            const squadData = army.id === 0 ? this.squad1 : this.squad2;
+            const squadData = this.getSquadByArmyId(army.id);
             const stats = this.getSquadStats(squadData);
             const squadInfo = this.getSquadInfo(squadData);
 
@@ -1732,21 +2650,24 @@ class Game {
         const { r, c, type } = army.target;
         if (!this.occupiedTiles.has(`${r},${c}`)) {
             this.occupiedTiles.add(`${r},${c}`);
-            if (isGateTile(type)) { 
-                this.showToast(`⚔️ ${army.name} 관문 돌파!`); 
+            if (isGateTile(type)) {
+                this.showToast(`?? ${army.name} ?? ??!`);
                 this.sound.playUnlock();
                 this.spawnParticles(this.width/2, this.height/2, "#FF0000", 50, "confetti");
             } else if (isDragonTile(type)) {
-                this.showToast(`🐉 ${army.name} 드래곤 조우!`);
+                this.showToast(`?? ${army.name} ??? ??!`);
                 this.sound.playUnlock();
                 this.spawnParticles(this.width/2, this.height/2, "#FF6D00", 40, "confetti");
-            } else { 
-                this.showToast(`🚩 ${army.name} 점령 성공!`); 
-                this.sound.playCollect(); 
+            } else {
+                this.showToast(`?? ${army.name} ?? ??!`);
+                this.sound.playCollect();
             }
-            if (document.getElementById('field-modal').classList.contains('open')) this.renderFieldMap(); 
+            this.recalcFieldBonuses();
+            const effectToast = this.getCaptureEffectToast(type);
+            if (effectToast) setTimeout(() => this.showToast(effectToast), 700);
+            if (document.getElementById('field-modal').classList.contains('open')) this.renderFieldMap();
         } else {
-             this.showToast(`${army.name} 도착 완료`);
+            this.showToast(`${army.name} ?? ??`);
         }
         army.state = 'IDLE';
         this.updateUI(); this.saveGame();
@@ -1832,7 +2753,18 @@ class Game {
         viewport.addEventListener('touchend', () => { isDragging = false; });
     }
 
-    closeModal() { this.exitMoveTargetMode(); document.getElementById('field-modal').classList.remove('open'); document.getElementById('modal-refill').classList.remove('open'); document.getElementById('modal-settings').classList.remove('open'); this.clearPathPreview(); this.setMovePreview(""); }
+    closeModal() { 
+        this.exitMoveTargetMode(); 
+        document.getElementById('field-modal').classList.remove('open'); 
+        document.getElementById('modal-refill').classList.remove('open'); 
+        document.getElementById('modal-settings').classList.remove('open'); 
+        document.getElementById('modal-object').classList.remove('open'); 
+        if (this.shopTimer) { clearInterval(this.shopTimer); this.shopTimer = null; }
+        this.currentShopContext = null;
+        document.querySelector('#modal-object .modal-content')?.classList.remove('wide');
+        this.clearPathPreview(); 
+        this.setMovePreview(""); 
+    }
     buyBuilding(type, price) {
         if (this.gold < price) { this.showToast("골드 부족!"); return; }
         const limit = BUILDING_LIMITS[type] || 999; const current = this.getBuildingCount(type);
@@ -1876,7 +2808,9 @@ class Game {
         const nextD = LEVEL_DATA.find(d => d.level === this.lordLevel + 1);
         this.maxEnergy = d ? d.maxEnergy : 50;
         this.requiredXp = nextD ? (nextD.xp - d.xp) : 999999;
-        this.maxCp = this.lordLevel >= 10 ? 22 : 20;
+        this.baseMaxCp = this.lordLevel >= 10 ? 22 : 20;
+        this.baseCpRegen = 1;
+        this.applyCpBonuses();
     }
     selectItem(item, location) { if (this.selectedItem?.item !== item) this.sound.playClick(); this.selectedItem = item ? { item, location } : null; this.updateInfoPanel(); this.requestRender(); }
     updateInfoPanel() {
@@ -1899,7 +2833,7 @@ class Game {
     handleAction() {
         if (!this.selectedItem) return; const { item, location } = this.selectedItem;
         if (item.type >= 10 && item.type < 20) { 
-            if(location.zone===ZONES.GRID) this.grid[location.r][location.c]=null; else if(location.zone===ZONES.SQUAD1) this.squad1[location.idx]=null; else this.squad2[location.idx]=null;
+            if(location.zone===ZONES.GRID) this.grid[location.r][location.c]=null; else if(location.zone===ZONES.SQUAD1) this.squad1[location.idx]=null; else if(location.zone===ZONES.SQUAD2) this.squad2[location.idx]=null; else this.squad3[location.idx]=null;
             const val = getData(item.type, item.level).sell; this.gold += val; this.showToast(`+${val} G`); this.sound.playCollect(); this.selectItem(null); this.updateUI(); this.requestRender();
         } else if (item.type < 10 && item.type !== ITEM_TYPE.BUILDING_CHEST && item.type !== ITEM_TYPE.BUILDING_CAMP) this.produce(item);
     }
@@ -1909,7 +2843,7 @@ class Game {
             this.sound.resume(); const p = getPos(e); const hit = this.getZoneAt(p.x, p.y);
             if (hit) {
                 if (hit.zone === ZONES.GRID && this.gridState[hit.r][hit.c].type !== LOCK_TYPE.OPEN) { this.tryUnlock(hit.r, hit.c); return; }
-                let item = hit.zone===ZONES.GRID ? this.grid[hit.r][hit.c] : (hit.zone===ZONES.SQUAD1 ? this.squad1[hit.idx] : this.squad2[hit.idx]);
+                let item = hit.zone===ZONES.GRID ? this.grid[hit.r][hit.c] : (hit.zone===ZONES.SQUAD1 ? this.squad1[hit.idx] : (hit.zone===ZONES.SQUAD2 ? this.squad2[hit.idx] : this.squad3[hit.idx]));
                 this.potentialDrag = { startPos: p, item, hit };
             } else this.selectItem(null);
         };
@@ -1922,17 +2856,17 @@ class Game {
         this.canvas.ontouchstart = e => { start(e); e.preventDefault(); }; window.ontouchmove = e => { move(e); e.preventDefault(); }; window.ontouchend = end;
     }
     startDrag(item, hit, pos) {
-        let cx, cy; if(hit.zone===ZONES.GRID) { cx = this.gridStartX+hit.c*this.gridTileSize; cy = this.gridStartY+hit.r*this.gridTileSize; } else if(hit.zone===ZONES.SQUAD1) { cx = this.squad1Rect.x+(hit.idx%3)*this.squadCellSize; cy = this.squad1Rect.y+Math.floor(hit.idx/3)*this.squadCellSize; } else { cx = this.squad2Rect.x+(hit.idx%3)*this.squadCellSize; cy = this.squad2Rect.y+Math.floor(hit.idx/3)*this.squadCellSize; }
+        let cx, cy; if(hit.zone===ZONES.GRID) { cx = this.gridStartX+hit.c*this.gridTileSize; cy = this.gridStartY+hit.r*this.gridTileSize; } else if(hit.zone===ZONES.SQUAD1) { cx = this.squad1Rect.x+(hit.idx%3)*this.squadCellSize; cy = this.squad1Rect.y+Math.floor(hit.idx/3)*this.squadCellSize; } else if(hit.zone===ZONES.SQUAD2) { cx = this.squad2Rect.x+(hit.idx%3)*this.squadCellSize; cy = this.squad2Rect.y+Math.floor(hit.idx/3)*this.squadCellSize; } else { cx = this.squad3Rect.x+(hit.idx%3)*this.squadCellSize; cy = this.squad3Rect.y+Math.floor(hit.idx/3)*this.squadCellSize; }
         this.drag = { item, startZone: hit, x: pos.x, y: pos.y, offsetX: pos.x-cx, offsetY: pos.y-cy, size: hit.zone===ZONES.GRID?this.gridTileSize:this.squadCellSize };
-        if(hit.zone===ZONES.GRID) this.grid[hit.r][hit.c]=null; else if(hit.zone===ZONES.SQUAD1) this.squad1[hit.idx]=null; else this.squad2[hit.idx]=null;
+        if(hit.zone===ZONES.GRID) this.grid[hit.r][hit.c]=null; else if(hit.zone===ZONES.SQUAD1) this.squad1[hit.idx]=null; else if(hit.zone===ZONES.SQUAD2) this.squad2[hit.idx]=null; else this.squad3[hit.idx]=null;
         this.selectItem(item, hit); this.requestRender();
     }
     endDrag() {
         const hit = this.getZoneAt(this.drag.x, this.drag.y); let returned = false;
         if (hit) {
-            let target = null; if(hit.zone===ZONES.GRID) { if(this.gridState[hit.r][hit.c].type!==LOCK_TYPE.OPEN) returned=true; else target=this.grid[hit.r][hit.c]; } else if(hit.zone===ZONES.SQUAD1) target=this.squad1[hit.idx]; else target=this.squad2[hit.idx];
+            let target = null; if(hit.zone===ZONES.GRID) { if(this.gridState[hit.r][hit.c].type!==LOCK_TYPE.OPEN) returned=true; else target=this.grid[hit.r][hit.c]; } else if(hit.zone===ZONES.SQUAD1) target=this.squad1[hit.idx]; else if(hit.zone===ZONES.SQUAD2) target=this.squad2[hit.idx]; else target=this.squad3[hit.idx];
             if (!returned) {
-                if (!target) { if(hit.zone===ZONES.GRID) this.grid[hit.r][hit.c]=this.drag.item; else if(hit.zone===ZONES.SQUAD1) this.squad1[hit.idx]=this.drag.item; else this.squad2[hit.idx]=this.drag.item; this.selectItem(this.drag.item, hit); }
+                if (!target) { if(hit.zone===ZONES.GRID) this.grid[hit.r][hit.c]=this.drag.item; else if(hit.zone===ZONES.SQUAD1) this.squad1[hit.idx]=this.drag.item; else if(hit.zone===ZONES.SQUAD2) this.squad2[hit.idx]=this.drag.item; else this.squad3[hit.idx]=this.drag.item; this.selectItem(this.drag.item, hit); }
                 else if (target.type===ITEM_TYPE.BUILDING_CAMP && this.drag.item.type>=10 && this.drag.item.type<20 && hit.zone===ZONES.GRID) { 
                     if (!target.storedUnits) target.storedUnits = []; 
                     const cap = CAMP_CAPACITY[target.level] || 4;
@@ -1968,7 +2902,7 @@ class Game {
                 } else returned=true;
             }
         } else returned=true;
-        if (returned) { const s=this.drag.startZone; if(s.zone===ZONES.GRID) this.grid[s.r][s.c]=this.drag.item; else if(s.zone===ZONES.SQUAD1) this.squad1[s.idx]=this.drag.item; else this.squad2[s.idx]=this.drag.item; }
+        if (returned) { const s=this.drag.startZone; if(s.zone===ZONES.GRID) this.grid[s.r][s.c]=this.drag.item; else if(s.zone===ZONES.SQUAD1) this.squad1[s.idx]=this.drag.item; else if(s.zone===ZONES.SQUAD2) this.squad2[s.idx]=this.drag.item; else this.squad3[s.idx]=this.drag.item; }
         this.hover=null; this.updateUI(); this.requestRender(); this.drag=null;
     }
     handleClick(item, hit) {
@@ -1985,6 +2919,7 @@ class Game {
         const check = (rect, rows, cols, size) => { if(x>=rect.x && x<rect.x+rect.w && y>=rect.y && y<rect.y+rect.h) { const c=Math.floor((x-rect.x)/size), r=Math.floor((y-rect.y)/size); if(c>=0 && c<cols && r>=0 && r<rows) return {c,r,idx:r*3+c}; } return null; };
         let res = check(this.squad1Rect, CONFIG.squadRows, CONFIG.squadCols, this.squadCellSize); if(res) return {zone:ZONES.SQUAD1, ...res};
         res = check(this.squad2Rect, CONFIG.squadRows, CONFIG.squadCols, this.squadCellSize); if(res) return {zone:ZONES.SQUAD2, ...res};
+        if (this.thirdSquadUnlocked && this.squad3Rect) { res = check(this.squad3Rect, CONFIG.squadRows, CONFIG.squadCols, this.squadCellSize); if(res) return {zone:ZONES.SQUAD3, ...res}; }
         if(x>=this.gridStartX && x<this.gridStartX+this.gridTileSize*CONFIG.gridCols && y>=this.gridStartY && y<this.gridStartY+this.gridTileSize*CONFIG.gridRows) { const c=Math.floor((x-this.gridStartX)/this.gridTileSize), r=Math.floor((y-this.gridStartY)/this.gridTileSize); if(c>=0 && c<CONFIG.gridCols && r>=0 && r<CONFIG.gridRows) return {zone:ZONES.GRID, r, c, idx:r*8+c}; }
         return null;
     }
@@ -2082,9 +3017,10 @@ class Game {
         // 스쿼드 이동 업데이트 (매 프레임)
         this.updateArmies();
 
-        if(this.isDirty || this.drag) {
-            this.ctx.clearRect(0,0,this.width,this.height);
+            if(this.isDirty || this.drag) {
+                this.ctx.clearRect(0,0,this.width,this.height);
             this.drawSquad(this.squad1, this.squad1Rect, "SQUAD 1", "#4caf50", ZONES.SQUAD1); this.drawSquad(this.squad2, this.squad2Rect, "SQUAD 2", "#2196f3", ZONES.SQUAD2);
+            if (this.thirdSquadUnlocked && this.squad3Rect) this.drawSquad(this.squad3, this.squad3Rect, "SQUAD 3", "#f59e0b", ZONES.SQUAD3);
             for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) {
                 const x = this.gridStartX+c*this.gridTileSize, y = this.gridStartY+r*this.gridTileSize;
                 const isHover = this.hover && this.hover.zone===ZONES.GRID && this.hover.r===r && this.hover.c===c, isSel = this.selectedItem && this.selectedItem.location.zone===ZONES.GRID && this.selectedItem.location.r===r && this.selectedItem.location.c===c;
@@ -2092,12 +3028,21 @@ class Game {
             }
             if(this.drag) this.drawItem(this.drag.x-this.drag.size/2, this.drag.y-this.drag.size/2, this.drag.size, this.drag.item, true);
             for(let i=this.particles.length-1; i>=0; i--) { this.particles[i].update(); this.particles[i].draw(this.ctx); if(this.particles[i].life <= 0) this.particles.splice(i, 1); }
-            let anim = false; this.grid.flat().concat(this.squad1).concat(this.squad2).forEach(i=>{ if(i&&i.scale!==1){ i.scale+=(i.scale<1?0.1:-0.05); if(Math.abs(i.scale-1)<0.05)i.scale=1; anim=true; } });
+            let anim = false; this.grid.flat().concat(this.squad1).concat(this.squad2).concat(this.squad3).forEach(i=>{ if(i&&i.scale!==1){ i.scale+=(i.scale<1?0.1:-0.05); if(Math.abs(i.scale-1)<0.05)i.scale=1; anim=true; } });
             this.isDirty = anim || !!this.drag || this.particles.length > 0;
         }
         requestAnimationFrame(()=>this.loop());
     }
-    getSquadPower(s) { let p=0; for(let u of s) if(u&&u.type>=10&&u.type<20) { const d=getData(u.type,u.level); if(d.hp) p+=(d.hp+d.atk+d.def); } return p; }
+    getSquadPower(s) {
+        let p = 0;
+        for (let u of s) {
+            if (!u || u.type < 10 || u.type >= 20) continue;
+            const base = getData(u.type, u.level);
+            const d = this.applyFieldBuffsToStats(base);
+            if (d && d.hp) p += (d.hp + d.atk + d.def);
+        }
+        return p;
+    }
     drawSquad(data, rect, label, color, zone) {
         const cp = this.getSquadPower(data);
         this.ctx.fillStyle = color; this.ctx.font="bold 40px sans-serif"; this.ctx.textAlign="center"; this.ctx.fillText(`${label}`, rect.x+rect.w/2, rect.y-22);
@@ -2180,6 +3125,14 @@ class Game {
         // Simple positioning relative to container
         el.style.left = '50%'; el.style.top = '20%'; el.style.transform = 'translate(-50%, 0)';
         document.getElementById('canvas-wrapper').appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    showJoinNotice(text) {
+        const el = document.createElement('div');
+        el.className = 'join-float';
+        el.innerText = text;
+        document.getElementById('game-container').appendChild(el);
         setTimeout(() => el.remove(), 1000);
     }
     updateUI() {
