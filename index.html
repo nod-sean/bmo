@@ -283,6 +283,12 @@ const ASSET_KEYS = [
     '1821', '1822', '1823', '1824', '1825', 'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', 'field_bg'
 ];
 
+// --- Added Level Colors from KOV_main.pptx ---
+const LEVEL_COLORS = {
+    1: "#FFFFFF", 2: "#BDBDBD", 3: "#6D4C41", 4: "#2E7D32", 5: "#00897B",
+    6: "#1E88E5", 7: "#6A1B9A", 8: "#F57C00", 9: "#C62828", 10: "#212121"
+};
+
 // --- GAME DATA ---
 const LEVEL_DATA = [
     { level: 1, xp: 0, maxEnergy: 50 }, { level: 2, xp: 10, maxEnergy: 52 }, { level: 3, xp: 25, maxEnergy: 54 },
@@ -687,7 +693,9 @@ class Game {
     initGame() {
         this.refreshLockState(); this.grid[3][3] = { type: ITEM_TYPE.BUILDING_BARRACKS, level: 1, scale: 1 };
         this.grid[4][4] = { type: ITEM_TYPE.BUILDING_CHEST, level: 1, scale: 1, usage: 5 };
-        this.grid[5][5] = { type: ITEM_TYPE.BUILDING_CAMP, level: 1, scale: 1, storedUnit: null };
+        // --- MODIFIED: Initialize Camp with storedUnits array ---
+        this.grid[5][5] = { type: ITEM_TYPE.BUILDING_CAMP, level: 1, scale: 1, storedUnits: [] };
+        // --------------------------------------------------------
         this.updateLevelStats();
     }
     refreshLockState() {
@@ -919,6 +927,29 @@ class Game {
         return { power: this.getSquadPower(squadData), range, speed };
     }
 
+    // --- ADDED: Helper to find max building level for merge limit ---
+    getHighestBuildingLevel(unitType) {
+        // Map unit types to their producer building types
+        let buildingType = -1;
+        if (unitType === ITEM_TYPE.UNIT_INFANTRY) buildingType = ITEM_TYPE.BUILDING_BARRACKS;
+        else if (unitType === ITEM_TYPE.UNIT_ARCHER) buildingType = ITEM_TYPE.BUILDING_RANGE;
+        else if (unitType === ITEM_TYPE.UNIT_CAVALRY) buildingType = ITEM_TYPE.BUILDING_STABLE;
+
+        if (buildingType === -1) return 10; // No limit if not a standard unit
+
+        let maxLvl = 0;
+        // Check Grid
+        for(let r=0; r<CONFIG.gridRows; r++) {
+            for(let c=0; c<CONFIG.gridCols; c++) {
+                const item = this.grid[r][c];
+                if (item && item.type === buildingType) {
+                    maxLvl = Math.max(maxLvl, item.level);
+                }
+            }
+        }
+        return maxLvl || 1; // Default to Lv.1 if no building found
+    }
+
     openSquadSelector(targetR, targetC, tileType) {
         const existing = document.querySelector('.squad-selector'); if(existing) existing.remove();
         const viewport = document.getElementById('map-viewport'); const selector = document.createElement('div'); selector.className = 'squad-selector';
@@ -1110,7 +1141,7 @@ class Game {
         for(let r=0;r<8;r++) for(let c=0;c<8;c++) {
             if(this.gridState[r][c].type===LOCK_TYPE.OPEN && !this.grid[r][c]) {
                 this.gold -= price; const newItem = { type: type, level: 1, scale: 0 };
-                if (type === ITEM_TYPE.BUILDING_CHEST) newItem.usage = 5; if (type === ITEM_TYPE.BUILDING_CAMP) newItem.storedUnit = null;
+                if (type === ITEM_TYPE.BUILDING_CHEST) newItem.usage = 5; if (type === ITEM_TYPE.BUILDING_CAMP) newItem.storedUnits = []; // Modified here
                 this.grid[r][c] = newItem; this.updateUI(); this.requestRender(); this.showToast("건설 완료!"); this.closeModal();
                 const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2, cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2;
                 this.spawnParticles(cx, cy, "#FFD700", 20, "confetti"); this.sound.playSpawn(); return;
@@ -1154,7 +1185,7 @@ class Game {
         const item = this.selectedItem.item; const data = getData(item.type, item.level); els.name.innerText = `${data.name} LV.${item.level}`;
         if (item.type < 10) { 
             if (item.type === ITEM_TYPE.BUILDING_CHEST) els.desc.innerText = `남은 횟수: ${item.usage}회`;
-            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = `보관: ${item.storedUnit ? 1 : 0} / ${CAMP_CAPACITY[item.level]}`;
+            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = `보관: ${item.storedUnits ? item.storedUnits.length : 0} / ${CAMP_CAPACITY[item.level]}`; // Modified here
             else { els.desc.innerText = "유닛 생산"; const cost = data.energy || 1; els.lbl.innerText = `-${cost}⚡`; els.btn.style.opacity = 1; els.icon.innerText = ""; }
         } else if (item.type >= 20) { els.desc.innerText = "클릭하여 획득"; els.lbl.innerText = "획득"; els.btn.style.opacity = 1; }
         else { 
@@ -1201,10 +1232,34 @@ class Game {
             let target = null; if(hit.zone===ZONES.GRID) { if(this.gridState[hit.r][hit.c].type!==LOCK_TYPE.OPEN) returned=true; else target=this.grid[hit.r][hit.c]; } else if(hit.zone===ZONES.SQUAD1) target=this.squad1[hit.idx]; else target=this.squad2[hit.idx];
             if (!returned) {
                 if (!target) { if(hit.zone===ZONES.GRID) this.grid[hit.r][hit.c]=this.drag.item; else if(hit.zone===ZONES.SQUAD1) this.squad1[hit.idx]=this.drag.item; else this.squad2[hit.idx]=this.drag.item; this.selectItem(this.drag.item, hit); }
-                else if (target.type===ITEM_TYPE.BUILDING_CAMP && !target.storedUnit && this.drag.item.type>=10 && this.drag.item.type<20 && hit.zone===ZONES.GRID) { target.storedUnit = this.drag.item; this.showToast("보관됨"); this.sound.playClick(); }
+                // --- MODIFIED: Camp Multi-Storage Logic ---
+                else if (target.type===ITEM_TYPE.BUILDING_CAMP && this.drag.item.type>=10 && this.drag.item.type<20 && hit.zone===ZONES.GRID) { 
+                    if (!target.storedUnits) target.storedUnits = []; // Safety init
+                    const cap = CAMP_CAPACITY[target.level] || 4;
+                    if (target.storedUnits.length < cap) {
+                        target.storedUnits.push(this.drag.item);
+                        this.showToast(`보관됨 (${target.storedUnits.length}/${cap})`);
+                        this.sound.playClick();
+                    } else {
+                        this.showToast("보관함이 가득 찼습니다.");
+                        returned = true;
+                    }
+                }
+                // ------------------------------------------
                 else if (target.type===this.drag.item.type && target.level===this.drag.item.level) {
                     const isUnit = target.type>=10 && target.type<20; const maxLvl = isUnit ? 10 : 5; let canMerge = true;
-                    if(isUnit) { const bLvl = this.getHighestBuildingLevel(target.type); if(target.level >= bLvl+5) { this.showToast(`합성 불가 (건물 Lv.${target.level-4} 필요)`); canMerge=false; returned=true; } }
+                    
+                    // --- MODIFIED: Building Level Merge Limit Check ---
+                    if(isUnit) { 
+                        const bLvl = this.getHighestBuildingLevel(target.type); 
+                        // Rule: Max Merge Level = Building Level + 5
+                        if(target.level >= bLvl+5) { 
+                            this.showToast(`합성 불가 (건물 Lv.${target.level-4} 필요)`); 
+                            canMerge=false; returned=true; 
+                        } 
+                    }
+                    // --------------------------------------------------
+
                     if(canMerge && target.level < maxLvl) {
                         target.level++; target.scale=1.3;
                         if(target.type===ITEM_TYPE.BUILDING_CHEST) { 
@@ -1281,11 +1336,24 @@ class Game {
         for(let r=0; r<CONFIG.gridRows; r++) for(let c=0; c<CONFIG.gridCols; c++) if(this.gridState[r][c].type===LOCK_TYPE.OPEN && !this.grid[r][c]) { this.grid[r][c]=item; const cx = this.gridStartX + c * this.gridTileSize + this.gridTileSize/2, cy = this.gridStartY + r * this.gridTileSize + this.gridTileSize/2; this.spawnParticles(cx, cy, "#EEE", 10, "smoke"); return true; }
         return false;
     }
+    // --- MODIFIED: Camp Eject Logic (Array Support) ---
     ejectCamp(camp, r, c) {
-        if(!camp.storedUnit) { this.showToast("비어있음"); return; }
-        const moves = [[0,1],[0,-1],[1,0],[-1,0]]; for(let m of moves) { const nr=r+m[0], nc=c+m[1]; if(nr>=0 && nr<8 && nc>=0 && nc<8 && this.gridState[nr][nc].type===LOCK_TYPE.OPEN && !this.grid[nr][nc]) { this.grid[nr][nc]=camp.storedUnit; camp.storedUnit=null; this.requestRender(); this.sound.playClick(); return; } }
+        if(!camp.storedUnits || camp.storedUnits.length === 0) { this.showToast("비어있음"); return; }
+        const moves = [[0,1],[0,-1],[1,0],[-1,0]]; 
+        for(let m of moves) { 
+            const nr=r+m[0], nc=c+m[1]; 
+            if(nr>=0 && nr<8 && nc>=0 && nc<8 && this.gridState[nr][nc].type===LOCK_TYPE.OPEN && !this.grid[nr][nc]) { 
+                const unit = camp.storedUnits.pop(); // Take last added unit (LIFO)
+                this.grid[nr][nc] = unit; 
+                this.requestRender(); 
+                this.sound.playClick(); 
+                this.showToast(`꺼냄 (${camp.storedUnits.length} 남음)`);
+                return; 
+            } 
+        }
         this.showToast("주변 공간 부족");
     }
+    // --------------------------------------------------
     collectResource(item, r, c) {
         const val = ITEM_VALUES[item.level] || 1; let pColor = "#fff";
         if(item.type===ITEM_TYPE.ITEM_GOLD) { this.gold+=val; this.showToast(`+${val}G`); pColor="#FFD700"; } else if(item.type===ITEM_TYPE.ITEM_ENERGY) { this.energy=Math.min(this.energy+val, this.maxEnergy); this.showToast(`+${val}⚡`); pColor="#00FFFF"; } else { this.gem+=val; this.showToast(`+${val}💎`); pColor="#FF00FF"; }
@@ -1341,6 +1409,12 @@ class Game {
     }
     drawItem(x, y, s, item, isDrag=false) {
         const sc=isDrag?1.1:item.scale, p=4, ds=(s-p*2)*sc, offset=(s-ds)/2; const img = this.assets.getImage(item.type, item.level);
+        
+        // --- ADDED: LEVEL COLOR BORDER ---
+        const LEVEL_COLORS = { 1:"#FFFFFF", 2:"#BDBDBD", 3:"#6D4C41", 4:"#2E7D32", 5:"#00897B", 6:"#1E88E5", 7:"#6A1B9A", 8:"#F57C00", 9:"#C62828", 10:"#212121" };
+        const lvColor = LEVEL_COLORS[item.level] || "#fff";
+        
+        // Draw image or placeholder
         if(img && img.complete && img.naturalWidth>0) {
             if(isDrag) { this.ctx.shadowColor="black"; this.ctx.shadowBlur=15; }
             const drawSize = ds * 1.2; const drawOffset = (s - drawSize) / 2;
@@ -1351,11 +1425,38 @@ class Game {
             const drawSize = ds * 1.2; const drawOffset = (s - drawSize) / 2;
             this.ctx.fillStyle = c; this.roundRect(x + drawOffset, y + drawOffset, drawSize, drawSize, 12); this.ctx.fill(); this.ctx.strokeStyle = "rgba(0,0,0,0.4)"; this.ctx.lineWidth = 2; this.ctx.stroke(); this.ctx.fillStyle = "rgba(0,0,0,0.6)"; this.ctx.font = `${Math.floor(drawSize*0.5)}px sans-serif`; this.ctx.textAlign = "center"; this.ctx.textBaseline = "middle"; this.ctx.fillText(sym, x+s/2, y+s/2);
         }
+        
+        // --- ADDED: LEVEL BORDER ---
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeStyle = lvColor;
+        this.ctx.strokeRect(x+p, y+p, ds, ds);
+
         const bx=x+s/2, by=y+ds; 
         if(item.type>=10 || item.type<10) { 
             this.ctx.fillStyle="rgba(0,0,0,0.8)"; this.ctx.beginPath(); this.ctx.arc(bx, by-10, 10, 0, Math.PI*2); this.ctx.fill(); this.ctx.strokeStyle="#fff"; this.ctx.lineWidth=1; this.ctx.stroke(); this.ctx.fillStyle="#fff"; this.ctx.font="bold 12px sans-serif"; this.ctx.textAlign="center"; this.ctx.fillText(item.level, bx, by-6);
         }
-        if(item.type===ITEM_TYPE.BUILDING_CAMP && item.storedUnit) { this.ctx.fillStyle="#f00"; this.ctx.font="bold 16px sans-serif"; this.ctx.fillText("IN", bx, y+s/2); }
+        
+        // --- MODIFIED: Camp Storage Display ---
+        if(item.type===ITEM_TYPE.BUILDING_CAMP) { 
+            const count = item.storedUnits ? item.storedUnits.length : 0;
+            const cap = CAMP_CAPACITY[item.level] || 4;
+            
+            // Styled Text Box
+            const text = `${count}/${cap}`;
+            this.ctx.font = "bold 16px sans-serif";
+            const textW = this.ctx.measureText(text).width + 8;
+            
+            this.ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Semi-transparent black bg
+            this.ctx.beginPath();
+            this.ctx.roundRect(bx - textW/2, y + s/2 - 10, textW, 20, 4);
+            this.ctx.fill();
+            
+            this.ctx.fillStyle = "#fff"; // White text
+            this.ctx.shadowColor = "black";
+            this.ctx.shadowBlur = 2;
+            this.ctx.fillText(text, bx, y + s/2 + 6);
+            this.ctx.shadowBlur = 0; // Reset shadow
+        }
     }
     roundRect(x,y,w,h,r){this.ctx.beginPath();this.ctx.moveTo(x+r,y);this.ctx.arcTo(x+w,y,x+w,y+h,r);this.ctx.arcTo(x+w,y+h,x,y+h,r);this.ctx.arcTo(x,y+h,x,y,r);this.ctx.arcTo(x,y,x+w,y,r);this.ctx.closePath();}
     showToast(msg) { if (msg.includes("부족") || msg.includes("불가")) this.sound.playError(); const t = document.getElementById('toast'); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,1000); }
