@@ -1112,8 +1112,19 @@ class Game {
         try {
             const saved = localStorage.getItem('kov_save_v1'); if(!saved) return false;
             const data = JSON.parse(saved);
-            this.grid = data.grid || this.grid; this.gridState = data.gridState || this.gridState;
-            this.squad1 = data.squad1 || this.squad1; this.squad2 = data.squad2 || this.squad2; this.squad3 = data.squad3 || this.squad3;
+            const isValidGrid = (grid) => Array.isArray(grid) && grid.length === CONFIG.gridRows && grid.every(row => Array.isArray(row) && row.length === CONFIG.gridCols);
+            const isValidSquad = (squad) => Array.isArray(squad) && squad.length === 9;
+            const validGrid = isValidGrid(data.grid);
+            const validGridState = isValidGrid(data.gridState);
+            if (!validGrid) {
+                try { localStorage.removeItem('kov_save_v1'); } catch (e) {}
+                return false;
+            }
+            this.grid = data.grid;
+            this.gridState = validGridState ? data.gridState : this.gridState;
+            this.squad1 = isValidSquad(data.squad1) ? data.squad1 : this.squad1;
+            this.squad2 = isValidSquad(data.squad2) ? data.squad2 : this.squad2;
+            this.squad3 = isValidSquad(data.squad3) ? data.squad3 : this.squad3;
             this.lordLevel = data.lordLevel || 1; this.currentXp = data.currentXp || 0;
             this.energy = data.energy ?? 50; this.gold = data.gold ?? 3000; this.gem = data.gem ?? 50;
             this.cp = data.cp ?? 20; this.maxCp = data.maxCp ?? 20;
@@ -1131,16 +1142,27 @@ class Game {
                     this.armies.push({ id: 2, name: "제3부대", color: "#f59e0b", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 });
                 }
             }
+            if (!validGridState) this.refreshLockState();
+            if (!this.occupiedTiles || this.occupiedTiles.size === 0) this.occupiedTiles = new Set([`${PLAYER_START.r},${PLAYER_START.c}`]);
+            else this.occupiedTiles.add(`${PLAYER_START.r},${PLAYER_START.c}`);
             this.revealFog(PLAYER_START.r, PLAYER_START.c, FOG_RADIUS);
             return true;
-        } catch(e) { return false; }
+        } catch(e) {
+            try { localStorage.removeItem('kov_save_v1'); } catch (err) {}
+            return false;
+        }
     }
     resetGame() {
-        if(confirm("정말 게임을 초기화 하시겠습니까?")) { 
-            localStorage.removeItem('kov_save_v1'); 
-            localStorage.removeItem('kov_field_object_prob_v1');
-            window.location.reload(); 
+        if(confirm("정말 게임을 초기화 하시겠습니까?")) {
+            try {
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('kov_')) localStorage.removeItem(key);
+                }
+            } catch (e) {}
+            window.location.reload();
         }
+    }
     }
 
     openSettings() { document.getElementById('modal-settings').classList.add('open'); }
@@ -1251,10 +1273,10 @@ class Game {
         return 0;
     }
     getTileMoveTime(type, r, c) {
-        // ??: ?? FIELD_MAP_DATA(0~6) + ?? ?? ??(100~501)
+        // 타입: 기본 FIELD_MAP_DATA(0~6) + 지형 기본 코드(100~501)
         if (isGateTile(type) || isCitadelTile(type)) return 5;
         if (isDragonTile(type)) return 6;
-        if (type === 4) return 1; // ??(?)
+        if (type === 4) return 1; // 도로
 
         let evalType = type;
         if (!isTerrainCode(type) && typeof r === "number" && typeof c === "number") {
@@ -1263,21 +1285,21 @@ class Game {
         }
         if (isTerrainCode(evalType)) {
             const base = getTerrainBase(evalType);
-            if (base === 100) return 3; // ??
-            if (base === 200) return 5; // ?
-            if (base === 300) return 4; // ??
-            if (base === 400) return 5; // ??
-            if (base === 500) return 6; // ??
+            if (base === 100) return 3; // 평원
+            if (base === 200) return 5; // 숲
+            if (base === 300) return 4; // 고원
+            if (base === 400) return 5; // 산악
+            if (base === 500) return 6; // 화산
             return 3;
         }
-        return 3; // ?? ??
+        return 3; // 기본 지형
     }
     getTileMoveMeta(type, r, c) {
-        let name = "??";
-        if (type === 4) name = "??";
-        else if (isGateTile(type)) name = "??";
-        else if (isCitadelTile(type)) name = "??";
-        else if (isDragonTile(type)) name = "???";
+        let name = "지형";
+        if (type === 4) name = "도로";
+        else if (isGateTile(type)) name = "관문";
+        else if (isCitadelTile(type)) name = "성채";
+        else if (isDragonTile(type)) name = "드래곤";
         else {
             let evalType = type;
             if (!isTerrainCode(type) && typeof r === "number" && typeof c === "number") {
@@ -1630,11 +1652,11 @@ class Game {
     }
 
     collectFieldObjectToMerge(type, r, c) {
-        if (!this.canCollectFieldObject(r, c)) { this.showToast("?? ? ?? ??"); return; }
+        if (!this.canCollectFieldObject(r, c)) { this.showToast("진입 후 획득 가능"); return; }
         const info = this.getCollectibleFieldItemInfo(type);
-        if (!info) { this.showToast("?? ??"); return; }
+        if (!info) { this.showToast("획득 불가"); return; }
         const item = this.createMergeItemFromInfo(info);
-        if (!this.spawnItem(item)) { this.showToast("?? ?? ?? ??"); return; }
+        if (!this.spawnItem(item)) { this.showToast("머지 슬롯 공간 부족"); return; }
 
         this.clearFieldObjectFromMap(r, c);
         if (this.fieldObjectState) {
@@ -1649,7 +1671,7 @@ class Game {
             this.renderFieldMap();
             this.setFieldInfo(FIELD_MAP_DATA[r][c], r, c);
         }
-        this.showToast("?? ??");
+        this.showToast("획득 완료");
     }
 
 
@@ -2390,7 +2412,7 @@ class Game {
             <div class="field-info-row"><span>이동력(최소~최대)</span><span>${moveText}</span></div>
             <div class="field-info-row"><span>이동 범위</span><span>${stats.range}</span></div>
             <div class="field-info-row"><span>속도 보정</span><span>${speedFactorText}</span></div>
-            <div class="field-info-row"><span>?? ??</span><span>${buffText}</span></div>
+            <div class="field-info-row"><span>필드 버프</span><span>${buffText}</span></div>
             <div class="field-info-small">${unitHtml}</div>
         `;
     }
@@ -2482,7 +2504,7 @@ class Game {
 
     renderFieldMap() {
         const modal = document.getElementById('field-modal'); const content = document.getElementById('modal-content'); const title = document.getElementById('modal-title');
-        modal.dataset.mode = 'field'; modal.classList.add('open'); title.innerText = "?? ? (Field)"; content.innerHTML = ""; content.style.overflow = "hidden";
+        modal.dataset.mode = 'field'; modal.classList.add('open'); title.innerText = "월드 맵 (Field)"; content.innerHTML = ""; content.style.overflow = "hidden";
         content.style.position = "relative";
         content.style.display = "block";
         content.style.height = "100%";
@@ -2494,7 +2516,7 @@ class Game {
             const armyName = this.armies[this.selectedArmyId].name;
             const hud = document.createElement('div');
             hud.className = 'selected-army-hud';
-            hud.innerHTML = `<span class="hud-name">${armyName} ???</span><button class="hud-btn" onclick="game.deselectArmy()">?? ??</button>`;
+            hud.innerHTML = `<span class="hud-name">${armyName} 선택됨</span><button class="hud-btn" onclick="game.deselectArmy()">선택 해제</button>`;
             content.appendChild(hud);
         }
 
@@ -2509,11 +2531,11 @@ class Game {
 
         const headerDiv = document.createElement('div'); headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded text-xs shadow-md";
         const incomeSign = this.income >= 0 ? "+" : "";
-        headerDiv.innerHTML = `<div>?? ??: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>?? ??: <span class="text-yellow-400 font-bold">${incomeSign}${this.income}/3sec</span></div><div>?? CP: <span id="field-cp-display" class="text-white font-bold">${this.cp}/${this.maxCp}</span></div>`;
+        headerDiv.innerHTML = `<div>점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>세금: <span class="text-yellow-400 font-bold">${incomeSign}${this.income}/3sec</span></div><div>CP: <span id="field-cp-display" class="text-white font-bold">${this.cp}/${this.maxCp}</span></div>`;
         overlay.appendChild(headerDiv);
 
         const moveInfo = document.createElement('div'); moveInfo.id = 'field-move-info'; moveInfo.className = 'field-move-info';
-        moveInfo.innerText = this.movePreviewText || '??? ??? ?????.';
+        moveInfo.innerText = this.movePreviewText || '이동할 타일을 선택하세요.';
         moveInfo.onclick = () => { if (this.moveTargetMode) this.exitMoveTargetMode(); };
         overlay.appendChild(moveInfo);
 
@@ -2657,7 +2679,7 @@ class Game {
                 mapLayer.appendChild(cell);
             }
         }
-        viewport.appendChild(mapLayer); content.appendChild(viewport);
+        viewport.appendChild(mapLayer);
         if (this.previewPath) this.applyPathPreview(this.previewPath);
         if (this.moveTargetMode) this.renderMoveTimeOverlay();
         this.initFieldCamera(viewport, mapLayer);
@@ -2925,19 +2947,19 @@ class Game {
             this.occupiedTiles.add(`${r},${c}`);
             mapChanged = true;
             if (isGateTile(type)) {
-                this.showToast(`?? ${army.name} ?? ??!`);
+                this.showToast(`⚔️ ${army.name} 관문 돌파!`);
                 this.sound.playUnlock();
                 this.spawnParticles(this.width/2, this.height/2, "#FF0000", 50, "confetti");
             } else if (isDragonTile(type)) {
-                this.showToast(`?? ${army.name} ??? ??!`);
+                this.showToast(`🔥 ${army.name} 드래곤 처치!`);
                 this.sound.playUnlock();
                 this.spawnParticles(this.width/2, this.height/2, "#ff6b6b", 50, "confetti");
             } else {
-                this.showToast(`?? ${army.name} ?? ??!`);
+                this.showToast(`🚩 ${army.name} 점령 성공!`);
                 this.sound.playCollect();
             }
         } else {
-            this.showToast(`${army.name} ?? ??`);
+            this.showToast(`${army.name} 도착 완료`);
         }
 
         const collectibleInfo = this.getCollectibleFieldItemInfo(type);
@@ -2951,9 +2973,13 @@ class Game {
                 }
                 mapChanged = true;
                 this.sound.playCollect();
-                this.showToast("?? ??");
+                this.showToast("획득 완료!");
             } else {
-                this.showToast("?? ?? ?? ??");
+                this.showToast("머지 슬롯 공간 부족");
+                this.setMovePreview("머지 슬롯이 가득 차서 획득 실패");
+                setTimeout(() => {
+                    if (!this.moveTargetMode) this.setMovePreview("");
+                }, 1500);
             }
         }
 
