@@ -105,11 +105,12 @@
         .field-goldmine::after { content: '⛏️'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-fountain::after { content: '⛲'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-        .field-move-info { background: rgba(0,0,0,0.55); border: 1px solid #555; border-radius: 8px; padding: 6px 10px; margin-bottom: 6px; font-size: 13px; color: #fff; display: flex; justify-content: space-between; gap: 8px; }
-        .field-overlay { position: absolute; top: 0; left: 0; right: 0; z-index: 60; display: flex; flex-direction: column; gap: 6px; padding: 8px 8px 0; pointer-events: none; }
+        .field-move-info { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 4px 8px; font-size: 11px; color: #f8fafc; display: flex; justify-content: space-between; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.35); }
+        .field-overlay { position: absolute; top: 0; left: 0; right: 0; z-index: 60; display: flex; flex-direction: column; gap: 4px; padding: 6px 8px 0; pointer-events: none; }
         .field-overlay > * { pointer-events: auto; }
-        .field-info-panel { background: rgba(20,20,20,0.9); border: 1px solid #555; border-radius: 8px; padding: 8px 10px; margin-bottom: 0; font-size: 12px; color: #fff; transform: translateY(-8px); opacity: 0; max-height: 0; overflow: hidden; transition: transform 0.2s ease, opacity 0.2s ease, max-height 0.2s ease; }
-        .field-info-panel.open { transform: translateY(0); opacity: 1; max-height: 220px; }
+        .field-floating-wrap { position: relative; z-index: 70; display: none; flex-direction: column; gap: 6px; width: min(240px, 78vw); pointer-events: auto; align-self: flex-start; }
+        .field-info-panel { background: rgba(20,20,20,0.94); border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; padding: 8px 10px; margin-bottom: 0; font-size: 12px; color: #fff; transform: translateY(6px) scale(0.98); opacity: 0; max-height: 0; overflow: hidden; transition: transform 0.2s ease, opacity 0.2s ease, max-height 0.2s ease; box-shadow: 0 8px 18px rgba(0,0,0,0.4); }
+        .field-info-panel.open { transform: translateY(0) scale(1); opacity: 1; max-height: 240px; }
         .field-info-title { font-weight: bold; color: #ffd700; font-size: 13px; margin-bottom: 4px; }
         .field-info-row { display: flex; justify-content: space-between; gap: 8px; }
         .field-info-small { font-size: 11px; color: #ccc; margin-top: 4px; }
@@ -139,6 +140,13 @@
         }
         .field-action-menu { position: absolute; background: rgba(15,15,15,0.95); border: 1px solid #666; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 6px; z-index: 120; min-width: 90px; box-shadow: 0 6px 14px rgba(0,0,0,0.5); }
         .field-action-btn { background: #2f2f2f; border: 1px solid #555; color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+
+        @media (max-width: 820px) {
+            .field-time { font-size: 3px; letter-spacing: -0.3px; }
+        }
+        @media (max-width: 480px) {
+            .field-time { font-size: 2.6px; letter-spacing: -0.25px; }
+        }
         .field-action-btn:active { transform: scale(0.97); }
         
         #income-float { position:absolute; color:#ffd700; font-weight:bold; font-size:12px; pointer-events:none; animation: floatUp 1s forwards; z-index: 200; text-shadow: 1px 1px 0 #000; }
@@ -1155,9 +1163,15 @@ class Game {
     resetGame() {
         if(confirm("정말 게임을 초기화 하시겠습니까?")) {
             try {
+                localStorage.removeItem('kov_save_v1');
+                localStorage.removeItem('kov_field_object_prob_v1');
+                localStorage.removeItem('kov_uid');
                 for (let i = localStorage.length - 1; i >= 0; i--) {
                     const key = localStorage.key(i);
                     if (key && key.startsWith('kov_')) localStorage.removeItem(key);
+                }
+                if (localStorage.getItem('kov_save_v1')) {
+                    localStorage.clear();
                 }
             } catch (e) {}
             window.location.reload();
@@ -1442,7 +1456,15 @@ class Game {
     setMovePreview(text) {
         this.movePreviewText = text || "";
         const el = document.getElementById('field-move-info');
-        if (el) el.innerText = this.movePreviewText || '이동할 타일을 선택하세요.';
+        if (el) {
+            if (this.movePreviewText) {
+                el.style.display = 'flex';
+                el.innerText = this.movePreviewText;
+            } else {
+                el.style.display = 'none';
+            }
+        }
+        this.updateFloatingPanelPositionFromSelection();
     }
 
     openObjectModal(title, bodyHtml) {
@@ -2183,6 +2205,12 @@ class Game {
         if (type === null || type === undefined) {
             panel.classList.remove('open');
             panel.innerHTML = `<div class="field-info-title">선택 없음</div><div class="field-info-small">필드 오브젝트를 선택하세요.</div>`;
+            const wrap = document.getElementById('field-floating-wrap');
+            if (wrap) wrap.style.display = 'none';
+            const prev = document.querySelector('.field-selected');
+            if (prev) prev.classList.remove('field-selected');
+            this.currentFieldTargetKey = null;
+            this.currentFieldTargetType = null;
             return;
         }
         panel.classList.add('open');
@@ -2244,6 +2272,30 @@ class Game {
             <div id="field-move-options" class="field-move-options"></div>
         `;
         this.renderFieldMoveOptions(panel, r, c, type, isNewTarget);
+        this.updateFloatingPanelPosition(r, c);
+    }
+
+    updateFloatingPanelPosition(r, c) {
+        const wrap = document.getElementById('field-floating-wrap');
+        if (!wrap) return;
+        if (typeof r !== "number" || typeof c !== "number") {
+            wrap.style.display = 'none';
+            return;
+        }
+        wrap.style.display = 'flex';
+    }
+
+    updateFloatingPanelPositionFromSelection() {
+        if (!this.currentFieldTargetKey) {
+            this.updateFloatingPanelPosition();
+            return;
+        }
+        const parts = this.currentFieldTargetKey.split(',');
+        if (parts.length < 2) return;
+        const r = Number(parts[0]);
+        const c = Number(parts[1]);
+        if (Number.isNaN(r) || Number.isNaN(c)) return;
+        this.updateFloatingPanelPosition(r, c);
     }
 
     getArmyMoveInfo(army, targetR, targetC) {
@@ -2495,10 +2547,38 @@ class Game {
         let x = clientX - rect.left;
         let y = clientY - rect.top;
         const menuW = 110, menuH = 80;
-        x = Math.min(rect.width - menuW - 8, Math.max(8, x + 8));
-        y = Math.min(rect.height - menuH - 8, Math.max(8, y - 8));
-        menu.style.left = `${x}px`;
-        menu.style.top = `${y}px`;
+        const clampPos = (pos) => ({
+            x: Math.min(rect.width - menuW - 8, Math.max(8, pos.x)),
+            y: Math.min(rect.height - menuH - 8, Math.max(8, pos.y))
+        });
+
+        const candidates = [
+            { x: x + 8, y: y - 8 },
+            { x: x - menuW - 8, y: y - 8 },
+            { x: x - menuW / 2, y: y + 10 },
+            { x: x - menuW / 2, y: y - menuH - 10 }
+        ];
+
+        let finalPos = clampPos(candidates[0]);
+        const wrap = document.getElementById('field-floating-wrap');
+        if (wrap && wrap.style.display !== 'none') {
+            const wrapRect = wrap.getBoundingClientRect();
+            const wr = {
+                left: wrapRect.left - rect.left,
+                top: wrapRect.top - rect.top,
+                right: wrapRect.right - rect.left,
+                bottom: wrapRect.bottom - rect.top
+            };
+            const intersects = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+            for (const cand of candidates) {
+                const pos = clampPos(cand);
+                const mr = { left: pos.x, top: pos.y, right: pos.x + menuW, bottom: pos.y + menuH };
+                if (!intersects(mr, wr)) { finalPos = pos; break; }
+            }
+        }
+
+        menu.style.left = `${finalPos.x}px`;
+        menu.style.top = `${finalPos.y}px`;
     }
 
     renderFieldMap() {
@@ -2528,20 +2608,24 @@ class Game {
         const overlay = document.createElement('div');
         overlay.className = 'field-overlay';
 
-        const headerDiv = document.createElement('div'); headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded text-xs shadow-md";
+        const headerDiv = document.createElement('div'); headerDiv.className = "flex justify-between items-center bg-gray-700 px-2 py-1 rounded text-[11px] shadow-md";
         const incomeSign = this.income >= 0 ? "+" : "";
         headerDiv.innerHTML = `<div>점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>세금: <span class="text-yellow-400 font-bold">${incomeSign}${this.income}/3sec</span></div><div>CP: <span id="field-cp-display" class="text-white font-bold">${this.cp}/${this.maxCp}</span></div>`;
         overlay.appendChild(headerDiv);
 
+        const floatingWrap = document.createElement('div');
+        floatingWrap.id = 'field-floating-wrap';
+        floatingWrap.className = 'field-floating-wrap';
+
         const moveInfo = document.createElement('div'); moveInfo.id = 'field-move-info'; moveInfo.className = 'field-move-info';
-        moveInfo.innerText = this.movePreviewText || '이동할 타일을 선택하세요.';
+        moveInfo.style.display = 'none';
         moveInfo.onclick = () => { if (this.moveTargetMode) this.exitMoveTargetMode(); };
-        overlay.appendChild(moveInfo);
+        floatingWrap.appendChild(moveInfo);
 
         const infoPanel = document.createElement('div'); infoPanel.id = 'field-info-panel'; infoPanel.className = 'field-info-panel';
-        overlay.appendChild(infoPanel);
-        this.setFieldInfo(null);
+        floatingWrap.appendChild(infoPanel);
 
+        overlay.appendChild(floatingWrap);
         content.appendChild(overlay);
 
         const mapLayer = document.createElement('div'); mapLayer.id = 'map-layer'; mapLayer.style.position = 'absolute'; mapLayer.style.transformOrigin = '0 0'; mapLayer.style.display = 'grid'; mapLayer.style.gridTemplateColumns = `repeat(${MAP_SIZE}, 12px)`; mapLayer.style.gap = '1px'; mapLayer.style.padding = '50px';
@@ -2679,6 +2763,17 @@ class Game {
             }
         }
         viewport.appendChild(mapLayer);
+        this.setMovePreview(this.movePreviewText);
+        if (this.currentFieldTargetKey) {
+            const [tr, tc] = this.currentFieldTargetKey.split(',').map(Number);
+            if (!Number.isNaN(tr) && !Number.isNaN(tc) && FIELD_MAP_DATA?.[tr]?.[tc] !== undefined) {
+                this.setFieldInfo(FIELD_MAP_DATA[tr][tc], tr, tc);
+            } else {
+                this.setFieldInfo(null);
+            }
+        } else {
+            this.setFieldInfo(null);
+        }
         if (this.previewPath) this.applyPathPreview(this.previewPath);
         if (this.moveTargetMode) this.renderMoveTimeOverlay();
         this.initFieldCamera(viewport, mapLayer);
@@ -2996,6 +3091,7 @@ class Game {
         mapLayer.style.transition = 'transform 0.3s ease-out';
         this.camera.x = newX; this.camera.y = newY;
         mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`;
+        this.updateFloatingPanelPositionFromSelection();
         setTimeout(() => { mapLayer.style.transition = 'none'; }, 300);
     }
 
@@ -3026,7 +3122,10 @@ class Game {
             const x = (vw / 2) - (targetX * scale); const y = (vh / 2) - (targetY * scale);
             this.camera = { x, y, scale };
         }
-        const updateTransform = () => { mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`; };
+        const updateTransform = () => { 
+            mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`; 
+            this.updateFloatingPanelPositionFromSelection();
+        };
         setTimeout(updateTransform, 0);
 
         let isDragging = false, lastX = 0, lastY = 0, initialPinchDist = 0, initialPinchScale = 1;
