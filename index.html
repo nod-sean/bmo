@@ -78,7 +78,7 @@
         #path-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 15; }
         .path-line-bg { stroke: rgba(0,0,0,0.6); stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
         .path-line { stroke: #ffd700; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        .field-time { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; display: flex; align-items: center; justify-content: center; font-size: 4px; font-weight: 700; color: #ffe08a; text-shadow: 0 1px 0 rgba(0,0,0,0.75); pointer-events: none; letter-spacing: -0.4px; z-index: 25; line-height: 1; }
+        .field-time { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; display: flex; align-items: center; justify-content: center; font-size: 4px; font-weight: 700; color: #ffe08a; text-shadow: 0 1px 0 rgba(0,0,0,0.75); pointer-events: none; letter-spacing: -0.4px; z-index: 25; line-height: 1; opacity: 0.5; }
         .field-time.lower { transform: translateY(1px); }
         .field-cell::after { z-index: 12; }
         .field-move-eligible { outline: 1px dashed rgba(255,255,255,0.35); }
@@ -106,7 +106,10 @@
         .field-fountain::after { content: '⛲'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
         .field-move-info { background: rgba(0,0,0,0.55); border: 1px solid #555; border-radius: 8px; padding: 6px 10px; margin-bottom: 6px; font-size: 13px; color: #fff; display: flex; justify-content: space-between; gap: 8px; }
-        .field-info-panel { background: rgba(20,20,20,0.9); border: 1px solid #555; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: 12px; color: #fff; }
+        .field-overlay { position: absolute; top: 0; left: 0; right: 0; z-index: 60; display: flex; flex-direction: column; gap: 6px; padding: 8px 8px 0; pointer-events: none; }
+        .field-overlay > * { pointer-events: auto; }
+        .field-info-panel { background: rgba(20,20,20,0.9); border: 1px solid #555; border-radius: 8px; padding: 8px 10px; margin-bottom: 0; font-size: 12px; color: #fff; transform: translateY(-8px); opacity: 0; max-height: 0; overflow: hidden; transition: transform 0.2s ease, opacity 0.2s ease, max-height 0.2s ease; }
+        .field-info-panel.open { transform: translateY(0); opacity: 1; max-height: 220px; }
         .field-info-title { font-weight: bold; color: #ffd700; font-size: 13px; margin-bottom: 4px; }
         .field-info-row { display: flex; justify-content: space-between; gap: 8px; }
         .field-info-small { font-size: 11px; color: #ccc; margin-top: 4px; }
@@ -375,7 +378,8 @@ function isShopTile(code) { return code === 5221; }
 function isTavernTile(code) { return code === 5231; }
 function isRuinsTile(code) { return code === 5241 || code === 5242; }
 function isStatueTile(code) { return code >= 5301 && code <= 5332; }
-function isBlockingField(code) { return isGateTile(code) || isCitadelTile(code) || isDragonTile(code); }
+function isBorderTerrain(code) { return isTerrainCode(code) && code % 100 === 1; }
+function isBlockingField(code) { return isGateTile(code) || isCitadelTile(code) || isDragonTile(code) || isBorderTerrain(code); }
 function getStatueKind(code) {
     if (code >= 5301 && code <= 5302) return "atk";
     if (code >= 5311 && code <= 5312) return "def";
@@ -642,6 +646,53 @@ const FIELD_OBJECT_PROB = [
   { code: 3105, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
 ];
 
+const FIELD_OBJECT_REGEN = [
+  { code: 1801, fields: [50, 50, 0, 0, 0], min: 8, max: 16 },
+  { code: 1802, fields: [0, 50, 50, 0, 0], min: 4, max: 8 },
+  { code: 1803, fields: [0, 0, 50, 50, 0], min: 2, max: 4 },
+  { code: 1804, fields: [0, 0, 0, 50, 50], min: 1, max: 2 },
+  { code: 1805, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 1811, fields: [50, 50, 0, 0, 0], min: 8, max: 16 },
+  { code: 1812, fields: [0, 50, 50, 0, 0], min: 4, max: 8 },
+  { code: 1813, fields: [0, 0, 50, 50, 0], min: 2, max: 4 },
+  { code: 1814, fields: [0, 0, 0, 50, 50], min: 1, max: 2 },
+  { code: 1815, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 1821, fields: [0, 0, 50, 50, 0], min: 1, max: 2 },
+  { code: 1822, fields: [0, 0, 0, 50, 50], min: 0, max: 0 },
+  { code: 1823, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 1824, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 1825, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2101, fields: [0, 20, 20, 30, 30], min: 1, max: 2 },
+  { code: 2102, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2103, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2104, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2105, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2201, fields: [0, 20, 20, 30, 30], min: 1, max: 2 },
+  { code: 2202, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2203, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2204, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2205, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2301, fields: [0, 20, 20, 30, 30], min: 1, max: 2 },
+  { code: 2302, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2303, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2304, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2305, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2801, fields: [0, 30, 30, 40, 0], min: 4, max: 8 },
+  { code: 2802, fields: [0, 10, 20, 30, 40], min: 2, max: 4 },
+  { code: 2803, fields: [0, 0, 0, 30, 70], min: 1, max: 2 },
+  { code: 2804, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 2805, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 3101, fields: [0, 20, 20, 30, 30], min: 2, max: 4 },
+  { code: 3102, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 3103, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 3104, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+  { code: 3105, fields: [0, 0, 0, 0, 0], min: 0, max: 0 },
+];
+
+const OBJECT_REGEN_INTERVAL_MIN = 10;
+const OBJECT_REGEN_INTERVAL_MS = OBJECT_REGEN_INTERVAL_MIN * 60 * 1000;
+
+
 function getTerrainGroupFromCode(code) {
     const base = getTerrainBase(code);
     if (base === 100) return 1;
@@ -737,6 +788,66 @@ function applyObjectProbToMap() {
 }
 
 applyObjectProbToMap();
+
+function buildRegenPools() {
+    const pools = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    for (let r = 0; r < FIELD_MAP_DATA.length; r++) {
+        for (let c = 0; c < FIELD_MAP_DATA[r].length; c++) {
+            const base = FIELD_TERRAIN_DATA?.[r]?.[c];
+            if (!isTerrainCode(base)) continue;
+            if (!isTerrainCode(FIELD_MAP_DATA[r][c])) continue;
+            const group = getTerrainGroupFromCode(base);
+            if (group) pools[group].push({ r, c });
+        }
+    }
+    return pools;
+}
+
+function countFieldObjects() {
+    const counts = {};
+    for (let r = 0; r < FIELD_MAP_DATA.length; r++) {
+        for (let c = 0; c < FIELD_MAP_DATA[r].length; c++) {
+            const code = FIELD_MAP_DATA[r][c];
+            counts[code] = (counts[code] || 0) + 1;
+        }
+    }
+    return counts;
+}
+
+function applyObjectRegenCycle(regenByCode, regenTargets, now) {
+    const pools = buildRegenPools();
+    const counts = countFieldObjects();
+    const placements = [];
+    FIELD_OBJECT_REGEN.forEach(entry => {
+        const max = entry.max || 0;
+        const min = entry.min || 0;
+        if (max <= 0) return;
+        const current = counts[entry.code] || 0;
+        if (!regenTargets[entry.code]) {
+            const span = Math.max(0, max - min);
+            regenTargets[entry.code] = min + (span > 0 ? Math.floor(Math.random() * (span + 1)) : 0);
+        }
+        const target = regenTargets[entry.code];
+        if (current >= target) return;
+        const last = regenByCode?.[entry.code] || 0;
+        if (now - last < OBJECT_REGEN_INTERVAL_MS) return;
+
+        const group = pickWeightedGroup(entry.fields, pools);
+        let cell = group ? pickFromPool(group, pools) : null;
+        if (!cell) {
+            const fallback = Object.keys(pools).map(n => parseInt(n, 10)).filter(g => pools[g].length > 0);
+            if (fallback.length === 0) return;
+            const g = fallback[Math.floor(Math.random() * fallback.length)];
+            cell = pickFromPool(g, pools);
+        }
+        if (!cell) return;
+        FIELD_MAP_DATA[cell.r][cell.c] = entry.code;
+        counts[entry.code] = current + 1;
+        placements.push({ r: cell.r, c: cell.c, code: entry.code });
+        if (regenByCode) regenByCode[entry.code] = now;
+    });
+    return placements;
+}
 
 // Helper Functions
 function getCode(type, level) {
@@ -954,6 +1065,7 @@ class Game {
         setInterval(() => this.regenEnergy(), 1000);
         setInterval(() => this.regenCp(), 1000);
         setInterval(() => this.collectTerritoryIncome(), 3000); 
+        this.initObjectRegen();
         window.addEventListener('resize', () => { this.resize(); this.requestRender(); });
         this.resize(); this.setupInput();
         this.assets.loadAll(() => { this.requestRender(); });
@@ -1091,6 +1203,40 @@ class Game {
                 this.cp++; this.cpRegenAcc = 0; this.updateUI();
             }
         }
+    }
+    initObjectRegen() {
+        if (!this.fieldObjectState) this.fieldObjectState = {};
+        if (!this.fieldObjectState.regenByCode) this.fieldObjectState.regenByCode = {};
+        if (!this.fieldObjectState.regenTargetByCode) this.fieldObjectState.regenTargetByCode = {};
+        const now = Date.now();
+        FIELD_OBJECT_REGEN.forEach(entry => {
+            if ((entry.max || 0) <= 0) return;
+            if (this.fieldObjectState.regenByCode[entry.code] === undefined) {
+                this.fieldObjectState.regenByCode[entry.code] = now;
+            }
+            if (this.fieldObjectState.regenTargetByCode[entry.code] === undefined) {
+                const min = entry.min || 0;
+                const max = entry.max || 0;
+                const span = Math.max(0, max - min);
+                this.fieldObjectState.regenTargetByCode[entry.code] = min + (span > 0 ? Math.floor(Math.random() * (span + 1)) : 0);
+            }
+        });
+        if (this.objectRegenTimer) clearInterval(this.objectRegenTimer);
+        this.objectRegenTimer = setInterval(() => this.runObjectRegen(), 1000);
+    }
+    runObjectRegen() {
+        const now = Date.now();
+        if (!this.fieldObjectState.regenByCode) this.fieldObjectState.regenByCode = {};
+        if (!this.fieldObjectState.regenTargetByCode) this.fieldObjectState.regenTargetByCode = {};
+        const placements = applyObjectRegenCycle(this.fieldObjectState.regenByCode, this.fieldObjectState.regenTargetByCode, now);
+        if (placements.length > 0) {
+            if (document.getElementById('field-modal').classList.contains('open') && !this.moveTargetMode) {
+                this.renderFieldMap();
+            } else {
+                this.requestRender();
+            }
+        }
+        this.saveGame();
     }
     getTaxRate(type) { 
         if (isGateTile(type)) return 3; // Gate
@@ -1414,6 +1560,99 @@ class Game {
         this.updateUI();
     }
 
+    getCollectibleFieldItemInfo(type) {
+        if (isTerrainCode(type)) return null;
+        return getInfoFromCode(type);
+    }
+
+    createMergeItemFromInfo(info) {
+        const item = { type: info.type, level: info.level, scale: 0 };
+        if (item.type === ITEM_TYPE.BUILDING_CHEST) item.usage = 5;
+        if (item.type === ITEM_TYPE.BUILDING_CAMP) item.storedUnits = [];
+        return item;
+    }
+
+    removeObjectProbPlacement(r, c) {
+        if (typeof window === 'undefined') return;
+        const key = 'kov_field_object_prob_v1';
+        let placements = null;
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw) placements = JSON.parse(raw);
+        } catch (e) {}
+        if (!Array.isArray(placements)) return;
+        const next = placements.filter(p => !(p.r === r && p.c === c));
+        if (next.length === placements.length) return;
+        try { localStorage.setItem(key, JSON.stringify(next)); } catch (e) {}
+    }
+
+    clearFieldObjectFromMap(r, c) {
+        const base = FIELD_TERRAIN_DATA?.[r]?.[c];
+        if (base !== undefined && base !== null) FIELD_MAP_DATA[r][c] = base;
+        else FIELD_MAP_DATA[r][c] = 100;
+        this.removeObjectProbPlacement(r, c);
+    }
+
+    isFieldReachable(r, c) {
+        const targetKey = `${r},${c}`;
+        if (this.occupiedTiles.has(targetKey)) return true;
+        if (!this.occupiedTiles.size) return false;
+        const queue = [];
+        const visited = new Set();
+        this.occupiedTiles.forEach(key => {
+            const [sr, sc] = key.split(',').map(Number);
+            queue.push({ r: sr, c: sc });
+            visited.add(key);
+        });
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+        while (queue.length) {
+            const cur = queue.shift();
+            for (const d of dirs) {
+                const nr = cur.r + d[0];
+                const nc = cur.c + d[1];
+                if (nr < 0 || nr >= MAP_SIZE || nc < 0 || nc >= MAP_SIZE) continue;
+                const nkey = `${nr},${nc}`;
+                if (visited.has(nkey)) continue;
+                const type = FIELD_MAP_DATA[nr][nc];
+                const isTarget = nkey === targetKey;
+                const isOccupied = this.occupiedTiles.has(nkey);
+                if (isBlockingField(type) && !isOccupied && !isTarget) continue;
+                if (nkey === targetKey) return true;
+                visited.add(nkey);
+                queue.push({ r: nr, c: nc });
+            }
+        }
+        return false;
+    }
+
+    canCollectFieldObject(r, c) {
+        return this.isFieldReachable(r, c);
+    }
+
+    collectFieldObjectToMerge(type, r, c) {
+        if (!this.canCollectFieldObject(r, c)) { this.showToast("?? ? ?? ??"); return; }
+        const info = this.getCollectibleFieldItemInfo(type);
+        if (!info) { this.showToast("?? ??"); return; }
+        const item = this.createMergeItemFromInfo(info);
+        if (!this.spawnItem(item)) { this.showToast("?? ?? ?? ??"); return; }
+
+        this.clearFieldObjectFromMap(r, c);
+        if (this.fieldObjectState) {
+            if (!this.fieldObjectState.regenByCode) this.fieldObjectState.regenByCode = {};
+            this.fieldObjectState.regenByCode[type] = Date.now();
+        }
+        this.sound.playCollect();
+        this.requestRender();
+        this.updateUI();
+
+        if (document.getElementById('field-modal').classList.contains('open')) {
+            this.renderFieldMap();
+            this.setFieldInfo(FIELD_MAP_DATA[r][c], r, c);
+        }
+        this.showToast("?? ??");
+    }
+
+
     applyCpBonuses() {
         const baseMax = this.baseMaxCp ?? this.maxCp ?? 20;
         const baseRegen = this.baseCpRegen ?? this.cpRegen ?? 1;
@@ -1716,7 +1955,7 @@ class Game {
         return this.thirdSquadUnlocked ? this.armies : this.armies.filter(a => a.id !== 2);
     }
 
-    enterMoveTargetMode(armyId) {
+    enterMoveTargetMode(armyId, opts = {}) {
         const army = this.armies[armyId];
         if (!army) return;
         if (!this.getAvailableArmies().some(a => a.id === armyId)) { this.showToast("성채 점령 필요"); return; }
@@ -1726,13 +1965,14 @@ class Game {
         const stats = this.getSquadStats(squadData);
         if (stats.power < 10) { this.showToast("병력이 부족합니다."); return; }
 
+        const { center = false } = opts;
         this.exitMoveTargetMode();
         this.selectedArmyId = army.id;
         this.lastSelectedArmyId = army.id;
         const times = this.buildMoveTimeMap(army, stats);
         this.moveTargetMode = { armyId: army.id, stats, times };
         this.setMovePreview("ETA 표시 중 (취소: 상단 메시지 탭)");
-        this.centerCameraOnArmy(army.id);
+        if (center) this.centerCameraOnArmy(army.id);
         this.renderMoveTimeOverlay();
     }
 
@@ -1920,9 +2160,11 @@ class Game {
         const panel = document.getElementById('field-info-panel');
         if (!panel) return;
         if (type === null || type === undefined) {
+            panel.classList.remove('open');
             panel.innerHTML = `<div class="field-info-title">선택 없음</div><div class="field-info-small">필드 오브젝트를 선택하세요.</div>`;
             return;
         }
+        panel.classList.add('open');
         const targetKey = `${r},${c}`;
         const isNewTarget = this.currentFieldTargetKey !== targetKey || this.currentFieldTargetType !== type;
         this.currentFieldTargetKey = targetKey;
@@ -2029,9 +2271,27 @@ class Game {
             if (preferred !== null && preferred !== undefined) {
                 this.selectedArmyId = preferred;
                 this.lastSelectedArmyId = preferred;
-                this.enterMoveTargetMode(preferred);
+                this.enterMoveTargetMode(preferred, { center: false });
             }
         }
+
+        let summaryInfo = null;
+        const summaryId = (this.selectedArmyId !== null && this.selectedArmyId !== undefined)
+            ? this.selectedArmyId
+            : this.lastSelectedArmyId;
+        if (summaryId !== null && summaryId !== undefined) {
+            summaryInfo = infos.find(i => i.armyId === summaryId && i.canMove);
+        }
+        if (!summaryInfo) summaryInfo = infos.find(i => i.canMove);
+        const summaryRow = document.createElement('div');
+        summaryRow.className = 'field-info-row';
+        if (summaryInfo) {
+            const etaMin = Math.max(1, Math.round(summaryInfo.timeMin));
+            summaryRow.innerHTML = `<span>ETA</span><span>S${summaryInfo.armyId + 1} ${etaMin}m / CP ${summaryInfo.cpCost}</span>`;
+        } else {
+            summaryRow.innerHTML = `<span>ETA</span><span>-</span>`;
+        }
+        wrap.appendChild(summaryRow);
 
         infos.forEach(info => {
             const btn = document.createElement('button');
@@ -2049,7 +2309,7 @@ class Game {
                 if (!info.canMove) { this.showToast(info.reason); return; }
                 this.selectedArmyId = info.armyId;
                 this.lastSelectedArmyId = info.armyId;
-                this.enterMoveTargetMode(info.armyId);
+                this.enterMoveTargetMode(info.armyId, { center: false });
                 wrap.querySelectorAll('.field-eta-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             };
@@ -2222,8 +2482,10 @@ class Game {
 
     renderFieldMap() {
         const modal = document.getElementById('field-modal'); const content = document.getElementById('modal-content'); const title = document.getElementById('modal-title');
-        modal.dataset.mode = 'field'; modal.classList.add('open'); title.innerText = "월드 맵 (Field)"; content.innerHTML = ""; content.style.overflow = "hidden";
-        content.style.display = "flex"; content.style.flexDirection = "column";
+        modal.dataset.mode = 'field'; modal.classList.add('open'); title.innerText = "?? ? (Field)"; content.innerHTML = ""; content.style.overflow = "hidden";
+        content.style.position = "relative";
+        content.style.display = "block";
+        content.style.height = "100%";
         
         if (this.selectedArmyId !== null) {
             const existingHud = document.querySelector('.selected-army-hud');
@@ -2232,25 +2494,35 @@ class Game {
             const armyName = this.armies[this.selectedArmyId].name;
             const hud = document.createElement('div');
             hud.className = 'selected-army-hud';
-            hud.innerHTML = `<span class="hud-name">${armyName} 선택됨</span><button class="hud-btn" onclick="game.deselectArmy()">선택 해제</button>`;
+            hud.innerHTML = `<span class="hud-name">${armyName} ???</span><button class="hud-btn" onclick="game.deselectArmy()">?? ??</button>`;
             content.appendChild(hud);
         }
 
-        const headerDiv = document.createElement('div'); headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded mb-2 text-xs sticky top-0 z-30 shadow-md";
-        const incomeSign = this.income >= 0 ? "+" : "";
-        headerDiv.innerHTML = `<div>🚩 점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>💰 세금: <span class="text-yellow-400 font-bold">${incomeSign}${this.income}/3sec</span></div><div>🧭 CP: <span id="field-cp-display" class="text-white font-bold">${this.cp}/${this.maxCp}</span></div>`; content.appendChild(headerDiv);
-        const moveInfo = document.createElement('div'); moveInfo.id = 'field-move-info'; moveInfo.className = 'field-move-info';
-        moveInfo.innerText = this.movePreviewText || '이동할 타일을 선택하세요.';
-        moveInfo.onclick = () => { if (this.moveTargetMode) this.exitMoveTargetMode(); };
-        content.appendChild(moveInfo);
-        const infoPanel = document.createElement('div'); infoPanel.id = 'field-info-panel'; infoPanel.className = 'field-info-panel';
-        content.appendChild(infoPanel);
-        this.setFieldInfo(null);
-        const viewport = document.createElement('div'); viewport.id = 'map-viewport'; viewport.style.position = 'relative'; viewport.style.width = '100%'; viewport.style.flex = '1'; viewport.style.height = 'auto'; viewport.style.overflow = 'hidden'; 
-        viewport.style.backgroundColor = '#2e3b23'; 
+        const viewport = document.createElement('div'); viewport.id = 'map-viewport'; viewport.style.position = 'absolute'; viewport.style.inset = '0'; viewport.style.width = '100%'; viewport.style.height = '100%'; viewport.style.overflow = 'hidden';
+        viewport.style.backgroundColor = '#2e3b23';
         viewport.style.touchAction = 'none';
         viewport.onclick = (e) => { if (e.target === viewport) this.hideFieldActionMenu(); };
-        
+        content.appendChild(viewport);
+
+        const overlay = document.createElement('div');
+        overlay.className = 'field-overlay';
+
+        const headerDiv = document.createElement('div'); headerDiv.className = "flex justify-between items-center bg-gray-700 p-2 rounded text-xs shadow-md";
+        const incomeSign = this.income >= 0 ? "+" : "";
+        headerDiv.innerHTML = `<div>?? ??: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>?? ??: <span class="text-yellow-400 font-bold">${incomeSign}${this.income}/3sec</span></div><div>?? CP: <span id="field-cp-display" class="text-white font-bold">${this.cp}/${this.maxCp}</span></div>`;
+        overlay.appendChild(headerDiv);
+
+        const moveInfo = document.createElement('div'); moveInfo.id = 'field-move-info'; moveInfo.className = 'field-move-info';
+        moveInfo.innerText = this.movePreviewText || '??? ??? ?????.';
+        moveInfo.onclick = () => { if (this.moveTargetMode) this.exitMoveTargetMode(); };
+        overlay.appendChild(moveInfo);
+
+        const infoPanel = document.createElement('div'); infoPanel.id = 'field-info-panel'; infoPanel.className = 'field-info-panel';
+        overlay.appendChild(infoPanel);
+        this.setFieldInfo(null);
+
+        content.appendChild(overlay);
+
         const mapLayer = document.createElement('div'); mapLayer.id = 'map-layer'; mapLayer.style.position = 'absolute'; mapLayer.style.transformOrigin = '0 0'; mapLayer.style.display = 'grid'; mapLayer.style.gridTemplateColumns = `repeat(${MAP_SIZE}, 12px)`; mapLayer.style.gap = '1px'; mapLayer.style.padding = '50px';
         const mapSizePx = (MAP_SIZE * 13 - 1) + 100;
         const pathOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -2492,7 +2764,7 @@ class Game {
                     e.stopPropagation();
                     this.selectedArmyId = army.id;
                     selector.remove();
-                    this.enterMoveTargetMode(army.id);
+                    this.enterMoveTargetMode(army.id, { center: false });
                 };
             }
             selector.appendChild(card);
@@ -2648,8 +2920,10 @@ class Game {
 
     handleArrival(army) {
         const { r, c, type } = army.target;
+        let mapChanged = false;
         if (!this.occupiedTiles.has(`${r},${c}`)) {
             this.occupiedTiles.add(`${r},${c}`);
+            mapChanged = true;
             if (isGateTile(type)) {
                 this.showToast(`?? ${army.name} ?? ??!`);
                 this.sound.playUnlock();
@@ -2657,21 +2931,39 @@ class Game {
             } else if (isDragonTile(type)) {
                 this.showToast(`?? ${army.name} ??? ??!`);
                 this.sound.playUnlock();
-                this.spawnParticles(this.width/2, this.height/2, "#FF6D00", 40, "confetti");
+                this.spawnParticles(this.width/2, this.height/2, "#ff6b6b", 50, "confetti");
             } else {
                 this.showToast(`?? ${army.name} ?? ??!`);
                 this.sound.playCollect();
             }
-            this.recalcFieldBonuses();
-            const effectToast = this.getCaptureEffectToast(type);
-            if (effectToast) setTimeout(() => this.showToast(effectToast), 700);
-            if (document.getElementById('field-modal').classList.contains('open')) this.renderFieldMap();
         } else {
             this.showToast(`${army.name} ?? ??`);
+        }
+
+        const collectibleInfo = this.getCollectibleFieldItemInfo(type);
+        if (collectibleInfo && this.canCollectFieldObject(r, c)) {
+            const item = this.createMergeItemFromInfo(collectibleInfo);
+            if (this.spawnItem(item)) {
+                this.clearFieldObjectFromMap(r, c);
+                if (this.fieldObjectState) {
+                    if (!this.fieldObjectState.regenByCode) this.fieldObjectState.regenByCode = {};
+                    this.fieldObjectState.regenByCode[type] = Date.now();
+                }
+                mapChanged = true;
+                this.sound.playCollect();
+                this.showToast("?? ??");
+            } else {
+                this.showToast("?? ?? ?? ??");
+            }
+        }
+
+        if (mapChanged && document.getElementById('field-modal').classList.contains('open')) {
+            this.renderFieldMap();
         }
         army.state = 'IDLE';
         this.updateUI(); this.saveGame();
     }
+
 
     moveCameraTo(targetX, targetY, viewport, mapLayer) {
         const viewportWidth = viewport.clientWidth; const viewportHeight = viewport.clientHeight;
