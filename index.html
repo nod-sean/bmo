@@ -78,8 +78,8 @@
         #path-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 15; }
         .path-line-bg { stroke: rgba(0,0,0,0.6); stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
         .path-line { stroke: #ffd700; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        .field-time { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; display: flex; align-items: center; justify-content: center; font-size: 4px; font-weight: 700; color: #ffe08a; text-shadow: 0 1px 0 rgba(0,0,0,0.75); pointer-events: none; letter-spacing: -0.4px; z-index: 25; line-height: 1; opacity: 0.5; }
-        .field-time.lower { transform: translateY(1px); }
+        .field-time { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; display: flex; align-items: center; justify-content: center; font-size: 4px; font-weight: 700; color: #ffe08a; text-shadow: 0 1px 0 rgba(0,0,0,0.75); pointer-events: none; letter-spacing: -0.4px; z-index: 25; line-height: 1; opacity: 0.5; transform: translateY(var(--label-offset, 0px)) scale(var(--label-scale, 1)); transform-origin: center bottom; }
+        .field-time.lower { --label-offset: 1px; }
         .field-cell::after { z-index: 12; }
         .field-move-eligible { outline: 1px dashed rgba(255,255,255,0.35); }
         .field-move-source { outline: 1px solid #4ade80; box-shadow: 0 0 4px rgba(74,222,128,0.9); }
@@ -1048,6 +1048,7 @@ class Game {
         this.moveTargetMode = null;
         this.previewPath = null;
         this.movePreviewText = "";
+        this.isResetting = false;
 
         this.visibilityMap = new Set();
         this.revealFog(PLAYER_START.r, PLAYER_START.c, FOG_RADIUS);
@@ -1065,8 +1066,21 @@ class Game {
         ];
 
         this.calcLayout(); 
-        if(!this.loadGame()) this.initGame();
-        else { this.updateLevelStats(); }
+        const resetFlag = localStorage.getItem('kov_force_reset') === '1';
+        if (resetFlag) {
+            try {
+                localStorage.removeItem('kov_force_reset');
+                localStorage.removeItem('kov_save_v1');
+                localStorage.removeItem('kov_field_object_prob_v1');
+                localStorage.removeItem('kov_uid');
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('kov_')) localStorage.removeItem(key);
+                }
+            } catch (e) {}
+        }
+        if(!resetFlag && this.loadGame()) { this.updateLevelStats(); }
+        else { this.initGame(); }
         this.recalcFieldBonuses();
         this.updateUI();
 
@@ -1100,6 +1114,7 @@ class Game {
 
     saveGame() {
         try {
+            if (this.isResetting || localStorage.getItem('kov_force_reset') === '1') return;
             const data = {
                 grid: this.grid, gridState: this.gridState, squad1: this.squad1, squad2: this.squad2, squad3: this.squad3,
                 lordLevel: this.lordLevel, currentXp: this.currentXp, energy: this.energy, gold: this.gold, gem: this.gem,
@@ -1162,7 +1177,9 @@ class Game {
     }
     resetGame() {
         if(confirm("정말 게임을 초기화 하시겠습니까?")) {
+            this.isResetting = true;
             try {
+                localStorage.setItem('kov_force_reset', '1');
                 localStorage.removeItem('kov_save_v1');
                 localStorage.removeItem('kov_field_object_prob_v1');
                 localStorage.removeItem('kov_uid');
@@ -3091,6 +3108,7 @@ class Game {
         mapLayer.style.transition = 'transform 0.3s ease-out';
         this.camera.x = newX; this.camera.y = newY;
         mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`;
+        mapLayer.style.setProperty('--label-scale', (1 / this.camera.scale).toFixed(3));
         this.updateFloatingPanelPositionFromSelection();
         setTimeout(() => { mapLayer.style.transition = 'none'; }, 300);
     }
@@ -3124,6 +3142,7 @@ class Game {
         }
         const updateTransform = () => { 
             mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`; 
+            mapLayer.style.setProperty('--label-scale', (1 / this.camera.scale).toFixed(3));
             this.updateFloatingPanelPositionFromSelection();
         };
         setTimeout(updateTransform, 0);
