@@ -77,6 +77,7 @@
         .field-target { outline: 1px solid #ffd700; box-shadow: 0 0 4px #ffd700; z-index: 15; }
         .field-selected { outline: 2px solid #22d3ee; box-shadow: 0 0 6px rgba(34,211,238,0.9); z-index: 16; }
         .field-path { outline: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.08); z-index: 12; }
+        .field-wall { background: #2b2b2b !important; border: 1px solid #1f1f1f; box-shadow: inset 0 0 3px rgba(0,0,0,0.6); }
         #path-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 15; }
         .path-line-bg { stroke: rgba(0,0,0,0.6); stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
         .path-line { stroke: #ffd700; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
@@ -93,6 +94,17 @@
         .field-fog { background-color: #0b0b0b !important; border: none; cursor: default; z-index: 100; opacity: 1 !important; }
         .field-cloud-blocked { z-index: 14; background-color: transparent; }
         .field-cloud-layer { position: absolute; inset: 0; background-image: var(--cloud-img); background-repeat: no-repeat; background-size: 100% 100%; background-position: center; pointer-events: none; z-index: 30; filter: drop-shadow(0 0 2px rgba(0,0,0,0.25)); }
+
+        .field-bottom-bar { position: absolute; left: 8px; right: 8px; bottom: 56px; background: rgba(15,15,15,0.9); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 8px 10px; display: flex; align-items: flex-start; gap: 8px; z-index: 80; pointer-events: auto; max-height: 36vh; overflow: hidden; }
+        .field-bottom-icon { width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #f8fafc; flex: 0 0 auto; overflow: hidden; }
+        .field-bottom-icon img { width: 100%; height: 100%; object-fit: contain; }
+        .field-bottom-text { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 4px; }
+        .field-bottom-name { font-size: 12px; color: #f8fafc; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .field-bottom-meta { font-size: 10px; color: #cbd5f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .field-bottom-details { display: flex; flex-direction: column; gap: 2px; font-size: 10px; color: #e5e7eb; max-height: 16vh; overflow: auto; padding-right: 2px; }
+        .field-bottom-details .field-info-row { font-size: 10px; }
+        .field-bottom-details .field-info-small { font-size: 10px; color: #9ca3af; }
+        .field-bottom-move { margin-top: 4px; display: flex; flex-direction: column; gap: 4px; }
         
         /* Object Icons */
         .field-gate { border: 1px solid #ef4444; }
@@ -372,6 +384,7 @@ const TERRAIN_COLORS = { 100: "#4a6e3a", 200: "#2e5a2a", 300: "#8b6f3d", 400: "#
 const TERRAIN_COLORS_BORDER = { 100: "#5b7b47", 200: "#3b6a36", 300: "#9b7e4a", 400: "#8a8a8a", 500: "#8a2b2b" };
 
 function isTerrainCode(code) { return code >= 100 && code < 600; }
+function isWallTile(code) { return code === 0; }
 function getTerrainBase(code) { return Math.floor(code / 100) * 100; }
 function getTerrainName(code) {
     const base = getTerrainBase(code);
@@ -383,18 +396,18 @@ function getTerrainBaseName(code) {
     return base === 100 ? "평원" : base === 200 ? "숲" : base === 300 ? "고원" : base === 400 ? "산악" : base === 500 ? "화산" : "지형";
 }
 
-function isCastleTile(code) { return code === 1 || code === 5101; }
+function isCastleTile(code) { return code === 1 || code === 5100 || code === 5101; }
 function isGateTile(code) { return code === 2 || (code >= 5111 && code <= 5114); }
 function isCitadelTile(code) { return code === 3 || (code >= 5121 && code <= 5123); }
 function isDragonTile(code) { return code === 5131; }
-function isGoldMineTile(code) { return code === 5 || (code >= 5201 && code <= 5202); }
-function isFountainTile(code) { return code === 6 || (code >= 5211 && code <= 5212); }
+function isGoldMineTile(code) { return code === 5 || (code >= 5200 && code <= 5202); }
+function isFountainTile(code) { return code === 6 || (code >= 5210 && code <= 5212); }
 function isShopTile(code) { return code === 5221; }
 function isTavernTile(code) { return code === 5231; }
 function isRuinsTile(code) { return code === 5241 || code === 5242; }
 function isStatueTile(code) { return code >= 5301 && code <= 5332; }
 function isBorderTerrain(code) { return isTerrainCode(code) && code % 100 === 1; }
-function isBlockingField(code) { return isGateTile(code) || isCitadelTile(code) || isDragonTile(code) || isBorderTerrain(code); }
+function isBlockingField(code) { return isWallTile(code) || isGateTile(code) || isCitadelTile(code) || isDragonTile(code) || isBorderTerrain(code); }
 function getStatueKind(code) {
     if (code >= 5301 && code <= 5302) return "atk";
     if (code >= 5311 && code <= 5312) return "def";
@@ -579,34 +592,38 @@ const CHEST_DROP_TABLE = { 1: [ {code: 1801, prob: 50}, {code: 1811, prob: 50} ]
 
 // --- PHASE 2 MAP DATA (FIELD_OBJECT_1) ---
 const FIELD_MAP_DATA = [
-  [200, 200, 200, 200, 201, 101, 100, 100, 100, 101, 201, 200, 200, 200, 201, 101, 100, 100, 100, 101, 201, 200, 200, 200, 200],
-  [200, 200, 200, 200, 201, 101, 5221, 100, 5231, 101, 201, 200, 200, 200, 201, 101, 5231, 100, 5221, 101, 201, 200, 200, 200, 200],
-  [200, 200, 5121, 200, 5111, 100, 100, 5101, 100, 100, 5111, 200, 5121, 200, 5111, 100, 100, 5101, 100, 100, 5111, 200, 5121, 200, 200],
-  [200, 200, 200, 200, 201, 101, 5211, 100, 5201, 101, 201, 200, 200, 200, 201, 101, 5201, 100, 5211, 101, 201, 200, 200, 200, 200],
-  [201, 201, 5111, 201, 201, 101, 101, 100, 101, 101, 201, 201, 200, 201, 201, 101, 101, 100, 101, 101, 201, 201, 5111, 201, 201],
-  [101, 101, 101, 101, 101, 301, 301, 5112, 301, 301, 401, 401, 5113, 401, 401, 301, 301, 5112, 301, 301, 101, 101, 100, 101, 101],
-  [100, 5221, 100, 5211, 101, 301, 300, 300, 300, 301, 401, 400, 400, 400, 401, 301, 300, 300, 300, 301, 101, 5211, 100, 5221, 100],
-  [100, 100, 5101, 100, 100, 5112, 300, 5122, 300, 300, 5113, 400, 5123, 400, 5113, 300, 300, 5122, 300, 5112, 100, 100, 5101, 100, 100],
-  [100, 5231, 100, 5201, 101, 301, 300, 300, 300, 301, 401, 400, 400, 400, 401, 301, 300, 300, 300, 301, 101, 5201, 100, 5231, 100],
-  [101, 101, 101, 101, 101, 301, 301, 300, 301, 301, 401, 401, 400, 401, 401, 301, 301, 300, 301, 301, 101, 101, 100, 101, 101],
-  [201, 201, 5111, 201, 201, 401, 401, 5113, 401, 401, 501, 501, 5114, 501, 501, 401, 401, 5113, 401, 401, 201, 201, 5111, 201, 201],
-  [200, 200, 200, 200, 201, 401, 400, 400, 400, 401, 501, 500, 500, 500, 501, 401, 400, 400, 400, 401, 201, 200, 200, 200, 200],
-  [200, 200, 5121, 200, 201, 5113, 400, 5123, 400, 400, 5114, 500, 5131, 500, 5114, 400, 400, 5123, 400, 5113, 200, 200, 5121, 200, 200],
-  [200, 200, 200, 200, 201, 401, 400, 400, 400, 401, 501, 500, 500, 500, 501, 401, 400, 400, 400, 401, 201, 200, 200, 200, 200],
-  [201, 201, 5111, 201, 201, 401, 401, 5113, 401, 401, 501, 501, 5114, 501, 501, 401, 401, 5113, 401, 401, 201, 201, 5111, 201, 201],
-  [101, 101, 100, 101, 101, 301, 301, 300, 301, 301, 401, 401, 400, 401, 401, 301, 301, 300, 301, 301, 101, 101, 100, 101, 101],
-  [100, 5231, 100, 5201, 101, 301, 300, 300, 300, 301, 401, 400, 400, 400, 401, 301, 300, 300, 300, 301, 101, 5201, 100, 5231, 100],
-  [100, 100, 5101, 100, 100, 5112, 300, 5122, 300, 300, 5113, 400, 5123, 400, 5113, 300, 300, 5122, 300, 5112, 100, 100, 5101, 100, 100],
-  [100, 5221, 100, 5211, 101, 301, 300, 300, 300, 301, 401, 400, 400, 400, 401, 301, 300, 300, 300, 301, 101, 5211, 100, 5221, 100],
-  [101, 101, 100, 101, 101, 301, 301, 5112, 301, 301, 401, 401, 5113, 401, 401, 301, 301, 5112, 301, 301, 101, 101, 100, 101, 101],
-  [201, 201, 5111, 201, 201, 101, 101, 100, 101, 101, 201, 201, 200, 201, 201, 101, 101, 100, 101, 101, 201, 201, 5111, 201, 201],
-  [200, 200, 200, 200, 201, 101, 5211, 100, 5201, 101, 201, 200, 200, 200, 201, 101, 5201, 100, 5211, 101, 201, 200, 200, 200, 200],
-  [200, 200, 5121, 200, 5111, 100, 100, 5101, 100, 100, 5111, 200, 5101, 200, 5111, 100, 100, 5101, 100, 100, 5111, 200, 5121, 200, 200],
-  [200, 200, 200, 200, 201, 101, 5221, 100, 5231, 101, 201, 200, 200, 200, 201, 101, 5231, 100, 5221, 101, 201, 200, 200, 200, 200],
-  [200, 200, 200, 200, 201, 101, 100, 100, 100, 101, 201, 200, 200, 200, 201, 101, 100, 100, 100, 101, 201, 200, 200, 200, 200]
+  [200, 200, 200, 200, 200, 0, 100, 100, 100, 100, 100, 0, 200, 200, 200, 200, 200, 0, 100, 100, 100, 100, 100, 0, 200, 200, 200, 200, 200],
+  [200, 200, 200, 200, 200, 0, 100, 5221, 100, 5231, 100, 0, 200, 200, 200, 200, 200, 0, 100, 5231, 100, 5221, 100, 0, 200, 200, 200, 200, 200],
+  [200, 200, 5121, 200, 200, 0, 100, 100, 5101, 100, 100, 5111, 200, 200, 5121, 200, 200, 5111, 100, 100, 5101, 100, 100, 5111, 200, 200, 5121, 200, 200],
+  [200, 200, 200, 200, 200, 0, 100, 5211, 100, 5200, 100, 0, 200, 200, 200, 200, 200, 0, 100, 5200, 100, 5211, 100, 0, 200, 200, 200, 200, 200],
+  [200, 200, 200, 200, 200, 0, 100, 100, 100, 100, 100, 0, 200, 200, 200, 200, 200, 0, 100, 100, 100, 100, 100, 0, 200, 200, 200, 200, 200],
+  [0, 0, 5111, 0, 0, 0, 0, 0, 5112, 0, 0, 0, 0, 0, 5113, 0, 0, 0, 0, 0, 5112, 0, 0, 0, 0, 0, 5111, 0, 0],
+  [100, 100, 100, 100, 100, 0, 300, 300, 300, 300, 300, 0, 400, 400, 400, 400, 400, 0, 300, 300, 300, 300, 300, 0, 100, 100, 100, 100, 100],
+  [100, 5221, 100, 5211, 100, 0, 300, 300, 300, 300, 300, 0, 400, 400, 400, 400, 400, 0, 300, 300, 300, 300, 300, 0, 100, 5211, 100, 5221, 100],
+  [100, 100, 5101, 100, 100, 5112, 300, 300, 5122, 300, 300, 5113, 400, 400, 5123, 400, 400, 5113, 300, 300, 5122, 300, 300, 5112, 100, 100, 5101, 100, 100],
+  [100, 5231, 100, 5200, 100, 0, 300, 300, 300, 300, 300, 0, 400, 400, 400, 400, 400, 0, 300, 300, 300, 300, 300, 0, 100, 5200, 100, 5231, 100],
+  [100, 100, 100, 100, 100, 0, 300, 300, 300, 300, 300, 0, 400, 400, 400, 400, 400, 0, 300, 300, 300, 300, 300, 0, 100, 100, 100, 100, 100],
+  [0, 0, 5111, 0, 0, 0, 0, 0, 5113, 0, 0, 0, 0, 0, 5114, 0, 0, 0, 0, 0, 5113, 0, 0, 0, 0, 0, 5111, 0, 0],
+  [200, 200, 200, 200, 200, 0, 400, 400, 400, 400, 400, 0, 500, 500, 500, 500, 500, 0, 400, 400, 400, 400, 400, 0, 200, 200, 200, 200, 200],
+  [200, 200, 200, 200, 200, 0, 400, 400, 400, 400, 400, 0, 500, 500, 500, 500, 500, 0, 400, 400, 400, 400, 400, 0, 200, 200, 200, 200, 200],
+  [200, 200, 5121, 200, 200, 5113, 400, 400, 5123, 400, 400, 5114, 500, 500, 5131, 500, 500, 5114, 400, 400, 5123, 400, 400, 5113, 200, 200, 5121, 200, 200],
+  [200, 200, 200, 200, 200, 0, 400, 400, 400, 400, 400, 0, 500, 500, 500, 500, 500, 0, 400, 400, 400, 400, 400, 0, 200, 200, 200, 200, 200],
+  [200, 200, 200, 200, 200, 0, 400, 400, 400, 400, 400, 0, 500, 500, 500, 500, 500, 0, 400, 400, 400, 400, 400, 0, 200, 200, 200, 200, 200],
+  [0, 0, 5111, 0, 0, 0, 0, 0, 5113, 0, 0, 0, 0, 0, 5114, 0, 0, 0, 0, 0, 5113, 0, 0, 0, 0, 0, 5111, 0, 0],
+  [100, 100, 100, 100, 100, 0, 300, 300, 300, 300, 300, 0, 400, 400, 400, 400, 400, 0, 300, 300, 300, 300, 300, 0, 100, 100, 100, 100, 100],
+  [100, 5231, 100, 5200, 100, 0, 300, 300, 300, 300, 300, 0, 400, 400, 400, 400, 400, 0, 300, 300, 300, 300, 300, 0, 100, 5200, 100, 5231, 100],
+  [100, 100, 5101, 100, 100, 5112, 300, 300, 5122, 300, 300, 5113, 400, 400, 5123, 400, 400, 5113, 300, 300, 5122, 300, 300, 5112, 100, 100, 5101, 100, 100],
+  [100, 5221, 100, 5211, 100, 0, 300, 300, 300, 300, 300, 0, 400, 400, 400, 400, 400, 0, 300, 300, 300, 300, 300, 0, 100, 5211, 100, 5221, 100],
+  [100, 100, 100, 100, 100, 0, 300, 300, 300, 300, 300, 0, 400, 400, 400, 400, 400, 0, 300, 300, 300, 300, 300, 0, 100, 100, 100, 100, 100],
+  [0, 0, 5111, 0, 0, 0, 0, 0, 5112, 0, 0, 0, 0, 0, 5113, 0, 0, 0, 0, 0, 5112, 0, 0, 0, 0, 0, 5111, 0, 0],
+  [200, 200, 200, 200, 200, 0, 100, 100, 100, 100, 100, 0, 200, 200, 200, 200, 200, 0, 100, 100, 100, 100, 100, 0, 200, 200, 200, 200, 200],
+  [200, 200, 200, 200, 200, 0, 100, 5211, 100, 5200, 100, 0, 200, 200, 200, 200, 200, 0, 100, 5200, 100, 5211, 100, 0, 200, 200, 200, 200, 200],
+  [200, 200, 5121, 200, 200, 5111, 100, 100, 5101, 100, 100, 5111, 200, 200, 5100, 200, 200, 5111, 100, 100, 5101, 100, 100, 5111, 200, 200, 5121, 200, 200],
+  [200, 200, 200, 200, 200, 0, 100, 5221, 100, 5231, 100, 0, 200, 200, 200, 200, 200, 0, 100, 5231, 100, 5221, 100, 0, 200, 200, 200, 200, 200],
+  [200, 200, 200, 200, 200, 0, 100, 100, 100, 100, 100, 0, 200, 200, 200, 200, 200, 0, 100, 100, 100, 100, 100, 0, 200, 200, 200, 200, 200],
 ];
 const FIELD_TERRAIN_DATA = FIELD_MAP_DATA.map(row => row.slice());
-const MAP_SIZE = 25;
+const MAP_SIZE = FIELD_MAP_DATA.length;
 const PLAYER_START = { r: 22, c: 7 };
 const FOG_RADIUS = 8;
 
@@ -799,7 +816,7 @@ function applyObjectProbToMap() {
         placements.forEach(p => {
             if (!FIELD_MAP_DATA[p.r] || typeof FIELD_MAP_DATA[p.r][p.c] === 'undefined') { changed = true; return; }
             const base = FIELD_TERRAIN_DATA?.[p.r]?.[p.c];
-            if (isBorderTerrain(FIELD_MAP_DATA[p.r][p.c]) || isBorderTerrain(base)) {
+            if (isWallTile(base) || isBorderTerrain(FIELD_MAP_DATA[p.r][p.c]) || isBorderTerrain(base)) {
                 if (base !== undefined && base !== null) FIELD_MAP_DATA[p.r][p.c] = base;
                 changed = true;
                 return;
@@ -821,7 +838,7 @@ function purgeBorderObjects() {
     for (let r = 0; r < FIELD_MAP_DATA.length; r++) {
         for (let c = 0; c < FIELD_MAP_DATA[r].length; c++) {
             const base = FIELD_TERRAIN_DATA?.[r]?.[c];
-            if (!isBorderTerrain(base)) continue;
+            if (!isBorderTerrain(base) && !isWallTile(base)) continue;
             if (isTerrainCode(FIELD_MAP_DATA[r][c])) continue;
             FIELD_MAP_DATA[r][c] = base;
             changed = true;
@@ -1652,7 +1669,7 @@ class Game {
         for (let r = 0; r < MAP_SIZE; r++) {
             for (let c = 0; c < MAP_SIZE; c++) {
                 const type = FIELD_MAP_DATA[r][c];
-                if (isBorderTerrain(type) || isGateTile(type) || isCitadelTile(type) || isDragonTile(type)) continue;
+                if (isWallTile(type) || isBorderTerrain(type) || isGateTile(type) || isCitadelTile(type) || isDragonTile(type)) continue;
                 if (regions[r][c] !== -1) continue;
                 const stack = [{ r, c }];
                 regions[r][c] = regionId;
@@ -1663,7 +1680,7 @@ class Game {
                         const nc = cur.c + d[1];
                         if (nr < 0 || nr >= MAP_SIZE || nc < 0 || nc >= MAP_SIZE) continue;
                         const ntype = FIELD_MAP_DATA[nr][nc];
-                        if (isBorderTerrain(ntype) || isGateTile(ntype) || isCitadelTile(ntype) || isDragonTile(ntype)) continue;
+                        if (isWallTile(ntype) || isBorderTerrain(ntype) || isGateTile(ntype) || isCitadelTile(ntype) || isDragonTile(ntype)) continue;
                         if (regions[nr][nc] !== -1) continue;
                         regions[nr][nc] = regionId;
                         stack.push({ r: nr, c: nc });
@@ -1771,6 +1788,7 @@ class Game {
     }
 
     isTileBlocked(current, r, c, type, isOccupied, isTarget, regionId) {
+        if (isWallTile(type)) return true;
         if (isBorderTerrain(type)) {
             if (this.isBorderOpen(r, c)) return false;
             return true;
@@ -2431,6 +2449,9 @@ class Game {
     }
 
     getFieldObjectInfo(type, r, c) {
+        if (isWallTile(type)) {
+            return { name: "장벽", level: "-", owner: "-", defenders: [] };
+        }
         if (isTerrainCode(type)) {
             return { name: getTerrainName(type), level: "-", owner: "-", defenders: [] };
         }
@@ -2463,6 +2484,11 @@ class Game {
 
         const owner = this.occupiedTiles.has(`${r},${c}`) ? "점령" : "-";
         return { name, level, owner, defenders };
+    }
+
+    isCapturableFieldObject(type) {
+        return isGateTile(type) || isCitadelTile(type) || isGoldMineTile(type) || isFountainTile(type)
+            || isShopTile(type) || isTavernTile(type) || isRuinsTile(type) || isStatueTile(type);
     }
 
 
@@ -2516,6 +2542,54 @@ class Game {
             .join("");
     }
 
+    getFieldIconEmoji(type) {
+        if (isWallTile(type)) return "🧱";
+        if (isCastleTile(type)) return "🏰";
+        if (isGateTile(type)) return "🚪";
+        if (isCitadelTile(type)) return "🏯";
+        if (isDragonTile(type)) return "🐉";
+        if (isGoldMineTile(type)) return "⛏️";
+        if (isFountainTile(type)) return "⛲";
+        if (isShopTile(type)) return "🏪";
+        if (isTavernTile(type)) return "🍺";
+        if (isRuinsTile(type)) return "🏛️";
+        if (isStatueTile(type)) return "🗿";
+        if (isTerrainCode(type)) return "🗺️";
+        return "❓";
+    }
+
+    updateFieldBottomBar(type, r, c, info) {
+        const bar = document.getElementById('field-bottom-bar');
+        if (!bar) return;
+        const icon = bar.querySelector('.field-bottom-icon');
+        const nameEl = bar.querySelector('.field-bottom-name');
+        const metaEl = bar.querySelector('.field-bottom-meta');
+        const detailsEl = bar.querySelector('#field-bottom-details');
+        const moveWrap = bar.querySelector('#field-move-options');
+        if (!nameEl || !metaEl || !icon) return;
+
+        if (type === null || type === undefined) {
+            icon.innerHTML = "❔";
+            icon.style.backgroundImage = "";
+            nameEl.textContent = "선택된 오브젝트 없음";
+            metaEl.textContent = "오브젝트를 선택하세요.";
+            if (detailsEl) detailsEl.innerHTML = "";
+            if (moveWrap) moveWrap.innerHTML = "";
+            return;
+        }
+
+        const data = info || this.getFieldObjectInfo(type, r, c);
+        const title = `${data.name}${data.level !== "-" ? ` Lv.${data.level}` : ""}`;
+        const metaParts = [];
+        if (data.owner && data.owner !== "-") metaParts.push(`소유 ${data.owner}`);
+        if (!metaParts.length && typeof r === "number" && typeof c === "number") metaParts.push(`좌표 ${r},${c}`);
+
+        icon.innerHTML = this.getFieldIconEmoji(type);
+        icon.style.backgroundImage = "";
+        nameEl.textContent = title;
+        metaEl.textContent = metaParts.join(" · ");
+    }
+
     setFieldInfo(type, r, c) {
         const panel = document.getElementById('field-info-panel');
         if (!panel) return;
@@ -2528,9 +2602,11 @@ class Game {
             if (prev) prev.classList.remove('field-selected');
             this.currentFieldTargetKey = null;
             this.currentFieldTargetType = null;
+            this.updateFieldBottomBar(null);
             return;
         }
-        panel.classList.add('open');
+        panel.classList.remove('open');
+        panel.innerHTML = "";
         const targetKey = `${r},${c}`;
         const isNewTarget = this.currentFieldTargetKey !== targetKey || this.currentFieldTargetType !== type;
         this.currentFieldTargetKey = targetKey;
@@ -2579,22 +2655,31 @@ class Game {
         if (upkeep > 0) {
             effectRows += `<div class="field-info-row"><span>유지비</span><span>-${upkeep}/3초</span></div>`;
         }
-        panel.innerHTML = `
-            <div class="field-info-title">${info.name}${info.level !== "-" ? ` Lv.${info.level}` : ""}</div>
-            <div class="field-info-row"><span>소유자</span><span>${info.owner}</span></div>
-            <div class="field-info-row"><span>수비병</span><span>${this.formatDefenders(info.defenders)}</span></div>
-            ${extraRows}
-            ${effectRows}
-            <div class="field-info-small">좌표: ${r},${c}</div>
-            <div id="field-move-options" class="field-move-options"></div>
-        `;
-        this.renderFieldMoveOptions(panel, r, c, type, isNewTarget);
+        const bar = document.getElementById('field-bottom-bar');
+        if (bar) {
+            const details = bar.querySelector('#field-bottom-details');
+            if (details) {
+                details.innerHTML = `
+                    <div class="field-info-row"><span>소유자</span><span>${info.owner}</span></div>
+                    <div class="field-info-row"><span>수비병</span><span>${this.formatDefenders(info.defenders)}</span></div>
+                    ${extraRows}
+                    ${effectRows}
+                    <div class="field-info-small">좌표: ${r},${c}</div>
+                `;
+            }
+            this.renderFieldMoveOptions(bar, r, c, type, isNewTarget);
+        }
         this.updateFloatingPanelPosition(r, c);
+        this.updateFieldBottomBar(type, r, c, info);
     }
 
     updateFloatingPanelPosition(r, c) {
         const wrap = document.getElementById('field-floating-wrap');
         if (!wrap) return;
+        if (!this.movePreviewText) {
+            wrap.style.display = 'none';
+            return;
+        }
         if (typeof r !== "number" || typeof c !== "number") {
             wrap.style.display = 'none';
             return;
@@ -2952,6 +3037,7 @@ class Game {
         floatingWrap.appendChild(moveInfo);
 
         const infoPanel = document.createElement('div'); infoPanel.id = 'field-info-panel'; infoPanel.className = 'field-info-panel';
+        infoPanel.style.display = 'none';
         floatingWrap.appendChild(infoPanel);
 
         overlay.appendChild(floatingWrap);
@@ -3014,7 +3100,7 @@ class Game {
         const reachable = this.buildReachableTiles();
 
         const appendCloudLayer = (cell, r, c, type) => {
-            if (isGateTile(type) || isCitadelTile(type)) return;
+            if (isGateTile(type) || isCitadelTile(type) || isWallTile(type)) return;
             const layer = document.createElement('div');
             layer.className = 'field-cloud-layer';
             cell.appendChild(layer);
@@ -3036,7 +3122,8 @@ class Game {
                 }
 
                 let color = 'rgba(0, 0, 0, 0)';
-                if (isCastleTile(type)) { color = '#4285f4'; cell.classList.add('field-castle'); }
+                if (isWallTile(type)) { color = '#2b2b2b'; cell.classList.add('field-wall'); }
+                else if (isCastleTile(type)) { color = '#4285f4'; cell.classList.add('field-castle'); }
                 else if (isGateTile(type)) { color = '#ea4335'; cell.classList.add('field-gate'); if(isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); }
                 else if (isCitadelTile(type)) { color = '#fbbc05'; cell.classList.add('field-citadel'); }
                 else if (isDragonTile(type)) { color = '#b71c1c'; cell.classList.add('field-dragon'); }
@@ -3064,7 +3151,7 @@ class Game {
                 
                 cell.style.backgroundColor = color;
 
-                const isKnownObject = isCastleTile(type) || isGateTile(type) || isCitadelTile(type) || isDragonTile(type)
+                const isKnownObject = isWallTile(type) || isCastleTile(type) || isGateTile(type) || isCitadelTile(type) || isDragonTile(type)
                     || isGoldMineTile(type) || isFountainTile(type) || isShopTile(type) || isTavernTile(type)
                     || isRuinsTile(type) || isStatueTile(type);
                 if (!isTerrainCode(type) && !isKnownObject) {
@@ -3127,6 +3214,20 @@ class Game {
             }
         }
         viewport.appendChild(mapLayer);
+
+        const bottomBar = document.createElement('div');
+        bottomBar.id = 'field-bottom-bar';
+        bottomBar.className = 'field-bottom-bar';
+        bottomBar.innerHTML = `
+            <div class="field-bottom-icon">❔</div>
+            <div class="field-bottom-text">
+                <div class="field-bottom-name">선택된 오브젝트 없음</div>
+                <div class="field-bottom-meta">오브젝트를 선택하세요.</div>
+                <div id="field-bottom-details" class="field-bottom-details"></div>
+                <div id="field-move-options" class="field-bottom-move"></div>
+            </div>
+        `;
+        viewport.appendChild(bottomBar);
         this.setMovePreview(this.movePreviewText);
         this.renderEffectLog();
         if (this.currentFieldTargetKey) {
@@ -3418,7 +3519,7 @@ class Game {
         let mapChanged = false;
         if (isBorderTerrain(type)) {
             this.showToast("경계 타일은 점령 불가");
-        } else if (!this.occupiedTiles.has(`${r},${c}`)) {
+        } else if (this.isCapturableFieldObject(type) && !this.occupiedTiles.has(`${r},${c}`)) {
             this.occupiedTiles.add(`${r},${c}`);
             mapChanged = true;
             if (isGateTile(type)) {
@@ -3435,6 +3536,8 @@ class Game {
             }
             const effectMsg = this.getCaptureEffectToast(type);
             if (effectMsg) this.pushEffectLog(effectMsg);
+        } else if (this.isCapturableFieldObject(type)) {
+            this.showToast(`${army.name} 도착 완료`);
         } else {
             this.showToast(`${army.name} 도착 완료`);
         }
