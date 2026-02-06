@@ -77,7 +77,19 @@
         .field-target { outline: 1px solid #ffd700; box-shadow: 0 0 4px #ffd700; z-index: 15; }
         .field-selected { outline: 2px solid #22d3ee; box-shadow: 0 0 6px rgba(34,211,238,0.9); z-index: 16; }
         .field-path { outline: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.08); z-index: 12; }
-        .field-wall { background: #2b2b2b !important; border: 1px solid #1f1f1f; box-shadow: inset 0 0 3px rgba(0,0,0,0.6); }
+        .field-wall {
+            background-color: #8b5a3c !important;
+            background-image:
+                linear-gradient(0deg, rgba(255,255,255,0.08), rgba(0,0,0,0.12)),
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 6px),
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 6px),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.12) 0 1px, transparent 1px 12px);
+            background-size: 100% 100%, 6px 6px, 6px 6px, 12px 12px;
+            background-position: 0 0, 0 0, 0 0, 3px 3px;
+            border: 1px solid rgba(0,0,0,0.25);
+            box-shadow: inset 0 0 1px rgba(0,0,0,0.35);
+        }
+        .field-wall::after { content: '🧱'; font-size: 9px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.45; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.45)); }
         #path-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 15; }
         .path-line-bg { stroke: rgba(0,0,0,0.6); stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
         .path-line { stroke: #ffd700; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
@@ -95,16 +107,29 @@
         .field-cloud-blocked { z-index: 14; background-color: transparent; }
         .field-cloud-layer { position: absolute; inset: 0; background-image: var(--cloud-img); background-repeat: no-repeat; background-size: 100% 100%; background-position: center; pointer-events: none; z-index: 30; filter: drop-shadow(0 0 2px rgba(0,0,0,0.25)); }
 
-        .field-bottom-bar { position: absolute; left: 8px; right: 8px; bottom: 56px; background: rgba(15,15,15,0.9); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 8px 10px; display: flex; align-items: flex-start; gap: 8px; z-index: 80; pointer-events: auto; max-height: 36vh; overflow: hidden; }
+        .field-bottom-bar { position: absolute; left: 8px; right: 8px; bottom: 56px; background: rgba(15,15,15,0.9); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; z-index: 80; pointer-events: auto; max-height: 38vh; overflow: hidden; box-shadow: 0 8px 18px rgba(0,0,0,0.35); backdrop-filter: blur(2px); }
         .field-bottom-icon { width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #f8fafc; flex: 0 0 auto; overflow: hidden; }
         .field-bottom-icon img { width: 100%; height: 100%; object-fit: contain; }
-        .field-bottom-text { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 4px; }
-        .field-bottom-name { font-size: 12px; color: #f8fafc; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .field-bottom-meta { font-size: 10px; color: #cbd5f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .field-bottom-details { display: flex; flex-direction: column; gap: 2px; font-size: 10px; color: #e5e7eb; max-height: 16vh; overflow: auto; padding-right: 2px; }
-        .field-bottom-details .field-info-row { font-size: 10px; }
-        .field-bottom-details .field-info-small { font-size: 10px; color: #9ca3af; }
-        .field-bottom-move { margin-top: 4px; display: flex; flex-direction: column; gap: 4px; }
+        .field-bottom-text { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 6px; }
+        .field-bottom-header { display: flex; flex-direction: column; gap: 2px; }
+        .field-bottom-name { font-size: clamp(12px, 2.2vw, 14px); color: #f8fafc; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .field-bottom-meta { font-size: clamp(10px, 1.6vw, 12px); color: #cbd5f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .field-bottom-grid { display: flex; gap: 12px; align-items: flex-start; }
+        .field-bottom-grid > .field-bottom-details { flex: 1; min-width: 0; }
+        .field-bottom-details { display: flex; flex-direction: column; gap: 4px; font-size: clamp(10px, 1.4vw, 12px); color: #e5e7eb; max-height: 18vh; overflow: auto; padding-right: 2px; line-height: 1.35; }
+        .field-bottom-details .field-info-row { font-size: inherit; }
+        .field-bottom-details .field-info-small { font-size: clamp(9px, 1.2vw, 11px); color: #9ca3af; width: 100%; }
+        .field-bottom-bar .field-info-row { display: grid; grid-template-columns: minmax(58px, 86px) 1fr; align-items: center; gap: 6px; justify-content: start; }
+        .field-bottom-bar .field-info-row span { text-align: left; }
+        .field-bottom-bar .field-info-row span:first-child { color: #a7b0c8; }
+        .field-bottom-bar .field-info-row span:last-child { color: #e5e7eb; }
+        .field-bottom-bar .field-info-small { color: #94a3b8; }
+        .field-bottom-move { display: flex; flex-direction: column; gap: 4px; }
+
+        @media (max-width: 520px) {
+            .field-bottom-bar { bottom: 52px; padding: 9px 10px; max-height: 42vh; }
+            .field-bottom-grid { flex-direction: column; }
+        }
         
         /* Object Icons */
         .field-gate { border: 1px solid #ef4444; }
@@ -136,7 +161,7 @@
         .field-info-row { display: flex; justify-content: space-between; gap: 8px; }
         .field-info-small { font-size: 11px; color: #ccc; margin-top: 4px; }
         .field-move-options { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
-        .field-eta-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: #e5e7eb; padding: 3px 6px; border-radius: 6px; font-size: 11px; text-align: left; }
+        .field-eta-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); color: #e5e7eb; padding: 4px 6px; border-radius: 6px; font-size: clamp(10px, 1.2vw, 12px); text-align: left; width: 100%; }
         .field-eta-btn.active { border-color: #fbbf24; color: #fbbf24; box-shadow: 0 0 0 1px rgba(251,191,36,0.4); }
         .field-eta-btn.disabled { opacity: 0.5; }
         .field-action-btn.disabled { opacity: 0.5; }
@@ -2732,10 +2757,10 @@ class Game {
         if (!wrap) return;
         wrap.innerHTML = "";
 
-        const title = document.createElement('div');
-        title.className = 'field-info-small';
-        title.innerText = "부대 이동 ETA";
-        wrap.appendChild(title);
+        const headerRow = document.createElement('div');
+        headerRow.className = 'field-info-row';
+        headerRow.innerHTML = `<span>부대 이동</span><span>행동력/소요</span>`;
+        wrap.appendChild(headerRow);
 
         const infos = this.getAvailableArmies().map(army => this.getArmyMoveInfo(army, r, c, type));
 
@@ -2774,17 +2799,23 @@ class Game {
             summaryRow.innerHTML = `<span>ETA</span><span>-</span>`;
         }
         wrap.appendChild(summaryRow);
+        if (summaryInfo && summaryInfo.stats) {
+            const rangeRow = document.createElement('div');
+            rangeRow.className = 'field-info-row';
+            rangeRow.innerHTML = `<span>이동 범위</span><span>${summaryInfo.stats.range}칸</span>`;
+            wrap.appendChild(rangeRow);
+        }
 
         infos.forEach(info => {
             const btn = document.createElement('button');
-            btn.className = 'field-eta-btn';
+            btn.className = 'field-eta-btn field-info-row';
             if (info.armyId === this.selectedArmyId) btn.classList.add('active');
             if (!info.canMove) btn.classList.add('disabled');
 
             const etaText = info.canMove
                 ? `${Math.max(1, Math.round(info.timeMin))}m / CP ${info.cpCost}`
                 : `불가 · ${info.reason}`;
-            btn.innerText = `S${info.armyId + 1} ${etaText}`;
+            btn.innerHTML = `<span>S${info.armyId + 1}</span><span>${etaText}</span>`;
 
             btn.onclick = (e) => {
                 e.stopPropagation();
@@ -3221,10 +3252,14 @@ class Game {
         bottomBar.innerHTML = `
             <div class="field-bottom-icon">❔</div>
             <div class="field-bottom-text">
+                <div class="field-bottom-header">
                 <div class="field-bottom-name">선택된 오브젝트 없음</div>
                 <div class="field-bottom-meta">오브젝트를 선택하세요.</div>
-                <div id="field-bottom-details" class="field-bottom-details"></div>
-                <div id="field-move-options" class="field-bottom-move"></div>
+                </div>
+                <div class="field-bottom-grid">
+                    <div id="field-bottom-details" class="field-bottom-details"></div>
+                    <div id="field-move-options" class="field-bottom-details"></div>
+                </div>
             </div>
         `;
         viewport.appendChild(bottomBar);
