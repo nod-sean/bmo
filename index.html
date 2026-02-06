@@ -70,7 +70,7 @@
         .toggle-switch.on .toggle-knob { left: 22px; }
 
         /* Field Styles */
-        .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; z-index: 10; }
+        .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; z-index: 10; overflow: hidden; }
         .field-occupied { border: 1px solid #42a5f5; box-shadow: 0 0 2px #42a5f5; z-index: 10; opacity: 1.0 !important; }
         .field-target { outline: 1px solid #ffd700; box-shadow: 0 0 4px #ffd700; z-index: 15; }
         .field-selected { outline: 2px solid #22d3ee; box-shadow: 0 0 6px rgba(34,211,238,0.9); z-index: 16; }
@@ -78,7 +78,10 @@
         #path-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 15; }
         .path-line-bg { stroke: rgba(0,0,0,0.6); stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
         .path-line { stroke: #ffd700; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        .field-time { position: absolute; left: 0; right: 0; bottom: 1px; height: 8px; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; color: #ffe08a; text-shadow: 0 1px 0 rgba(0,0,0,0.75); pointer-events: none; letter-spacing: -0.35px; z-index: 25; line-height: 1; opacity: 0.5; transform: translateY(var(--label-offset, -1px)) scale(var(--label-scale, 1)); transform-origin: center bottom; }
+        .field-badge { position: absolute; left: 50%; bottom: 0; transform: translate(-50%, 1px); padding: 0 1px; border-radius: 2px; font-size: 3px; font-weight: 700; line-height: 1; letter-spacing: -0.2px; color: #f8fafc; background: rgba(0,0,0,0.2); z-index: 18; opacity: 0.4; pointer-events: none; }
+        .field-badge.active { color: #d1fae5; background: rgba(34,197,94,0.25); }
+        .field-badge.inactive { color: #fee2e2; background: rgba(239,68,68,0.2); }
+        .field-time { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; display: flex; align-items: center; justify-content: center; font-size: clamp(4px, 0.5vw, 6px); font-weight: 700; color: #ffe08a; text-shadow: 0 1px 0 rgba(0,0,0,0.75); pointer-events: none; letter-spacing: -0.35px; z-index: 25; line-height: 1; opacity: 0.5; transform: translateY(var(--label-offset, -1px)) scale(var(--label-scale, 1)); transform-origin: center bottom; }
         .field-time.lower { --label-offset: 0px; }
         .field-cell::after { z-index: 12; }
         .field-move-eligible { outline: 1px dashed rgba(255,255,255,0.35); }
@@ -108,6 +111,9 @@
         .field-move-info { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 4px 8px; font-size: 11px; color: #f8fafc; display: flex; justify-content: space-between; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.35); }
         .field-overlay { position: absolute; top: 0; left: 0; right: 0; z-index: 60; display: flex; flex-direction: column; gap: 4px; padding: 6px 8px 0; pointer-events: none; }
         .field-overlay > * { pointer-events: auto; }
+        .field-effect-log { background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 4px 8px; font-size: 10px; color: #e5e7eb; display: none; flex-direction: column; gap: 2px; width: min(240px, 78vw); }
+        .field-effect-log .title { font-weight: bold; color: #fbbf24; font-size: 10px; }
+        .field-effect-log .entry { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .field-floating-wrap { position: relative; z-index: 70; display: none; flex-direction: column; gap: 6px; width: min(240px, 78vw); pointer-events: auto; align-self: flex-start; }
         .field-info-panel { background: rgba(20,20,20,0.94); border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; padding: 8px 10px; margin-bottom: 0; font-size: 12px; color: #fff; transform: translateY(6px) scale(0.98); opacity: 0; max-height: 0; overflow: hidden; transition: transform 0.2s ease, opacity 0.2s ease, max-height 0.2s ease; box-shadow: 0 8px 18px rgba(0,0,0,0.4); }
         .field-info-panel.open { transform: translateY(0) scale(1); opacity: 1; max-height: 240px; }
@@ -122,16 +128,20 @@
         .field-info-bar { height: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; margin-top: 2px; }
         .field-info-bar-fill { height: 100%; background: #fbbf24; }
         .shop-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
-        .shop-card { background: #2b2b2b; border: 1px solid #4b4b4b; border-radius: 10px; padding: 8px; text-align: left; font-size: 11px; display: flex; flex-direction: column; gap: 6px; }
+        .shop-card { background: #2b2b2b; border: 1px solid #4b4b4b; border-radius: 10px; padding: 8px; text-align: left; font-size: 11px; display: flex; flex-direction: column; gap: 6px; min-height: 92px; }
         .shop-card .name { font-weight: bold; color: #f8fafc; }
-        .shop-card .meta { color: #cbd5f5; font-size: 10px; }
-        .shop-card .price-btn { align-self: stretch; background: #f59e0b; color: #111827; border-radius: 8px; padding: 6px 0; font-weight: bold; font-size: 11px; }
+        .shop-card .meta { color: #cbd5f5; font-size: 10px; min-height: 18px; }
+        .shop-card .level { color: #94a3b8; font-size: 10px; }
+        .shop-card .price-btn { align-self: stretch; background: #f59e0b; color: #111827; border-radius: 8px; padding: 6px 0; font-weight: bold; font-size: 11px; margin-top: auto; }
         .shop-card .price-btn:active { transform: scale(0.98); }
         .shop-card.disabled { opacity: 0.45; }
         .shop-card.disabled .price-btn { background: #374151; color: #9ca3af; }
         .shop-icon { width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .shop-icon-img { width: 100%; height: 100%; object-fit: contain; }
         .shop-row { display: flex; align-items: center; gap: 6px; }
+        .shop-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .shop-title { font-weight: bold; color: #f8fafc; }
+        .shop-refresh { color: #9ca3af; font-size: 10px; }
         .shop-card.restock { animation: restockPulse 0.8s ease-out; box-shadow: 0 0 0 2px rgba(34,197,94,0.6); }
         @keyframes restockPulse {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0.0); }
@@ -734,7 +744,7 @@ function buildTerrainPools() {
     for (let r = 0; r < FIELD_MAP_DATA.length; r++) {
         for (let c = 0; c < FIELD_MAP_DATA[r].length; c++) {
             const type = FIELD_MAP_DATA[r][c];
-            if (!isTerrainCode(type)) continue;
+            if (!isTerrainCode(type) || isBorderTerrain(type)) continue;
             const group = getTerrainGroupFromCode(type);
             if (group) pools[group].push({ r, c });
         }
@@ -781,22 +791,50 @@ function applyObjectProbToMap() {
             localStorage.setItem(key, JSON.stringify(placements));
         } catch (e) {}
     } else {
+        let changed = false;
+        const next = [];
         placements.forEach(p => {
-            if (!FIELD_MAP_DATA[p.r] || typeof FIELD_MAP_DATA[p.r][p.c] === 'undefined') return;
-            if (!isTerrainCode(FIELD_MAP_DATA[p.r][p.c])) return;
+            if (!FIELD_MAP_DATA[p.r] || typeof FIELD_MAP_DATA[p.r][p.c] === 'undefined') { changed = true; return; }
+            const base = FIELD_TERRAIN_DATA?.[p.r]?.[p.c];
+            if (isBorderTerrain(FIELD_MAP_DATA[p.r][p.c]) || isBorderTerrain(base)) {
+                if (base !== undefined && base !== null) FIELD_MAP_DATA[p.r][p.c] = base;
+                changed = true;
+                return;
+            }
+            if (!isTerrainCode(FIELD_MAP_DATA[p.r][p.c])) { changed = true; return; }
             FIELD_MAP_DATA[p.r][p.c] = p.code;
+            next.push(p);
         });
+        if (changed) {
+            try { localStorage.setItem(key, JSON.stringify(next)); } catch (e) {}
+        }
     }
 }
 
 applyObjectProbToMap();
+
+function purgeBorderObjects() {
+    let changed = false;
+    for (let r = 0; r < FIELD_MAP_DATA.length; r++) {
+        for (let c = 0; c < FIELD_MAP_DATA[r].length; c++) {
+            const base = FIELD_TERRAIN_DATA?.[r]?.[c];
+            if (!isBorderTerrain(base)) continue;
+            if (isTerrainCode(FIELD_MAP_DATA[r][c])) continue;
+            FIELD_MAP_DATA[r][c] = base;
+            changed = true;
+        }
+    }
+    return changed;
+}
+
+purgeBorderObjects();
 
 function buildRegenPools() {
     const pools = { 1: [], 2: [], 3: [], 4: [], 5: [] };
     for (let r = 0; r < FIELD_MAP_DATA.length; r++) {
         for (let c = 0; c < FIELD_MAP_DATA[r].length; c++) {
             const base = FIELD_TERRAIN_DATA?.[r]?.[c];
-            if (!isTerrainCode(base)) continue;
+            if (!isTerrainCode(base) || isBorderTerrain(base)) continue;
             if (!isTerrainCode(FIELD_MAP_DATA[r][c])) continue;
             const group = getTerrainGroupFromCode(base);
             if (group) pools[group].push({ r, c });
@@ -956,7 +994,7 @@ class Particle {
 }
 
 class AStar {
-    static findPath(start, end, mapData, occupiedTiles) {
+    static findPath(start, end, mapData, occupiedTiles, isBlockedFn) {
         const rows = MAP_SIZE, cols = MAP_SIZE;
         const openSet = [], closedSet = new Set();
         const startNode = { r: start.r, c: start.c, g: 0, h: 0, f: 0, parent: null };
@@ -987,7 +1025,11 @@ class AStar {
                     const isOccupied = occupiedTiles.has(`${nr},${nc}`);
                     
                     let isWalkable = true;
-                    if (isBlockingField(type) && !isOccupied && !isTarget) isWalkable = false;
+                    if (isBlockedFn) {
+                        if (isBlockedFn(current, nr, nc, type, isOccupied, isTarget)) isWalkable = false;
+                    } else if (isBlockingField(type) && !isOccupied && !isTarget) {
+                        isWalkable = false;
+                    }
                     
                     if(!isWalkable) continue;
                     
@@ -1043,6 +1085,9 @@ class Game {
         this.previewPath = null;
         this.movePreviewText = "";
         this.isResetting = false;
+        this.effectLog = [];
+        this.openBorderTiles = new Set();
+        this.fieldRegions = null;
 
         this.visibilityMap = new Set();
         this.revealFog(PLAYER_START.r, PLAYER_START.c, FOG_RADIUS);
@@ -1076,6 +1121,8 @@ class Game {
         if(!resetFlag && this.loadGame()) { this.updateLevelStats(); }
         else { this.initGame(); }
         this.recalcFieldBonuses();
+        this.buildFieldRegions();
+        this.updateOpenBorders();
         this.updateUI();
 
         setInterval(() => this.regenEnergy(), 1000);
@@ -1595,6 +1642,146 @@ class Game {
         return { key, state, cfg };
     }
 
+    buildFieldRegions() {
+        const regions = Array.from({ length: MAP_SIZE }, () => Array(MAP_SIZE).fill(-1));
+        let regionId = 0;
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+        for (let r = 0; r < MAP_SIZE; r++) {
+            for (let c = 0; c < MAP_SIZE; c++) {
+                const type = FIELD_MAP_DATA[r][c];
+                if (isBorderTerrain(type) || isGateTile(type) || isCitadelTile(type) || isDragonTile(type)) continue;
+                if (regions[r][c] !== -1) continue;
+                const stack = [{ r, c }];
+                regions[r][c] = regionId;
+                while (stack.length) {
+                    const cur = stack.pop();
+                    for (const d of dirs) {
+                        const nr = cur.r + d[0];
+                        const nc = cur.c + d[1];
+                        if (nr < 0 || nr >= MAP_SIZE || nc < 0 || nc >= MAP_SIZE) continue;
+                        const ntype = FIELD_MAP_DATA[nr][nc];
+                        if (isBorderTerrain(ntype) || isGateTile(ntype) || isCitadelTile(ntype) || isDragonTile(ntype)) continue;
+                        if (regions[nr][nc] !== -1) continue;
+                        regions[nr][nc] = regionId;
+                        stack.push({ r: nr, c: nc });
+                    }
+                }
+                regionId += 1;
+            }
+        }
+        this.fieldRegions = regions;
+    }
+
+    getRegionIdAt(r, c) {
+        if (!this.fieldRegions || r < 0 || c < 0 || r >= MAP_SIZE || c >= MAP_SIZE) return -1;
+        return this.fieldRegions[r][c];
+    }
+
+    getAdjacentRegionIds(r, c) {
+        const ids = new Set();
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+        for (const d of dirs) {
+            const nr = r + d[0];
+            const nc = c + d[1];
+            const id = this.getRegionIdAt(nr, nc);
+            if (id !== -1) ids.add(id);
+        }
+        return ids;
+    }
+
+    getAdjacentRegionKey(r, c) {
+        const ids = Array.from(this.getAdjacentRegionIds(r, c));
+        if (ids.length === 0) return "";
+        ids.sort((a, b) => a - b);
+        return ids.join(",");
+    }
+
+    getArmyRegionId(army) {
+        if (!army) return -1;
+        const type = FIELD_MAP_DATA?.[army.r]?.[army.c];
+        if (!isBorderTerrain(type)) {
+            const id = this.getRegionIdAt(army.r, army.c);
+            if (id !== -1) army.regionId = id;
+            return id;
+        }
+        if (army.regionId !== undefined && army.regionId !== null) return army.regionId;
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+        for (const d of dirs) {
+            const nr = army.r + d[0];
+            const nc = army.c + d[1];
+            const id = this.getRegionIdAt(nr, nc);
+            if (id !== -1) {
+                army.regionId = id;
+                return id;
+            }
+        }
+        return -1;
+    }
+
+    updateOpenBorders() {
+        const open = new Set();
+        const visited = new Set();
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+
+        const bfs = (sr, sc, adjKey) => {
+            const stack = [{ r: sr, c: sc }];
+            visited.add(`${sr},${sc}`);
+            while (stack.length) {
+                const cur = stack.pop();
+                open.add(`${cur.r},${cur.c}`);
+                for (const d of dirs) {
+                    const nr = cur.r + d[0];
+                    const nc = cur.c + d[1];
+                    if (nr < 0 || nr >= MAP_SIZE || nc < 0 || nc >= MAP_SIZE) continue;
+                    const nkey = `${nr},${nc}`;
+                    if (visited.has(nkey)) continue;
+                    if (!isBorderTerrain(FIELD_MAP_DATA[nr][nc])) continue;
+                    const nAdjKey = this.getAdjacentRegionKey(nr, nc);
+                    if (!nAdjKey || nAdjKey !== adjKey) continue;
+                    visited.add(nkey);
+                    stack.push({ r: nr, c: nc });
+                }
+            }
+        };
+
+        this.occupiedTiles.forEach(key => {
+            const [r, c] = key.split(',').map(Number);
+            const type = FIELD_MAP_DATA[r]?.[c];
+            if (!isGateTile(type)) return;
+            for (const d of dirs) {
+                const nr = r + d[0];
+                const nc = c + d[1];
+                if (nr < 0 || nr >= MAP_SIZE || nc < 0 || nc >= MAP_SIZE) continue;
+                if (!isBorderTerrain(FIELD_MAP_DATA[nr][nc])) continue;
+                const nkey = `${nr},${nc}`;
+                const adjKey = this.getAdjacentRegionKey(nr, nc);
+                if (!adjKey) continue;
+                if (!visited.has(nkey)) bfs(nr, nc, adjKey);
+            }
+        });
+
+        this.openBorderTiles = open;
+    }
+
+    isBorderOpen(r, c) {
+        return this.openBorderTiles?.has(`${r},${c}`);
+    }
+
+    isTileBlocked(current, r, c, type, isOccupied, isTarget, regionId) {
+        if (isBorderTerrain(type)) {
+            if (this.isBorderOpen(r, c)) return false;
+            return true;
+        }
+        if (isOccupied || isTarget) return false;
+        if (current && isBorderTerrain(FIELD_MAP_DATA[current.r][current.c])) {
+            if (!this.isBorderOpen(current.r, current.c)) {
+                const targetRegion = this.getRegionIdAt(r, c);
+                if (regionId !== -1 && targetRegion !== -1 && targetRegion !== regionId) return true;
+            }
+        }
+        return isGateTile(type) || isCitadelTile(type) || isDragonTile(type);
+    }
+
     collectFieldResource(type, r, c) {
         const key = `${r},${c}`;
         if (!this.occupiedTiles.has(key)) { this.showToast("점령 후 수령 가능"); return; }
@@ -1653,10 +1840,25 @@ class Game {
         if (!this.occupiedTiles.size) return false;
         const queue = [];
         const visited = new Set();
+        const regionByKey = {};
         this.occupiedTiles.forEach(key => {
             const [sr, sc] = key.split(',').map(Number);
-            queue.push({ r: sr, c: sc });
+            const startType = FIELD_MAP_DATA[sr][sc];
+            let regionId = -1;
+            if (!isBorderTerrain(startType)) {
+                regionId = this.getRegionIdAt(sr, sc);
+            } else {
+                const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+                for (const d of dirs) {
+                    const nr = sr + d[0];
+                    const nc = sc + d[1];
+                    const id = this.getRegionIdAt(nr, nc);
+                    if (id !== -1) { regionId = id; break; }
+                }
+            }
+            queue.push({ r: sr, c: sc, regionId });
             visited.add(key);
+            regionByKey[key] = regionId;
         });
         const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
         while (queue.length) {
@@ -1670,10 +1872,15 @@ class Game {
                 const type = FIELD_MAP_DATA[nr][nc];
                 const isTarget = nkey === targetKey;
                 const isOccupied = this.occupiedTiles.has(nkey);
-                if (isBlockingField(type) && !isOccupied && !isTarget) continue;
+                if (this.isTileBlocked(cur, nr, nc, type, isOccupied, isTarget, cur.regionId ?? -1)) continue;
                 if (nkey === targetKey) return true;
+                let nextRegion = cur.regionId ?? -1;
+                if (!isBorderTerrain(type)) {
+                    const rid = this.getRegionIdAt(nr, nc);
+                    if (rid !== -1) nextRegion = rid;
+                }
                 visited.add(nkey);
-                queue.push({ r: nr, c: nc });
+                queue.push({ r: nr, c: nc, regionId: nextRegion });
             }
         }
         return false;
@@ -1803,6 +2010,12 @@ class Game {
         return Math.max(80, (stats.sell + 1) * 100);
     }
 
+    getShopItemKey(item) {
+        if (!item) return "";
+        if (item.kind === "item") return `item:${item.code ?? `${item.type}:${item.level}`}`;
+        return `unit:${item.code ?? `${item.name}:${item.level}`}`;
+    }
+
     buildShopCatalog(type) {
         const level = this.getFieldLevel(type);
         if (isShopTile(type)) {
@@ -1884,8 +2097,13 @@ class Game {
         const now = Date.now();
         const interval = 3 * 60 * 60 * 1000;
         if (now - state.lastRefresh >= interval) {
+            const prevSoldKeys = new Set((state.items || []).filter(i => i.sold).map(i => this.getShopItemKey(i)));
             state.lastRefresh = now;
-            state.items = this.buildShopCatalog(type);
+            state.items = this.buildShopCatalog(type).map(item => ({
+                ...item,
+                sold: false,
+                restock: prevSoldKeys.has(this.getShopItemKey(item))
+            }));
             state.justRefreshed = true;
             this.fieldShopState[key] = state;
         }
@@ -1900,7 +2118,7 @@ class Game {
         const now = Date.now();
         if (now - state.lastRefresh >= interval || !state.items || state.items.length === 0) {
             state.lastRefresh = now;
-            state.items = this.buildShopCatalog(type);
+            state.items = this.buildShopCatalog(type).map(item => ({ ...item, sold: false, restock: false }));
         }
         this.fieldShopState[key] = state;
         this.currentShopContext = { type, r, c };
@@ -1924,7 +2142,8 @@ class Game {
         modal.querySelector('.modal-content')?.classList.add('wide');
 
         const header = document.createElement('div');
-        header.innerHTML = `<div>${name} Lv.${level}</div><div class="text-gray-400 text-xs">갱신까지: <span id="shop-refresh-timer">${remain}</span></div>`;
+        header.className = "shop-header";
+        header.innerHTML = `<div class="shop-title">${name} Lv.${level}</div><div class="shop-refresh">갱신까지: <span id="shop-refresh-timer">${remain}</span></div>`;
         b.appendChild(header);
 
         const list = document.createElement('div');
@@ -1933,7 +2152,7 @@ class Game {
         state.items.forEach(item => {
             const row = document.createElement('div');
             row.className = "shop-card";
-            if (state.justRefreshed) row.classList.add('restock');
+            if (item.restock) row.classList.add('restock');
 
             if (item.kind === "item") {
                 const imgSrc = this.getAssetSrc(item.type, item.level);
@@ -1941,7 +2160,7 @@ class Game {
                     ? `<div class="shop-icon"><img class="shop-icon-img" src="${imgSrc}" alt=""></div>`
                     : `<div class="shop-icon">${item.icon || this.getItemIcon(item.type)}</div>`;
                 row.innerHTML = `
-                    <div class="shop-row">${iconHtml}<div><div class="name">${item.name} Lv.${item.level}</div><div class="meta">획득량 +${item.earn}</div></div></div>
+                    <div class="shop-row">${iconHtml}<div><div class="name">${item.name}</div><div class="level">Lv.${item.level}</div><div class="meta">획득량 +${item.earn}</div></div></div>
                     <button class="price-btn">${item.sold ? "SOLD OUT" : `💰 ${item.price}`}</button>
                 `;
                 const btn = row.querySelector('.price-btn');
@@ -1959,7 +2178,7 @@ class Game {
                     ? `<div class="shop-icon"><img class="shop-icon-img" src="${imgSrc}" alt=""></div>`
                     : `<div class="shop-icon">⚔</div>`;
                 row.innerHTML = `
-                    <div class="shop-row">${iconHtml}<div><div class="name">${item.name} Lv.${item.level}</div><div class="meta">용병 고용</div></div></div>
+                    <div class="shop-row">${iconHtml}<div><div class="name">${item.name}</div><div class="level">Lv.${item.level}</div><div class="meta">용병 고용</div></div></div>
                     <button class="price-btn">${item.sold ? "SOLD OUT" : `💰 ${item.price}`}</button>
                 `;
                 const btn = row.querySelector('.price-btn');
@@ -1974,6 +2193,7 @@ class Game {
             list.appendChild(row);
         });
 
+        state.items.forEach(item => { item.restock = false; });
         state.justRefreshed = false;
         b.appendChild(list);
         modal.classList.add('open');
@@ -2040,12 +2260,19 @@ class Game {
     buildMoveTimeMap(army, stats) {
         const times = new Map();
         const origin = { r: army.r, c: army.c };
+        const regionId = this.getArmyRegionId(army);
         for (let r = 0; r < MAP_SIZE; r++) {
             for (let c = 0; c < MAP_SIZE; c++) {
                 const key = `${r},${c}`;
                 if (!this.visibilityMap.has(key)) continue;
                 if (r === origin.r && c === origin.c) continue;
-                const path = AStar.findPath(origin, { r, c }, FIELD_MAP_DATA, this.occupiedTiles);
+                const path = AStar.findPath(
+                    origin,
+                    { r, c },
+                    FIELD_MAP_DATA,
+                    this.occupiedTiles,
+                    (cur, nr, nc, type, isOcc, isTarget) => this.isTileBlocked(cur, nr, nc, type, isOcc, isTarget, regionId)
+                );
                 if (!path) continue;
                 const dist = path.length - 1;
                 if (dist <= 0 || dist > stats.range) continue;
@@ -2096,8 +2323,15 @@ class Game {
 
         const army = this.armies[armyId];
         if (!army || army.state !== 'IDLE') { this.showToast("부대가 이동 중입니다."); return; }
+        const regionId = this.getArmyRegionId(army);
 
-        const path = AStar.findPath({ r: army.r, c: army.c }, { r, c }, FIELD_MAP_DATA, this.occupiedTiles);
+        const path = AStar.findPath(
+            { r: army.r, c: army.c },
+            { r, c },
+            FIELD_MAP_DATA,
+            this.occupiedTiles,
+            (cur, nr, nc, type, isOcc, isTarget) => this.isTileBlocked(cur, nr, nc, type, isOcc, isTarget, regionId)
+        );
         if (!path) { this.showToast("갈 수 없음"); this.sound.playError(); return; }
         const dist = path.length - 1;
         if (dist > stats.range) { this.showToast(`거리 초과 (${dist}/${stats.range})`); this.sound.playError(); return; }
@@ -2210,6 +2444,29 @@ class Game {
         return "";
     }
 
+    pushEffectLog(message) {
+        if (!message) return;
+        const now = new Date();
+        const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        this.effectLog.unshift({ time, message });
+        if (this.effectLog.length > 5) this.effectLog.length = 5;
+        this.renderEffectLog();
+    }
+
+    renderEffectLog() {
+        const panel = document.getElementById('field-effect-log');
+        if (!panel) return;
+        if (!this.effectLog.length) {
+            panel.style.display = 'none';
+            panel.innerHTML = '';
+            return;
+        }
+        panel.style.display = 'flex';
+        panel.innerHTML = `<div class="title">효과 로그</div>` + this.effectLog
+            .map(entry => `<div class="entry">${entry.time} · ${entry.message}</div>`)
+            .join("");
+    }
+
     setFieldInfo(type, r, c) {
         const panel = document.getElementById('field-info-panel');
         if (!panel) return;
@@ -2314,8 +2571,15 @@ class Game {
         const stats = this.getSquadStats(squadData);
         if (stats.power < 10) return { armyId: army.id, canMove: false, reason: "병력 부족", stats };
         if (army.state !== 'IDLE') return { armyId: army.id, canMove: false, reason: "이동중", stats };
+        const regionId = this.getArmyRegionId(army);
 
-        const path = AStar.findPath({ r: army.r, c: army.c }, { r: targetR, c: targetC }, FIELD_MAP_DATA, this.occupiedTiles);
+        const path = AStar.findPath(
+            { r: army.r, c: army.c },
+            { r: targetR, c: targetC },
+            FIELD_MAP_DATA,
+            this.occupiedTiles,
+            (cur, nr, nc, type, isOcc, isTarget) => this.isTileBlocked(cur, nr, nc, type, isOcc, isTarget, regionId)
+        );
         if (!path) return { armyId: army.id, canMove: false, reason: "갈 수 없음", stats };
 
         const dist = path.length - 1;
@@ -2624,6 +2888,11 @@ class Game {
         headerDiv.innerHTML = `<div>점령: <span class="text-white font-bold">${this.occupiedTiles.size}</span></div><div>세금: <span class="text-yellow-400 font-bold">${incomeSign}${this.income}/3sec</span></div><div>CP: <span id="field-cp-display" class="text-white font-bold">${this.cp}/${this.maxCp}</span></div>`;
         overlay.appendChild(headerDiv);
 
+        const effectLog = document.createElement('div');
+        effectLog.id = 'field-effect-log';
+        effectLog.className = 'field-effect-log';
+        overlay.appendChild(effectLog);
+
         const floatingWrap = document.createElement('div');
         floatingWrap.id = 'field-floating-wrap';
         floatingWrap.className = 'field-floating-wrap';
@@ -2760,6 +3029,25 @@ class Game {
 
                 if (this.currentFieldTargetKey === key) cell.classList.add('field-selected');
 
+                if (isGateTile(type) || isCitadelTile(type) || isRuinsTile(type) || isStatueTile(type)) {
+                    const badge = document.createElement('div');
+                    badge.className = 'field-badge';
+                    badge.classList.add(isOccupied ? 'active' : 'inactive');
+                    if (isGateTile(type)) badge.innerText = 'GT';
+                    else if (isCitadelTile(type)) badge.innerText = 'SQ';
+                    else if (isRuinsTile(type)) badge.innerText = 'CP';
+                    else if (isStatueTile(type)) {
+                        const buff = this.getStatueBuff(type);
+                        const kind = buff ? buff.kind.toUpperCase() : 'BF';
+                        if (kind === 'ATK') badge.innerText = 'AT';
+                        else if (kind === 'DEF') badge.innerText = 'DF';
+                        else if (kind === 'HP') badge.innerText = 'HP';
+                        else if (kind === 'SPD') badge.innerText = 'SP';
+                        else badge.innerText = kind.slice(0, 2);
+                    }
+                    cell.appendChild(badge);
+                }
+
                 // Additional marker classes handled above
 
                 cell.onclick = (e) => {
@@ -2775,6 +3063,7 @@ class Game {
         }
         viewport.appendChild(mapLayer);
         this.setMovePreview(this.movePreviewText);
+        this.renderEffectLog();
         if (this.currentFieldTargetKey) {
             const [tr, tc] = this.currentFieldTargetKey.split(',').map(Number);
             if (!Number.isNaN(tr) && !Number.isNaN(tc) && FIELD_MAP_DATA?.[tr]?.[tc] !== undefined) {
@@ -2799,6 +3088,7 @@ class Game {
     commandArmy(armyId, targetR, targetC, tileType) {
         const army = this.armies[armyId];
         if (army.state !== 'IDLE') { this.showToast("부대가 이동 중입니다."); return; }
+        const regionId = this.getArmyRegionId(army);
         this.lastSelectedArmyId = armyId;
         
         let energyCost = 1; let goldCost = 0;
@@ -2809,7 +3099,13 @@ class Game {
         
         if (stats.power < 10) { this.showToast("병력이 부족합니다."); return; }
 
-        const path = AStar.findPath({r: army.r, c: army.c}, {r: targetR, c: targetC}, FIELD_MAP_DATA, this.occupiedTiles);
+        const path = AStar.findPath(
+            { r: army.r, c: army.c },
+            { r: targetR, c: targetC },
+            FIELD_MAP_DATA,
+            this.occupiedTiles,
+            (cur, nr, nc, type, isOcc, isTarget) => this.isTileBlocked(cur, nr, nc, type, isOcc, isTarget, regionId)
+        );
         
         if (!path) { this.showToast("갈 수 없는 지역입니다."); return; }
         const dist = path.length - 1;
@@ -2917,8 +3213,15 @@ class Game {
             const squadData = this.getSquadByArmyId(army.id);
             const stats = this.getSquadStats(squadData);
             const squadInfo = this.getSquadInfo(squadData);
+            const regionId = this.getArmyRegionId(army);
 
-            const path = AStar.findPath({r: army.r, c: army.c}, {r: targetR, c: targetC}, FIELD_MAP_DATA, this.occupiedTiles);
+            const path = AStar.findPath(
+                { r: army.r, c: army.c },
+                { r: targetR, c: targetC },
+                FIELD_MAP_DATA,
+                this.occupiedTiles,
+                (cur, nr, nc, type, isOcc, isTarget) => this.isTileBlocked(cur, nr, nc, type, isOcc, isTarget, regionId)
+            );
             const dist = path ? path.length - 1 : 999;
             const reachable = path && dist <= stats.range;
             const cpCost = path ? dist * CP_COST_PER_TILE : 0;
@@ -3048,7 +3351,9 @@ class Game {
     handleArrival(army) {
         const { r, c, type } = army.target;
         let mapChanged = false;
-        if (!this.occupiedTiles.has(`${r},${c}`)) {
+        if (isBorderTerrain(type)) {
+            this.showToast("경계 타일은 점령 불가");
+        } else if (!this.occupiedTiles.has(`${r},${c}`)) {
             this.occupiedTiles.add(`${r},${c}`);
             mapChanged = true;
             if (isGateTile(type)) {
@@ -3063,6 +3368,8 @@ class Game {
                 this.showToast(`🚩 ${army.name} 점령 성공!`);
                 this.sound.playCollect();
             }
+            const effectMsg = this.getCaptureEffectToast(type);
+            if (effectMsg) this.pushEffectLog(effectMsg);
         } else {
             this.showToast(`${army.name} 도착 완료`);
         }
@@ -3088,6 +3395,7 @@ class Game {
             }
         }
 
+        if (mapChanged) this.updateOpenBorders();
         if (mapChanged && document.getElementById('field-modal').classList.contains('open')) {
             this.renderFieldMap();
         }
@@ -3102,7 +3410,7 @@ class Game {
         mapLayer.style.transition = 'transform 0.3s ease-out';
         this.camera.x = newX; this.camera.y = newY;
         mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`;
-        const labelScale = Math.min(1, 1 / this.camera.scale);
+        const labelScale = Math.max(0.5, Math.min(1.15, 1 / this.camera.scale));
         mapLayer.style.setProperty('--label-scale', labelScale.toFixed(3));
         this.updateFloatingPanelPositionFromSelection();
         setTimeout(() => { mapLayer.style.transition = 'none'; }, 300);
@@ -3137,7 +3445,7 @@ class Game {
         }
         const updateTransform = () => { 
             mapLayer.style.transform = `translate(${this.camera.x}px, ${this.camera.y}px) scale(${this.camera.scale})`; 
-            const labelScale = Math.min(1, 1 / this.camera.scale);
+            const labelScale = Math.max(0.5, Math.min(1.15, 1 / this.camera.scale));
             mapLayer.style.setProperty('--label-scale', labelScale.toFixed(3));
             this.updateFloatingPanelPositionFromSelection();
         };
