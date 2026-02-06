@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
         /* ... (기존 스타일 유지) ... */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background-color: #000; touch-action: none; font-family: 'Segoe UI', sans-serif; overflow: hidden; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100dvh; }
-        #game-container { position: relative; background-color: #4e342e; box-shadow: 0 0 50px rgba(0,0,0,0.5); width: 100%; height: 100%; max-width: 56.25vh; display: flex; flex-direction: column; overflow: hidden; }
+        #game-container { position: relative; background-color: #4e342e; box-shadow: 0 0 50px rgba(0,0,0,0.5); width: 100%; min-height: 22px; height: 100%; max-width: 56.25vh; display: flex; flex-direction: column; overflow: hidden; }
         
         /* Header */
         .header-panel { flex: 0 0 auto; background: linear-gradient(to bottom, rgba(0,0,0,0.95), rgba(0,0,0,0.0)); color: white; padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); z-index: 20; }
@@ -18,8 +18,8 @@
         .res-icon { width: 18px; height: 18px; object-fit: contain; display: inline-flex; align-items: center; justify-content: center; }
 
         /* Canvas */
-        #canvas-wrapper { flex: 1; position: relative; overflow: hidden; background-color: #3e2723; width: 100%; }
-        canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+        #canvas-wrapper { flex: 1; position: relative; overflow: hidden; background-color: #3e2723; width: 100%; min-height: 22px; }
+        canvas { display: block; width: 100%; min-height: 22px; height: 100%; image-rendering: pixelated; }
 
         /* Footer */
         .footer-panel { flex: 0 0 auto; background: #d7ccc8; border-top: 4px solid #8d6e63; padding: 8px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; min-height: 90px; z-index: 20; }
@@ -59,7 +59,7 @@
         .modal-overlay.open .modal-content { transform: scale(1); }
         .modal-content.wide { max-width: 360px; }
         
-        #field-modal { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: #222; z-index: 90; transform: translateY(100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column; color: white; }
+        #field-modal { position: absolute; bottom: 0; left: 0; width: 100%; min-height: 22px; height: 100%; background: #222; z-index: 90; transform: translateY(100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column; color: white; }
         #field-modal.open { transform: translateY(0); }
         
         .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; overflow-y: auto; padding: 10px; }
@@ -107,31 +107,37 @@
         .field-cloud-blocked { z-index: 14; background-color: transparent; }
         .field-cloud-layer { position: absolute; inset: 0; background-image: var(--cloud-img); background-repeat: no-repeat; background-size: 100% 100%; background-position: center; pointer-events: none; z-index: 30; filter: drop-shadow(0 0 2px rgba(0,0,0,0.25)); }
 
-        .field-bottom-bar { position: absolute; left: 8px; right: 8px; bottom: 56px; background: rgba(15,15,15,0.9); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; z-index: 80; pointer-events: auto; max-height: 38vh; overflow: hidden; box-shadow: 0 8px 18px rgba(0,0,0,0.35); backdrop-filter: blur(2px); }
+        .field-bottom-bar { position: absolute; left: 8px; right: 8px; bottom: 8px; background: rgba(15,15,15,0.9); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; z-index: 80; pointer-events: auto; max-height: 38vh; overflow: hidden; box-shadow: 0 8px 18px rgba(0,0,0,0.35); backdrop-filter: blur(2px); }
         .field-bottom-icon { width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #f8fafc; flex: 0 0 auto; overflow: hidden; }
-        .field-bottom-icon img { width: 100%; height: 100%; object-fit: contain; }
+        .field-bottom-icon img { width: 100%; min-height: 22px; height: 100%; object-fit: contain; }
         .field-bottom-text { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 6px; }
-        .field-bottom-header { display: flex; flex-direction: column; gap: 2px; }
+        .field-bottom-header { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+        .field-bottom-header-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .field-bottom-header-right { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
         .field-bottom-name { font-size: clamp(12px, 2.2vw, 14px); color: #f8fafc; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .field-bottom-meta { font-size: clamp(10px, 1.6vw, 12px); color: #cbd5f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .field-bottom-grid { display: flex; gap: 12px; align-items: flex-start; }
-        .field-bottom-grid > .field-bottom-details { flex: 1; min-width: 0; }
-        .field-bottom-details { display: flex; flex-direction: column; gap: 4px; font-size: clamp(10px, 1.4vw, 12px); color: #e5e7eb; max-height: 18vh; overflow: auto; padding-right: 2px; line-height: 1.35; }
+        .field-bottom-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+        .field-bottom-grid > .field-bottom-details { min-width: 0; }
+        .field-bottom-details { display: flex; flex-direction: column; gap: 6px; font-size: clamp(10px, 1.4vw, 12px); color: #e5e7eb; max-height: 20vh; overflow: auto; padding-right: 2px; line-height: 1.4; }
+        .field-bottom-section-title { font-size: clamp(10px, 1.5vw, 12px); color: #fbbf24; font-weight: 700; letter-spacing: -0.2px; }
+        .field-bottom-summary { font-size: clamp(11px, 1.6vw, 13px); color: #f8fafc; font-weight: 600; }
+        .field-bottom-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 2px 0; }
         .field-bottom-details .field-info-row { font-size: inherit; }
-        .field-bottom-details .field-info-small { font-size: clamp(9px, 1.2vw, 11px); color: #9ca3af; width: 100%; }
-        .field-bottom-bar .field-info-row { display: grid; grid-template-columns: minmax(58px, 86px) 1fr; align-items: center; gap: 6px; justify-content: start; }
+        .field-bottom-details .field-info-small { font-size: clamp(9px, 1.2vw, 11px); color: #9ca3af; width: 100%; min-height: 22px; }
+        .field-bottom-bar .field-info-row { display: grid; grid-template-columns: minmax(64px, 90px) 1fr; align-items: center; gap: 6px; justify-content: start; }
         .field-bottom-bar .field-info-row span { text-align: left; }
         .field-bottom-bar .field-info-row span:first-child { color: #a7b0c8; }
         .field-bottom-bar .field-info-row span:last-child { color: #e5e7eb; }
         .field-bottom-bar .field-info-small { color: #94a3b8; }
         .field-bottom-move { display: flex; flex-direction: column; gap: 4px; }
+        #field-move-options { padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.08); }
 
-        @media (max-width: 520px) {
-            .field-bottom-bar { bottom: 52px; padding: 9px 10px; max-height: 42vh; }
-            .field-bottom-grid { flex-direction: column; }
+        @media (max-width: 360px) {
+            .field-bottom-bar { bottom: 8px; padding: 9px 10px; max-height: 42vh; }
+            .field-bottom-grid { grid-template-columns: 1fr; }
         }
         
-        /* Object Icons */
+                /* Object Icons */
         .field-gate { border: 1px solid #ef4444; }
         .field-gate.locked::after { content: '🔒'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-gate.unlocked::after { content: '👐'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
@@ -139,9 +145,9 @@
         .field-fortress::after { content: '🏯'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-citadel::after { content: '🏯'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-dragon::after { content: '🐉'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .field-shop::after { content: '🏪'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .field-shop::after { content: '🛒'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-tavern::after { content: '🍺'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .field-ruins::after { content: '🏺'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .field-ruins::after { content: '🏛️'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .field-statue::after { content: '🗿'; font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         
         /* New Objects: Gold Mine & Fountain */
@@ -161,7 +167,7 @@
         .field-info-row { display: flex; justify-content: space-between; gap: 8px; }
         .field-info-small { font-size: 11px; color: #ccc; margin-top: 4px; }
         .field-move-options { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
-        .field-eta-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); color: #e5e7eb; padding: 4px 6px; border-radius: 6px; font-size: clamp(10px, 1.2vw, 12px); text-align: left; width: 100%; }
+        .field-eta-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); color: #e5e7eb; padding: 3px 6px; border-radius: 6px; font-size: clamp(9px, 1.1vw, 11px); text-align: left; width: 100%; min-height: 22px; }
         .field-eta-btn.active { border-color: #fbbf24; color: #fbbf24; box-shadow: 0 0 0 1px rgba(251,191,36,0.4); }
         .field-eta-btn.disabled { opacity: 0.5; }
         .field-action-btn.disabled { opacity: 0.5; }
@@ -177,7 +183,7 @@
         .shop-card.disabled { opacity: 0.45; }
         .shop-card.disabled .price-btn { background: #374151; color: #9ca3af; }
         .shop-icon { width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .shop-icon-img { width: 100%; height: 100%; object-fit: contain; }
+        .shop-icon-img { width: 100%; min-height: 22px; height: 100%; object-fit: contain; }
         .shop-row { display: flex; align-items: center; gap: 6px; }
         .shop-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .shop-title { font-weight: bold; color: #f8fafc; }
@@ -308,9 +314,9 @@
 
     <!-- Modals -->
     <div id="field-modal">
-        <div class="flex justify-between items-center p-4 border-b border-gray-600 bg-gray-900">
-            <h2 class="text-xl font-bold text-yellow-400" id="modal-title">메뉴</h2>
-            <button onclick="game.closeModal()" class="w-8 h-8 text-gray-400 font-bold">✖</button>
+        <div class="flex justify-between items-center px-3 py-2 border-b border-gray-600 bg-gray-900">
+            <h2 class="text-lg font-bold text-yellow-400" id="modal-title">메뉴</h2>
+            <button onclick="game.closeModal()" class="w-7 h-7 text-gray-400 font-bold text-sm">✖</button>
         </div>
         <div class="flex-1 overflow-auto bg-gray-800 p-2 relative" id="modal-content"></div>
     </div>
@@ -478,8 +484,8 @@ const REFILL_DATA = {
         { cost: 30, amount: 100, currency: 'crystal', name: "⚡ 100 충전" }
     ],
     cp: [
-        { cost: 2, amount: 5, currency: 'crystal', name: "🧭 5 충전" },
-        { cost: 11, amount: 30, currency: 'crystal', name: "🧭 30 충전" }
+        { cost: 2, amount: 5, currency: 'crystal', name: "⚔ 5 충전" },
+        { cost: 11, amount: 30, currency: 'crystal', name: "⚔ 30 충전" }
     ],
     gold: [
         { cost: 10, amount: 1000, currency: 'crystal', name: "💰 1,000 충전" },
@@ -525,7 +531,7 @@ const FIELD_OBJECT_DATA = {
   5321: { name: "체력 석상", level: 1, defenders: [], abilities: [], statue: { kind: "hp", value: 0.05 } },
   5322: { name: "체력 석상", level: 2, defenders: [], abilities: [], statue: { kind: "hp", value: 0.1 } },
   5331: { name: "속도 석상", level: 1, defenders: [], abilities: [], statue: { kind: "spd", value: 0.05 } },
-  5332: { name: "속도 석상", level: 2, defenders: [], abilities: [], statue: { kind: "spd", value: 0.1 } },
+  5332: { name: "속도 석상", level: 2, defenders: [], abilities: [], statue: { kind: "spd", value: 0.1 } }
 };
 
 const STATUE_BUFF_FALLBACK = { 1: 0.05, 2: 0.10 };
@@ -574,7 +580,7 @@ const UNIT_STATS = {
     1209: { name: "보우마스터", hp: 72, atk: 32, def: 21, spd: 23, rng: 5, mov: 1, sell: 50 },
     1210: { name: "신궁", hp: 80, atk: 35, def: 23, spd: 25, rng: 6, mov: 1, sell: 100 },
     1301: { name: "기병", hp: 12, atk: 6, def: 8, spd: 10, rng: 1, mov: 2, sell: 0 },
-    1302: { name: "경기병", hp: 24, atk: 9, def: 12, spd: 12, rng: 1, mov: 1, sell: 1 },
+    1302: { name: "경기병", hp: 24, atk: 9, def: 12, spd: 12, rng: 1, mov: 2, sell: 1 },
     1303: { name: "창기병", hp: 36, atk: 12, def: 16, spd: 14, rng: 1, mov: 2, sell: 1 },
     1304: { name: "기사", hp: 48, atk: 15, def: 20, spd: 16, rng: 1, mov: 2, sell: 2 },
     1305: { name: "중기병", hp: 60, atk: 18, def: 24, spd: 18, rng: 1, mov: 2, sell: 3 },
@@ -1999,7 +2005,9 @@ class Game {
         this.updateUI();
 
         if (document.getElementById('field-modal').classList.contains('open')) {
-            this.renderFieldMap();
+            if (!this.refreshFieldMapVisuals()) {
+                this.renderFieldMap();
+            }
             this.setFieldInfo(FIELD_MAP_DATA[r][c], r, c);
         }
         this.showToast("획득 완료");
@@ -2685,6 +2693,7 @@ class Game {
             const details = bar.querySelector('#field-bottom-details');
             if (details) {
                 details.innerHTML = `
+                    <div class="field-bottom-section-title">오브젝트 정보</div>
                     <div class="field-info-row"><span>소유자</span><span>${info.owner}</span></div>
                     <div class="field-info-row"><span>수비병</span><span>${this.formatDefenders(info.defenders)}</span></div>
                     ${extraRows}
@@ -2757,10 +2766,6 @@ class Game {
         if (!wrap) return;
         wrap.innerHTML = "";
 
-        const headerRow = document.createElement('div');
-        headerRow.className = 'field-info-row';
-        headerRow.innerHTML = `<span>부대 이동</span><span>행동력/소요</span>`;
-        wrap.appendChild(headerRow);
 
         const infos = this.getAvailableArmies().map(army => this.getArmyMoveInfo(army, r, c, type));
 
@@ -2805,6 +2810,10 @@ class Game {
             rangeRow.innerHTML = `<span>이동 범위</span><span>${summaryInfo.stats.range}칸</span>`;
             wrap.appendChild(rangeRow);
         }
+
+        const divider = document.createElement('div');
+        divider.className = 'field-bottom-divider';
+        wrap.appendChild(divider);
 
         infos.forEach(info => {
             const btn = document.createElement('button');
@@ -3021,6 +3030,136 @@ class Game {
         menu.style.top = `${finalPos.y}px`;
     }
 
+    refreshFieldMapVisuals() {
+        const mapLayer = document.getElementById('map-layer');
+        if (!mapLayer) return false;
+        const reachable = this.buildReachableTiles();
+        const appendCloudLayer = (cell, r, c, type) => {
+            if (isGateTile(type) || isCitadelTile(type) || isWallTile(type)) return;
+            const layer = document.createElement('div');
+            layer.className = 'field-cloud-layer';
+            cell.appendChild(layer);
+        };
+
+        for (let r = 0; r < MAP_SIZE; r++) {
+            for (let c = 0; c < MAP_SIZE; c++) {
+                const cell = document.getElementById(`field-cell-${r}-${c}`);
+                if (!cell) continue;
+                const type = FIELD_MAP_DATA[r][c];
+                const key = `${r},${c}`;
+                const isOccupied = this.occupiedTiles.has(key);
+                const isVisible = this.visibilityMap.has(key);
+                const isReachable = reachable.has(key);
+                let isAdjacent = false;
+                const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+                if (!isOccupied) {
+                    for (let d of dirs) {
+                        const nr = r + d[0], nc = c + d[1];
+                        if (this.occupiedTiles.has(`${nr},${nc}`)) { isAdjacent = true; break; }
+                    }
+                }
+
+                cell.className = 'field-cell';
+                cell.innerHTML = '';
+                cell.style.backgroundImage = '';
+                cell.style.backgroundSize = '';
+                cell.style.backgroundRepeat = '';
+                cell.style.backgroundPosition = '';
+                cell.style.opacity = '';
+
+                if (!isVisible) {
+                    cell.classList.add('field-fog');
+                    appendCloudLayer(cell, r, c, type);
+                    continue;
+                }
+
+                let color = 'rgba(0, 0, 0, 0)';
+                if (isWallTile(type)) { color = '#2b2b2b'; cell.classList.add('field-wall'); }
+                else if (isCastleTile(type)) { color = '#4285f4'; cell.classList.add('field-castle'); }
+                else if (isGateTile(type)) { color = '#ea4335'; cell.classList.add('field-gate'); if (isOccupied) cell.classList.add('unlocked'); else cell.classList.add('locked'); }
+                else if (isCitadelTile(type)) { color = '#fbbc05'; cell.classList.add('field-citadel'); }
+                else if (isDragonTile(type)) { color = '#b71c1c'; cell.classList.add('field-dragon'); }
+                else if (isGoldMineTile(type)) { color = '#6d4c41'; cell.classList.add('field-goldmine'); }
+                else if (isFountainTile(type)) { color = '#0ea5e9'; cell.classList.add('field-fountain'); }
+                else if (isShopTile(type)) { color = '#2563eb'; cell.classList.add('field-shop'); }
+                else if (isTavernTile(type)) { color = '#7c3aed'; cell.classList.add('field-tavern'); }
+                else if (isRuinsTile(type)) { color = '#9ca3af'; cell.classList.add('field-ruins'); }
+                else if (isStatueTile(type)) { color = '#94a3b8'; cell.classList.add('field-statue'); }
+                else if (isTerrainCode(type)) {
+                    const base = getTerrainBase(type);
+                    const isBorder = type % 100 === 1;
+                    color = (isBorder ? TERRAIN_COLORS_BORDER[base] : TERRAIN_COLORS[base]) || '#2e3b23';
+                } else if (type === 4) {
+                    color = 'rgba(139, 69, 19, 0.4)';
+                } else {
+                    const base = FIELD_TERRAIN_DATA?.[r]?.[c];
+                    if (isTerrainCode(base)) {
+                        const baseType = getTerrainBase(base);
+                        const isBorder = base % 100 === 1;
+                        color = (isBorder ? TERRAIN_COLORS_BORDER[baseType] : TERRAIN_COLORS[baseType]) || '#2e3b23';
+                    } else {
+                        color = 'transparent';
+                    }
+                }
+
+                cell.style.backgroundColor = color;
+
+                const isKnownObject = isWallTile(type) || isCastleTile(type) || isGateTile(type) || isCitadelTile(type) || isDragonTile(type)
+                    || isGoldMineTile(type) || isFountainTile(type) || isShopTile(type) || isTavernTile(type)
+                    || isRuinsTile(type) || isStatueTile(type);
+                if (!isTerrainCode(type) && !isKnownObject) {
+                    const icon = this.assets.getImage(String(type));
+                    if (icon && icon.src) {
+                        cell.style.backgroundImage = `url(${icon.src})`;
+                        cell.style.backgroundSize = 'contain';
+                        cell.style.backgroundRepeat = 'no-repeat';
+                        cell.style.backgroundPosition = 'center';
+                    }
+                }
+
+                if (isOccupied) {
+                    cell.classList.add('field-occupied');
+                    cell.style.opacity = 1.0;
+                } else if (isAdjacent) {
+                    cell.classList.add('field-adjacent');
+                    cell.style.opacity = 0.6;
+                } else {
+                    cell.style.opacity = 1.0;
+                }
+
+                if (!isReachable && !isOccupied) {
+                    cell.classList.add('field-cloud-blocked');
+                    appendCloudLayer(cell, r, c, type);
+                }
+
+                if (this.currentFieldTargetKey === key) cell.classList.add('field-selected');
+
+                if (isGateTile(type) || isCitadelTile(type) || isRuinsTile(type) || isStatueTile(type)) {
+                    const badge = document.createElement('div');
+                    badge.className = 'field-badge';
+                    badge.classList.add(isOccupied ? 'active' : 'inactive');
+                    if (isGateTile(type)) badge.innerText = 'GT';
+                    else if (isCitadelTile(type)) badge.innerText = 'SQ';
+                    else if (isRuinsTile(type)) badge.innerText = 'CP';
+                    else if (isStatueTile(type)) {
+                        const buff = this.getStatueBuff(type);
+                        const kind = buff ? buff.kind.toUpperCase() : 'BF';
+                        if (kind === 'ATK') badge.innerText = 'AT';
+                        else if (kind === 'DEF') badge.innerText = 'DF';
+                        else if (kind === 'HP') badge.innerText = 'HP';
+                        else if (kind === 'SPD') badge.innerText = 'SP';
+                        else badge.innerText = kind.slice(0, 2);
+                    }
+                    cell.appendChild(badge);
+                }
+            }
+        }
+
+        if (this.previewPath) this.applyPathPreview(this.previewPath);
+        if (this.moveTargetMode) this.renderMoveTimeOverlay();
+        this.updateFloatingPanelPositionFromSelection();
+        return true;
+    }
     renderFieldMap() {
         const modal = document.getElementById('field-modal'); const content = document.getElementById('modal-content'); const title = document.getElementById('modal-title');
         modal.dataset.mode = 'field'; modal.classList.add('open'); title.innerText = "월드 맵 (Field)"; content.innerHTML = ""; content.style.overflow = "hidden";
@@ -3253,8 +3392,14 @@ class Game {
             <div class="field-bottom-icon">❔</div>
             <div class="field-bottom-text">
                 <div class="field-bottom-header">
-                <div class="field-bottom-name">선택된 오브젝트 없음</div>
-                <div class="field-bottom-meta">오브젝트를 선택하세요.</div>
+                    <div class="field-bottom-header-left">
+                        <div class="field-bottom-name">선택된 오브젝트 없음</div>
+                        <div class="field-bottom-meta">오브젝트를 선택하세요.</div>
+                    </div>
+                    <div class="field-bottom-header-right">
+                        <div class="field-bottom-section-title">부대 이동</div>
+                        <div class="field-bottom-meta">행동력/소요</div>
+                    </div>
                 </div>
                 <div class="field-bottom-grid">
                     <div id="field-bottom-details" class="field-bottom-details"></div>
@@ -3600,7 +3745,11 @@ class Game {
 
         if (mapChanged) this.updateOpenBorders();
         if (mapChanged && document.getElementById('field-modal').classList.contains('open')) {
-            this.renderFieldMap();
+            if (!this.refreshFieldMapVisuals()) {
+                this.renderFieldMap();
+            } else if (this.currentFieldTargetKey === `${r},${c}`) {
+                this.setFieldInfo(FIELD_MAP_DATA[r][c], r, c);
+            }
         }
         army.state = 'IDLE';
         this.updateUI(); this.saveGame();
@@ -4089,3 +4238,19 @@ const game = new Game();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
