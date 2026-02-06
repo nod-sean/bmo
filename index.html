@@ -69,6 +69,8 @@
         .toggle-knob { width: 16px; height: 16px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.3s; }
         .toggle-switch.on .toggle-knob { left: 22px; }
 
+        :root { --cloud-img: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCcgdmlld0JveD0nMCAwIDY0IDY0Jz48ZyBmaWxsPScjZjhmOGY4Jz48ZWxsaXBzZSBjeD0nMTgnIGN5PSczNicgcng9JzE4JyByeT0nMTInLz48ZWxsaXBzZSBjeD0nMzInIGN5PScyNicgcng9JzIyJyByeT0nMTQnLz48ZWxsaXBzZSBjeD0nNDgnIGN5PSczNCcgcng9JzE4JyByeT0nMTInLz48cmVjdCB4PSc2JyB5PSczMCcgd2lkdGg9JzUyJyBoZWlnaHQ9JzIyJyByeD0nMTEnLz48L2c+PGcgZmlsbD0nI2VkZWRlZCc+PGVsbGlwc2UgY3g9JzI0JyBjeT0nNDAnIHJ4PScxNicgcnk9JzEwJy8+PGVsbGlwc2UgY3g9JzQwJyBjeT0nMzgnIHJ4PScxNicgcnk9JzEwJy8+PC9nPjwvc3ZnPg=="); }
+
         /* Field Styles */
         .field-cell { width: 12px; height: 12px; transition: all 0.2s; border-radius: 1px; position: relative; z-index: 10; overflow: hidden; }
         .field-occupied { border: 1px solid #42a5f5; box-shadow: 0 0 2px #42a5f5; z-index: 10; opacity: 1.0 !important; }
@@ -88,8 +90,9 @@
         .field-move-source { outline: 1px solid #4ade80; box-shadow: 0 0 4px rgba(74,222,128,0.9); }
 
         /* Fog of War */
-        .field-fog { background-color: #000 !important; border: none; cursor: default; z-index: 100; opacity: 1 !important; }
-        .field-fog::after { content: ''; }
+        .field-fog { background-color: #0b0b0b !important; border: none; cursor: default; z-index: 100; opacity: 1 !important; }
+        .field-cloud-blocked { z-index: 14; background-color: transparent; }
+        .field-cloud-layer { position: absolute; inset: 0; background-image: var(--cloud-img); background-repeat: no-repeat; background-size: 100% 100%; background-position: center; pointer-events: none; z-index: 30; filter: drop-shadow(0 0 2px rgba(0,0,0,0.25)); }
         
         /* Object Icons */
         .field-gate { border: 1px solid #ef4444; }
@@ -1886,6 +1889,52 @@ class Game {
         return false;
     }
 
+    buildReachableTiles() {
+        const reachable = new Set();
+        if (!this.occupiedTiles.size) return reachable;
+        const queue = [];
+        this.occupiedTiles.forEach(key => {
+            const [sr, sc] = key.split(',').map(Number);
+            const startType = FIELD_MAP_DATA[sr][sc];
+            let regionId = -1;
+            if (!isBorderTerrain(startType)) {
+                regionId = this.getRegionIdAt(sr, sc);
+            } else {
+                const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+                for (const d of dirs) {
+                    const nr = sr + d[0];
+                    const nc = sc + d[1];
+                    const id = this.getRegionIdAt(nr, nc);
+                    if (id !== -1) { regionId = id; break; }
+                }
+            }
+            queue.push({ r: sr, c: sc, regionId });
+            reachable.add(key);
+        });
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+        while (queue.length) {
+            const cur = queue.shift();
+            for (const d of dirs) {
+                const nr = cur.r + d[0];
+                const nc = cur.c + d[1];
+                if (nr < 0 || nr >= MAP_SIZE || nc < 0 || nc >= MAP_SIZE) continue;
+                const nkey = `${nr},${nc}`;
+                if (reachable.has(nkey)) continue;
+                const type = FIELD_MAP_DATA[nr][nc];
+                const isOccupied = this.occupiedTiles.has(nkey);
+                if (this.isTileBlocked(cur, nr, nc, type, isOccupied, false, cur.regionId ?? -1)) continue;
+                let nextRegion = cur.regionId ?? -1;
+                if (!isBorderTerrain(type)) {
+                    const rid = this.getRegionIdAt(nr, nc);
+                    if (rid !== -1) nextRegion = rid;
+                }
+                reachable.add(nkey);
+                queue.push({ r: nr, c: nc, regionId: nextRegion });
+            }
+        }
+        return reachable;
+    }
+
     canCollectFieldObject(r, c) {
         return this.isFieldReachable(r, c);
     }
@@ -2962,15 +3011,26 @@ class Game {
             const TILE_SIZE = 13, x = 50 + (army.c * TILE_SIZE), y = 50 + (army.r * TILE_SIZE); marker.style.transform = `translate(${x}px, ${y}px)`; armyLayer.appendChild(marker);
         });
 
+        const reachable = this.buildReachableTiles();
+
+        const appendCloudLayer = (cell, r, c, type) => {
+            if (isGateTile(type)) return;
+            const layer = document.createElement('div');
+            layer.className = 'field-cloud-layer';
+            cell.appendChild(layer);
+        };
+
         for (let r = 0; r < MAP_SIZE; r++) {
             for (let c = 0; c < MAP_SIZE; c++) {
                 const cell = document.createElement('div'); cell.className = 'field-cell'; cell.id = `field-cell-${r}-${c}`;
                 const type = FIELD_MAP_DATA[r][c], key = `${r},${c}`, isOccupied = this.occupiedTiles.has(key), isVisible = this.visibilityMap.has(key);
+                const isReachable = reachable.has(key);
                 let isAdjacent = false; const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
                 if (!isOccupied) { for (let d of dirs) { const nr = r + d[0], nc = c + d[1]; if (this.occupiedTiles.has(`${nr},${nc}`)) { isAdjacent = true; break; } } }
                 
                 if (!isVisible) { 
                     cell.classList.add('field-fog'); 
+                    appendCloudLayer(cell, r, c, type);
                     mapLayer.appendChild(cell);
                     continue;
                 }
@@ -3023,8 +3083,13 @@ class Game {
                 } else if (isAdjacent) { 
                     cell.classList.add('field-adjacent'); 
                     cell.style.opacity = 0.6;
-                } else {
+                } else { 
                     cell.style.opacity = 1.0;
+                }
+
+                if (!isReachable && !isOccupied) {
+                    cell.classList.add('field-cloud-blocked');
+                    appendCloudLayer(cell, r, c, type);
                 }
 
                 if (this.currentFieldTargetKey === key) cell.classList.add('field-selected');
