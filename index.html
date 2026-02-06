@@ -3014,7 +3014,7 @@ class Game {
         const reachable = this.buildReachableTiles();
 
         const appendCloudLayer = (cell, r, c, type) => {
-            if (isGateTile(type)) return;
+            if (isGateTile(type) || isCitadelTile(type)) return;
             const layer = document.createElement('div');
             layer.className = 'field-cloud-layer';
             cell.appendChild(layer);
