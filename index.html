@@ -47,24 +47,34 @@ body {
     flex: 0 0 auto;
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.0));
     color: white;
-    padding: 8px 12px;
-    padding-top: max(8px, env(safe-area-inset-top));
+    padding: 6px 8px;
+    /* Reduced padding */
+    padding-top: max(6px, env(safe-area-inset-top));
     z-index: 20;
+    overflow-x: auto;
+    /* Allow scroll if needed, or hidden */
+    scrollbar-width: none;
+    /* Hide scrollbar */
 }
 
 .res-pill {
     background: rgba(0, 0, 0, 0.6);
     border: 1px solid #555;
     border-radius: 99px;
-    padding: 4px 10px;
+    padding: 2px 8px;
+    /* Reduced padding */
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
+    /* Reduced gap */
     font-weight: bold;
-    font-size: 12px;
+    font-size: 11px;
+    /* Reduced font size */
     color: #fff;
     cursor: pointer;
     transition: transform 0.1s;
+    white-space: nowrap;
+    /* Prevent wrapping */
 }
 
 .res-pill:active {
@@ -126,6 +136,15 @@ canvas {
     color: #3e2723;
     margin: 0 6px;
     overflow: hidden;
+    color: #3e2723;
+    margin: 0 6px;
+    overflow: hidden;
+    display: none;
+    /* Force hidden by default */
+}
+
+.modal-overlay.open {
+    display: flex;
 }
 
 .stat-grid {
@@ -2041,8 +2060,10 @@ canvas {
                     </div>
                     <div class="flex gap-4">
                         <button class="battle-btn close"
-                            onclick="document.getElementById('modal-battle-prep').classList.remove('open')">취소</button>
-                        <button class="battle-btn start" onclick="game.confirmBattleStart()">전투 개시!</button>
+                            onclick="this.closest('.modal-overlay').classList.remove('open'); this.closest('.modal-overlay').style.display='none'; game.closeBattlePrepModal()">취소</button>
+                        <button class="battle-btn start"
+                            onclick="this.closest('.modal-overlay').classList.remove('open'); this.closest('.modal-overlay').style.display='none'; game.confirmBattleStart()">전투
+                            개시!</button>
                     </div>
                 </div>
             </div>
@@ -9917,6 +9938,15 @@ class Game {
         document.getElementById('settings-uid').innerText = localStorage.getItem('kov_uid');
     }
 
+    closeAllModals() {
+        console.log("Force closing all modals");
+        document.querySelectorAll('.modal-overlay').forEach(el => {
+            el.classList.remove('open');
+            el.style.display = 'none';
+        });
+        this.battleContext = null;
+    }
+
     createGrassPattern() {
         const c = document.createElement('canvas');
         c.width = 32; c.height = 32;
@@ -10245,7 +10275,9 @@ class Game {
         this.refreshLockState(); this.grid[3][3] = { type: ITEM_TYPE.BUILDING_BARRACKS, level: 1, scale: 1 };
         this.grid[4][4] = { type: ITEM_TYPE.BUILDING_CHEST, level: 1, scale: 1, usage: 5 };
         this.grid[5][5] = { type: ITEM_TYPE.BUILDING_CAMP, level: 1, scale: 1, storedUnits: [] }; // Added storedUnits
+        this.grid[5][5] = { type: ITEM_TYPE.BUILDING_CAMP, level: 1, scale: 1, storedUnits: [] }; // Added storedUnits
         this.updateLevelStats();
+        this.updateInfoPanel(); // Ensure panel is visible on init
     }
     refreshLockState() {
         for (let r = 0; r < CONFIG.gridRows; r++) for (let c = 0; c < CONFIG.gridCols; c++) {
@@ -12142,22 +12174,32 @@ class Game {
             btn.onclick = (e) => { e.stopPropagation(); this.openPortalModal(r, c); };
             menu.appendChild(btn);
         }
-        if (type === FIELD_EVENT_TYPES.BANDIT || type === FIELD_EVENT_TYPES.BANDIT_LEADER || type === FIELD_EVENT_TYPES.DUNGEON) {
+        // Attack Button for Bandits AND Hostile Static Objects
+        const isHostile = (type === FIELD_EVENT_TYPES.BANDIT || type === FIELD_EVENT_TYPES.BANDIT_LEADER || type === FIELD_EVENT_TYPES.DUNGEON);
+        const isUnoccupiedCapturable = this.isCapturableFieldObject(type) && !this.occupiedTiles.has(key);
+
+        if (isHostile || isUnoccupiedCapturable) {
             const btn = document.createElement('button');
             btn.className = 'field-action-btn';
             btn.innerText = '공격';
             btn.onclick = (e) => {
                 e.stopPropagation();
                 this.hideFieldActionMenu();
+
+                // If no army selected, try to select the nearest available army? 
+                // Currently prompts user to select.
                 if (this.selectedArmyId !== null) {
                     const army = this.armies[this.selectedArmyId];
-                    if (Math.abs(army.r - r) + Math.abs(army.c - c) <= 1) {
+                    const dr = Math.abs(army.r - r);
+                    const dc = Math.abs(army.c - c);
+                    // CHANGED: Allow diagonal attack (Chebyshev distance <= 1)
+                    if (dr <= 1 && dc <= 1) {
                         this.openBattlePrepModal(type, r, c);
                     } else {
-                        this.showToast("거리가 멉니다.");
+                        this.showToast("거리가 멉니다. (1칸 이내 접근 필요)");
                     }
                 } else {
-                    this.showToast("부대를 먼저 선택하세요.");
+                    this.showToast("공격할 부대를 먼저 선택하세요.");
                 }
             };
             menu.appendChild(btn);
@@ -12848,6 +12890,16 @@ class Game {
         }
     }
 
+    isHostileTarget(type, r, c) {
+        // Events
+        if (type === FIELD_EVENT_TYPES.BANDIT || type === FIELD_EVENT_TYPES.BANDIT_LEADER || type === FIELD_EVENT_TYPES.DUNGEON) return true;
+        // Capturable (Gates, Citadels, Dragon) if not occupied
+        // Note: isCapturableFieldObject is likely available, but using raw checks to be safe
+        const isCapturable = isGateTile(type) || isCitadelTile(type) || isDragonTile(type);
+        if (isCapturable && !this.occupiedTiles.has(`${r},${c}`)) return true;
+        return false;
+    }
+
     startMarch(armyId, r, c, type, energyCost, goldCost, cpCost, path, speedFactor) {
         if (this.energy < energyCost) { this.showToast(`에너지 부족 (${energyCost})`); return; }
         if (this.gold < goldCost) { this.showToast(`골드 부족 (${goldCost})`); return; }
@@ -12859,6 +12911,14 @@ class Game {
 
         const army = this.armies[armyId];
         army.state = 'MOVING_TO';
+
+        // Attack Move Logic: If hostile, stop 1 tile short
+        if (this.isHostileTarget(type, r, c) && path.length > 1) {
+            // Keep the full path in a temp prop if needed, or just pop
+            // army.target still holds the real destination
+            path.pop();
+        }
+
         army.path = path;
         army.stepTimes = this.buildStepTimes(path, speedFactor);
         army.nextStepIndex = 1; // Start from 1 (0 is current pos)
@@ -12903,7 +12963,11 @@ class Game {
     }
 
     handleArrival(army) {
+        if (!army || !army.target) return;
         const { r, c, type } = army.target;
+
+        // Check if we stopped at adjacent tile for attack
+        // REMOVED: Auto-battle triggering. Instead, we let it fall through to open the Menu.
 
         // --- FIELD EVENT INTERACTION ---
         const eventKey = `${r},${c}`;
@@ -12913,25 +12977,43 @@ class Game {
             this.saveGame();
 
             if (event.type === FIELD_EVENT_TYPES.BANDIT || event.type === FIELD_EVENT_TYPES.BANDIT_LEADER || event.type === FIELD_EVENT_TYPES.DUNGEON) {
-                this.openBattlePrepModal(event.type, r, c); // Pass event type as "enemy code"
+                // Open Menu instead of auto-battle
+                setTimeout(() => {
+                    const cell = document.getElementById(`field-cell-${r}-${c}`);
+                    if (cell) {
+                        const rect = cell.getBoundingClientRect();
+                        this.setFieldInfo(event.type, r, c);
+                        this.showFieldActionMenu(r, c, event.type, rect.left + rect.width / 2, rect.top + rect.height / 2);
+                    }
+                }, 100);
                 return;
             } else if (event.type === FIELD_EVENT_TYPES.PORTAL) {
                 this.openPortalModal(r, c);
-                // delete this.fieldEvents[eventKey]; // Optional: consume portal?
                 return;
             } else if (event.type === FIELD_EVENT_TYPES.CARAVAN) {
                 this.openCaravanShop();
                 return;
             }
+            // Caravan opens menu via click usually, but if arrival triggers it?
+            // Only auto-trigger for Hostile.
         }
 
         let mapChanged = false;
         if (isBorderTerrain(type)) {
             this.showToast("경계 타일은 점령 불가");
-        } else if (this.isCapturableFieldObject(type) && !this.occupiedTiles.has(`${r},${c}`)) {
-            army.state = 'IDLE'; // Stop moving to prevent loop
-            this.saveGame(); // Save state to prevent reload loop
-            this.openBattlePrepModal(type, r, c);
+        } else if ((this.isCapturableFieldObject(type) && !this.occupiedTiles.has(`${r},${c}`)) || this.isHostileTarget(type, r, c)) {
+            army.state = 'IDLE'; // Stop moving
+            this.saveGame();
+
+            // Open Floating Menu at cell position
+            setTimeout(() => {
+                const cell = document.getElementById(`field-cell-${r}-${c}`);
+                if (cell) {
+                    const rect = cell.getBoundingClientRect();
+                    this.setFieldInfo(type, r, c);
+                    this.showFieldActionMenu(r, c, type, rect.left + rect.width / 2, rect.top + rect.height / 2);
+                }
+            }, 100);
             return;
         } else if (this.isCapturableFieldObject(type)) {
             this.showToast(`${army.name} 도착 완료`);
@@ -13122,9 +13204,20 @@ class Game {
     }
     selectItem(item, location) { if (this.selectedItem?.item !== item) this.sound.playClick(); this.selectedItem = item ? { item, location } : null; this.updateInfoPanel(); this.requestRender(); }
     updateInfoPanel() {
-        const els = { name: document.getElementById('info-name'), desc: document.getElementById('info-desc'), cls: document.getElementById('info-class'), stats: document.getElementById('unit-stats-grid'), btn: document.getElementById('btn-action'), lbl: document.getElementById('action-label'), icon: document.getElementById('action-icon') };
+        const els = { name: document.getElementById('info-name'), desc: document.getElementById('info-desc'), cls: document.getElementById('info-class'), stats: document.getElementById('unit-stats-grid'), btn: document.getElementById('btn-action'), lbl: document.getElementById('action-label'), icon: document.getElementById('action-icon'), panel: document.getElementById('info-panel') };
+
+        if (!this.selectedItem) {
+            // Hide panel if nothing selected (or show default message?)
+            // Design choice: Show panel with default "Select Object" text
+            if (els.panel) els.panel.style.display = 'flex';
+            els.stats.classList.add('hidden'); els.cls.innerText = ""; els.btn.style.opacity = 0.5; els.lbl.innerText = "-";
+            els.name.innerText = "선택된 없음"; els.desc.innerText = "유닛이나 건물을 선택하세요.";
+            return;
+        }
+
+        if (els.panel) els.panel.style.display = 'flex';
         els.stats.classList.add('hidden'); els.cls.innerText = ""; els.btn.style.opacity = 0.5; els.lbl.innerText = "-";
-        if (!this.selectedItem) { els.name.innerText = "선택된 없음"; els.desc.innerText = "유닛이나 건물을 선택하세요."; return; }
+
         const item = this.selectedItem.item; const data = getData(item.type, item.level); els.name.innerText = `${data.name} LV.${item.level}`;
         if (item.type < 10) {
             if (item.type === ITEM_TYPE.BUILDING_CHEST) els.desc.innerText = `남은 횟수: ${item.usage}회`;
@@ -13138,6 +13231,46 @@ class Game {
             document.getElementById('st-rng').innerText = data.range || data.rng || 0;
             document.getElementById('st-mov').innerText = data.move || data.mov || 0;
             els.lbl.innerText = `+${data.sell}`; els.icon.innerText = "💰"; els.btn.style.opacity = 1;
+        }
+    }
+
+    // ... (rest of file)
+
+    async confirmBattleStart() {
+        try {
+            console.log("Confirming Battle Start...");
+
+            // Safety Check: If no context, check if we can recover or just close
+            if (!this.battleContext) {
+                console.error("No Battle Context found during confirm!");
+                // Try to recover? No, just close to avoid stuck state
+                alert("전투 데이터를 불러올 수 없습니다. 다시 시도해주세요.");
+                this.closeBattlePrepModal();
+                return;
+            }
+
+            // Close Prep, Open Battle
+            const prep = document.getElementById('modal-battle-prep');
+            if (prep) {
+                prep.classList.remove('open');
+                prep.style.display = 'none';
+            }
+
+            const modal = document.getElementById('modal-battle');
+            if (modal) {
+                modal.style.display = '';
+                modal.classList.add('open');
+            }
+
+            // Need to regenerate 'allies' list from the updated squadRef
+            this.battleContext.allies = this.getSquadUnits(this.battleContext.squadRef);
+
+            // Start Sim
+            this.startBattleSimulation();
+        } catch (e) {
+            console.error("Battle Start Error:", e);
+            alert("전투 시작 중 오류 발생: " + e.message);
+            this.closeAllModals();
         }
     }
     handleAction() {
@@ -13458,6 +13591,7 @@ class Game {
     // --- BATTLE PREP & SIMULATION ---
 
     openBattlePrepModal(targetType, r, c) {
+        // ... (data fetching)
         const meta = this.getTileMoveMeta(targetType, r, c);
         const objData = this.getFieldObjectData(targetType);
         if (!objData || !objData.defenders || objData.defenders.length === 0) {
@@ -13465,22 +13599,22 @@ class Game {
             return;
         }
 
-        // Store prep context
+        // ... (context setup)
         this.battleContext = {
             targetCode: targetType,
             r: r, c: c,
-            // Defenders: parse into 3x3 slots
             defenders: this.parseDefenders(objData.defenders, objData.level),
-            // Allies: Reference to the ACTUAL squad array so we can reorder it
             squadRef: this.lastSelectedArmyId !== null ? this.getSquadByArmyId(this.armies[this.lastSelectedArmyId].id) : this.squad1,
-            // Allies Display: Flattened list for simulation, but for Prep we use squadRef directly
             allies: [],
             log: [],
             active: false
         };
 
         const modal = document.getElementById('modal-battle-prep');
-        if (modal) modal.classList.add('open'); //, 'fade-in');
+        if (modal) {
+            modal.style.display = ''; // Reset inline display: none
+            modal.classList.add('open');
+        }
 
         this.renderPrepGrid();
     }
@@ -13567,18 +13701,42 @@ class Game {
         this.saveGame(); // Save formation changes immediately
     }
 
-    confirmBattleStart() {
-        // Close Prep, Open Battle
-        document.getElementById('modal-battle-prep').classList.remove('open');
-        const modal = document.getElementById('modal-battle');
-        if (modal) modal.classList.add('open');
+    async confirmBattleStart() {
+        try {
+            console.log("Confirming Battle Start...");
 
-        // Prepare simulation data from current Context
-        // Need to regenerate 'allies' list from the updated squadRef
-        this.battleContext.allies = this.getSquadUnits(this.battleContext.squadRef);
+            // Safety Check: If no context, check if we can recover or just close
+            if (!this.battleContext) {
+                console.error("No Battle Context found during confirm!");
+                // Try to recover? No, just close to avoid stuck state
+                alert("전투 데이터를 불러올 수 없습니다. 다시 시도해주세요.");
+                this.closeBattlePrepModal();
+                return;
+            }
 
-        // Start Sim
-        this.startBattleSimulation();
+            // Close Prep, Open Battle
+            const prep = document.getElementById('modal-battle-prep');
+            if (prep) {
+                prep.classList.remove('open');
+                prep.style.display = 'none';
+            }
+
+            const modal = document.getElementById('modal-battle');
+            if (modal) {
+                modal.style.display = '';
+                modal.classList.add('open');
+            }
+
+            // Need to regenerate 'allies' list from the updated squadRef
+            this.battleContext.allies = this.getSquadUnits(this.battleContext.squadRef);
+
+            // Start Sim
+            this.startBattleSimulation();
+        } catch (e) {
+            console.error("Battle Start Error:", e);
+            alert("전투 시작 중 오류 발생: " + e.message);
+            this.closeAllModals();
+        }
     }
 
     startBattleSimulation() {
@@ -13605,10 +13763,40 @@ class Game {
     }
 
     closeBattleModal() {
-        const modal = document.getElementById('modal-battle');
-        if (modal) modal.classList.remove('open');
+        console.log("Closing Battle Modal (Inline)");
+        const els = document.querySelectorAll('.modal-overlay');
+        els.forEach(el => {
+            el.classList.remove('open');
+            el.style.display = 'none';
+        });
         if (this.battleTimer) clearInterval(this.battleTimer);
         this.battleContext = null;
+    }
+
+    closeBattlePrepModal() {
+        console.log("Closing Battle Prep Modal (Inline)");
+        try {
+            // Clear Army Targets to prevent loop
+            this.armies.forEach(army => {
+                if (army.state === 'IDLE' || army.state === 'MOVING_TO') {
+                    army.target = null;
+                    army.path = [];
+                }
+            });
+
+            const els = document.querySelectorAll('.modal-overlay');
+            els.forEach(el => {
+                el.classList.remove('open');
+                el.style.display = 'none';
+            });
+            this.battleContext = null;
+            this.saveGame();
+        } catch (e) {
+            console.error("Critical Error closing prep:", e);
+            // Absolute Emergency Fallback
+            document.getElementById('modal-battle-prep').style.display = 'none';
+            document.getElementById('modal-battle').style.display = 'none';
+        }
     }
 
     parseDefenders(defenders, level) {
@@ -13752,36 +13940,51 @@ class Game {
     }
 
     startBattleSimulation() {
-        if (!this.battleContext || this.battleContext.active) return;
+        console.log("Starting Battle Simulation...");
+        if (!this.battleContext) { console.error("No battle context starting sim"); return; }
+        // Force Active
+        this.battleContext.active = true;
+
         if (typeof BattleSimulator === 'undefined') {
             console.error("BattleSimulator module not loaded.");
             this.addBattleLog("Error: Battle Simulator missing.");
             return;
         }
 
-        this.battleContext.active = true;
+        // Force Close Controls
         const controls = document.getElementById('battle-controls');
         if (controls) controls.style.display = 'none';
 
-        const sim = new BattleSimulator();
-        // Pass clones or data? parseDefenders returns objects, let's pass them.
-        // Simulator makes its own working copies but returns steps with IDs.
-        // We will update the UI state (ctx.allies/defenders) based on steps.
-        const result = sim.simulate(this.battleContext.allies, this.battleContext.defenders);
+        try {
+            const sim = new BattleSimulator();
+            console.log("Simulating result...");
+            const result = sim.simulate(this.battleContext.allies, this.battleContext.defenders);
+            console.log("Simulation Result:", result);
 
-        this.battleSimulation = result;
-        this.battleStepIndex = 0;
-        this.battleContext.log = []; // Clear log to replay
+            this.battleSimulation = result;
+            this.battleStepIndex = 0;
+            this.battleContext.log = [];
 
-        this.battleTimer = setInterval(() => this.battleTick(), 800); // Slower tick for readability
+            console.log("Starting Battle Timer...");
+            if (this.battleTimer) clearInterval(this.battleTimer);
+            this.battleTick(); // Run first tick immediately
+            this.battleTimer = setInterval(() => this.battleTick(), 800);
+        } catch (e) {
+            console.error("Simulation Initialization Error:", e);
+            this.addBattleLog("Simulation Error: " + e.message);
+        }
     }
 
     battleTick() {
-        if (!this.battleContext || !this.battleContext.active || !this.battleSimulation) return;
+        // console.log("Battle Tick", this.battleStepIndex);
+        if (!this.battleContext || !this.battleContext.active || !this.battleSimulation) {
+            // console.warn("Battle Tick skipped: Invalid State");
+            return;
+        }
 
         const steps = this.battleSimulation.steps;
         if (this.battleStepIndex >= steps.length) {
-            // End
+            console.log("Battle Ended via Steps");
             const winner = this.battleSimulation.winner;
             if (winner === 'allies') this.endBattle(true);
             else this.endBattle(false);
@@ -13797,17 +14000,12 @@ class Game {
             this.addBattleLog(step.msg);
             // Update HP
             const targetId = step.defenderId;
-            // Find unit in ctx.allies or ctx.defenders
-            // IDs are ally-N or enemy-N
             let unit = this.battleContext.allies.find(u => u.id === targetId);
             if (!unit) unit = this.battleContext.defenders.find(u => u.id === targetId);
 
             if (unit) {
-                unit.hp = step.targetHp; // Sync HP
-                // Trigger animation/flash?
-                const gridId = targetId.startsWith('ally') ? 'battle-grid-ally' : 'battle-grid-enemy';
-                // Need to find DOM element to flash? renderBattleModal rebuilds DOM.
-                // Optimally we shouldn't rebuild entire DOM every tick, but for now it's robust.
+                unit.hp = step.targetHp;
+                // Don't full re-render here if possible, but renderBattleModal does it safest.
             }
         }
 
@@ -13852,6 +14050,20 @@ class Game {
     }
 
     handleBattleWin(r, c) {
+        // Move victorious army to target
+        const army = this.armies[this.lastSelectedArmyId] || this.armies.find(a => this.battleContext && a.id === this.battleContext.armyId) || this.armies[0];
+        // Note: lastSelectedArmyId should be reliable as battle prep sets it. Better: use battleContext army?
+        // battleContext doesn't store armyId explicitly yet, but we can infer or add it. 
+        // Providing fallback to lastSelectedArmyId which is set in openBattlePrep
+        if (this.lastSelectedArmyId !== null && this.lastSelectedArmyId !== undefined) {
+            const a = this.armies[this.lastSelectedArmyId];
+            if (a) {
+                a.r = r; a.c = c;
+                this.revealFog(r, c, FOG_RADIUS);
+                this.updateArmies();
+            }
+        }
+
         const key = `${r},${c}`;
 
         // --- EVENT BATTLE WIN ---
