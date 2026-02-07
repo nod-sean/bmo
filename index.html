@@ -239,6 +239,22 @@ canvas {
     max-width: 360px;
 }
 
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    z-index: 10;
+}
+
+.close-modal:hover {
+    color: #fff;
+}
+
 #field-modal {
     position: absolute;
     bottom: 0;
@@ -458,6 +474,299 @@ canvas {
 .field-move-source {
     outline: 1px solid #4ade80;
     box-shadow: 0 0 4px rgba(74, 222, 128, 0.9);
+}
+
+/* --- Phase 4: Social & BM Styles --- */
+
+/* Header Profile */
+.header-profile {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 48px;
+    height: 48px;
+    background: #2a2a2a;
+    border: 2px solid #fbbf24;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+.header-profile .avatar {
+    font-size: 28px;
+}
+
+.header-profile .level-badge {
+    position: absolute;
+    bottom: -6px;
+    right: -6px;
+    background: #dc2626;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 99px;
+    border: 1px solid white;
+}
+
+/* Adjust Header Padding for Profile */
+.header-panel {
+    padding-left: 65px;
+    position: relative;
+}
+
+/* Chat Floating Button */
+.chat-float-btn {
+    position: absolute;
+    bottom: 110px;
+    left: 16px;
+    right: auto;
+    width: 48px;
+    height: 48px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #60a5fa;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 90;
+    backdrop-filter: blur(4px);
+    transition: transform 0.2s;
+}
+
+.chat-float-btn:active {
+    transform: scale(0.9);
+}
+
+/* Chat Drawer */
+.chat-drawer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45%;
+    background: rgba(17, 24, 39, 0.95);
+    border-top: 2px solid #4b5563;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(110%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.chat-drawer.open {
+    transform: translateY(0);
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: #1f2937;
+    border-bottom: 1px solid #374151;
+    font-weight: bold;
+    color: #e5e7eb;
+}
+
+.chat-tabs {
+    display: flex;
+    background: #111827;
+}
+
+.chat-tabs button {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    color: #9ca3af;
+    border: none;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.chat-tabs button.active {
+    color: #60a5fa;
+    border-bottom-color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chat-line {
+    font-size: 13px;
+    color: #ffffff !important;
+    line-height: 1.4;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.chat-line .sender {
+    color: #fbbf24;
+    font-weight: bold;
+    margin-right: 4px;
+}
+
+.chat-line.me {
+    text-align: right;
+}
+
+.chat-line.me .sender {
+    display: none;
+}
+
+.chat-line.me .text {
+    background: #1e40af;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px 12px 0 12px;
+    display: inline-block;
+}
+
+.chat-input-area {
+    padding: 10px;
+    background: #1f2937;
+    display: flex;
+    gap: 8px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    background: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 4px;
+    color: white;
+    padding: 8px;
+}
+
+.chat-input-area button {
+    padding: 8px 16px;
+    background: #2563eb;
+    color: white;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+/* Profile View */
+.profile-view {
+    padding: 20px;
+    text-align: center;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.profile-avatar-lg {
+    width: 80px;
+    height: 80px;
+    background: #2a2a2a;
+    border: 3px solid #fbbf24;
+    border-radius: 16px;
+    font-size: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-info h3 {
+    margin: 0;
+    font-size: 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-info p {
+    margin: 4px 0 0;
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.stat-box {
+    background: #374151;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.stat-box div {
+    color: #9ca3af;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.stat-box span {
+    color: #fbbf24;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 12px;
+    background: #4b5563;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.shop-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+    padding: 0 5px;
+}
+
+.shop-tab {
+    flex: 1;
+    padding: 8px;
+    background: #374151;
+    color: #9ca3af;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.shop-tab.active {
+    background: #fbbf24;
+    color: #111827;
+    font-weight: bold;
 }
 
 /* Fog of War */
@@ -1540,7 +1849,9 @@ canvas {
                 </div>
             </div>
             <!-- Dev Tools -->
-            <div class="flex gap-2 mt-1 opacity-30 hover:opacity-100 transition-opacity justify-end items-center">
+            <!-- Dev Tools -->
+            <div class="flex gap-2 mt-1 opacity-30 hover:opacity-100 transition-opacity justify-end items-center"
+                style="display:none;">
                 <button onclick="game.resetGame()"
                     class="bg-red-800 text-white px-2 py-1 rounded text-[10px] border border-red-500 hover:bg-red-600">🔄리셋</button>
                 <button onclick="game.cheatEnergy()"
@@ -1559,10 +1870,9 @@ canvas {
 
         <!-- Footer -->
         <div class="footer-panel">
-            <button class="action-btn chat-btn bg-gray-700 border-gray-600" onclick="game.openSettings()">
-                <span class="text-2xl filter drop-shadow">⚙️</span>
+            <button class="action-btn chat-btn bg-gray-700 border-gray-600" id="chat-btn" onclick="game.toggleChat()">
+                <span class="text-2xl filter drop-shadow">💬</span>
             </button>
-
             <div class="info-box" id="info-panel">
                 <div class="flex justify-between items-center"><span class="font-bold text-sm truncate"
                         id="info-name">선택 없음</span><span class="text-[10px] text-gray-500 font-bold"
@@ -8792,7 +9102,7 @@ const ASSET_KEYS = [
     '1821', '1822', '1823', '1824', '1825', 'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', 'field_bg'
 ];
 
-const CONFIG = { gridCols: 8, gridRows: 8, gridTopY: 520, gridPadding: 20, squadCols: 3, squadRows: 3, squadTopY: 55, squadGap: 80, squadCellSize: 130, squadGap3: 24, squadCellSize3: 110 };
+const CONFIG = { gridCols: 8, gridRows: 8, gridTopY: 460, gridPadding: 20, squadCols: 3, squadRows: 3, squadTopY: 40, squadGap: 80, squadCellSize: 130, squadGap3: 24, squadCellSize3: 110 };
 const ITEM_TYPE = {
     EMPTY: 0,
     BUILDING_BARRACKS: 1, BUILDING_RANGE: 2, BUILDING_STABLE: 3, BUILDING_CHEST: 4, BUILDING_CAMP: 5,
@@ -9375,6 +9685,20 @@ function getData(type, level) {
     return { name: "Unknown", earn: 0, sell: 0 };
 }
 
+// --- DUMMY DATA FOR SOCIAL ---
+const DUMMY_CHAT_MESSAGES = [
+    "[시스템] 환영합니다! 공지: 매너 채팅 부탁드립니다.",
+    "[월드] 라그나로크: 드래곤 잡으실 분 구해요 (3/4)",
+    "[월드] 뉴비가이드: 5성 유닛 어디서 얻나요?",
+    "[길드] 왕국수호대: 오늘 길드전 20시 필참입니다.",
+    "[시스템] '전설의 기사'님이 '다이아 상자'에서 [신궁]을 획득하셨습니다!",
+    "[월드] 상인조합: 골드 대량 매입합니다 귓 주세요.",
+    "[월드] 즐겜유저: 아... 강화 또 터졌네 ㅠㅠ",
+    "[시스템] 핫타임 이벤트가 시작되었습니다! (경험치 +50%)"
+];
+
+const USER_TITLES = ["견습 기사", "왕국 수호자", "드래곤 슬레이어", "부호", "전략의 신"];
+
 // --- CLASSES ---
 class SoundManager {
     constructor() {
@@ -9495,8 +9819,22 @@ class Game {
         this.squad1 = Array(9).fill(null); this.squad2 = Array(9).fill(null); this.squad3 = Array(9).fill(null);
         this.particles = [];
         this.lordLevel = 1; this.currentXp = 0;
-        this.energy = 50; this.gold = 3000; this.gem = 50;
+        this.energy = 50; this.gold = 3000; this.gems = 100; this.points = 0; // Gem/Point Added
         this.cp = 20;
+
+        // Phase 4: Social & BM State
+        this.userProfile = {
+            name: "전설의 유저",
+            title: "견습 기사",
+            avatar: 1, // 1~5
+            vip: 0,
+            winRate: 0,
+            totalPVP: 0,
+            totalCP: 0
+        };
+        this.chatLog = [];
+        this.adWatchCount = 0;
+        this.isChatOpen = false;
         this.baseMaxCp = 20; this.baseCpRegen = 1;
         this.cpBonus = 0; this.cpRegenBonus = 0;
         this.maxCp = this.baseMaxCp; this.cpRegen = this.baseCpRegen;
@@ -9567,7 +9905,9 @@ class Game {
         setInterval(() => this.regenEnergy(), 1000);
         setInterval(() => this.regenCp(), 1000);
         setInterval(() => this.collectTerritoryIncome(), 3000);
+        setInterval(() => this.collectTerritoryIncome(), 3000);
         this.initObjectRegen();
+        this.initSocialUI(); // Phase 4 Injection
         window.addEventListener('resize', () => { this.resize(); this.requestRender(); });
         this.resize(); this.setupInput();
         this.assets.loadAll(() => { this.requestRender(); });
@@ -10857,6 +11197,7 @@ class Game {
                     this.buyFieldItem(item);
                 };
             } else {
+                // Unit
                 const info = getInfoFromCode(item.code);
                 const imgSrc = this.getAssetSrc(info.type, info.level);
                 const iconHtml = imgSrc
@@ -10888,8 +11229,187 @@ class Game {
             if (!modal.classList.contains('open')) { clearInterval(this.shopTimer); this.shopTimer = null; return; }
             const el = document.getElementById('shop-refresh-timer');
             if (el) el.innerText = this.formatTimeLeft(next - Date.now());
-            this.refreshShopModal();
+            // this.refreshShopModal(); // Avoid infinite loop or flicker if logic is recursive
         }, 1000);
+    }
+
+    // --- PHASE 4: SOCIAL UI ---
+    initSocialUI() {
+        // Chat Button is now in Footer (HTML), so we don't create it here.
+        // We only verify drawer exists.
+
+        const gameContainer = document.getElementById('game-container');
+        if (!gameContainer) return;
+
+        // 2. Chat Drawer
+        if (!document.getElementById('chat-drawer')) {
+            const chatDrawer = document.createElement('div');
+            chatDrawer.id = 'chat-drawer';
+            chatDrawer.className = 'chat-drawer';
+            chatDrawer.innerHTML = `
+                <div class="chat-header">
+                    <span>💬 World Chat</span>
+                    <button onclick="game.toggleChat()">✖</button>
+                </div>
+                <div class="chat-tabs">
+                    <button class="active">World</button>
+                    <button>Guild</button>
+                    <button>System</button>
+                </div>
+                <div id="chat-messages" class="chat-messages"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="메시지를 입력하세요...">
+                    <button onclick="game.sendChatMessage()">전송</button>
+                </div>
+            `;
+            gameContainer.appendChild(chatDrawer);
+        }
+
+        // 3. Profile Modal
+        if (!document.getElementById('modal-profile')) {
+            const profileModal = document.createElement('div');
+            profileModal.id = 'modal-profile';
+            profileModal.className = 'modal-overlay';
+            profileModal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close-modal" onclick="document.getElementById('modal-profile').classList.remove('open')">&times;</span>
+                    <div id="profile-body"></div>
+                </div>
+            `;
+            document.body.appendChild(profileModal);
+        }
+
+        // Update Header
+        this.updateHeaderForSocial();
+
+        // Start Chat Simulation
+        setInterval(() => this.simulateChat(), 5000 + Math.random() * 10000);
+    }
+
+    updateHeaderForSocial() {
+        console.log("Updating Header for Social (v3)...");
+        const header = document.getElementById('ui-header');
+        // If header doesn't exist (it should, class is header-panel), try querySelector
+        const headerPanel = document.querySelector('.header-panel');
+        if (!headerPanel) return;
+
+        // Check if already updated
+        if (document.getElementById('header-profile')) return;
+
+        // Inject Profile Icon at start
+        const profileIcon = document.createElement('div');
+        profileIcon.id = 'header-profile';
+        profileIcon.className = 'header-profile';
+        profileIcon.innerHTML = `<div class="avatar">🧙‍♂️</div><div class="level-badge">${this.lordLevel}</div>`;
+        profileIcon.onclick = () => this.openProfile();
+        headerPanel.insertBefore(profileIcon, headerPanel.firstChild);
+
+        // Inject Point Counters (Gems are already in HTML)
+        const resContainer = headerPanel.querySelector('.flex.justify-between.mb-1'); // The first row
+        if (resContainer) {
+            // Points (Inject only Points and Settings)
+
+            // Points
+            const pointDiv = document.createElement('div');
+            pointDiv.className = 'res-pill';
+            pointDiv.onclick = () => this.showToast('포인트 상점 준비 중');
+            pointDiv.innerHTML = `
+                <span class="res-icon">🅿️</span>
+                <span id="res-point">${this.points}</span>
+                <span class="text-gray-400 text-[10px] ml-1">+</span>
+            `;
+            resContainer.appendChild(pointDiv);
+
+            // Settings Button (Top Right)
+            const settingsDiv = document.createElement('div');
+            settingsDiv.className = 'res-pill settings-icon';
+            settingsDiv.onclick = () => document.getElementById('modal-settings').classList.add('open');
+            settingsDiv.innerHTML = `<span class="res-icon">⚙️</span>`;
+            resContainer.appendChild(settingsDiv);
+        }
+    }
+
+    toggleChat() {
+        this.isChatOpen = !this.isChatOpen;
+        const drawer = document.getElementById('chat-drawer');
+        if (this.isChatOpen) {
+            drawer.classList.add('open');
+            this.refreshChatUI();
+        } else {
+            drawer.classList.remove('open');
+        }
+    }
+
+    sendChatMessage() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        this.chatLog.push({ sender: this.userProfile.name, text, type: 'me' });
+        if (this.chatLog.length > 50) this.chatLog.shift();
+
+        input.value = "";
+        this.refreshChatUI();
+        this.showToast("메시지 전송 완료");
+    }
+
+    simulateChat() {
+        const msg = DUMMY_CHAT_MESSAGES[Math.floor(Math.random() * DUMMY_CHAT_MESSAGES.length)];
+        const parts = msg.split(']');
+        const sender = parts[0].replace('[', '');
+        const text = parts[1].trim();
+
+        this.chatLog.push({ sender, text, type: 'other' });
+        if (this.chatLog.length > 50) this.chatLog.shift();
+        if (this.isChatOpen) this.refreshChatUI();
+    }
+
+    refreshChatUI() {
+        const container = document.getElementById('chat-messages');
+        if (!container) return;
+        container.innerHTML = this.chatLog.map(log => `
+                <div class="chat-line ${log.type}">
+                <span class="sender">${log.type === 'me' ? '' : `[${log.sender}]`}</span>
+                <span class="text" style="color:white !important;">${log.text}</span>
+            </div>
+                `).join('');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    openProfile() {
+        const modal = document.getElementById('modal-profile');
+        const body = document.getElementById('profile-body');
+        modal.classList.add('open');
+
+        body.innerHTML = `
+                < div class="profile-view" >
+                <div class="profile-header">
+                    <div class="profile-avatar-lg">🧙‍♂️</div>
+                    <div class="profile-info">
+                        <h3>${this.userProfile.name} <button class="edit-btn" onclick="game.editName()">✏️</button></h3>
+                        <p>${this.userProfile.title}</p>
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-box"><div>승률</div><span>${this.userProfile.winRate}%</span></div>
+                    <div class="stat-box"><div>전투력</div><span>${this.cp * 100}</span></div>
+                    <div class="stat-box"><div>VIP</div><span>${this.userProfile.vip}</span></div>
+                </div>
+                <div class="profile-actions">
+                    <button class="btn-action" onclick="game.showToast('준비 중')">친구 관리</button>
+                    <button class="btn-action" onclick="game.showToast('로그아웃')">계정 연동</button>
+                </div>
+            </div >
+                `;
+    }
+
+    editName() {
+        const newName = prompt("변경할 닉네임을 입력하세요:", this.userProfile.name);
+        if (newName && newName.length > 0) {
+            this.userProfile.name = newName;
+            this.openProfile(); // Refresh
+            this.showToast("닉네임이 변경되었습니다.");
+        }
     }
 
     playSquadJoinFx(zone, idx) {
@@ -10948,7 +11468,7 @@ class Game {
         const regionId = this.getArmyRegionId(army);
         for (let r = 0; r < MAP_SIZE; r++) {
             for (let c = 0; c < MAP_SIZE; c++) {
-                const key = `${r},${c}`;
+                const key = `${r},${c} `;
                 if (!this.visibilityMap.has(key)) continue;
                 if (r === origin.r && c === origin.c) continue;
                 const path = AStar.findPath(
@@ -10980,7 +11500,7 @@ class Game {
         const { times, armyId } = this.moveTargetMode;
         times.forEach((info, key) => {
             const [r, c] = key.split(',').map(Number);
-            const cell = document.getElementById(`field-cell-${r}-${c}`);
+            const cell = document.getElementById(`field - cell - ${r} -${c} `);
             if (!cell || cell.classList.contains('field-fog')) return;
             if (info.cpCost > this.cp) return;
             const label = document.createElement('div');
@@ -10989,13 +11509,13 @@ class Game {
             const isBorderTile = this.occupiedTiles.has(key) || isGateTile(tileType);
             if (isBorderTile) label.classList.add('lower');
             const display = Math.max(1, Math.round(info.timeMin));
-            label.innerText = `${display}m`;
+            label.innerText = `${display} m`;
             cell.appendChild(label);
             cell.classList.add('field-move-eligible');
         });
         const army = this.armies[armyId];
         if (army) {
-            const startCell = document.getElementById(`field-cell-${army.r}-${army.c}`);
+            const startCell = document.getElementById(`field - cell - ${army.r} -${army.c} `);
             if (startCell) startCell.classList.add('field-move-source');
         }
     }
@@ -11003,7 +11523,7 @@ class Game {
     handleMoveTargetClick(r, c, type) {
         if (!this.moveTargetMode) return;
         const { armyId, stats, times } = this.moveTargetMode;
-        const info = times.get(`${r},${c}`);
+        const info = times.get(`${r},${c} `);
         if (!info) { this.showToast("이동 불가"); this.sound.playError(); return; }
 
         const army = this.armies[armyId];
@@ -11019,15 +11539,15 @@ class Game {
         );
         if (!path) { this.showToast("갈 수 없음"); this.sound.playError(); return; }
         const dist = path.length - 1;
-        if (dist > stats.range) { this.showToast(`거리 초과 (${dist}/${stats.range})`); this.sound.playError(); return; }
+        if (dist > stats.range) { this.showToast(`거리 초과(${dist} / ${stats.range})`); this.sound.playError(); return; }
 
         let energyCost = 1; let goldCost = 0;
         if (isGateTile(type)) { energyCost = 5; goldCost = 100; }
         const cpCost = dist * CP_COST_PER_TILE;
 
-        if (this.energy < energyCost) { this.showToast(`에너지 부족 (${energyCost})`); return; }
-        if (this.gold < goldCost) { this.showToast(`골드 부족 (${goldCost})`); return; }
-        if (this.cp < cpCost) { this.showToast(`지휘력 부족 (${cpCost})`); return; }
+        if (this.energy < energyCost) { this.showToast(`에너지 부족(${energyCost})`); return; }
+        if (this.gold < goldCost) { this.showToast(`골드 부족(${goldCost})`); return; }
+        if (this.cp < cpCost) { this.showToast(`지휘력 부족(${cpCost})`); return; }
 
         this.exitMoveTargetMode();
         this.selectedArmyId = armyId;
@@ -11037,7 +11557,7 @@ class Game {
     clearPathPreview() {
         if (!this.previewPath) return;
         this.previewPath.forEach(p => {
-            const cell = document.getElementById(`field-cell-${p.r}-${p.c}`);
+            const cell = document.getElementById(`field - cell - ${p.r} -${p.c} `);
             if (cell) cell.classList.remove('field-path');
         });
         this.previewPath = null;
@@ -11050,12 +11570,12 @@ class Game {
         if (!path || path.length === 0) return;
         this.previewPath = path;
         path.forEach(p => {
-            const cell = document.getElementById(`field-cell-${p.r}-${p.c}`);
+            const cell = document.getElementById(`field - cell - ${p.r} -${p.c} `);
             if (cell) cell.classList.add('field-path');
         });
         const overlay = this.pathOverlay || document.getElementById('path-overlay');
         if (!overlay) return;
-        const points = path.map(p => `${50 + (p.c * 13) + 6.5},${50 + (p.r * 13) + 6.5}`).join(' ');
+        const points = path.map(p => `${50 + (p.c * 13) + 6.5},${50 + (p.r * 13) + 6.5} `).join(' ');
         const bg = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
         bg.setAttribute('points', points);
         bg.setAttribute('class', 'path-line-bg');
@@ -11109,7 +11629,7 @@ class Game {
             else if (type === FIELD_EVENT_TYPES.CARAVAN) { name = "카라반"; level = "-"; }
         }
 
-        const owner = this.occupiedTiles.has(`${r},${c}`) ? "점령" : "-";
+        const owner = this.occupiedTiles.has(`${r},${c} `) ? "점령" : "-";
         return { name, level, owner, defenders };
     }
 
@@ -11125,7 +11645,7 @@ class Game {
         return defenders.map(d => {
             const stat = UNIT_STATS[d.code];
             const nm = stat ? stat.name : d.code;
-            return `${nm} x${d.count}`;
+            return `${nm} x${d.count} `;
         }).join(" / ");
     }
 
@@ -11138,8 +11658,8 @@ class Game {
             const val = Number(ab.value);
             if (ab.code === ABILITY_CODES.GATE_OPEN) messages.push("관문 돌파: 이동로 개방");
             else if (ab.code === ABILITY_CODES.SQUAD_SLOT) messages.push("성채 효과: 추가 스쿼드 +1");
-            else if (ab.code === ABILITY_CODES.CP_CAP) messages.push(`지휘력 최대 +${val}`);
-            else if (ab.code === ABILITY_CODES.CP_REGEN) messages.push(`지휘력 리젠 +${val}/5분`);
+            else if (ab.code === ABILITY_CODES.CP_CAP) messages.push(`지휘력 최대 + ${val} `);
+            else if (ab.code === ABILITY_CODES.CP_REGEN) messages.push(`지휘력 리젠 + ${val}/5분`);
             else if (ab.code === ABILITY_CODES.GOLD_CAP) messages.push(`골드 최대 +${val}`);
             else if (ab.code === ABILITY_CODES.GOLD_REGEN) messages.push(`골드 리젠 +${val}/5분`);
             else if (ab.code === ABILITY_CODES.ENERGY_CAP) messages.push(`에너지 최대 +${val}`);
