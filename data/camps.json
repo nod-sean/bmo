@@ -1,0 +1,37 @@
+{
+  "3101": {
+    "code": 3101,
+    "name": "camp",
+    "name_kr": "막사",
+    "level": 1,
+    "capacity": 4
+  },
+  "3102": {
+    "code": 3102,
+    "name": "camp",
+    "name_kr": "막사",
+    "level": 2,
+    "capacity": 6
+  },
+  "3103": {
+    "code": 3103,
+    "name": "camp",
+    "name_kr": "막사",
+    "level": 3,
+    "capacity": 8
+  },
+  "3104": {
+    "code": 3104,
+    "name": "camp",
+    "name_kr": "막사",
+    "level": 4,
+    "capacity": 12
+  },
+  "3105": {
+    "code": 3105,
+    "name": "camp",
+    "name_kr": "막사",
+    "level": 5,
+    "capacity": 16
+  }
+}

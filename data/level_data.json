@@ -1,0 +1,4002 @@
+[
+  {
+    "level": 1,
+    "xp": 0,
+    "energy_max": 50,
+    "energy_regen": 1,
+    "cp_max": 20,
+    "cp_regen": 1
+  },
+  {
+    "level": 2,
+    "xp": 10,
+    "energy_max": 52,
+    "energy_regen": 1,
+    "cp_max": 20,
+    "cp_regen": 1
+  },
+  {
+    "level": 3,
+    "xp": 25,
+    "energy_max": 54,
+    "energy_regen": 1,
+    "cp_max": 20,
+    "cp_regen": 1
+  },
+  {
+    "level": 4,
+    "xp": 43,
+    "energy_max": 56,
+    "energy_regen": 1,
+    "cp_max": 20,
+    "cp_regen": 1
+  },
+  {
+    "level": 5,
+    "xp": 65,
+    "energy_max": 58,
+    "energy_regen": 1,
+    "cp_max": 20,
+    "cp_regen": 1
+  },
+  {
+    "level": 6,
+    "xp": 91,
+    "energy_max": 60,
+    "energy_regen": 1,
+    "cp_max": 20,
+    "cp_regen": 1
+  },
+  {
+    "level": 7,
+    "xp": 122,
+    "energy_max": 62,
+    "energy_regen": 1,
+    "cp_max": 20,
+    "cp_regen": 1
+  },
+  {
+    "level": 8,
+    "xp": 157,
+    "energy_max": 64,
+    "energy_regen": 1,
+    "cp_max": 20,
+    "cp_regen": 1
+  },
+  {
+    "level": 9,
+    "xp": 197,
+    "energy_max": 66,
+    "energy_regen": 1,
+    "cp_max": 20,
+    "cp_regen": 1
+  },
+  {
+    "level": 10,
+    "xp": 242,
+    "energy_max": 68,
+    "energy_regen": 1,
+    "cp_max": 22,
+    "cp_regen": 1
+  },
+  {
+    "level": 11,
+    "xp": 292,
+    "energy_max": 70,
+    "energy_regen": 1,
+    "cp_max": 22,
+    "cp_regen": 1
+  },
+  {
+    "level": 12,
+    "xp": 347,
+    "energy_max": 72,
+    "energy_regen": 1,
+    "cp_max": 22,
+    "cp_regen": 1
+  },
+  {
+    "level": 13,
+    "xp": 408,
+    "energy_max": 74,
+    "energy_regen": 1,
+    "cp_max": 22,
+    "cp_regen": 1
+  },
+  {
+    "level": 14,
+    "xp": 474,
+    "energy_max": 76,
+    "energy_regen": 1,
+    "cp_max": 22,
+    "cp_regen": 1
+  },
+  {
+    "level": 15,
+    "xp": 546,
+    "energy_max": 78,
+    "energy_regen": 1,
+    "cp_max": 22,
+    "cp_regen": 1
+  },
+  {
+    "level": 16,
+    "xp": 624,
+    "energy_max": 80,
+    "energy_regen": 1,
+    "cp_max": 22,
+    "cp_regen": 1
+  },
+  {
+    "level": 17,
+    "xp": 708,
+    "energy_max": 82,
+    "energy_regen": 1,
+    "cp_max": 22,
+    "cp_regen": 1
+  },
+  {
+    "level": 18,
+    "xp": 798,
+    "energy_max": 84,
+    "energy_regen": 1,
+    "cp_max": 22,
+    "cp_regen": 1
+  },
+  {
+    "level": 19,
+    "xp": 894,
+    "energy_max": 86,
+    "energy_regen": 1,
+    "cp_max": 22,
+    "cp_regen": 1
+  },
+  {
+    "level": 20,
+    "xp": 996,
+    "energy_max": 88,
+    "energy_regen": 1,
+    "cp_max": 24,
+    "cp_regen": 1
+  },
+  {
+    "level": 21,
+    "xp": 1104,
+    "energy_max": 90,
+    "energy_regen": 1,
+    "cp_max": 24,
+    "cp_regen": 1
+  },
+  {
+    "level": 22,
+    "xp": 1219,
+    "energy_max": 92,
+    "energy_regen": 1,
+    "cp_max": 24,
+    "cp_regen": 1
+  },
+  {
+    "level": 23,
+    "xp": 1340,
+    "energy_max": 94,
+    "energy_regen": 1,
+    "cp_max": 24,
+    "cp_regen": 1
+  },
+  {
+    "level": 24,
+    "xp": 1468,
+    "energy_max": 96,
+    "energy_regen": 1,
+    "cp_max": 24,
+    "cp_regen": 1
+  },
+  {
+    "level": 25,
+    "xp": 1603,
+    "energy_max": 98,
+    "energy_regen": 1,
+    "cp_max": 24,
+    "cp_regen": 1
+  },
+  {
+    "level": 26,
+    "xp": 1744,
+    "energy_max": 100,
+    "energy_regen": 1,
+    "cp_max": 24,
+    "cp_regen": 1
+  },
+  {
+    "level": 27,
+    "xp": 1892,
+    "energy_max": 102,
+    "energy_regen": 1,
+    "cp_max": 24,
+    "cp_regen": 1
+  },
+  {
+    "level": 28,
+    "xp": 2047,
+    "energy_max": 104,
+    "energy_regen": 1,
+    "cp_max": 24,
+    "cp_regen": 1
+  },
+  {
+    "level": 29,
+    "xp": 2209,
+    "energy_max": 106,
+    "energy_regen": 1,
+    "cp_max": 24,
+    "cp_regen": 1
+  },
+  {
+    "level": 30,
+    "xp": 2378,
+    "energy_max": 108,
+    "energy_regen": 1,
+    "cp_max": 26,
+    "cp_regen": 1
+  },
+  {
+    "level": 31,
+    "xp": 2554,
+    "energy_max": 110,
+    "energy_regen": 1,
+    "cp_max": 26,
+    "cp_regen": 1
+  },
+  {
+    "level": 32,
+    "xp": 2738,
+    "energy_max": 112,
+    "energy_regen": 1,
+    "cp_max": 26,
+    "cp_regen": 1
+  },
+  {
+    "level": 33,
+    "xp": 2929,
+    "energy_max": 114,
+    "energy_regen": 1,
+    "cp_max": 26,
+    "cp_regen": 1
+  },
+  {
+    "level": 34,
+    "xp": 3127,
+    "energy_max": 116,
+    "energy_regen": 1,
+    "cp_max": 26,
+    "cp_regen": 1
+  },
+  {
+    "level": 35,
+    "xp": 3333,
+    "energy_max": 118,
+    "energy_regen": 1,
+    "cp_max": 26,
+    "cp_regen": 1
+  },
+  {
+    "level": 36,
+    "xp": 3546,
+    "energy_max": 120,
+    "energy_regen": 1,
+    "cp_max": 26,
+    "cp_regen": 1
+  },
+  {
+    "level": 37,
+    "xp": 3767,
+    "energy_max": 122,
+    "energy_regen": 1,
+    "cp_max": 26,
+    "cp_regen": 1
+  },
+  {
+    "level": 38,
+    "xp": 3996,
+    "energy_max": 124,
+    "energy_regen": 1,
+    "cp_max": 26,
+    "cp_regen": 1
+  },
+  {
+    "level": 39,
+    "xp": 4232,
+    "energy_max": 126,
+    "energy_regen": 1,
+    "cp_max": 26,
+    "cp_regen": 1
+  },
+  {
+    "level": 40,
+    "xp": 4476,
+    "energy_max": 128,
+    "energy_regen": 1,
+    "cp_max": 28,
+    "cp_regen": 1
+  },
+  {
+    "level": 41,
+    "xp": 4728,
+    "energy_max": 130,
+    "energy_regen": 1,
+    "cp_max": 28,
+    "cp_regen": 1
+  },
+  {
+    "level": 42,
+    "xp": 4988,
+    "energy_max": 132,
+    "energy_regen": 1,
+    "cp_max": 28,
+    "cp_regen": 1
+  },
+  {
+    "level": 43,
+    "xp": 5256,
+    "energy_max": 134,
+    "energy_regen": 1,
+    "cp_max": 28,
+    "cp_regen": 1
+  },
+  {
+    "level": 44,
+    "xp": 5532,
+    "energy_max": 136,
+    "energy_regen": 1,
+    "cp_max": 28,
+    "cp_regen": 1
+  },
+  {
+    "level": 45,
+    "xp": 5816,
+    "energy_max": 138,
+    "energy_regen": 1,
+    "cp_max": 28,
+    "cp_regen": 1
+  },
+  {
+    "level": 46,
+    "xp": 6108,
+    "energy_max": 140,
+    "energy_regen": 1,
+    "cp_max": 28,
+    "cp_regen": 1
+  },
+  {
+    "level": 47,
+    "xp": 6408,
+    "energy_max": 142,
+    "energy_regen": 1,
+    "cp_max": 28,
+    "cp_regen": 1
+  },
+  {
+    "level": 48,
+    "xp": 6716,
+    "energy_max": 144,
+    "energy_regen": 1,
+    "cp_max": 28,
+    "cp_regen": 1
+  },
+  {
+    "level": 49,
+    "xp": 7033,
+    "energy_max": 146,
+    "energy_regen": 1,
+    "cp_max": 28,
+    "cp_regen": 1
+  },
+  {
+    "level": 50,
+    "xp": 7358,
+    "energy_max": 148,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 51,
+    "xp": 7691,
+    "energy_max": 150,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 52,
+    "xp": 8033,
+    "energy_max": 152,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 53,
+    "xp": 8383,
+    "energy_max": 154,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 54,
+    "xp": 8742,
+    "energy_max": 156,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 55,
+    "xp": 9109,
+    "energy_max": 158,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 56,
+    "xp": 9485,
+    "energy_max": 160,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 57,
+    "xp": 9870,
+    "energy_max": 162,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 58,
+    "xp": 10263,
+    "energy_max": 164,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 59,
+    "xp": 10665,
+    "energy_max": 166,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 60,
+    "xp": 11076,
+    "energy_max": 168,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 61,
+    "xp": 11496,
+    "energy_max": 170,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 62,
+    "xp": 11925,
+    "energy_max": 172,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 63,
+    "xp": 12363,
+    "energy_max": 174,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 64,
+    "xp": 12810,
+    "energy_max": 176,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 65,
+    "xp": 13266,
+    "energy_max": 178,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 66,
+    "xp": 13731,
+    "energy_max": 180,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 67,
+    "xp": 14205,
+    "energy_max": 182,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 68,
+    "xp": 14688,
+    "energy_max": 184,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 69,
+    "xp": 15180,
+    "energy_max": 186,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 70,
+    "xp": 15682,
+    "energy_max": 188,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 71,
+    "xp": 16193,
+    "energy_max": 190,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 72,
+    "xp": 16713,
+    "energy_max": 192,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 73,
+    "xp": 17242,
+    "energy_max": 194,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 74,
+    "xp": 17781,
+    "energy_max": 196,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 75,
+    "xp": 18329,
+    "energy_max": 198,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 76,
+    "xp": 18887,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 77,
+    "xp": 19454,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 78,
+    "xp": 20031,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 79,
+    "xp": 20617,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 80,
+    "xp": 21213,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 81,
+    "xp": 21819,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 82,
+    "xp": 22434,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 83,
+    "xp": 23059,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 84,
+    "xp": 23694,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 85,
+    "xp": 24339,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 86,
+    "xp": 24994,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 87,
+    "xp": 25658,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 88,
+    "xp": 26332,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 89,
+    "xp": 27016,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 90,
+    "xp": 27710,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 91,
+    "xp": 28414,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 92,
+    "xp": 29128,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 93,
+    "xp": 29852,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 94,
+    "xp": 30587,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 95,
+    "xp": 31332,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 96,
+    "xp": 32087,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 97,
+    "xp": 32852,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 98,
+    "xp": 33627,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 99,
+    "xp": 34413,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 100,
+    "xp": 35209,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 101,
+    "xp": 36015,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 102,
+    "xp": 36832,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 103,
+    "xp": 37659,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 104,
+    "xp": 38496,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 105,
+    "xp": 39344,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 106,
+    "xp": 40202,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 107,
+    "xp": 41071,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 108,
+    "xp": 41950,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 109,
+    "xp": 42840,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 110,
+    "xp": 43741,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 111,
+    "xp": 44652,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 112,
+    "xp": 45574,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 113,
+    "xp": 46507,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 114,
+    "xp": 47450,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 115,
+    "xp": 48404,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 116,
+    "xp": 49369,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 117,
+    "xp": 50345,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 118,
+    "xp": 51331,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 119,
+    "xp": 52328,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 120,
+    "xp": 53336,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 121,
+    "xp": 54355,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 122,
+    "xp": 55385,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 123,
+    "xp": 56426,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 124,
+    "xp": 57478,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 125,
+    "xp": 58541,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 126,
+    "xp": 59615,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 127,
+    "xp": 60700,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 128,
+    "xp": 61796,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 129,
+    "xp": 62903,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 130,
+    "xp": 64022,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 131,
+    "xp": 65152,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 132,
+    "xp": 66293,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 133,
+    "xp": 67445,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 134,
+    "xp": 68609,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 135,
+    "xp": 69784,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 136,
+    "xp": 70970,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 137,
+    "xp": 72167,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 138,
+    "xp": 73376,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 139,
+    "xp": 74596,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 140,
+    "xp": 75828,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 141,
+    "xp": 77071,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 142,
+    "xp": 78326,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 143,
+    "xp": 79592,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 144,
+    "xp": 80870,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 145,
+    "xp": 82159,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 146,
+    "xp": 83460,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 147,
+    "xp": 84772,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 148,
+    "xp": 86096,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 149,
+    "xp": 87431,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 150,
+    "xp": 88778,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 151,
+    "xp": 90137,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 152,
+    "xp": 91508,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 153,
+    "xp": 92890,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 154,
+    "xp": 94284,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 155,
+    "xp": 95690,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 156,
+    "xp": 97108,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 157,
+    "xp": 98537,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 158,
+    "xp": 99978,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 159,
+    "xp": 101431,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 160,
+    "xp": 102896,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 161,
+    "xp": 104373,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 162,
+    "xp": 105862,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 163,
+    "xp": 107363,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 164,
+    "xp": 108876,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 165,
+    "xp": 110401,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 166,
+    "xp": 111938,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 167,
+    "xp": 113487,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 168,
+    "xp": 115048,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 169,
+    "xp": 116621,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 170,
+    "xp": 118206,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 171,
+    "xp": 119803,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 172,
+    "xp": 121412,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 173,
+    "xp": 123033,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 174,
+    "xp": 124667,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 175,
+    "xp": 126313,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 176,
+    "xp": 127971,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 177,
+    "xp": 129641,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 178,
+    "xp": 131324,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 179,
+    "xp": 133019,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 180,
+    "xp": 134726,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 181,
+    "xp": 136446,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 182,
+    "xp": 138178,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 183,
+    "xp": 139922,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 184,
+    "xp": 141679,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 185,
+    "xp": 143448,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 186,
+    "xp": 145230,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 187,
+    "xp": 147024,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 188,
+    "xp": 148830,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 189,
+    "xp": 150649,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 190,
+    "xp": 152481,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 191,
+    "xp": 154325,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 192,
+    "xp": 156182,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 193,
+    "xp": 158051,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 194,
+    "xp": 159933,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 195,
+    "xp": 161827,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 196,
+    "xp": 163734,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 197,
+    "xp": 165654,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 198,
+    "xp": 167586,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 199,
+    "xp": 169531,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 200,
+    "xp": 171489,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 201,
+    "xp": 173460,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 202,
+    "xp": 175443,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 203,
+    "xp": 177439,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 204,
+    "xp": 179448,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 205,
+    "xp": 181470,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 206,
+    "xp": 183504,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 207,
+    "xp": 185551,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 208,
+    "xp": 187611,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 209,
+    "xp": 189684,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 210,
+    "xp": 191770,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 211,
+    "xp": 193869,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 212,
+    "xp": 195981,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 213,
+    "xp": 198106,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 214,
+    "xp": 200244,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 215,
+    "xp": 202395,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 216,
+    "xp": 204559,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 217,
+    "xp": 206736,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 218,
+    "xp": 208926,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 219,
+    "xp": 211129,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 220,
+    "xp": 213345,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 221,
+    "xp": 215574,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 222,
+    "xp": 217816,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 223,
+    "xp": 220071,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 224,
+    "xp": 222340,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 225,
+    "xp": 224622,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 226,
+    "xp": 226917,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 227,
+    "xp": 229225,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 228,
+    "xp": 231546,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 229,
+    "xp": 233881,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 230,
+    "xp": 236229,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 231,
+    "xp": 238590,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 232,
+    "xp": 240964,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 233,
+    "xp": 243352,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 234,
+    "xp": 245753,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 235,
+    "xp": 248167,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 236,
+    "xp": 250595,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 237,
+    "xp": 253036,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 238,
+    "xp": 255491,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 239,
+    "xp": 257959,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 240,
+    "xp": 260440,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 241,
+    "xp": 262935,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 242,
+    "xp": 265443,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 243,
+    "xp": 267965,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 244,
+    "xp": 270500,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 245,
+    "xp": 273049,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 246,
+    "xp": 275611,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 247,
+    "xp": 278187,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 248,
+    "xp": 280777,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 249,
+    "xp": 283380,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 250,
+    "xp": 285997,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 251,
+    "xp": 288627,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 252,
+    "xp": 291271,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 253,
+    "xp": 293929,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 254,
+    "xp": 296600,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 255,
+    "xp": 299285,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 256,
+    "xp": 301984,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 257,
+    "xp": 304696,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 258,
+    "xp": 307422,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 259,
+    "xp": 310162,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 260,
+    "xp": 312916,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 261,
+    "xp": 315683,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 262,
+    "xp": 318464,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 263,
+    "xp": 321259,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 264,
+    "xp": 324068,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 265,
+    "xp": 326891,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 266,
+    "xp": 329728,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 267,
+    "xp": 332578,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 268,
+    "xp": 335442,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 269,
+    "xp": 338320,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 270,
+    "xp": 341212,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 271,
+    "xp": 344118,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 272,
+    "xp": 347038,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 273,
+    "xp": 349972,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 274,
+    "xp": 352920,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 275,
+    "xp": 355882,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 276,
+    "xp": 358858,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 277,
+    "xp": 361848,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 278,
+    "xp": 364852,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 279,
+    "xp": 367870,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 280,
+    "xp": 370902,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 281,
+    "xp": 373948,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 282,
+    "xp": 377008,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 283,
+    "xp": 380082,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 284,
+    "xp": 383171,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 285,
+    "xp": 386274,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 286,
+    "xp": 389391,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 287,
+    "xp": 392522,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 288,
+    "xp": 395667,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 289,
+    "xp": 398826,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 290,
+    "xp": 402000,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 291,
+    "xp": 405188,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 292,
+    "xp": 408390,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 293,
+    "xp": 411606,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 294,
+    "xp": 414837,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 295,
+    "xp": 418082,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 296,
+    "xp": 421341,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 297,
+    "xp": 424615,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 298,
+    "xp": 427903,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 299,
+    "xp": 431205,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 300,
+    "xp": 434522,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 301,
+    "xp": 437853,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 302,
+    "xp": 441199,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 303,
+    "xp": 444559,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 304,
+    "xp": 447933,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 305,
+    "xp": 451322,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 306,
+    "xp": 454725,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 307,
+    "xp": 458143,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 308,
+    "xp": 461575,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 309,
+    "xp": 465022,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 310,
+    "xp": 468483,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 311,
+    "xp": 471959,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 312,
+    "xp": 475449,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 313,
+    "xp": 478954,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 314,
+    "xp": 482473,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 315,
+    "xp": 486007,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 316,
+    "xp": 489556,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 317,
+    "xp": 493119,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 318,
+    "xp": 496697,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 319,
+    "xp": 500289,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 320,
+    "xp": 503896,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 321,
+    "xp": 507518,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 322,
+    "xp": 511154,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 323,
+    "xp": 514805,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 324,
+    "xp": 518471,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 325,
+    "xp": 522152,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 326,
+    "xp": 525847,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 327,
+    "xp": 529557,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 328,
+    "xp": 533282,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 329,
+    "xp": 537022,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 330,
+    "xp": 540776,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 331,
+    "xp": 544545,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 332,
+    "xp": 548329,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 333,
+    "xp": 552128,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 334,
+    "xp": 555942,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 335,
+    "xp": 559771,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 336,
+    "xp": 563614,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 337,
+    "xp": 567472,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 338,
+    "xp": 571345,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 339,
+    "xp": 575233,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 340,
+    "xp": 579136,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 341,
+    "xp": 583054,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 342,
+    "xp": 586987,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 343,
+    "xp": 590935,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 344,
+    "xp": 594898,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 345,
+    "xp": 598876,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 346,
+    "xp": 602869,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 347,
+    "xp": 606877,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 348,
+    "xp": 610900,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 349,
+    "xp": 614938,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 350,
+    "xp": 618991,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 351,
+    "xp": 623059,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 352,
+    "xp": 627142,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 353,
+    "xp": 631240,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 354,
+    "xp": 635353,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 355,
+    "xp": 639481,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 356,
+    "xp": 643625,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 357,
+    "xp": 647784,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 358,
+    "xp": 651958,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 359,
+    "xp": 656147,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 360,
+    "xp": 660351,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 361,
+    "xp": 664570,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 362,
+    "xp": 668805,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 363,
+    "xp": 673055,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 364,
+    "xp": 677320,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 365,
+    "xp": 681600,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 366,
+    "xp": 685896,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 367,
+    "xp": 690207,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 368,
+    "xp": 694533,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 369,
+    "xp": 698874,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 370,
+    "xp": 703231,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 371,
+    "xp": 707603,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 372,
+    "xp": 711990,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 373,
+    "xp": 716393,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 374,
+    "xp": 720811,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 375,
+    "xp": 725244,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 376,
+    "xp": 729693,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 377,
+    "xp": 734157,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 378,
+    "xp": 738637,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 379,
+    "xp": 743132,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 380,
+    "xp": 747643,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 381,
+    "xp": 752169,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 382,
+    "xp": 756710,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 383,
+    "xp": 761267,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 384,
+    "xp": 765839,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 385,
+    "xp": 770427,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 386,
+    "xp": 775030,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 387,
+    "xp": 779649,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 388,
+    "xp": 784283,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 389,
+    "xp": 788933,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 390,
+    "xp": 793598,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 391,
+    "xp": 798279,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 392,
+    "xp": 802976,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 393,
+    "xp": 807688,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 394,
+    "xp": 812416,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 395,
+    "xp": 817159,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 396,
+    "xp": 821918,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 397,
+    "xp": 826693,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 398,
+    "xp": 831483,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 399,
+    "xp": 836289,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 400,
+    "xp": 841111,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 401,
+    "xp": 845948,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 402,
+    "xp": 850801,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 403,
+    "xp": 855670,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 404,
+    "xp": 860554,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 405,
+    "xp": 865454,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 406,
+    "xp": 870370,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 407,
+    "xp": 875302,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 408,
+    "xp": 880249,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 409,
+    "xp": 885212,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 410,
+    "xp": 890191,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 411,
+    "xp": 895186,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 412,
+    "xp": 900197,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 413,
+    "xp": 905223,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 414,
+    "xp": 910265,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 415,
+    "xp": 915323,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 416,
+    "xp": 920397,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 417,
+    "xp": 925487,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 418,
+    "xp": 930593,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 419,
+    "xp": 935715,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 420,
+    "xp": 940853,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 421,
+    "xp": 946006,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 422,
+    "xp": 951175,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 423,
+    "xp": 956360,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 424,
+    "xp": 961561,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 425,
+    "xp": 966778,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 426,
+    "xp": 972011,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 427,
+    "xp": 977260,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 428,
+    "xp": 982525,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 429,
+    "xp": 987806,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 430,
+    "xp": 993103,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 431,
+    "xp": 998416,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 432,
+    "xp": 1003745,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 433,
+    "xp": 1009090,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 434,
+    "xp": 1014451,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 435,
+    "xp": 1019828,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 436,
+    "xp": 1025222,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 437,
+    "xp": 1030632,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 438,
+    "xp": 1036058,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 439,
+    "xp": 1041500,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 440,
+    "xp": 1046958,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 441,
+    "xp": 1052432,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 442,
+    "xp": 1057922,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 443,
+    "xp": 1063428,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 444,
+    "xp": 1068951,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 445,
+    "xp": 1074490,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 446,
+    "xp": 1080045,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 447,
+    "xp": 1085616,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 448,
+    "xp": 1091203,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 449,
+    "xp": 1096807,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 450,
+    "xp": 1102427,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 451,
+    "xp": 1108063,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 452,
+    "xp": 1113715,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 453,
+    "xp": 1119384,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 454,
+    "xp": 1125069,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 455,
+    "xp": 1130770,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 456,
+    "xp": 1136487,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 457,
+    "xp": 1142221,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 458,
+    "xp": 1147971,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 459,
+    "xp": 1153737,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 460,
+    "xp": 1159520,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 461,
+    "xp": 1165319,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 462,
+    "xp": 1171135,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 463,
+    "xp": 1176967,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 464,
+    "xp": 1182815,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 465,
+    "xp": 1188680,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 466,
+    "xp": 1194561,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 467,
+    "xp": 1200459,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 468,
+    "xp": 1206373,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 469,
+    "xp": 1212303,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 470,
+    "xp": 1218250,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 471,
+    "xp": 1224213,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 472,
+    "xp": 1230193,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 473,
+    "xp": 1236189,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 474,
+    "xp": 1242202,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 475,
+    "xp": 1248231,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 476,
+    "xp": 1254277,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 477,
+    "xp": 1260339,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 478,
+    "xp": 1266418,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 479,
+    "xp": 1272513,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 480,
+    "xp": 1278625,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 481,
+    "xp": 1284753,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 482,
+    "xp": 1290898,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 483,
+    "xp": 1297060,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 484,
+    "xp": 1303238,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 485,
+    "xp": 1309433,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 486,
+    "xp": 1315644,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 487,
+    "xp": 1321872,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 488,
+    "xp": 1328117,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 489,
+    "xp": 1334378,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 490,
+    "xp": 1340656,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 491,
+    "xp": 1346951,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 492,
+    "xp": 1353262,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 493,
+    "xp": 1359590,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 494,
+    "xp": 1365935,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 495,
+    "xp": 1372296,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 496,
+    "xp": 1378674,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 497,
+    "xp": 1385069,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 498,
+    "xp": 1391481,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 499,
+    "xp": 1397909,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  },
+  {
+    "level": 500,
+    "xp": 1404354,
+    "energy_max": 200,
+    "energy_regen": 1,
+    "cp_max": 30,
+    "cp_regen": 1
+  }
+]

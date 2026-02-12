@@ -1,0 +1,661 @@
+{
+  "REFILL_DATA": {
+    "energy": [
+      {
+        "energy_refill": 5,
+        "crystal": 2,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "energy_refill": 10,
+        "crystal": 4,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "energy_refill": 30,
+        "crystal": 11,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "energy_refill": 50,
+        "crystal": 18,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "energy_refill": 100,
+        "crystal": 35,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "energy_refill": 3,
+        "crystal": 0,
+        "ad": 1,
+        "limit": 3
+      }
+    ],
+    "gold": [
+      {
+        "gold_refill": 5,
+        "crystal": 2,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "gold_refill": 10,
+        "crystal": 4,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "gold_refill": 30,
+        "crystal": 11,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "gold_refill": 50,
+        "crystal": 18,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "gold_refill": 100,
+        "crystal": 35,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "gold_refill": 3,
+        "crystal": 0,
+        "ad": 1,
+        "limit": 3
+      }
+    ],
+    "cp": [
+      {
+        "cp_refill": 5,
+        "crystal": 2,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "cp_refill": 10,
+        "crystal": 4,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "cp_refill": 30,
+        "crystal": 11,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "cp_refill": 50,
+        "crystal": 18,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "cp_refill": 100,
+        "crystal": 35,
+        "ad": 0,
+        "limit": 0
+      },
+      {
+        "cp_refill": 3,
+        "crystal": 0,
+        "ad": 1,
+        "limit": 3
+      }
+    ],
+    "crystal": [
+      {
+        "code": 101,
+        "crystal_refill": 10,
+        "bonus": 0,
+        "cost": 1
+      },
+      {
+        "code": 102,
+        "crystal_refill": 50,
+        "bonus": 2,
+        "cost": 5
+      },
+      {
+        "code": 103,
+        "crystal_refill": 100,
+        "bonus": 5,
+        "cost": 10
+      },
+      {
+        "code": 104,
+        "crystal_refill": 200,
+        "bonus": 20,
+        "cost": 20
+      },
+      {
+        "code": 105,
+        "crystal_refill": 500,
+        "bonus": 75,
+        "cost": 50
+      },
+      {
+        "code": 106,
+        "crystal_refill": 1000,
+        "bonus": 200,
+        "cost": 100
+      }
+    ]
+  },
+  "ABILITY_CODES": {
+    "GOLD_CAP": 1,
+    "GOLD_REGEN": 2,
+    "ENERGY_CAP": 3,
+    "ENERGY_REGEN": 4,
+    "CP_CAP": 5,
+    "CP_REGEN": 6,
+    "GATE_OPEN": 101,
+    "SQUAD_SLOT": 102,
+    "TAX": 201,
+    "UPKEEP": 202
+  },
+  "BUILDING_LIMITS": {},
+  "SHOP_DATA": [
+    {
+      "type": 2101,
+      "name": "병영",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2201,
+      "name": "사격장",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2301,
+      "name": "마구간",
+      "price": 0,
+      "icon": "🏠"
+    }
+  ],
+  "FIELD_OBJECT_REWARDS": {
+    "1": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "2": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 2
+          }
+        ]
+      }
+    ],
+    "3": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 3
+          }
+        ]
+      }
+    ],
+    "4": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1103,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1104,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1203,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1204,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1303,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1304,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1803,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1813,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1822,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1823,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2101,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2102,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2201,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2202,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2301,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2302,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 3102,
+            "weight": 4
+          }
+        ]
+      }
+    ]
+  },
+  "DEFAULT_LOCALE": "ko",
+  "BATTLE_CONSTANTS": {
+    "BASE_DMG": 1,
+    "ADVANTAGE_BONUS": 1.5,
+    "DISADVANTAGE_PENALTY": 0.7,
+    "CRIT_CHANCE": 0.05,
+    "CRIT_MULT": 1.5
+  },
+  "GAMEPLAY": {
+    "MOVE_MS_PER_MIN": 120,
+    "CP_COST_PER_TILE": 1,
+    "TERRAIN_COLORS": {
+      "100": "#4a6e3a",
+      "200": "#2e5a2a",
+      "300": "#8b6f3d",
+      "400": "#7a7a7a",
+      "500": "#7a1f1f"
+    },
+    "TERRAIN_COLORS_BORDER": {
+      "100": "#5b7b47",
+      "200": "#3b6a36",
+      "300": "#9b7e4a",
+      "400": "#8a8a8a",
+      "500": "#8a2b2b"
+    },
+    "STATUE_BUFF_FALLBACK": {
+      "1": 0.05,
+      "2": 0.1
+    },
+    "CITADEL_CP_BONUS": 0,
+    "GATE_UPKEEP_PER_LEVEL": 1,
+    "CITADEL_UPKEEP_PER_LEVEL": 2,
+    "MERGE_XP_FALLBACK": {
+      "1": 1,
+      "2": 2,
+      "3": 4,
+      "4": 5,
+      "5": 6,
+      "6": 8,
+      "7": 10,
+      "8": 15,
+      "9": 20,
+      "10": 0
+    },
+    "ITEM_VALUES_FALLBACK": {
+      "1": 1,
+      "2": 2,
+      "3": 6,
+      "4": 14,
+      "5": 32
+    }
+  },
+  "FIELD_EVENTS": {
+    "RATES": {
+      "2001": 15,
+      "2002": 5,
+      "2010": 3,
+      "2020": 2,
+      "2030": 4
+    },
+    "DROP_TABLE": {
+      "2001": {
+        "gold": [
+          50,
+          100
+        ],
+        "items": [
+          {
+            "code": 1801,
+            "prob": 20
+          }
+        ]
+      },
+      "2002": {
+        "gold": [
+          200,
+          400
+        ],
+        "items": [
+          {
+            "code": 1811,
+            "prob": 30
+          },
+          {
+            "code": 1201,
+            "prob": 10
+          }
+        ]
+      },
+      "2010": {
+        "gold": [
+          500,
+          1000
+        ],
+        "items": [
+          {
+            "code": 2101,
+            "prob": 50
+          },
+          {
+            "code": 1210,
+            "prob": 20
+          }
+        ]
+      }
+    }
+  }
+}

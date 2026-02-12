@@ -1,0 +1,215 @@
+﻿class BattleSimulator {
+    constructor() {
+        this.log = [];
+        this.maxTurns = 50;
+        this.defaultConfig = {
+            BASE_DMG: 1,
+            ADVANTAGE_BONUS: 1.5,
+            CRIT_CHANCE: 0.05,
+            CRIT_MULT: 1.5
+        };
+    }
+
+    getConfig() {
+        const runtime = window?.GAME_DATA?.constants?.BATTLE_CONSTANTS || {};
+        return {
+            BASE_DMG: Number.isFinite(runtime.BASE_DMG) ? runtime.BASE_DMG : this.defaultConfig.BASE_DMG,
+            ADVANTAGE_BONUS: Number.isFinite(runtime.ADVANTAGE_BONUS) ? runtime.ADVANTAGE_BONUS : this.defaultConfig.ADVANTAGE_BONUS,
+            CRIT_CHANCE: Number.isFinite(runtime.CRIT_CHANCE) ? runtime.CRIT_CHANCE : this.defaultConfig.CRIT_CHANCE,
+            CRIT_MULT: Number.isFinite(runtime.CRIT_MULT) ? runtime.CRIT_MULT : this.defaultConfig.CRIT_MULT
+        };
+    }
+
+    normalizeUnit(unit, team, fallbackId) {
+        const hp = Number.isFinite(unit.hp) ? unit.hp : 1;
+        const maxHp = Number.isFinite(unit.maxHp) ? unit.maxHp : hp;
+        const slot = Number.isFinite(unit.slot) ? unit.slot : 0;
+        const spd = Number.isFinite(unit.spd) ? unit.spd : 1;
+        const atk = Number.isFinite(unit.atk) ? unit.atk : 1;
+        const def = Number.isFinite(unit.def) ? unit.def : 0;
+        const range = Number.isFinite(unit.range) ? unit.range : 1;
+        const move = Number.isFinite(unit.move) ? unit.move : 1;
+        const classType = Number.isFinite(unit.classType) ? unit.classType : 0;
+
+        return {
+            ...unit,
+            team,
+            id: unit.id || fallbackId,
+            name: unit.name || fallbackId,
+            hp,
+            maxHp,
+            currentHp: hp,
+            atk,
+            def,
+            spd,
+            range,
+            move,
+            classType,
+            slot
+        };
+    }
+
+    getPos(slot) {
+        const clamped = Math.max(0, Math.min(8, Number.isFinite(slot) ? slot : 0));
+        return { r: Math.floor(clamped / 3), c: clamped % 3 };
+    }
+
+    getDistance(attacker, target) {
+        const a = this.getPos(attacker.slot);
+        const b = this.getPos(target.slot);
+        return Math.abs(a.r - b.r) + Math.abs(a.c - b.c);
+    }
+
+    isAdvantage(attackerClass, defenderClass) {
+        return (
+            (attackerClass === 10 && defenderClass === 12) ||
+            (attackerClass === 12 && defenderClass === 11) ||
+            (attackerClass === 11 && defenderClass === 10)
+        );
+    }
+
+    buildTargetCandidate(attacker, enemy) {
+        const dist = this.getDistance(attacker, enemy);
+        const range = Math.max(0, attacker.range || 0);
+        const move = Math.max(0, attacker.move || 0);
+        const requiredMove = Math.max(0, dist - range);
+        const reachable = requiredMove <= move;
+        const hp20 = enemy.currentHp <= (enemy.maxHp * 0.2);
+        const hasAdvantage = this.isAdvantage(attacker.classType, enemy.classType);
+        const stationary = dist <= range;
+
+        return {
+            enemy,
+            dist,
+            reachable,
+            stationary,
+            hp20,
+            hasAdvantage
+        };
+    }
+
+    selectTarget(attacker, enemies) {
+        const candidates = enemies
+            .map((enemy) => this.buildTargetCandidate(attacker, enemy))
+            .filter((c) => c.reachable);
+
+        if (candidates.length === 0) {
+            return null;
+        }
+
+        candidates.sort((a, b) => {
+            if (a.hp20 !== b.hp20) return a.hp20 ? -1 : 1;
+            if (a.hasAdvantage !== b.hasAdvantage) return a.hasAdvantage ? -1 : 1;
+            if (a.stationary !== b.stationary) return a.stationary ? -1 : 1;
+            if (a.enemy.currentHp !== b.enemy.currentHp) return a.enemy.currentHp - b.enemy.currentHp;
+            if (a.dist !== b.dist) return a.dist - b.dist;
+            return (a.enemy.slot || 0) - (b.enemy.slot || 0);
+        });
+
+        return candidates[0];
+    }
+
+    attack(attacker, defender, steps, config, metadata) {
+        const attackerAdv = this.isAdvantage(attacker.classType, defender.classType);
+        const defenderAdv = this.isAdvantage(defender.classType, attacker.classType);
+
+        let effectiveAtk = attacker.atk;
+        let effectiveDef = defender.def;
+
+        // Design spec: on favorable matchup, atk/def values are boosted by 1.5x.
+        if (attackerAdv) effectiveAtk *= config.ADVANTAGE_BONUS;
+        if (defenderAdv) effectiveDef *= config.ADVANTAGE_BONUS;
+
+        // Design spec: dmg = atk * (100 / (100 + def))
+        let damage = config.BASE_DMG * (effectiveAtk * (100 / (100 + effectiveDef)));
+        const isCrit = Math.random() < config.CRIT_CHANCE;
+        if (isCrit) {
+            damage *= config.CRIT_MULT;
+        }
+
+        damage = Math.max(1, Math.floor(damage));
+        defender.currentHp = Math.max(0, defender.currentHp - damage);
+
+        let msg = `${attacker.name} -> ${defender.name}: ${damage} damage`;
+        if (metadata && metadata.hasAdvantage) msg += ' (advantage)';
+        if (metadata && metadata.stationary) msg += ' (no-move)';
+        if (isCrit) msg = `[CRIT] ${msg}`;
+
+        steps.push({
+            type: 'attack',
+            msg,
+            attackerId: attacker.id,
+            defenderId: defender.id,
+            damage,
+            targetHp: defender.currentHp
+        });
+
+        if (defender.currentHp <= 0) {
+            steps.push({ type: 'log', msg: `${defender.name} defeated` });
+        }
+    }
+
+    simulate(allies, defenders) {
+        const steps = [];
+        const config = this.getConfig();
+
+        steps.push({ type: 'log', msg: 'Battle simulation start' });
+
+        const teamA = allies.map((u, i) => this.normalizeUnit(u, 'A', `ally-${i}`));
+        const teamB = defenders.map((u, i) => this.normalizeUnit(u, 'B', `enemy-${i}`));
+
+        let turn = 0;
+        let winner = null;
+
+        while (turn < this.maxTurns) {
+            turn += 1;
+            steps.push({ type: 'log', msg: `[Turn ${turn}]` });
+
+            const activeUnits = [...teamA, ...teamB]
+                .filter((u) => u.currentHp > 0)
+                .sort((a, b) => (b.spd - a.spd) || ((a.slot || 0) - (b.slot || 0)));
+
+            if (activeUnits.length === 0) break;
+
+            for (const unit of activeUnits) {
+                if (unit.currentHp <= 0) continue;
+
+                const enemies = unit.team === 'A' ? teamB : teamA;
+                const liveEnemies = enemies.filter((e) => e.currentHp > 0);
+                if (liveEnemies.length === 0) {
+                    winner = unit.team === 'A' ? 'allies' : 'defenders';
+                    break;
+                }
+
+                const selected = this.selectTarget(unit, liveEnemies);
+                if (!selected) {
+                    steps.push({ type: 'log', msg: `${unit.name} cannot reach a target` });
+                    continue;
+                }
+
+                this.attack(unit, selected.enemy, steps, config, selected);
+            }
+
+            if (winner) break;
+            if (teamA.every((u) => u.currentHp <= 0)) { winner = 'defenders'; break; }
+            if (teamB.every((u) => u.currentHp <= 0)) { winner = 'allies'; break; }
+        }
+
+        if (!winner) {
+            const hpA = teamA.reduce((sum, u) => sum + Math.max(0, u.currentHp), 0);
+            const hpB = teamB.reduce((sum, u) => sum + Math.max(0, u.currentHp), 0);
+            winner = hpA >= hpB ? 'allies' : 'defenders';
+            steps.push({ type: 'log', msg: `Max turns reached, winner by remaining HP: ${winner}` });
+        } else {
+            steps.push({ type: 'log', msg: `Winner: ${winner}` });
+        }
+
+        return {
+            winner,
+            steps,
+            survivors: winner === 'allies' ? teamA : teamB
+        };
+    }
+}
+
+window.BattleSimulator = BattleSimulator;
