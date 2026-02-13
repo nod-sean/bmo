@@ -601,6 +601,160 @@
       "3": 6,
       "4": 14,
       "5": 32
+    },
+    "CP_COST_PER_COMMAND": 1,
+    "PORTAL_CP_COST": 1,
+    "DUNGEON_COOLDOWN_MS": 300000,
+    "DUNGEON_ENTRY_GOLD_COST": 200,
+    "DUNGEON_ENTRY_ENERGY_COST": 5,
+    "DUNGEON_ENTRY_CP_COST": 1,
+    "REBELLION_RANDOM_CHANCE": 0.0008,
+    "REBELLION_UNPAID_CHANCE": 0.2,
+    "REBELLION_COOLDOWN_MS": 300000,
+    "CROWN_HOLD_MS": 600000,
+    "SHOP_HOURLY_GOLD_FALLBACK": 120,
+    "TAVERN_HOURLY_GOLD_FALLBACK": 120,
+    "WORLD_RULESET_DEFAULT": "neutral",
+    "WORLD_RULESETS": {
+      "kind": {
+        "allowHostileEventAttack": true,
+        "allowCapturableAttack": true,
+        "allowRebellion": true,
+        "taxMultiplier": 1,
+        "upkeepMultiplier": 0.85,
+        "rebellionRandomMultiplier": 0.7,
+        "rebellionUnpaidMultiplier": 0.8,
+        "moveEnergyMultiplier": 0.9,
+        "moveGoldMultiplier": 0.9,
+        "cpCostMultiplier": 1
+      },
+      "neutral": {
+        "allowHostileEventAttack": true,
+        "allowCapturableAttack": true,
+        "allowRebellion": true,
+        "taxMultiplier": 1,
+        "upkeepMultiplier": 1,
+        "rebellionRandomMultiplier": 1,
+        "rebellionUnpaidMultiplier": 1,
+        "moveEnergyMultiplier": 1,
+        "moveGoldMultiplier": 1,
+        "cpCostMultiplier": 1
+      },
+      "cruel": {
+        "allowHostileEventAttack": true,
+        "allowCapturableAttack": true,
+        "allowRebellion": true,
+        "taxMultiplier": 0.9,
+        "upkeepMultiplier": 1.2,
+        "rebellionRandomMultiplier": 1.35,
+        "rebellionUnpaidMultiplier": 1.5,
+        "moveEnergyMultiplier": 1.15,
+        "moveGoldMultiplier": 1.15,
+        "cpCostMultiplier": 1
+      }
+    },
+    "WORLD_END_CONDITIONS": {
+      "enabled": true,
+      "type": "king_castle_hold",
+      "lock_actions_on_end": true,
+      "allow_next_season_transition": true,
+      "target_hold_ms": 1800000,
+      "target_score": 1000
+    },
+    "WORLD_SEASON_POLICY": {
+      "keep_merge_grid": true,
+      "keep_squads": true,
+      "keep_resources": true,
+      "keep_points": true,
+      "resource_carryover": {
+        "gold": 1,
+        "gem": 1,
+        "energy": 1,
+        "cp": 1,
+        "points": 1
+      }
+    },
+    "DRAGON_BOSS": {
+      "baseRewards": {
+        "gold": 3000,
+        "gem": 20,
+        "energy": 15,
+        "cp": 5,
+        "points": 25
+      },
+      "tierMultiplier": {
+        "s": 1.4,
+        "a": 1.15,
+        "b": 1,
+        "c": 0.8
+      },
+      "minShareByTier": {
+        "s": 0.5,
+        "a": 0.3,
+        "b": 0.15
+      },
+      "killBonusGold": 500,
+      "killBonusPoints": 5
+    },
+    "WORLD_PRESET_DEFAULT": "regular",
+    "WORLD_PRESETS": {
+      "regular": {
+        "label": "Regular",
+        "rule_set": "neutral",
+        "world_end_conditions": {
+          "enabled": true,
+          "type": "king_castle_hold",
+          "lock_actions_on_end": true,
+          "allow_next_season_transition": true,
+          "target_hold_ms": 1800000,
+          "target_score": 1000
+        },
+        "season_policy": {
+          "keep_merge_grid": true,
+          "keep_squads": true,
+          "keep_resources": true,
+          "keep_points": true,
+          "resource_carryover": { "gold": 1, "gem": 1, "energy": 1, "cp": 1, "points": 1 }
+        }
+      },
+      "seasonal": {
+        "label": "Seasonal",
+        "rule_set": "kind",
+        "world_end_conditions": {
+          "enabled": true,
+          "type": "score",
+          "lock_actions_on_end": true,
+          "allow_next_season_transition": true,
+          "target_hold_ms": 1500000,
+          "target_score": 750
+        },
+        "season_policy": {
+          "keep_merge_grid": true,
+          "keep_squads": true,
+          "keep_resources": true,
+          "keep_points": true,
+          "resource_carryover": { "gold": 0.8, "gem": 1, "energy": 1, "cp": 1, "points": 0.9 }
+        }
+      },
+      "hardcore": {
+        "label": "Hardcore",
+        "rule_set": "cruel",
+        "world_end_conditions": {
+          "enabled": true,
+          "type": "hybrid",
+          "lock_actions_on_end": true,
+          "allow_next_season_transition": true,
+          "target_hold_ms": 1200000,
+          "target_score": 1200
+        },
+        "season_policy": {
+          "keep_merge_grid": true,
+          "keep_squads": true,
+          "keep_resources": true,
+          "keep_points": true,
+          "resource_carryover": { "gold": 0.6, "gem": 0.9, "energy": 1, "cp": 1, "points": 0.75 }
+        }
+      }
     }
   },
   "FIELD_EVENTS": {

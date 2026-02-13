@@ -96,6 +96,17 @@ const DEFAULT_GAMEPLAY_CONSTANTS = {
     MOVE_MS_PER_MIN: 120,
     CP_COST_PER_TILE: 1,
     CP_COST_PER_COMMAND: 1,
+    PORTAL_CP_COST: 1,
+    DUNGEON_COOLDOWN_MS: 300000,
+    DUNGEON_ENTRY_GOLD_COST: 200,
+    DUNGEON_ENTRY_ENERGY_COST: 5,
+    DUNGEON_ENTRY_CP_COST: 1,
+    REBELLION_RANDOM_CHANCE: 0.0008,
+    REBELLION_UNPAID_CHANCE: 0.2,
+    REBELLION_COOLDOWN_MS: 300000,
+    CROWN_HOLD_MS: 600000,
+    SHOP_HOURLY_GOLD_FALLBACK: 120,
+    TAVERN_HOURLY_GOLD_FALLBACK: 120,
     TERRAIN_COLORS: { 100: "#4a6e3a", 200: "#2e5a2a", 300: "#8b6f3d", 400: "#7a7a7a", 500: "#7a1f1f" },
     TERRAIN_COLORS_BORDER: { 100: "#5b7b47", 200: "#3b6a36", 300: "#9b7e4a", 400: "#8a8a8a", 500: "#8a2b2b" },
     STATUE_BUFF_FALLBACK: { 1: 0.05, 2: 0.10 },
@@ -105,6 +116,147 @@ const DEFAULT_GAMEPLAY_CONSTANTS = {
     MERGE_XP_FALLBACK: { 1: 1, 2: 2, 3: 4, 4: 5, 5: 6, 6: 8, 7: 10, 8: 15, 9: 20, 10: 0 },
     ITEM_VALUES_FALLBACK: { 1: 1, 2: 2, 3: 6, 4: 14, 5: 32 }
 };
+
+const WORLD_RULESET_KEYS = Object.freeze({
+    KIND: "kind",
+    NEUTRAL: "neutral",
+    CRUEL: "cruel"
+});
+
+const DEFAULT_WORLD_RULESETS = Object.freeze({
+    [WORLD_RULESET_KEYS.KIND]: Object.freeze({
+        allowHostileEventAttack: true,
+        allowCapturableAttack: true,
+        allowRebellion: true,
+        taxMultiplier: 1.0,
+        upkeepMultiplier: 0.9,
+        rebellionRandomMultiplier: 0.75,
+        rebellionUnpaidMultiplier: 0.85,
+        moveEnergyMultiplier: 0.9,
+        moveGoldMultiplier: 1.0,
+        cpCostMultiplier: 1.0
+    }),
+    [WORLD_RULESET_KEYS.NEUTRAL]: Object.freeze({
+        allowHostileEventAttack: true,
+        allowCapturableAttack: true,
+        allowRebellion: true,
+        taxMultiplier: 1.0,
+        upkeepMultiplier: 1.0,
+        rebellionRandomMultiplier: 1.0,
+        rebellionUnpaidMultiplier: 1.0,
+        moveEnergyMultiplier: 1.0,
+        moveGoldMultiplier: 1.0,
+        cpCostMultiplier: 1.0
+    }),
+    [WORLD_RULESET_KEYS.CRUEL]: Object.freeze({
+        allowHostileEventAttack: true,
+        allowCapturableAttack: true,
+        allowRebellion: true,
+        taxMultiplier: 0.9,
+        upkeepMultiplier: 1.15,
+        rebellionRandomMultiplier: 1.25,
+        rebellionUnpaidMultiplier: 1.35,
+        moveEnergyMultiplier: 1.1,
+        moveGoldMultiplier: 1.1,
+        cpCostMultiplier: 1.0
+    })
+});
+
+function normalizeWorldRuleSetName(value) {
+    const mode = String(value || "").trim().toLowerCase();
+    if (mode === WORLD_RULESET_KEYS.KIND) return WORLD_RULESET_KEYS.KIND;
+    if (mode === WORLD_RULESET_KEYS.CRUEL) return WORLD_RULESET_KEYS.CRUEL;
+    return WORLD_RULESET_KEYS.NEUTRAL;
+}
+
+function readWorldRuleBoolean(value, fallback) {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number") return value !== 0;
+    if (typeof value === "string") {
+        const normalized = value.trim().toLowerCase();
+        if (normalized === "true" || normalized === "1" || normalized === "yes") return true;
+        if (normalized === "false" || normalized === "0" || normalized === "no") return false;
+    }
+    return fallback;
+}
+
+function readWorldRuleMultiplier(value, fallback) {
+    const num = Number(value);
+    if (!Number.isFinite(num) || num < 0) return fallback;
+    return num;
+}
+
+function mergeWorldRuleConfig(mode, raw) {
+    const base = DEFAULT_WORLD_RULESETS[mode] || DEFAULT_WORLD_RULESETS[WORLD_RULESET_KEYS.NEUTRAL];
+    const source = raw && typeof raw === "object" ? raw : {};
+    return Object.freeze({
+        allowHostileEventAttack: readWorldRuleBoolean(source.allowHostileEventAttack, base.allowHostileEventAttack),
+        allowCapturableAttack: readWorldRuleBoolean(source.allowCapturableAttack, base.allowCapturableAttack),
+        allowRebellion: readWorldRuleBoolean(source.allowRebellion, base.allowRebellion),
+        taxMultiplier: readWorldRuleMultiplier(source.taxMultiplier, base.taxMultiplier),
+        upkeepMultiplier: readWorldRuleMultiplier(source.upkeepMultiplier, base.upkeepMultiplier),
+        rebellionRandomMultiplier: readWorldRuleMultiplier(source.rebellionRandomMultiplier, base.rebellionRandomMultiplier),
+        rebellionUnpaidMultiplier: readWorldRuleMultiplier(source.rebellionUnpaidMultiplier, base.rebellionUnpaidMultiplier),
+        moveEnergyMultiplier: readWorldRuleMultiplier(source.moveEnergyMultiplier, base.moveEnergyMultiplier),
+        moveGoldMultiplier: readWorldRuleMultiplier(source.moveGoldMultiplier, base.moveGoldMultiplier),
+        cpCostMultiplier: readWorldRuleMultiplier(source.cpCostMultiplier, base.cpCostMultiplier)
+    });
+}
+
+function parseWorldEndConditions(raw) {
+    const source = raw && typeof raw === "object" ? raw : {};
+    const typeRaw = String(source.type || "king_castle_hold").trim().toLowerCase();
+    const allowedTypes = new Set(["king_castle_hold", "score", "hybrid"]);
+    const type = allowedTypes.has(typeRaw) ? typeRaw : "king_castle_hold";
+    const targetHoldMs = Math.max(60000, Number(source.target_hold_ms ?? source.targetHoldMs) || 1800000);
+    const targetScore = Math.max(1, Number(source.target_score ?? source.targetScore) || 1000);
+    const enabled = source.enabled === undefined ? true : !!source.enabled;
+    const lockActionsOnEnd = source.lock_actions_on_end === undefined && source.lockActionsOnEnd === undefined
+        ? true
+        : !!(source.lock_actions_on_end ?? source.lockActionsOnEnd);
+    const allowNextSeasonTransition = source.allow_next_season_transition === undefined && source.allowNextSeasonTransition === undefined
+        ? true
+        : !!(source.allow_next_season_transition ?? source.allowNextSeasonTransition);
+    return Object.freeze({ type, targetHoldMs, targetScore, enabled, lockActionsOnEnd, allowNextSeasonTransition });
+}
+
+function parseWorldSeasonPolicy(raw) {
+    const source = raw && typeof raw === "object" ? raw : {};
+    const carrySource = source.resource_carryover ?? source.resourceCarryover;
+    const carry = carrySource && typeof carrySource === "object" ? carrySource : {};
+    const readCarry = (key, fallback) => {
+        const value = Number(carry[key]);
+        if (!Number.isFinite(value) || value < 0) return fallback;
+        return value;
+    };
+    return Object.freeze({
+        keepMergeGrid: source.keep_merge_grid === undefined && source.keepMergeGrid === undefined ? true : !!(source.keep_merge_grid ?? source.keepMergeGrid),
+        keepSquads: source.keep_squads === undefined && source.keepSquads === undefined ? true : !!(source.keep_squads ?? source.keepSquads),
+        keepResources: source.keep_resources === undefined && source.keepResources === undefined ? true : !!(source.keep_resources ?? source.keepResources),
+        keepPoints: source.keep_points === undefined && source.keepPoints === undefined ? true : !!(source.keep_points ?? source.keepPoints),
+        resourceCarryover: Object.freeze({
+            gold: readCarry('gold', 1),
+            gem: readCarry('gem', 1),
+            energy: readCarry('energy', 1),
+            cp: readCarry('cp', 1),
+            points: readCarry('points', 1)
+        })
+    });
+}
+
+function parseWorldPreset(raw, fallbackRuleSet) {
+    const source = raw && typeof raw === "object" ? raw : {};
+    const ruleSet = normalizeWorldRuleSetName(source.rule_set || fallbackRuleSet || WORLD_RULESET_KEYS.NEUTRAL);
+    const worldEndConditions = parseWorldEndConditions(source.world_end_conditions || {});
+    const seasonPolicy = parseWorldSeasonPolicy(source.season_policy || {});
+    const label = String(source.label || "").trim();
+    return Object.freeze({
+        label,
+        ruleSet,
+        worldEndConditions,
+        seasonPolicy
+    });
+}
 
 function readNumberConstant(source, key, fallback) {
     const value = source ? source[key] : undefined;
@@ -142,7 +294,22 @@ function formatLocalizedText(template, params = {}) {
 function t(locale, key, params = {}, fallback = '') {
     const primary = getTextByKey(getLocaleTable(locale), key);
     const secondary = getTextByKey(getLocaleTable(FALLBACK_LOCALE), key);
-    const template = (typeof primary === 'string') ? primary : ((typeof secondary === 'string') ? secondary : (fallback || key));
+    const isInvalidTemplate = (value) => {
+        if (typeof value !== 'string') return true;
+        const text = value.trim();
+        if (!text) return true;
+        // Guard: some generated localization files may accidentally store key names as values.
+        if (text === key) return true;
+        return false;
+    };
+    const resolveKeyLikeFallback = () => {
+        if (fallback) return fallback;
+        const last = String(key || '').split('.').pop() || 'text';
+        return last.replaceAll('_', ' ');
+    };
+    const template = !isInvalidTemplate(primary)
+        ? primary
+        : (!isInvalidTemplate(secondary) ? secondary : resolveKeyLikeFallback());
     return formatLocalizedText(template, params);
 }
 
@@ -158,6 +325,120 @@ const BUILDING_TYPE_MAP = {
 const MOVE_MS_PER_MIN = readNumberConstant(GAMEPLAY_CONSTANTS, 'MOVE_MS_PER_MIN', DEFAULT_GAMEPLAY_CONSTANTS.MOVE_MS_PER_MIN);
 const CP_COST_PER_TILE = readNumberConstant(GAMEPLAY_CONSTANTS, 'CP_COST_PER_TILE', DEFAULT_GAMEPLAY_CONSTANTS.CP_COST_PER_TILE);
 const CP_COST_PER_COMMAND = readNumberConstant(GAMEPLAY_CONSTANTS, 'CP_COST_PER_COMMAND', CP_COST_PER_TILE || DEFAULT_GAMEPLAY_CONSTANTS.CP_COST_PER_COMMAND);
+const PORTAL_CP_COST = readNumberConstant(GAMEPLAY_CONSTANTS, 'PORTAL_CP_COST', DEFAULT_GAMEPLAY_CONSTANTS.PORTAL_CP_COST);
+const DUNGEON_COOLDOWN_MS = readNumberConstant(GAMEPLAY_CONSTANTS, 'DUNGEON_COOLDOWN_MS', DEFAULT_GAMEPLAY_CONSTANTS.DUNGEON_COOLDOWN_MS);
+const DUNGEON_ENTRY_GOLD_COST = readNumberConstant(GAMEPLAY_CONSTANTS, 'DUNGEON_ENTRY_GOLD_COST', DEFAULT_GAMEPLAY_CONSTANTS.DUNGEON_ENTRY_GOLD_COST);
+const DUNGEON_ENTRY_ENERGY_COST = readNumberConstant(GAMEPLAY_CONSTANTS, 'DUNGEON_ENTRY_ENERGY_COST', DEFAULT_GAMEPLAY_CONSTANTS.DUNGEON_ENTRY_ENERGY_COST);
+const DUNGEON_ENTRY_CP_COST = readNumberConstant(GAMEPLAY_CONSTANTS, 'DUNGEON_ENTRY_CP_COST', DEFAULT_GAMEPLAY_CONSTANTS.DUNGEON_ENTRY_CP_COST);
+const REBELLION_RANDOM_CHANCE = readNumberConstant(GAMEPLAY_CONSTANTS, 'REBELLION_RANDOM_CHANCE', DEFAULT_GAMEPLAY_CONSTANTS.REBELLION_RANDOM_CHANCE);
+const REBELLION_UNPAID_CHANCE = readNumberConstant(GAMEPLAY_CONSTANTS, 'REBELLION_UNPAID_CHANCE', DEFAULT_GAMEPLAY_CONSTANTS.REBELLION_UNPAID_CHANCE);
+const REBELLION_COOLDOWN_MS = readNumberConstant(GAMEPLAY_CONSTANTS, 'REBELLION_COOLDOWN_MS', DEFAULT_GAMEPLAY_CONSTANTS.REBELLION_COOLDOWN_MS);
+const CROWN_HOLD_MS = readNumberConstant(GAMEPLAY_CONSTANTS, 'CROWN_HOLD_MS', DEFAULT_GAMEPLAY_CONSTANTS.CROWN_HOLD_MS);
+const SHOP_HOURLY_GOLD_FALLBACK = readNumberConstant(GAMEPLAY_CONSTANTS, 'SHOP_HOURLY_GOLD_FALLBACK', DEFAULT_GAMEPLAY_CONSTANTS.SHOP_HOURLY_GOLD_FALLBACK);
+const TAVERN_HOURLY_GOLD_FALLBACK = readNumberConstant(GAMEPLAY_CONSTANTS, 'TAVERN_HOURLY_GOLD_FALLBACK', DEFAULT_GAMEPLAY_CONSTANTS.TAVERN_HOURLY_GOLD_FALLBACK);
+const RAW_WORLD_RULESETS = (GAMEPLAY_CONSTANTS.WORLD_RULESETS && typeof GAMEPLAY_CONSTANTS.WORLD_RULESETS === "object")
+    ? GAMEPLAY_CONSTANTS.WORLD_RULESETS
+    : ((GAME_DATA.constants?.WORLD_RULESETS && typeof GAME_DATA.constants.WORLD_RULESETS === "object")
+        ? GAME_DATA.constants.WORLD_RULESETS
+        : {});
+const WORLD_RULESETS = Object.freeze({
+    [WORLD_RULESET_KEYS.KIND]: mergeWorldRuleConfig(WORLD_RULESET_KEYS.KIND, RAW_WORLD_RULESETS.kind),
+    [WORLD_RULESET_KEYS.NEUTRAL]: mergeWorldRuleConfig(WORLD_RULESET_KEYS.NEUTRAL, RAW_WORLD_RULESETS.neutral),
+    [WORLD_RULESET_KEYS.CRUEL]: mergeWorldRuleConfig(WORLD_RULESET_KEYS.CRUEL, RAW_WORLD_RULESETS.cruel)
+});
+const DEFAULT_WORLD_RULESET = normalizeWorldRuleSetName(
+    GAMEPLAY_CONSTANTS.WORLD_RULESET_DEFAULT
+    || GAME_DATA.constants?.WORLD_RULESET_DEFAULT
+    || WORLD_RULESET_KEYS.NEUTRAL
+);
+const RAW_WORLD_END_CONDITIONS = (GAMEPLAY_CONSTANTS.WORLD_END_CONDITIONS && typeof GAMEPLAY_CONSTANTS.WORLD_END_CONDITIONS === "object")
+    ? GAMEPLAY_CONSTANTS.WORLD_END_CONDITIONS
+    : ((GAME_DATA.constants?.WORLD_END_CONDITIONS && typeof GAME_DATA.constants.WORLD_END_CONDITIONS === "object")
+        ? GAME_DATA.constants.WORLD_END_CONDITIONS
+        : {});
+const WORLD_END_CONDITIONS = parseWorldEndConditions(RAW_WORLD_END_CONDITIONS);
+const RAW_WORLD_SEASON_POLICY = (GAMEPLAY_CONSTANTS.WORLD_SEASON_POLICY && typeof GAMEPLAY_CONSTANTS.WORLD_SEASON_POLICY === "object")
+    ? GAMEPLAY_CONSTANTS.WORLD_SEASON_POLICY
+    : ((GAME_DATA.constants?.WORLD_SEASON_POLICY && typeof GAME_DATA.constants.WORLD_SEASON_POLICY === "object")
+        ? GAME_DATA.constants.WORLD_SEASON_POLICY
+        : {});
+const WORLD_SEASON_POLICY = parseWorldSeasonPolicy(RAW_WORLD_SEASON_POLICY);
+const RAW_WORLD_PRESETS = (GAMEPLAY_CONSTANTS.WORLD_PRESETS && typeof GAMEPLAY_CONSTANTS.WORLD_PRESETS === "object")
+    ? GAMEPLAY_CONSTANTS.WORLD_PRESETS
+    : ((GAME_DATA.constants?.WORLD_PRESETS && typeof GAME_DATA.constants.WORLD_PRESETS === "object")
+        ? GAME_DATA.constants.WORLD_PRESETS
+        : {});
+const DEFAULT_WORLD_PRESET_ID = String(
+    GAMEPLAY_CONSTANTS.WORLD_PRESET_DEFAULT
+    || GAME_DATA.constants?.WORLD_PRESET_DEFAULT
+    || "regular"
+).trim().toLowerCase();
+const WORLD_PRESETS = (() => {
+    const parsed = {};
+    Object.entries(RAW_WORLD_PRESETS).forEach(([id, cfg]) => {
+        const key = String(id || "").trim().toLowerCase();
+        if (!key) return;
+        parsed[key] = parseWorldPreset(cfg, DEFAULT_WORLD_RULESET);
+    });
+    if (!parsed.regular) {
+        parsed.regular = Object.freeze({
+            label: "Regular",
+            ruleSet: DEFAULT_WORLD_RULESET,
+            worldEndConditions: WORLD_END_CONDITIONS,
+            seasonPolicy: WORLD_SEASON_POLICY
+        });
+    }
+    return Object.freeze(parsed);
+})();
+const DEFAULT_WORLD_END_REWARD_CONFIG = Object.freeze({
+    score: { gold: 1800, gem: 25, energy: 20, cp: 8, points: 40 },
+    king_castle_hold: { gold: 3000, gem: 40, energy: 30, cp: 12, points: 60 },
+    hybrid: { gold: 2400, gem: 32, energy: 25, cp: 10, points: 50 },
+    modeMultiplier: { kind: 1.0, neutral: 1.1, cruel: 1.25 },
+    scoreGoldPerPoint: 4,
+    scorePointsPer100: 2
+});
+const DEFAULT_DRAGON_BOSS_CONFIG = Object.freeze({
+    baseRewards: Object.freeze({ gold: 3000, gem: 20, energy: 15, cp: 5, points: 25 }),
+    tierMultiplier: Object.freeze({ s: 1.4, a: 1.15, b: 1.0, c: 0.8 }),
+    minShareByTier: Object.freeze({ s: 0.5, a: 0.3, b: 0.15 }),
+    killBonusGold: 500,
+    killBonusPoints: 5
+});
+const DRAGON_BOSS_CONFIG = (() => {
+    const raw = GAMEPLAY_CONSTANTS.DRAGON_BOSS && typeof GAMEPLAY_CONSTANTS.DRAGON_BOSS === 'object'
+        ? GAMEPLAY_CONSTANTS.DRAGON_BOSS
+        : {};
+    const baseRaw = raw.baseRewards && typeof raw.baseRewards === 'object' ? raw.baseRewards : {};
+    const multRaw = raw.tierMultiplier && typeof raw.tierMultiplier === 'object' ? raw.tierMultiplier : {};
+    const shareRaw = raw.minShareByTier && typeof raw.minShareByTier === 'object' ? raw.minShareByTier : {};
+    const readNonNegative = (value, fallback) => {
+        const n = Number(value);
+        return Number.isFinite(n) && n >= 0 ? n : fallback;
+    };
+    return Object.freeze({
+        baseRewards: Object.freeze({
+            gold: readNonNegative(baseRaw.gold, DEFAULT_DRAGON_BOSS_CONFIG.baseRewards.gold),
+            gem: readNonNegative(baseRaw.gem, DEFAULT_DRAGON_BOSS_CONFIG.baseRewards.gem),
+            energy: readNonNegative(baseRaw.energy, DEFAULT_DRAGON_BOSS_CONFIG.baseRewards.energy),
+            cp: readNonNegative(baseRaw.cp, DEFAULT_DRAGON_BOSS_CONFIG.baseRewards.cp),
+            points: readNonNegative(baseRaw.points, DEFAULT_DRAGON_BOSS_CONFIG.baseRewards.points)
+        }),
+        tierMultiplier: Object.freeze({
+            s: Math.max(0.1, readNonNegative(multRaw.s, DEFAULT_DRAGON_BOSS_CONFIG.tierMultiplier.s)),
+            a: Math.max(0.1, readNonNegative(multRaw.a, DEFAULT_DRAGON_BOSS_CONFIG.tierMultiplier.a)),
+            b: Math.max(0.1, readNonNegative(multRaw.b, DEFAULT_DRAGON_BOSS_CONFIG.tierMultiplier.b)),
+            c: Math.max(0.1, readNonNegative(multRaw.c, DEFAULT_DRAGON_BOSS_CONFIG.tierMultiplier.c))
+        }),
+        minShareByTier: Object.freeze({
+            s: Math.max(0, Math.min(1, readNonNegative(shareRaw.s, DEFAULT_DRAGON_BOSS_CONFIG.minShareByTier.s))),
+            a: Math.max(0, Math.min(1, readNonNegative(shareRaw.a, DEFAULT_DRAGON_BOSS_CONFIG.minShareByTier.a))),
+            b: Math.max(0, Math.min(1, readNonNegative(shareRaw.b, DEFAULT_DRAGON_BOSS_CONFIG.minShareByTier.b)))
+        }),
+        killBonusGold: readNonNegative(raw.killBonusGold, DEFAULT_DRAGON_BOSS_CONFIG.killBonusGold),
+        killBonusPoints: readNonNegative(raw.killBonusPoints, DEFAULT_DRAGON_BOSS_CONFIG.killBonusPoints)
+    });
+})();
 const TERRAIN_COLORS = Object.assign({}, DEFAULT_GAMEPLAY_CONSTANTS.TERRAIN_COLORS, GAMEPLAY_CONSTANTS.TERRAIN_COLORS || {});
 const TERRAIN_COLORS_BORDER = Object.assign({}, DEFAULT_GAMEPLAY_CONSTANTS.TERRAIN_COLORS_BORDER, GAMEPLAY_CONSTANTS.TERRAIN_COLORS_BORDER || {});
 
@@ -399,7 +680,8 @@ const FIELD_EVENT_TYPES = {
     BANDIT_LEADER: 2002,// Strong Enemy (Mountains)
     DUNGEON: 2010,      // Hard Mode
     PORTAL: 2020,       // Teleport
-    CARAVAN: 2030       // Shop/Trade
+    CARAVAN: 2030,      // Shop/Trade
+    CROWN: 2040         // Crown Control Point
 };
 
 // Spawn Rates (Prob per 1000 tiles, approximate)
@@ -416,7 +698,8 @@ const FIELD_EVENT_RATES = {
 const DEFAULT_EVENT_DROP_TABLE = {
     [FIELD_EVENT_TYPES.BANDIT]: { gold: [50, 100], items: [{ code: 1801, prob: 20 }] }, // Low gold, low chance crop
     [FIELD_EVENT_TYPES.BANDIT_LEADER]: { gold: [200, 400], items: [{ code: 1811, prob: 30 }, { code: 1201, prob: 10 }] }, // Mid gold, Iron/Weapon
-    [FIELD_EVENT_TYPES.DUNGEON]: { gold: [500, 1000], items: [{ code: 2101, prob: 50 }, { code: 1210, prob: 20 }] } // High gold, Building/Rare
+    [FIELD_EVENT_TYPES.DUNGEON]: { gold: [500, 1000], items: [{ code: 2101, prob: 50 }, { code: 1210, prob: 20 }] }, // High gold, Building/Rare
+    [FIELD_EVENT_TYPES.CROWN]: { gold: [700, 1200], items: [{ code: 1812, prob: 35 }, { code: 1210, prob: 25 }] }
 };
 const EVENT_DROP_TABLE = Object.assign({}, DEFAULT_EVENT_DROP_TABLE, FIELD_EVENT_CONFIG.DROP_TABLE || {});
 const DEFAULT_FIELD_OBJECT_REWARD_TABLE = {
@@ -955,8 +1238,8 @@ class Game {
 
         // Phase 4: Social & BM State
         this.userProfile = {
-            name: "Unknown User",
-            title: "Commander",
+            name: this.getDefaultProfileName(),
+            title: this.getDefaultProfileTitle(),
             avatar: 1, // 1~5
             vip: 0,
             winRate: 0,
@@ -964,6 +1247,15 @@ class Game {
             totalCP: 0
         };
         this.chatLog = [];
+        this.chatState = { activeChannel: 'world', logsByChannel: { world: [], guild: [], system: [] }, maxLogs: 80 };
+        this.socialState = {
+            players: [],
+            friends: [],
+            friendRequestsIn: [],
+            friendRequestsOut: [],
+            allianceRequestsIn: [],
+            allianceRequestsOut: []
+        };
         this.adWatchCount = 0;
         this.isChatOpen = false;
         this.baseEnergyRegen = 1;
@@ -982,6 +1274,29 @@ class Game {
         this.populateFieldEvents(); // Generate Random Events
         this.occupiedTiles.add(`${PLAYER_START.r},${PLAYER_START.c}`);
         this.income = 0;
+        this.hourlyIncomeRemainder = 0;
+        this.dungeonState = { cooldownByKey: {} };
+        this.rebellionState = { lastByKey: {} };
+        this.crownState = { holderKey: null, capturedAt: 0, kingCastleKey: null, promotedAt: 0 };
+        this.worldState = {
+            season: 1,
+            ended: false,
+            winner: null,
+            reason: "",
+            endedAt: 0,
+            score: 0,
+            rewardPackage: null,
+            rewardsClaimed: false,
+            dragonBoss: { season: 1, killCount: 0, byUid: {}, lastKill: null }
+        };
+        this.worldLobbyState = { entered: false, channel: 'alpha', enteredAt: 0 };
+        this.lobbyChannelStatusTable = this.buildLobbyChannelStatusTable();
+        this.lobbyChannelStatusSource = 'local';
+        this.lobbyChannelStatusFetchedAt = 0;
+        this.lobbyChannelStatusLastAttemptAt = 0;
+        this.lobbyChannelFetchPending = false;
+        this.adminState = { presetId: DEFAULT_WORLD_PRESET_ID, worldEndConditions: WORLD_END_CONDITIONS, worldSeasonPolicy: WORLD_SEASON_POLICY };
+        this.worldRuleSet = DEFAULT_WORLD_RULESET;
 
         this.selectedArmyId = null;
         this.lastSelectedArmyId = null;
@@ -1000,6 +1315,10 @@ class Game {
         this.moveTargetMode = null;
         this.previewPath = null;
         this.movePreviewText = "";
+        this.pendingBattleReward = null;
+        this.battleFx = null;
+        this.battleFxPhaseTimer = null;
+        this.battleFxClearTimer = null;
         this.fieldCameraCleanup = null;
         this.isResetting = false;
         this.effectLog = [];
@@ -1011,7 +1330,7 @@ class Game {
 
         this.grassTexture = this.createGrassPattern();
 
-        this.settings = { bgm: true, sfx: true };
+        this.settings = { bgm: true, sfx: true, push: true };
         this.locale = DEFAULT_LOCALE;
         try {
             const savedLocale = localStorage.getItem('kov_locale');
@@ -1021,9 +1340,9 @@ class Game {
         this.drag = null; this.hover = null; this.selectedItem = null; this.potentialDrag = null; this.dpr = window.devicePixelRatio || 1;
 
         this.armies = [
-            { id: 0, name: "Squad 1", color: "#4caf50", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
-            { id: 1, name: "Squad 2", color: "#2196f3", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
-            { id: 2, name: "Squad 3", color: "#f59e0b", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 }
+            { id: 0, name: this.getDefaultSquadName(1), color: "#4caf50", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
+            { id: 1, name: this.getDefaultSquadName(2), color: "#2196f3", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
+            { id: 2, name: this.getDefaultSquadName(3), color: "#f59e0b", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 }
         ];
 
         this.calcLayout();
@@ -1042,6 +1361,8 @@ class Game {
         }
         if (!resetFlag && this.loadGame()) { this.updateLevelStats(); }
         else { this.initGame(); }
+        this.ensureAdminState();
+        this.applyWorldPreset(this.getActiveWorldPresetId(), { persist: false, silent: true });
         this.sanitizeUserProfile();
         this.sanitizeArmies();
         this.recalcFieldBonuses();
@@ -1051,7 +1372,6 @@ class Game {
 
         setInterval(() => this.regenEnergy(), 1000);
         setInterval(() => this.regenCp(), 1000);
-        setInterval(() => this.collectTerritoryIncome(), 3000);
         setInterval(() => this.collectTerritoryIncome(), 3000);
         this.initObjectRegen();
         this.initSocialUI(); // Phase 4 Injection
@@ -1071,6 +1391,8 @@ class Game {
             el.classList.remove('open');
             el.style.display = 'none';
         });
+        this.clearBattleFxTimers();
+        this.battleFx = null;
         this.battleContext = null;
     }
 
@@ -1096,8 +1418,8 @@ class Game {
 
     sanitizeUserProfile() {
         if (!this.userProfile || typeof this.userProfile !== 'object') this.userProfile = {};
-        this.userProfile.name = this.sanitizeProfileText(this.userProfile.name, 'Unknown User', 20);
-        this.userProfile.title = this.sanitizeProfileText(this.userProfile.title, 'Commander', 24);
+        this.userProfile.name = this.sanitizeProfileText(this.userProfile.name, this.getDefaultProfileName(), 20);
+        this.userProfile.title = this.sanitizeProfileText(this.userProfile.title, this.getDefaultProfileTitle(), 24);
         const avatar = Number(this.userProfile.avatar);
         this.userProfile.avatar = Number.isFinite(avatar) ? Math.max(1, Math.min(5, Math.floor(avatar))) : 1;
         this.userProfile.vip = Math.max(0, Number(this.userProfile.vip) || 0);
@@ -1105,15 +1427,27 @@ class Game {
         this.userProfile.winRate = Number.isFinite(winRate) ? Math.max(0, Math.min(100, winRate)) : 0;
     }
 
+    getDefaultProfileName() {
+        return this.tr('ui.profile.unknown_user', {}, 'Unknown User');
+    }
+
+    getDefaultProfileTitle() {
+        return this.tr('ui.profile.commander', {}, 'Commander');
+    }
+
+    getDefaultSquadName(index) {
+        return this.tr('ui.squad.name', { index }, `Squad ${index}`);
+    }
+
     sanitizeArmyName(value, index) {
-        return this.sanitizeProfileText(value, `Squad ${index + 1}`, 24);
+        return this.sanitizeProfileText(value, this.getDefaultSquadName(index + 1), 24);
     }
 
     sanitizeArmies() {
         const base = [
-            { id: 0, name: "Squad 1", color: "#4caf50", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
-            { id: 1, name: "Squad 2", color: "#2196f3", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
-            { id: 2, name: "Squad 3", color: "#f59e0b", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 }
+            { id: 0, name: this.getDefaultSquadName(1), color: "#4caf50", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
+            { id: 1, name: this.getDefaultSquadName(2), color: "#2196f3", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },
+            { id: 2, name: this.getDefaultSquadName(3), color: "#f59e0b", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 }
         ];
 
         const source = Array.isArray(this.armies) ? this.armies : [];
@@ -1154,6 +1488,7 @@ class Game {
                 cp: this.cp, maxCp: this.maxCp,
                 energyRegenAcc: this.energyRegenAcc,
                 cpRegenAcc: this.cpRegenAcc,
+                hourlyIncomeRemainder: this.hourlyIncomeRemainder,
                 energyLastRegenAt: this.energyLastRegenAt,
                 cpLastRegenAt: this.cpLastRegenAt,
                 occupiedTiles: Array.from(this.occupiedTiles), settings: this.settings,
@@ -1164,8 +1499,17 @@ class Game {
                 refillAdState: this.refillAdState,
                 fieldObjectState: this.fieldObjectState,
                 fieldDefenderState: this.fieldDefenderState,
+                dungeonState: this.dungeonState,
+                rebellionState: this.rebellionState,
+                crownState: this.crownState,
+                worldState: this.worldState,
+                worldLobbyState: this.worldLobbyState,
+                adminState: this.adminState,
+                worldRuleSet: this.getWorldRuleSetName(),
                 fieldBuffs: this.fieldBuffs,
-                armies: this.armies
+                armies: this.armies,
+                chatState: this.chatState,
+                socialState: this.socialState
             };
             localStorage.setItem('kov_save_v1', JSON.stringify(data));
         } catch (e) { }
@@ -1195,6 +1539,7 @@ class Game {
             this.maxCp = Number.isFinite(Number(data.maxCp)) ? Number(data.maxCp) : 20;
             this.energyRegenAcc = Number.isFinite(Number(data.energyRegenAcc)) ? Number(data.energyRegenAcc) : 0;
             this.cpRegenAcc = Number.isFinite(Number(data.cpRegenAcc)) ? Number(data.cpRegenAcc) : 0;
+            this.hourlyIncomeRemainder = Number.isFinite(Number(data.hourlyIncomeRemainder)) ? Number(data.hourlyIncomeRemainder) : 0;
             const nowTs = Date.now();
             this.energyLastRegenAt = Number.isFinite(Number(data.energyLastRegenAt)) ? Number(data.energyLastRegenAt) : nowTs;
             this.cpLastRegenAt = Number.isFinite(Number(data.cpLastRegenAt)) ? Number(data.cpLastRegenAt) : nowTs;
@@ -1206,17 +1551,31 @@ class Game {
             if (data.refillAdState) this.refillAdState = data.refillAdState;
             if (data.fieldObjectState) this.fieldObjectState = data.fieldObjectState;
             if (data.fieldDefenderState) this.fieldDefenderState = data.fieldDefenderState;
+            if (data.dungeonState && typeof data.dungeonState === 'object') this.dungeonState = data.dungeonState;
+            if (data.rebellionState && typeof data.rebellionState === 'object') this.rebellionState = data.rebellionState;
+            if (data.crownState && typeof data.crownState === 'object') this.crownState = data.crownState;
+            if (data.worldState && typeof data.worldState === 'object') this.worldState = data.worldState;
+            if (data.worldLobbyState && typeof data.worldLobbyState === 'object') this.worldLobbyState = data.worldLobbyState;
+            if (data.adminState && typeof data.adminState === 'object') this.adminState = data.adminState;
+            this.worldRuleSet = normalizeWorldRuleSetName(data.worldRuleSet || this.worldRuleSet);
             if (data.fieldBuffs) this.fieldBuffs = data.fieldBuffs;
             if (data.settings) { this.settings = data.settings; this.applySettings(); }
+            if (data.chatState && typeof data.chatState === 'object') this.chatState = data.chatState;
+            if (data.socialState && typeof data.socialState === 'object') this.socialState = data.socialState;
+            if (Array.isArray(data.chatLog) && data.chatLog.length) {
+                this.ensureChatState();
+                this.chatState.logsByChannel.world = data.chatLog.slice(-this.chatState.maxLogs);
+            }
             if (data.armies) {
                 this.armies = data.armies;
                 if (this.armies.length < 3) {
-                    this.armies.push({ id: 2, name: "Squad 3", color: "#f59e0b", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 });
+                    this.armies.push({ id: 2, name: this.getDefaultSquadName(3), color: "#f59e0b", state: 'IDLE', r: PLAYER_START.r, c: PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 });
                 }
             }
             if (!validGridState) this.refreshLockState();
             if (!this.occupiedTiles || this.occupiedTiles.size === 0) this.occupiedTiles = new Set([`${PLAYER_START.r},${PLAYER_START.c}`]);
             else this.occupiedTiles.add(`${PLAYER_START.r},${PLAYER_START.c}`);
+            this.syncCrownEventState();
             this.revealFog(PLAYER_START.r, PLAYER_START.c, FOG_RADIUS);
             return true;
         } catch (e) {
@@ -1225,7 +1584,7 @@ class Game {
         }
     }
     resetGame() {
-        if (confirm("Reset all local progress?")) {
+        if (confirm(this.tr('ui.settings.reset_confirm', {}, 'Reset all local progress?'))) {
             this.isResetting = true;
             try {
                 localStorage.setItem('kov_force_reset', '1');
@@ -1248,6 +1607,205 @@ class Game {
         this.refreshLocaleControls();
         document.getElementById('modal-settings').classList.add('open');
     }
+
+    openAdminModal() {
+        this.renderAdminPanel();
+        const modal = document.getElementById('modal-admin');
+        if (modal) modal.classList.add('open');
+    }
+
+    closeAdminModal() {
+        const modal = document.getElementById('modal-admin');
+        if (modal) modal.classList.remove('open');
+    }
+
+    renderAdminPanel() {
+        const modal = document.getElementById('modal-admin');
+        const presetSelect = document.getElementById('admin-preset-select');
+        const summary = document.getElementById('admin-preset-summary');
+        if (!modal || !presetSelect || !summary) return;
+
+        const activePreset = this.getActiveWorldPresetId();
+        presetSelect.innerHTML = '';
+        Object.keys(WORLD_PRESETS).forEach((id) => {
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.innerText = this.getWorldPresetLabel(id);
+            if (id === activePreset) opt.selected = true;
+            presetSelect.appendChild(opt);
+        });
+
+        const selected = this.getWorldPresetConfig(presetSelect.value || activePreset) || this.getWorldPresetConfig(activePreset);
+        const endCfg = selected?.worldEndConditions || this.getActiveWorldEndConditions();
+        const seasonCfg = selected?.seasonPolicy || this.getActiveWorldSeasonPolicy();
+        const ruleLabel = this.getWorldRuleSetLabel(selected?.ruleSet || this.getWorldRuleSetName());
+        const endType = String(endCfg.type || 'king_castle_hold');
+        const carry = seasonCfg.resourceCarryover || {};
+        summary.innerHTML = `
+            <div class="text-[12px] text-gray-200">${this.tr('ui.admin.summary.ruleset', {}, 'Ruleset')}: <b>${ruleLabel}</b></div>
+            <div class="text-[12px] text-gray-200">${this.tr('ui.admin.summary.end_type', {}, 'End Type')}: <b>${endType}</b></div>
+            <div class="text-[12px] text-gray-300">${this.tr('ui.admin.summary.end_target', {}, 'Targets')}: hold ${Math.floor((endCfg.targetHoldMs || 0) / 60000)}m / score ${endCfg.targetScore || 0}</div>
+            <div class="text-[12px] text-gray-300">${this.tr('ui.admin.summary.season_policy', {}, 'Season Policy')}: grid=${seasonCfg.keepMergeGrid ? 'keep' : 'reset'}, squad=${seasonCfg.keepSquads ? 'keep' : 'reset'}, res=${seasonCfg.keepResources ? 'keep' : 'reset'}, pt=${seasonCfg.keepPoints ? 'keep' : 'reset'}</div>
+            <div class="text-[12px] text-gray-300">${this.tr('ui.admin.summary.carryover', {}, 'Carryover')}: G ${carry.gold ?? 1}, GEM ${carry.gem ?? 1}, EN ${carry.energy ?? 1}, CP ${carry.cp ?? 1}, PT ${carry.points ?? 1}</div>
+        `;
+    }
+
+    onAdminPresetChange() {
+        this.renderAdminPanel();
+    }
+
+    applyAdminPresetFromUI() {
+        const presetSelect = document.getElementById('admin-preset-select');
+        const presetId = presetSelect ? presetSelect.value : this.getActiveWorldPresetId();
+        if (!presetId) return;
+        const ok = this.applyWorldPreset(presetId, { persist: true, silent: false });
+        if (ok) this.renderAdminPanel();
+    }
+
+    ensureWorldLobbyState() {
+        if (!this.worldLobbyState || typeof this.worldLobbyState !== 'object') {
+            this.worldLobbyState = { entered: false, channel: 'alpha', enteredAt: 0 };
+        }
+        if (!Object.prototype.hasOwnProperty.call(this.worldLobbyState, 'entered')) this.worldLobbyState.entered = false;
+        const rawChannel = String(this.worldLobbyState.channel || 'alpha').trim().toLowerCase();
+        this.worldLobbyState.channel = ['alpha', 'beta', 'gamma'].includes(rawChannel) ? rawChannel : 'alpha';
+        if (!Object.prototype.hasOwnProperty.call(this.worldLobbyState, 'enteredAt')) this.worldLobbyState.enteredAt = 0;
+        return this.worldLobbyState;
+    }
+
+    getApiBaseUrl() {
+        const raw = String(window.KOV_API_BASE_URL || '').trim();
+        return raw.replace(/\/+$/, '');
+    }
+
+    async fetchApiJson(path, options = {}) {
+        const base = this.getApiBaseUrl();
+        if (!base) return null;
+        const method = options.method || 'GET';
+        const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+        try {
+            const response = await fetch(`${base}${path}`, Object.assign({}, options, { method, headers, cache: 'no-store' }));
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async fetchLobbyChannelStatusFromApi(force = false) {
+        if (this.lobbyChannelFetchPending) return;
+        const now = Date.now();
+        if (!force && now - this.lobbyChannelStatusLastAttemptAt < 15000) return;
+        this.lobbyChannelFetchPending = true;
+        this.lobbyChannelStatusLastAttemptAt = now;
+        let didUpdateFromServer = false;
+        try {
+            const payload = await this.fetchApiJson('/v1/lobby/channels');
+            if (!payload || !Array.isArray(payload.channels)) return;
+            const table = {};
+            payload.channels.forEach((row) => {
+                const channel = String(row?.channelId || '').trim().toLowerCase();
+                const cap = Math.max(1, Number(row?.capacity || 0));
+                const occupied = Math.max(0, Math.min(cap, Number(row?.population || 0)));
+                if (!channel) return;
+                table[channel] = { channel, occupied, cap, ratio: occupied / cap };
+            });
+            if (!Object.keys(table).length) return;
+            this.lobbyChannelStatusTable = table;
+            this.lobbyChannelStatusSource = 'server';
+            this.lobbyChannelStatusFetchedAt = now;
+            didUpdateFromServer = true;
+        } finally {
+            this.lobbyChannelFetchPending = false;
+            if (didUpdateFromServer) {
+                const modal = document.getElementById('modal-lobby');
+                if (modal?.classList?.contains('open')) this.renderLobbyChannelStatus();
+            }
+        }
+    }
+
+    buildLobbyChannelStatusTable() {
+        const now = new Date();
+        const minuteBucket = Math.floor((now.getHours() * 60 + now.getMinutes()) / 5);
+        const make = (channel, basePop, cap) => {
+            let hash = 0;
+            for (let i = 0; i < channel.length; i++) hash += channel.charCodeAt(i) * (i + 3);
+            const wave = (minuteBucket * 17 + hash * 13) % 37;
+            const occupied = Math.max(1, Math.min(cap, basePop + wave));
+            const ratio = occupied / cap;
+            return { channel, occupied, cap, ratio };
+        };
+        return {
+            alpha: make('alpha', 58, 120),
+            beta: make('beta', 34, 100),
+            gamma: make('gamma', 22, 80)
+        };
+    }
+
+    getLobbyCongestionProfile(ratio) {
+        if (ratio >= 0.85) return { label: 'High', cls: 'text-red-300' };
+        if (ratio >= 0.55) return { label: 'Medium', cls: 'text-yellow-300' };
+        return { label: 'Low', cls: 'text-emerald-300' };
+    }
+
+    renderLobbyChannelStatus() {
+        const select = document.getElementById('lobby-channel-select');
+        const panel = document.getElementById('lobby-channel-status');
+        if (!select || !panel) return;
+        const selected = String(select.value || 'alpha').trim().toLowerCase();
+        const table = this.lobbyChannelStatusTable || this.buildLobbyChannelStatusTable();
+        const row = table[selected] || table.alpha;
+        if (!row) return;
+        const profile = this.getLobbyCongestionProfile(row.ratio);
+        const pct = Math.round(row.ratio * 100);
+        const sourceText = this.lobbyChannelStatusSource === 'server' ? 'Server' : 'Local estimate (skeleton)';
+
+        panel.innerHTML = `
+            <div class="flex items-center justify-between mb-1">
+                <span class="text-gray-300">Population</span>
+                <span class="font-bold text-gray-100">${row.occupied}/${row.cap}</span>
+            </div>
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-gray-300">Congestion</span>
+                <span class="font-bold ${profile.cls}">${profile.label} (${pct}%)</span>
+            </div>
+            <div class="w-full h-2 rounded bg-gray-700 overflow-hidden">
+                <div class="h-full ${row.ratio >= 0.85 ? 'bg-red-500' : (row.ratio >= 0.55 ? 'bg-yellow-500' : 'bg-emerald-500')}" style="width:${pct}%;"></div>
+            </div>
+            <div class="text-[10px] text-gray-400 mt-2">${sourceText}</div>
+        `;
+        if (this.lobbyChannelStatusSource !== 'server') this.fetchLobbyChannelStatusFromApi(false);
+    }
+
+    openWorldLobbyModal() {
+        const modal = document.getElementById('modal-lobby');
+        const select = document.getElementById('lobby-channel-select');
+        if (!modal || !select) return;
+        const state = this.ensureWorldLobbyState();
+        select.value = state.channel || 'alpha';
+        this.renderLobbyChannelStatus();
+        this.fetchLobbyChannelStatusFromApi(true);
+        modal.classList.add('open');
+    }
+
+    closeWorldLobbyModal() {
+        const modal = document.getElementById('modal-lobby');
+        if (modal) modal.classList.remove('open');
+    }
+
+    confirmWorldLobbyEntry() {
+        const select = document.getElementById('lobby-channel-select');
+        const channel = String(select?.value || 'alpha').trim().toLowerCase();
+        const state = this.ensureWorldLobbyState();
+        state.channel = ['alpha', 'beta', 'gamma'].includes(channel) ? channel : 'alpha';
+        state.entered = true;
+        state.enteredAt = Date.now();
+        this.renderLobbyChannelStatus();
+        this.closeWorldLobbyModal();
+        this.saveGame();
+        this.showToast(this.tr('toast.lobby_entered', { channel: state.channel.toUpperCase() }, `Entered channel ${state.channel.toUpperCase()}`));
+        this.toggleField({ skipLobby: true });
+    }
     setLocale(locale) {
         if (!locale || !LOCALIZATION_DATA || !LOCALIZATION_DATA[locale]) return;
         this.locale = locale;
@@ -1256,6 +1814,10 @@ class Game {
         this.showToast(this.tr('toast.locale_changed', { locale: locale.toUpperCase() }, `Language: ${locale}`));
     }
     refreshLocaleControls() {
+        const setText = (id, key, fallback) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = this.tr(key, {}, fallback);
+        };
         const localeSelect = document.getElementById('locale-select');
         if (localeSelect) {
             localeSelect.value = this.locale || DEFAULT_LOCALE;
@@ -1266,20 +1828,206 @@ class Game {
         }
         const localeLabel = document.getElementById('locale-label');
         if (localeLabel) localeLabel.innerText = this.tr('ui.settings.language', {}, 'Language');
+        const worldRuleSetLabel = document.getElementById('world-ruleset-label');
+        if (worldRuleSetLabel) worldRuleSetLabel.innerText = this.tr('ui.settings.world_ruleset', {}, 'World Ruleset');
+
+        const worldRuleSetSelect = document.getElementById('world-ruleset-select');
+        if (worldRuleSetSelect) {
+            worldRuleSetSelect.value = this.getWorldRuleSetName();
+            const optKind = worldRuleSetSelect.querySelector('option[value="kind"]');
+            const optNeutral = worldRuleSetSelect.querySelector('option[value="neutral"]');
+            const optCruel = worldRuleSetSelect.querySelector('option[value="cruel"]');
+            if (optKind) optKind.innerText = this.tr('ui.world_ruleset.kind', {}, 'Kind');
+            if (optNeutral) optNeutral.innerText = this.tr('ui.world_ruleset.neutral', {}, 'Neutral');
+            if (optCruel) optCruel.innerText = this.tr('ui.world_ruleset.cruel', {}, 'Cruel');
+        }
+
         const settingsTitle = document.getElementById('settings-title');
         if (settingsTitle) settingsTitle.innerText = this.tr('ui.settings.title', {}, 'Settings');
         const resetBtn = document.getElementById('settings-reset-btn');
         if (resetBtn) resetBtn.innerText = this.tr('ui.settings.reset', {}, 'Reset Account');
         const closeBtn = document.getElementById('settings-close-btn');
         if (closeBtn) closeBtn.innerText = this.tr('ui.settings.close', {}, 'Close');
+        const adminPresetSelect = document.getElementById('admin-preset-select');
+        if (adminPresetSelect) {
+            const current = this.getActiveWorldPresetId();
+            adminPresetSelect.innerHTML = '';
+            Object.keys(WORLD_PRESETS).forEach((id) => {
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.innerText = this.getWorldPresetLabel(id);
+                if (id === current) opt.selected = true;
+                adminPresetSelect.appendChild(opt);
+            });
+        }
+
+        setText('footer-build-label', 'ui.footer.build', 'Build');
+        setText('footer-field-label', 'ui.footer.field', 'Field');
+        setText('levelup-title', 'ui.modal.levelup.title', 'LEVEL UP!');
+        setText('levelup-level-label', 'ui.modal.levelup.level', 'Level (Lord Level)');
+        setText('levelup-energy-label', 'ui.modal.levelup.max_energy', 'Max Energy');
+        setText('levelup-confirm-btn', 'ui.common.confirm', 'Confirm');
+        setText('settings-bgm-label', 'ui.settings.bgm', 'BGM');
+        setText('settings-sfx-label', 'ui.settings.sfx', 'SFX');
+        setText('settings-push-label', 'ui.settings.push', 'Push Notifications');
+        setText('settings-uid-label', 'ui.settings.uid', 'UID');
+        setText('settings-version-label', 'ui.settings.version', 'Version');
+        setText('settings-redeem-label', 'ui.settings.redeem', 'Redeem Code');
+        setText('settings-redeem-btn', 'ui.settings.apply', 'Apply');
+        setText('settings-support-btn', 'ui.settings.support', 'Support');
+        setText('settings-delete-btn', 'ui.settings.delete', 'Delete Account');
+        setText('object-modal-close-btn', 'ui.settings.close', 'Close');
+        setText('battle-title-label', 'ui.battle.title', '⚔ BATTLE');
+        setText('battle-target-name', 'ui.battle.target', 'Target');
+        setText('battle-allies-label', 'ui.battle.allies', 'ALLIES');
+        setText('battle-enemies-label', 'ui.battle.enemies', 'ENEMIES');
+        setText('battle-result-close-btn', 'ui.settings.close', 'Close');
+        setText('battle-cancel-btn', 'ui.common.cancel', 'Cancel');
+        setText('battle-prep-title', 'ui.battle.prep.title', 'Battle Prep');
+        setText('battle-prep-subtitle', 'ui.battle.prep.subtitle', 'Drag to change formation');
+        setText('battle-prep-allies-label', 'ui.battle.prep.allies', 'Allies (Drag)');
+        setText('battle-prep-enemies-label', 'ui.battle.prep.enemies', 'Enemies');
+        setText('battle-prep-cancel-btn', 'ui.common.cancel', 'Cancel');
+        setText('battle-prep-start-btn', 'ui.battle.prep.start', 'Start Battle');
+        setText('info-name', 'ui.info.no_selection', 'No selection');
+        setText('info-desc', 'ui.info.select_hint', 'Select an item to see details.');
+        setText('action-label', 'ui.common.none', '-');
+        setText('settings-admin-btn', 'ui.settings.admin', 'Admin');
+        setText('admin-title', 'ui.admin.title', 'Admin Console');
+        setText('admin-preset-label', 'ui.admin.preset', 'World Preset');
+        setText('admin-apply-btn', 'ui.admin.apply', 'Apply Preset');
+        setText('admin-close-btn', 'ui.settings.close', 'Close');
+        setText('lobby-title', 'ui.lobby.title', 'Inter-World Lobby');
+        setText('lobby-close-btn', 'ui.settings.close', 'Close');
+        setText('lobby-desc', 'ui.lobby.desc', 'Select a channel and enter the world map.');
+        setText('lobby-channel-label', 'ui.lobby.channel', 'Channel');
+        setText('lobby-enter-btn', 'ui.lobby.enter', 'Enter World');
+        setText('lobby-cancel-btn', 'ui.common.cancel', 'Cancel');
+        setText('chat-close-btn', 'ui.chat.close', 'Close');
+        setText('chat-send-btn', 'ui.chat.send', 'Send');
+        const redeemInput = document.getElementById('settings-redeem-input');
+        if (redeemInput) redeemInput.placeholder = this.tr('ui.settings.redeem_placeholder', {}, 'Enter code');
+        const lobbySelect = document.getElementById('lobby-channel-select');
+        if (lobbySelect) {
+            const labels = {
+                alpha: this.tr('ui.lobby.channel.alpha', {}, 'Alpha'),
+                beta: this.tr('ui.lobby.channel.beta', {}, 'Beta'),
+                gamma: this.tr('ui.lobby.channel.gamma', {}, 'Gamma')
+            };
+            Array.from(lobbySelect.options).forEach((opt) => {
+                const k = String(opt.value || '').toLowerCase();
+                if (labels[k]) opt.innerText = labels[k];
+            });
+        }
+        this.renderLobbyChannelStatus();
+        this.updateChatTabUI();
+        this.renderAdminPanel();
+        this.applySettings();
     }
     toggleSetting(key, el) {
-        this.settings[key] = !this.settings[key]; el.classList.toggle('on');
-        const knob = el.querySelector('.toggle-knob'); knob.style.left = this.settings[key] ? '22px' : '2px';
+        if (!this.settings || typeof this.settings !== 'object') this.settings = {};
+        this.settings[key] = !this.settings[key];
+        if (el) {
+            el.classList.toggle('on');
+            const knob = el.querySelector('.toggle-knob');
+            if (knob) knob.style.left = this.settings[key] ? '22px' : '2px';
+        }
         if (key === 'bgm') { if (this.settings.bgm) this.sound.files.bgm.play().catch(() => { }); else this.sound.files.bgm.pause(); }
+        if (key === 'push') {
+            const mode = this.settings.push ? this.tr('ui.common.on', {}, 'ON') : this.tr('ui.common.off', {}, 'OFF');
+            this.showToast(this.tr('toast.push_toggled', { mode }, `Push notifications: ${mode}`));
+        }
         this.sound.enabled = this.settings.sfx; this.saveGame();
     }
-    applySettings() { this.sound.enabled = this.settings.sfx; }
+    applySettings() {
+        if (!this.settings || typeof this.settings !== 'object') this.settings = {};
+        if (typeof this.settings.bgm !== 'boolean') this.settings.bgm = true;
+        if (typeof this.settings.sfx !== 'boolean') this.settings.sfx = true;
+        if (typeof this.settings.push !== 'boolean') this.settings.push = true;
+        this.sound.enabled = this.settings.sfx;
+
+        const syncToggle = (id, enabled) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.toggle('on', !!enabled);
+            const knob = el.querySelector('.toggle-knob');
+            if (knob) knob.style.left = enabled ? '22px' : '2px';
+        };
+        syncToggle('settings-bgm-toggle', this.settings.bgm);
+        syncToggle('settings-sfx-toggle', this.settings.sfx);
+        syncToggle('settings-push-toggle', this.settings.push);
+    }
+
+    getRedeemStorageKey() {
+        const uid = this.getLocalUid();
+        return `kov_redeem_codes_v1_${uid}`;
+    }
+
+    getRedeemedCodeMap() {
+        try {
+            const raw = localStorage.getItem(this.getRedeemStorageKey());
+            if (!raw) return {};
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+        } catch (e) { }
+        return {};
+    }
+
+    saveRedeemedCodeMap(map) {
+        try {
+            localStorage.setItem(this.getRedeemStorageKey(), JSON.stringify(map || {}));
+        } catch (e) { }
+    }
+
+    applyRedeemCode() {
+        const input = document.getElementById('settings-redeem-input');
+        if (!input) return;
+        const raw = String(input.value || '').trim();
+        if (!raw) {
+            this.showToast(this.tr('toast.redeem_empty', {}, 'Please enter a code'));
+            return;
+        }
+        const code = raw.toUpperCase();
+        const rewardsByCode = {
+            KOVWELCOME: { gold: 1000, gem: 30, energy: 10, cp: 3 },
+            KOVSTARTER: { gold: 2000, gem: 50, energy: 15, cp: 5 }
+        };
+        const reward = rewardsByCode[code];
+        if (!reward) {
+            this.showToast(this.tr('toast.redeem_invalid', {}, 'Invalid code'));
+            return;
+        }
+
+        const redeemed = this.getRedeemedCodeMap();
+        if (redeemed[code]) {
+            this.showToast(this.tr('toast.redeem_used', {}, 'Code already used'));
+            return;
+        }
+
+        this.gold += Number(reward.gold || 0);
+        this.gem += Number(reward.gem || 0);
+        this.energy = Math.min(this.maxEnergy, this.energy + Number(reward.energy || 0));
+        this.cp = Math.min(this.maxCp, this.cp + Number(reward.cp || 0));
+        redeemed[code] = Date.now();
+        this.saveRedeemedCodeMap(redeemed);
+        input.value = '';
+        this.updateUI();
+        this.showToast(this.tr('toast.redeem_applied', {}, 'Code applied'));
+    }
+
+    openSupport() {
+        const url = 'https://github.com/nod-sean/bmo/issues';
+        try {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        } catch (e) { }
+        this.showToast(this.tr('toast.support_opened', {}, 'Support page opened'));
+    }
+
+    requestAccountDeletion() {
+        const ok = window.confirm(this.tr('ui.settings.delete_confirm', {}, 'Delete account and all local data?'));
+        if (!ok) return;
+        this.resetGame();
+    }
     getLocalDateKey() {
         const now = new Date();
         const y = now.getFullYear();
@@ -1490,23 +2238,893 @@ class Game {
         }
         this.saveGame();
     }
+
+    getWorldRuleSetName() {
+        return normalizeWorldRuleSetName(this.worldRuleSet);
+    }
+
+    getWorldRuleSet() {
+        const mode = this.getWorldRuleSetName();
+        return WORLD_RULESETS[mode] || WORLD_RULESETS[WORLD_RULESET_KEYS.NEUTRAL];
+    }
+
+    setWorldRuleSet(mode, opts = {}) {
+        const next = normalizeWorldRuleSetName(mode);
+        const persist = opts.persist !== false;
+        if (this.worldRuleSet === next) return next;
+        this.worldRuleSet = next;
+        this.recalcFieldBonuses();
+        this.updateUI();
+        if (persist) this.saveGame();
+        return next;
+    }
+
+    getWorldRuleSetLabel(mode) {
+        const normalized = normalizeWorldRuleSetName(mode);
+        if (normalized === WORLD_RULESET_KEYS.KIND) return this.tr('ui.world_ruleset.kind', {}, 'Kind');
+        if (normalized === WORLD_RULESET_KEYS.CRUEL) return this.tr('ui.world_ruleset.cruel', {}, 'Cruel');
+        return this.tr('ui.world_ruleset.neutral', {}, 'Neutral');
+    }
+
+    onWorldRuleSetChange(mode) {
+        const applied = this.setWorldRuleSet(mode, { persist: true });
+        const label = this.getWorldRuleSetLabel(applied);
+        this.showToast(this.tr('toast.world_ruleset_changed', { mode: label }, `World ruleset: ${label}`));
+        this.refreshLocaleControls();
+    }
+
+    scaleWorldCost(baseCost, multiplier) {
+        const base = Number(baseCost);
+        if (!Number.isFinite(base) || base <= 0) return 0;
+        const mult = Number.isFinite(Number(multiplier)) ? Math.max(0, Number(multiplier)) : 1;
+        const scaled = Math.round(base * mult);
+        if (mult > 0 && scaled <= 0) return 1;
+        return Math.max(0, scaled);
+    }
+
+    getMoveCostsByRule(tileType) {
+        let energyCost = 1;
+        let goldCost = 0;
+        if (isGateTile(tileType)) {
+            energyCost = 5;
+            goldCost = 100;
+        }
+        const rule = this.getWorldRuleSet();
+        return {
+            energyCost: this.scaleWorldCost(energyCost, rule.moveEnergyMultiplier),
+            goldCost: this.scaleWorldCost(goldCost, rule.moveGoldMultiplier),
+            cpCost: this.scaleWorldCost(CP_COST_PER_COMMAND, rule.cpCostMultiplier)
+        };
+    }
+
     getTaxRate(type) {
         const data = this.getFieldObjectData(type);
-        if (!data) return 1; // Default
-        // Assuming TAX is ability code 200 (or similar, check ABILITY_CODES if available, otherwise heuristic)
-        // ACTUALLY: Let's use getAbilityValue with ABILITY_CODES.TAX if it exists, otherwise fallback to known structure
-        // Since ABILITY_CODES might not be fully populated in game.js context yet (loaded from window), let's use the helper.
-        // We need to know the code for TAX. If ABILITY_CODES is loaded, use it.
-        // Based on previous files, ABILITY_CODES was initialized.
-        const tax = this.getAbilityValue(data, ABILITY_CODES.TAX);
-        return tax > 0 ? tax : 1;
+        let baseTax = 1;
+        if (data) {
+            const tax = this.getAbilityValue(data, ABILITY_CODES.TAX);
+            baseTax = tax > 0 ? tax : 1;
+        }
+        return this.scaleWorldCost(baseTax, this.getWorldRuleSet().taxMultiplier);
     }
 
     getUpkeepCost(type) {
         const data = this.getFieldObjectData(type);
         if (!data) return 0;
         const upkeep = this.getAbilityValue(data, ABILITY_CODES.UPKEEP);
-        return upkeep || 0;
+        return this.scaleWorldCost(upkeep || 0, this.getWorldRuleSet().upkeepMultiplier);
+    }
+
+    getFacilityHourlyGoldIncome(type) {
+        if (!isShopTile(type) && !isTavernTile(type)) return 0;
+        const data = this.getFieldObjectData(type);
+        const taxAbility = this.getAbilityValue(data, ABILITY_CODES.TAX);
+        if (taxAbility > 0) return taxAbility;
+        if (isShopTile(type)) return SHOP_HOURLY_GOLD_FALLBACK;
+        if (isTavernTile(type)) return TAVERN_HOURLY_GOLD_FALLBACK;
+        return 0;
+    }
+
+    getDungeonEventKey(r, c) {
+        return `dungeon:${r},${c}`;
+    }
+
+    getDungeonCooldownRemainingMs(r, c) {
+        const key = this.getDungeonEventKey(r, c);
+        const lastAt = Number(this.dungeonState?.cooldownByKey?.[key] || 0);
+        if (!lastAt) return 0;
+        return Math.max(0, (lastAt + DUNGEON_COOLDOWN_MS) - Date.now());
+    }
+
+    canEnterDungeon(r, c, showToast = true) {
+        const remainingMs = this.getDungeonCooldownRemainingMs(r, c);
+        if (remainingMs > 0) {
+            if (showToast) {
+                const time = this.formatDurationCompact(remainingMs);
+                this.showToast(this.tr('toast.dungeon_cooldown', { time }, `Dungeon cooldown: ${time}`));
+            }
+            return false;
+        }
+        if (this.gold < DUNGEON_ENTRY_GOLD_COST) {
+            if (showToast) this.showToast(this.tr('toast.gold_short_cost', { cost: DUNGEON_ENTRY_GOLD_COST }, `Not enough gold (${DUNGEON_ENTRY_GOLD_COST})`));
+            return false;
+        }
+        if (this.energy < DUNGEON_ENTRY_ENERGY_COST) {
+            if (showToast) this.showToast(this.tr('toast.energy_short_cost', { cost: DUNGEON_ENTRY_ENERGY_COST }, `Not enough energy (${DUNGEON_ENTRY_ENERGY_COST})`));
+            return false;
+        }
+        if (this.cp < DUNGEON_ENTRY_CP_COST) {
+            if (showToast) this.showToast(this.tr('toast.cp_short_cost', { cost: DUNGEON_ENTRY_CP_COST }, `Not enough CP (${DUNGEON_ENTRY_CP_COST})`));
+            return false;
+        }
+        return true;
+    }
+
+    consumeDungeonEntry(r, c) {
+        const key = this.getDungeonEventKey(r, c);
+        if (!this.dungeonState || typeof this.dungeonState !== 'object') this.dungeonState = { cooldownByKey: {} };
+        if (!this.dungeonState.cooldownByKey || typeof this.dungeonState.cooldownByKey !== 'object') this.dungeonState.cooldownByKey = {};
+
+        this.gold = Math.max(0, this.gold - DUNGEON_ENTRY_GOLD_COST);
+        this.energy = Math.max(0, this.energy - DUNGEON_ENTRY_ENERGY_COST);
+        this.cp = Math.max(0, this.cp - DUNGEON_ENTRY_CP_COST);
+        this.dungeonState.cooldownByKey[key] = Date.now();
+
+        this.showToast(this.tr(
+            'toast.dungeon_entry_paid',
+            { gold: DUNGEON_ENTRY_GOLD_COST, energy: DUNGEON_ENTRY_ENERGY_COST, cp: DUNGEON_ENTRY_CP_COST },
+            `Dungeon entry: -${DUNGEON_ENTRY_GOLD_COST}G -${DUNGEON_ENTRY_ENERGY_COST}EN -${DUNGEON_ENTRY_CP_COST}CP`
+        ));
+    }
+
+    ensureWorldState() {
+        if (!this.worldState || typeof this.worldState !== 'object') {
+            this.worldState = { season: 1, ended: false, winner: null, reason: "", endedAt: 0, score: 0, rewardPackage: null, rewardsClaimed: false, dragonBoss: { season: 1, killCount: 0, byUid: {}, lastKill: null } };
+        }
+        if (!Object.prototype.hasOwnProperty.call(this.worldState, 'season')) this.worldState.season = 1;
+        if (!Object.prototype.hasOwnProperty.call(this.worldState, 'ended')) this.worldState.ended = false;
+        if (!Object.prototype.hasOwnProperty.call(this.worldState, 'winner')) this.worldState.winner = null;
+        if (!Object.prototype.hasOwnProperty.call(this.worldState, 'reason')) this.worldState.reason = "";
+        if (!Object.prototype.hasOwnProperty.call(this.worldState, 'endedAt')) this.worldState.endedAt = 0;
+        if (!Object.prototype.hasOwnProperty.call(this.worldState, 'score')) this.worldState.score = 0;
+        if (!Object.prototype.hasOwnProperty.call(this.worldState, 'rewardPackage')) this.worldState.rewardPackage = null;
+        if (!Object.prototype.hasOwnProperty.call(this.worldState, 'rewardsClaimed')) this.worldState.rewardsClaimed = false;
+        if (!Object.prototype.hasOwnProperty.call(this.worldState, 'dragonBoss')) {
+            this.worldState.dragonBoss = { season: Number(this.worldState.season || 1), killCount: 0, byUid: {}, lastKill: null };
+        }
+        this.ensureDragonBossState();
+        return this.worldState;
+    }
+
+    getLocalUid() {
+        try {
+            const uid = localStorage.getItem('kov_uid');
+            if (uid) return uid;
+        } catch (e) { }
+        return 'local_player';
+    }
+
+    ensureDragonBossState() {
+        const world = this.worldState && typeof this.worldState === 'object' ? this.worldState : this.ensureWorldState();
+        if (!world.dragonBoss || typeof world.dragonBoss !== 'object') {
+            world.dragonBoss = { season: Number(world.season || 1), killCount: 0, byUid: {}, lastKill: null };
+        }
+        const boss = world.dragonBoss;
+        if (!Object.prototype.hasOwnProperty.call(boss, 'season')) boss.season = Number(world.season || 1);
+        if (!Object.prototype.hasOwnProperty.call(boss, 'killCount')) boss.killCount = 0;
+        if (!Object.prototype.hasOwnProperty.call(boss, 'byUid') || typeof boss.byUid !== 'object' || Array.isArray(boss.byUid)) boss.byUid = {};
+        if (!Object.prototype.hasOwnProperty.call(boss, 'lastKill')) boss.lastKill = null;
+
+        const currentSeason = Math.max(1, Number(world.season || 1));
+        if (Number(boss.season || 0) !== currentSeason) {
+            world.dragonBoss = { season: currentSeason, killCount: 0, byUid: {}, lastKill: null };
+            return world.dragonBoss;
+        }
+        return boss;
+    }
+
+    getBattleDamageByTeam(teamCode) {
+        if (!this.battleSimulation || !Array.isArray(this.battleSimulation.steps)) return 0;
+        return this.battleSimulation.steps.reduce((sum, step) => {
+            if (!step || step.type !== 'attack') return sum;
+            if (step.attackerTeam !== teamCode) return sum;
+            const damage = Number(step.damage || 0);
+            if (!Number.isFinite(damage) || damage <= 0) return sum;
+            return sum + damage;
+        }, 0);
+    }
+
+    getDragonContributionTier(share) {
+        const ratio = Math.max(0, Math.min(1, Number(share) || 0));
+        const rule = DRAGON_BOSS_CONFIG.minShareByTier;
+        if (ratio >= rule.s) return 'S';
+        if (ratio >= rule.a) return 'A';
+        if (ratio >= rule.b) return 'B';
+        return 'C';
+    }
+
+    buildDragonBossReward(tier, share, didKill) {
+        const normalizedTier = String(tier || 'C').trim().toUpperCase();
+        const multTable = DRAGON_BOSS_CONFIG.tierMultiplier;
+        const key = normalizedTier.toLowerCase();
+        const mult = Number(multTable[key]) || multTable.c || 1;
+        const base = DRAGON_BOSS_CONFIG.baseRewards;
+        const scaledShare = Math.max(0.5, Math.min(1.5, 0.6 + (Math.max(0, Math.min(1, Number(share) || 0)) * 0.8)));
+        const calc = (n) => Math.max(0, Math.floor(Number(n || 0) * mult * scaledShare));
+        const reward = {
+            gold: calc(base.gold),
+            gem: calc(base.gem),
+            energy: calc(base.energy),
+            cp: calc(base.cp),
+            points: calc(base.points)
+        };
+        if (didKill) {
+            reward.gold += Math.max(0, Math.floor(Number(DRAGON_BOSS_CONFIG.killBonusGold) || 0));
+            reward.points += Math.max(0, Math.floor(Number(DRAGON_BOSS_CONFIG.killBonusPoints) || 0));
+        }
+        return reward;
+    }
+
+    applyDragonBossReward(reward) {
+        if (!reward || typeof reward !== 'object') return;
+        this.gold += Math.max(0, Number(reward.gold) || 0);
+        this.gem += Math.max(0, Number(reward.gem) || 0);
+        this.energy = Math.min(this.maxEnergy, this.energy + Math.max(0, Number(reward.energy) || 0));
+        this.cp = Math.min(this.maxCp, this.cp + Math.max(0, Number(reward.cp) || 0));
+        this.points = Math.max(0, Number(this.points || 0)) + Math.max(0, Number(reward.points) || 0);
+    }
+
+    finalizeDragonBossKill() {
+        const world = this.ensureWorldState();
+        const boss = this.ensureDragonBossState();
+        const uid = this.getLocalUid();
+        const playerName = this.userProfile?.name || this.getDefaultProfileName();
+
+        const previousPlayerDamage = Math.max(0, Number(boss.byUid?.[uid]?.damage || 0));
+        const battleDamage = Math.max(0, this.getBattleDamageByTeam('A'));
+        const playerDamage = previousPlayerDamage + battleDamage;
+
+        if (!boss.byUid[uid] || typeof boss.byUid[uid] !== 'object') {
+            boss.byUid[uid] = { name: playerName, damage: 0, raids: 0, lastSeenAt: 0 };
+        }
+        boss.byUid[uid].name = playerName;
+        boss.byUid[uid].damage = playerDamage;
+        boss.byUid[uid].raids = Math.max(0, Number(boss.byUid[uid].raids || 0)) + 1;
+        boss.byUid[uid].lastSeenAt = Date.now();
+
+        const totalDamage = Object.values(boss.byUid).reduce((sum, row) => {
+            const value = Number(row?.damage || 0);
+            return sum + (Number.isFinite(value) && value > 0 ? value : 0);
+        }, 0);
+        const share = totalDamage > 0 ? (playerDamage / totalDamage) : 0;
+        const tier = this.getDragonContributionTier(share);
+        const reward = this.buildDragonBossReward(tier, share, true);
+        this.applyDragonBossReward(reward);
+
+        boss.killCount = Math.max(0, Number(boss.killCount || 0)) + 1;
+        const ranking = Object.entries(boss.byUid)
+            .map(([id, row]) => ({ uid: id, name: row?.name || id, damage: Math.max(0, Number(row?.damage || 0)) }))
+            .sort((a, b) => b.damage - a.damage);
+        const rank = Math.max(1, ranking.findIndex((entry) => entry.uid === uid) + 1);
+        boss.lastKill = {
+            at: Date.now(),
+            season: Math.max(1, Number(world.season || 1)),
+            uid,
+            name: playerName,
+            damage: battleDamage,
+            totalDamage,
+            contributionDamage: playerDamage,
+            contributionShare: share,
+            tier,
+            rank,
+            reward
+        };
+        return boss.lastKill;
+    }
+
+    ensureAdminState() {
+        if (!this.adminState || typeof this.adminState !== 'object') {
+            this.adminState = {};
+        }
+        const fallbackPreset = WORLD_PRESETS[DEFAULT_WORLD_PRESET_ID] ? DEFAULT_WORLD_PRESET_ID : 'regular';
+        const rawPresetId = String(this.adminState.presetId || fallbackPreset).trim().toLowerCase();
+        this.adminState.presetId = WORLD_PRESETS[rawPresetId] ? rawPresetId : fallbackPreset;
+        this.adminState.worldEndConditions = parseWorldEndConditions(this.adminState.worldEndConditions || WORLD_END_CONDITIONS);
+        this.adminState.worldSeasonPolicy = parseWorldSeasonPolicy(this.adminState.worldSeasonPolicy || WORLD_SEASON_POLICY);
+        return this.adminState;
+    }
+
+    getActiveWorldPresetId() {
+        return this.ensureAdminState().presetId;
+    }
+
+    getWorldPresetConfig(presetId) {
+        const key = String(presetId || '').trim().toLowerCase();
+        return WORLD_PRESETS[key] || null;
+    }
+
+    getActiveWorldEndConditions() {
+        return this.ensureAdminState().worldEndConditions || WORLD_END_CONDITIONS;
+    }
+
+    getActiveWorldSeasonPolicy() {
+        return this.ensureAdminState().worldSeasonPolicy || WORLD_SEASON_POLICY;
+    }
+
+    getWorldPresetLabel(presetId) {
+        const config = this.getWorldPresetConfig(presetId);
+        if (config && config.label) return config.label;
+        const key = String(presetId || '').trim().toLowerCase();
+        if (key === 'hardcore') return this.tr('ui.admin.preset.hardcore', {}, 'Hardcore');
+        if (key === 'seasonal') return this.tr('ui.admin.preset.seasonal', {}, 'Seasonal');
+        return this.tr('ui.admin.preset.regular', {}, 'Regular');
+    }
+
+    applyWorldPreset(presetId, opts = {}) {
+        const config = this.getWorldPresetConfig(presetId);
+        if (!config) return false;
+        const state = this.ensureAdminState();
+        const key = String(presetId || '').trim().toLowerCase();
+        state.presetId = key;
+        state.worldEndConditions = parseWorldEndConditions(config.worldEndConditions);
+        state.worldSeasonPolicy = parseWorldSeasonPolicy(config.seasonPolicy);
+        this.setWorldRuleSet(config.ruleSet, { persist: false });
+        this.refreshLocaleControls();
+        if (opts.persist !== false) this.saveGame();
+        if (!opts.silent) {
+            this.showToast(this.tr('toast.admin_preset_applied', { preset: this.getWorldPresetLabel(key) }, `Admin preset applied: ${this.getWorldPresetLabel(key)}`));
+        }
+        return true;
+    }
+
+    isWorldEnded() {
+        return !!this.ensureWorldState().ended;
+    }
+
+    isWorldActionsLocked() {
+        const endConditions = this.getActiveWorldEndConditions();
+        return this.isWorldEnded() && !!endConditions.lockActionsOnEnd;
+    }
+
+    guardWorldAction(action = 'action') {
+        if (!this.isWorldActionsLocked()) return false;
+        this.showToast(this.tr('toast.world_end_locked', { action }, `World ended: ${action} is locked`));
+        return true;
+    }
+
+    getWorldScore() {
+        let score = 0;
+        this.occupiedTiles.forEach(key => {
+            const [r, c] = key.split(',').map(Number);
+            const type = FIELD_MAP_DATA?.[r]?.[c];
+            if (isCitadelTile(type)) score += 25;
+            else if (isGateTile(type)) score += 10;
+            else if (isDragonTile(type)) score += 40;
+            else if (isShopTile(type) || isTavernTile(type)) score += 6;
+            else if (isGoldMineTile(type) || isFountainTile(type)) score += 4;
+            else score += 1;
+        });
+        return Math.max(0, Math.floor(score));
+    }
+
+    buildWorldEndRewardPackage(reason, score) {
+        const mode = this.getWorldRuleSetName();
+        const modeMultiplier = Number(DEFAULT_WORLD_END_REWARD_CONFIG.modeMultiplier[mode] || 1);
+        const reasonKey = (reason === 'score' || reason === 'king_castle_hold') ? reason : 'hybrid';
+        const base = DEFAULT_WORLD_END_REWARD_CONFIG[reasonKey] || DEFAULT_WORLD_END_REWARD_CONFIG.hybrid;
+        const safeScore = Math.max(0, Number(score) || 0);
+
+        const gold = Math.floor((base.gold + (safeScore * DEFAULT_WORLD_END_REWARD_CONFIG.scoreGoldPerPoint)) * modeMultiplier);
+        const gem = Math.max(1, Math.floor(base.gem * modeMultiplier));
+        const energy = Math.max(1, Math.floor(base.energy * modeMultiplier));
+        const cp = Math.max(1, Math.floor(base.cp * modeMultiplier));
+        const points = Math.max(1, Math.floor((base.points + Math.floor(safeScore / 100) * DEFAULT_WORLD_END_REWARD_CONFIG.scorePointsPer100) * modeMultiplier));
+
+        return {
+            reason: reasonKey,
+            mode,
+            score: safeScore,
+            rewards: { gold, gem, energy, cp, points }
+        };
+    }
+
+    renderWorldEndRewardRows(pkg) {
+        if (!pkg || !pkg.rewards) return "";
+        const rows = [];
+        rows.push(`<div class="text-sm">- ${this.tr('ui.modal.world_end.reward_gold', { value: pkg.rewards.gold }, `Gold +${pkg.rewards.gold}`)}</div>`);
+        rows.push(`<div class="text-sm">- ${this.tr('ui.modal.world_end.reward_gem', { value: pkg.rewards.gem }, `GEM +${pkg.rewards.gem}`)}</div>`);
+        rows.push(`<div class="text-sm">- ${this.tr('ui.modal.world_end.reward_energy', { value: pkg.rewards.energy }, `Energy +${pkg.rewards.energy}`)}</div>`);
+        rows.push(`<div class="text-sm">- ${this.tr('ui.modal.world_end.reward_cp', { value: pkg.rewards.cp }, `CP +${pkg.rewards.cp}`)}</div>`);
+        rows.push(`<div class="text-sm">- ${this.tr('ui.modal.world_end.reward_points', { value: pkg.rewards.points }, `PT +${pkg.rewards.points}`)}</div>`);
+        return rows.join('');
+    }
+
+    claimWorldEndRewards(opts = {}) {
+        const silent = !!opts.silent;
+        const world = this.ensureWorldState();
+        if (!world.ended) return false;
+        if (world.rewardsClaimed) return false;
+        const pkg = world.rewardPackage;
+        if (!pkg || !pkg.rewards) return false;
+
+        this.gold += Math.max(0, Number(pkg.rewards.gold) || 0);
+        this.gem += Math.max(0, Number(pkg.rewards.gem) || 0);
+        this.energy = Math.min(this.maxEnergy, this.energy + Math.max(0, Number(pkg.rewards.energy) || 0));
+        this.cp = Math.min(this.maxCp, this.cp + Math.max(0, Number(pkg.rewards.cp) || 0));
+        this.points = Math.max(0, Number(this.points || 0)) + Math.max(0, Number(pkg.rewards.points) || 0);
+
+        world.rewardsClaimed = true;
+        this.updateUI();
+        this.saveGame();
+        if (!silent) {
+            this.showToast(this.tr('toast.world_end_rewards_claimed', {}, 'World end rewards claimed'));
+            this.showWorldEndModal(world.reason || pkg.reason || 'score');
+        }
+        return true;
+    }
+
+    startNextSeason() {
+        if (!this.isWorldEnded()) return false;
+        const endConditions = this.getActiveWorldEndConditions();
+        if (!endConditions.allowNextSeasonTransition) {
+            this.showToast(this.tr('toast.next_season_unavailable', {}, 'Next season transition is disabled'));
+            return false;
+        }
+        const confirmText = this.tr('ui.modal.world_end.next_confirm', {}, 'Start next season now?');
+        if (!window.confirm(confirmText)) return false;
+
+        this.claimWorldEndRewards({ silent: true });
+
+        const world = this.ensureWorldState();
+        world.season = Math.max(1, Number(world.season || 1)) + 1;
+        world.ended = false;
+        world.winner = null;
+        world.reason = "";
+        world.endedAt = 0;
+        world.score = 0;
+        world.rewardPackage = null;
+        world.rewardsClaimed = false;
+        world.dragonBoss = { season: world.season, killCount: 0, byUid: {}, lastKill: null };
+
+        this.applySeasonTransitionPolicy();
+
+        this.dungeonState = { cooldownByKey: {} };
+        this.rebellionState = { lastByKey: {} };
+        this.crownState = { holderKey: null, capturedAt: 0, kingCastleKey: null, promotedAt: 0 };
+        this.fieldResourceState = {};
+        this.fieldShopState = {};
+        this.fieldDefenderState = {};
+        this.fieldBuffs = { atk: 0, def: 0, hp: 0, spd: 0 };
+
+        this.fieldEvents = {};
+        this.populateFieldEvents();
+        this.occupiedTiles = new Set([`${PLAYER_START.r},${PLAYER_START.c}`]);
+        this.visibilityMap = new Set();
+        this.revealFog(PLAYER_START.r, PLAYER_START.c, FOG_RADIUS);
+
+        this.armies.forEach((army) => {
+            if (!army) return;
+            army.state = 'IDLE';
+            army.r = PLAYER_START.r;
+            army.c = PLAYER_START.c;
+            army.path = [];
+            army.stepTimes = [];
+            army.nextStepIndex = 0;
+            army.target = null;
+            army.lastMoveTime = 0;
+            army.moveInterval = 0;
+        });
+        this.selectedArmyId = null;
+        this.lastSelectedArmyId = null;
+        this.currentFieldTargetKey = null;
+        this.currentFieldTargetType = null;
+
+        this.recalcFieldBonuses();
+        this.updateOpenBorders();
+        this.updateUI();
+        this.saveGame();
+
+        this.showToast(this.tr('toast.next_season_started', { season: world.season }, `Season ${world.season} started`));
+        this.showToast(this.getSeasonPolicyToast(world.season));
+        this.closeModal();
+        if (document.getElementById('field-modal')?.dataset?.mode === 'field') {
+            this.renderFieldMap();
+        } else {
+            this.requestRender();
+        }
+        return true;
+    }
+
+    applySeasonTransitionPolicy() {
+        const policy = this.getActiveWorldSeasonPolicy();
+
+        if (!policy.keepMergeGrid) {
+            this.grid = Array(CONFIG.gridRows).fill().map(() => Array(CONFIG.gridCols).fill(null));
+        }
+        if (!policy.keepSquads) {
+            this.squad1 = Array(9).fill(null);
+            this.squad2 = Array(9).fill(null);
+            this.squad3 = Array(9).fill(null);
+        }
+
+        if (!policy.keepResources) {
+            this.gold = 3000;
+            this.gem = 50;
+            this.energy = this.maxEnergy;
+            this.cp = this.maxCp;
+        } else {
+            this.gold = Math.max(0, Math.floor(this.gold * policy.resourceCarryover.gold));
+            this.gem = Math.max(0, Math.floor(this.gem * policy.resourceCarryover.gem));
+            this.energy = Math.max(0, Math.min(this.maxEnergy, Math.floor(this.energy * policy.resourceCarryover.energy)));
+            this.cp = Math.max(0, Math.min(this.maxCp, Math.floor(this.cp * policy.resourceCarryover.cp)));
+        }
+
+        if (!policy.keepPoints) {
+            this.points = 0;
+        } else {
+            this.points = Math.max(0, Math.floor(Number(this.points || 0) * policy.resourceCarryover.points));
+        }
+    }
+
+    getSeasonPolicyToast(season) {
+        const policy = this.getActiveWorldSeasonPolicy();
+        const parts = [];
+        parts.push(policy.keepMergeGrid ? this.tr('ui.season.keep.grid', {}, 'Grid kept') : this.tr('ui.season.reset.grid', {}, 'Grid reset'));
+        parts.push(policy.keepSquads ? this.tr('ui.season.keep.squads', {}, 'Squads kept') : this.tr('ui.season.reset.squads', {}, 'Squads reset'));
+        parts.push(policy.keepResources ? this.tr('ui.season.keep.resources', {}, 'Resources carried') : this.tr('ui.season.reset.resources', {}, 'Resources reset'));
+        parts.push(policy.keepPoints ? this.tr('ui.season.keep.points', {}, 'Points carried') : this.tr('ui.season.reset.points', {}, 'Points reset'));
+        return this.tr(
+            'toast.next_season_policy',
+            { season, policy: parts.join(', ') },
+            `Season ${season} policy: ${parts.join(', ')}`
+        );
+    }
+
+    showWorldEndModal(reason) {
+        const modal = document.getElementById('field-modal');
+        const content = document.getElementById('modal-content');
+        const title = document.getElementById('modal-title');
+        if (!modal || !content || !title) return;
+        const world = this.ensureWorldState();
+        const endConditions = this.getActiveWorldEndConditions();
+        if (!world.rewardPackage) {
+            world.rewardPackage = this.buildWorldEndRewardPackage(reason, world.score);
+        }
+
+        title.innerText = this.tr('ui.modal.world_end.title', {}, 'World Complete');
+        modal.hidden = false;
+        modal.classList.add('open');
+        modal.dataset.mode = 'world_end';
+
+        const reasonText = reason === 'score'
+            ? this.tr(
+                'ui.modal.world_end.reason_score',
+                { score: this.ensureWorldState().score, target: endConditions.targetScore },
+                `Target score reached (${this.ensureWorldState().score}/${endConditions.targetScore})`
+            )
+            : this.tr(
+                'ui.modal.world_end.reason_king_castle',
+                { minutes: Math.floor(endConditions.targetHoldMs / 60000) },
+                `King Castle hold completed (${Math.floor(endConditions.targetHoldMs / 60000)}m)`
+            );
+        const rewardRows = this.renderWorldEndRewardRows(world.rewardPackage);
+        const isClaimed = !!world.rewardsClaimed;
+        const claimLabel = isClaimed
+            ? this.tr('ui.modal.world_end.reward_claimed', {}, 'Claimed')
+            : this.tr('ui.modal.world_end.claim', {}, 'Claim Rewards');
+        const claimDisabled = isClaimed ? 'disabled style="opacity:0.5;cursor:default;"' : '';
+        const modeLabel = this.getWorldRuleSetLabel(world.rewardPackage?.mode || this.getWorldRuleSetName());
+
+        content.innerHTML = `
+            <div class="flex flex-col items-center justify-center space-y-4 p-8">
+                <div class="text-6xl">C</div>
+                <div class="text-2xl font-bold text-yellow-300">${this.tr('ui.modal.world_end.completed', {}, 'World Objective Complete')}</div>
+                <div class="text-white text-center">${reasonText}</div>
+                <div class="text-xs text-gray-300">${this.tr('ui.modal.world_end.mode', { mode: modeLabel }, `Ruleset: ${modeLabel}`)}</div>
+                <div class="text-xs text-gray-300">${this.tr('ui.modal.world_end.next', {}, 'Next season rule changes can now be applied.')}</div>
+                <div class="border border-yellow-600 bg-black bg-opacity-50 p-4 rounded text-left w-full">
+                    <div class="text-yellow-500 font-bold mb-2">${this.tr('ui.modal.world_end.rewards', {}, 'Season Rewards')}</div>
+                    ${rewardRows}
+                </div>
+                <button class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-8 rounded shadow-lg transform hover:scale-105 transition" onclick="game.claimWorldEndRewards()" ${claimDisabled}>
+                    ${claimLabel}
+                </button>
+                <button class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 px-8 rounded shadow-lg transform hover:scale-105 transition" onclick="game.startNextSeason()">
+                    ${this.tr('ui.modal.world_end.next_season', {}, 'Start Next Season')}
+                </button>
+                <button class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-8 rounded shadow-lg transform hover:scale-105 transition" onclick="game.closeModal()">
+                    ${this.tr('ui.common.continue', {}, 'Continue')}
+                </button>
+            </div>
+        `;
+    }
+
+    evaluateWorldEndCondition() {
+        const world = this.ensureWorldState();
+        world.score = this.getWorldScore();
+        const endConditions = this.getActiveWorldEndConditions();
+        if (!endConditions.enabled || world.ended) return false;
+
+        const allowKingCastle = endConditions.type === 'king_castle_hold' || endConditions.type === 'hybrid';
+        const allowScore = endConditions.type === 'score' || endConditions.type === 'hybrid';
+
+        let reason = '';
+        if (allowScore && world.score >= endConditions.targetScore) {
+            reason = 'score';
+        } else if (allowKingCastle) {
+            const crown = this.ensureCrownState();
+            const promotedAt = Number(crown.promotedAt || 0);
+            if (crown.kingCastleKey && promotedAt > 0) {
+                const heldMs = Date.now() - promotedAt;
+                if (heldMs >= endConditions.targetHoldMs) {
+                    reason = 'king_castle_hold';
+                }
+            }
+        }
+        if (!reason) return false;
+
+        world.ended = true;
+        world.winner = 'player';
+        world.reason = reason;
+        world.endedAt = Date.now();
+        world.rewardPackage = this.buildWorldEndRewardPackage(reason, world.score);
+        world.rewardsClaimed = false;
+
+        if (reason === 'score') {
+            this.showToast(this.tr('toast.world_end_score', { score: world.score }, `World complete by score (${world.score})`));
+        } else {
+            this.showToast(this.tr('toast.world_end_king_castle', {}, 'World complete by King Castle hold'));
+        }
+        this.pushEffectLog(this.tr('ui.field.effect.world_end', {}, 'World objective complete'));
+        this.showWorldEndModal(reason);
+        return true;
+    }
+
+    ensureCrownState() {
+        if (!this.crownState || typeof this.crownState !== 'object') {
+            this.crownState = { holderKey: null, capturedAt: 0, kingCastleKey: null, promotedAt: 0 };
+        }
+        if (!Object.prototype.hasOwnProperty.call(this.crownState, 'holderKey')) this.crownState.holderKey = null;
+        if (!Object.prototype.hasOwnProperty.call(this.crownState, 'capturedAt')) this.crownState.capturedAt = 0;
+        if (!Object.prototype.hasOwnProperty.call(this.crownState, 'kingCastleKey')) this.crownState.kingCastleKey = null;
+        if (!Object.prototype.hasOwnProperty.call(this.crownState, 'promotedAt')) this.crownState.promotedAt = 0;
+        return this.crownState;
+    }
+
+    isKingCastleTile(r, c) {
+        const state = this.ensureCrownState();
+        return state.kingCastleKey === `${r},${c}`;
+    }
+
+    getOwnedCitadelEntries() {
+        const out = [];
+        this.occupiedTiles.forEach(key => {
+            const [r, c] = key.split(',').map(Number);
+            const type = FIELD_MAP_DATA?.[r]?.[c];
+            if (!isCitadelTile(type)) return;
+            out.push({
+                key,
+                r,
+                c,
+                type,
+                level: this.getFieldLevel(type) || 1
+            });
+        });
+        return out;
+    }
+
+    pickKingCastleKey(candidates, preferredKey = null) {
+        if (!Array.isArray(candidates) || !candidates.length) return null;
+        if (preferredKey) {
+            const found = candidates.find(entry => entry.key === preferredKey);
+            if (found) return found.key;
+        }
+        const center = (MAP_SIZE - 1) / 2;
+        const sorted = [...candidates].sort((a, b) => {
+            if (b.level !== a.level) return b.level - a.level;
+            const da = Math.abs(a.r - center) + Math.abs(a.c - center);
+            const db = Math.abs(b.r - center) + Math.abs(b.c - center);
+            return da - db;
+        });
+        return sorted[0]?.key || null;
+    }
+
+    onCrownCaptured(r, c) {
+        const state = this.ensureCrownState();
+        const key = `${r},${c}`;
+        state.holderKey = key;
+        state.capturedAt = Date.now();
+        state.kingCastleKey = null;
+        state.promotedAt = 0;
+
+        const holdMin = Math.max(1, Math.round(CROWN_HOLD_MS / 60000));
+        this.showToast(this.tr('toast.crown_captured', { minutes: holdMin }, `Crown captured! Hold for ${holdMin}m to build King Castle.`));
+        this.pushEffectLog(this.tr('ui.field.effect.crown_captured', { minutes: holdMin }, `Crown captured (${holdMin}m hold started)`));
+    }
+
+    ensureCrownEventSpawned() {
+        const state = this.ensureCrownState();
+        if (state.holderKey || state.kingCastleKey) return false;
+
+        const hasCrownEvent = Object.values(this.fieldEvents || {}).some(evt => evt && evt.type === FIELD_EVENT_TYPES.CROWN);
+        if (hasCrownEvent) return false;
+
+        const candidates = [];
+        for (let r = 0; r < MAP_SIZE; r++) {
+            for (let c = 0; c < MAP_SIZE; c++) {
+                const terrain = FIELD_MAP_DATA?.[r]?.[c];
+                if (terrain === undefined) continue;
+                if (terrain === 0) continue;
+                if (isBlockingField(terrain)) continue;
+                if (isBorderTerrain(terrain)) continue;
+                if (Math.abs(r - PLAYER_START.r) < 3 && Math.abs(c - PLAYER_START.c) < 3) continue;
+                const key = `${r},${c}`;
+                if (this.fieldEvents[key]) continue;
+                if (this.occupiedTiles.has(key)) continue;
+                candidates.push({ key, r, c });
+            }
+        }
+        if (!candidates.length) return false;
+
+        const picked = candidates[Math.floor(Math.random() * candidates.length)];
+        this.fieldEvents[picked.key] = {
+            type: FIELD_EVENT_TYPES.CROWN,
+            id: `crown_${picked.r}_${picked.c}_${Date.now()}`,
+            r: picked.r,
+            c: picked.c,
+            captureAfterWin: true
+        };
+        return true;
+    }
+
+    syncCrownEventState() {
+        const state = this.ensureCrownState();
+        const hasOwnership = !!state.holderKey || !!state.kingCastleKey;
+        if (hasOwnership) {
+            Object.keys(this.fieldEvents || {}).forEach(key => {
+                const evt = this.fieldEvents[key];
+                if (evt && evt.type === FIELD_EVENT_TYPES.CROWN) delete this.fieldEvents[key];
+            });
+            return;
+        }
+        this.ensureCrownEventSpawned();
+    }
+
+    updateCrownAndCastleState() {
+        const state = this.ensureCrownState();
+        let changed = false;
+
+        if (state.kingCastleKey && !this.occupiedTiles.has(state.kingCastleKey)) {
+            state.holderKey = null;
+            state.capturedAt = 0;
+            state.kingCastleKey = null;
+            state.promotedAt = 0;
+            this.showToast(this.tr('toast.king_castle_lost', {}, 'King Castle lost. Crown has returned to the field.'));
+            this.pushEffectLog(this.tr('ui.field.effect.king_castle_lost', {}, 'King Castle lost'));
+            changed = true;
+        } else if (state.holderKey && !this.occupiedTiles.has(state.holderKey)) {
+            state.holderKey = null;
+            state.capturedAt = 0;
+            state.kingCastleKey = null;
+            state.promotedAt = 0;
+            this.showToast(this.tr('toast.crown_lost', {}, 'Crown control lost.'));
+            changed = true;
+        }
+
+        if (!state.holderKey) {
+            if (this.ensureCrownEventSpawned()) {
+                this.showToast(this.tr('toast.crown_spawned', {}, 'A Crown appeared on the field.'));
+                changed = true;
+            }
+            return changed;
+        }
+
+        if (!state.kingCastleKey) {
+            const heldMs = Date.now() - Number(state.capturedAt || 0);
+            if (heldMs >= CROWN_HOLD_MS) {
+                const citadels = this.getOwnedCitadelEntries();
+                if (citadels.length > 0) {
+                    const promotedKey = this.pickKingCastleKey(citadels, state.holderKey);
+                    if (promotedKey) {
+                        state.holderKey = promotedKey;
+                        state.kingCastleKey = promotedKey;
+                        state.promotedAt = Date.now();
+                        this.showToast(this.tr('toast.king_castle_established', {}, 'King Castle established!'));
+                        this.pushEffectLog(this.tr('ui.field.effect.king_castle_established', {}, 'King Castle established'));
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        return changed;
+    }
+
+    getRebellionCandidates() {
+        const out = [];
+        this.occupiedTiles.forEach(key => {
+            if (key === `${PLAYER_START.r},${PLAYER_START.c}`) return;
+            const [r, c] = key.split(',').map(Number);
+            const type = FIELD_MAP_DATA?.[r]?.[c];
+            if (isGateTile(type) || isCitadelTile(type)) out.push({ key, r, c, type });
+        });
+        return out;
+    }
+
+    triggerRebellionAt(candidate, reason = 'random') {
+        if (!candidate) return false;
+        const { key, r, c, type } = candidate;
+        if (this.fieldEvents[key]) return false;
+        if (!this.occupiedTiles.has(key)) return false;
+
+        this.occupiedTiles.delete(key);
+        if (!this.rebellionState || typeof this.rebellionState !== 'object') this.rebellionState = { lastByKey: {} };
+        if (!this.rebellionState.lastByKey || typeof this.rebellionState.lastByKey !== 'object') this.rebellionState.lastByKey = {};
+        this.rebellionState.lastByKey[key] = Date.now();
+
+        this.fieldEvents[key] = {
+            type: isCitadelTile(type) ? FIELD_EVENT_TYPES.BANDIT_LEADER : FIELD_EVENT_TYPES.BANDIT,
+            id: `rebellion_${r}_${c}_${Date.now()}`,
+            r,
+            c,
+            rebellion: true,
+            reason,
+            captureAfterWin: true
+        };
+
+        const targetName = this.isKingCastleTile(r, c)
+            ? this.tr('ui.field.object.king_castle', {}, 'King Castle')
+            : this.objectTypeNameByCode(type);
+        if (reason === 'unpaid') {
+            this.showToast(this.tr('toast.rebellion_unpaid', { name: targetName }, `Rebellion! Upkeep unpaid at ${targetName}`));
+        } else {
+            this.showToast(this.tr('toast.rebellion_random', { name: targetName }, `Rebellion at ${targetName}`));
+        }
+        this.pushEffectLog(this.tr('ui.field.effect.rebellion', { name: targetName }, `Rebellion: ${targetName}`));
+
+        this.recalcFieldBonuses();
+        this.updateOpenBorders();
+        this.requestRender();
+        return true;
+    }
+
+    maybeTriggerRebellion({ unpaid = false, totalUpkeep = 0, totalTax = 0 } = {}) {
+        const worldRule = this.getWorldRuleSet();
+        if (!worldRule.allowRebellion) return false;
+
+        const candidates = this.getRebellionCandidates();
+        if (!candidates.length) return false;
+
+        const now = Date.now();
+        if (!this.rebellionState || typeof this.rebellionState !== 'object') this.rebellionState = { lastByKey: {} };
+        if (!this.rebellionState.lastByKey || typeof this.rebellionState.lastByKey !== 'object') this.rebellionState.lastByKey = {};
+
+        const eligible = candidates.filter(c => {
+            const last = Number(this.rebellionState.lastByKey[c.key] || 0);
+            return now - last >= REBELLION_COOLDOWN_MS;
+        });
+        if (!eligible.length) return false;
+
+        const randomMultiplier = Number.isFinite(Number(worldRule.rebellionRandomMultiplier))
+            ? Math.max(0, Number(worldRule.rebellionRandomMultiplier))
+            : 1;
+        const unpaidMultiplier = Number.isFinite(Number(worldRule.rebellionUnpaidMultiplier))
+            ? Math.max(0, Number(worldRule.rebellionUnpaidMultiplier))
+            : 1;
+
+        let chance = REBELLION_RANDOM_CHANCE * randomMultiplier;
+        if (unpaid) {
+            const deficitBase = Math.max(0, totalUpkeep - Math.max(0, this.gold + totalTax));
+            const ratio = totalUpkeep > 0 ? Math.min(1, deficitBase / totalUpkeep) : 1;
+            chance = Math.max(
+                REBELLION_UNPAID_CHANCE * (0.5 + ratio * 0.5) * unpaidMultiplier,
+                REBELLION_RANDOM_CHANCE * randomMultiplier
+            );
+        }
+        chance = Math.min(1, Math.max(0, chance));
+
+        if (Math.random() >= chance) return false;
+        const pick = eligible[Math.floor(Math.random() * eligible.length)];
+        return this.triggerRebellionAt(pick, unpaid ? 'unpaid' : 'random');
     }
     getTileMoveTime(type, r, c) {
         // Supports legacy field object IDs (0-6) and terrain IDs (100-599).
@@ -1619,24 +3237,53 @@ class Game {
         return times;
     }
     collectTerritoryIncome() {
+        const crownChanged = this.updateCrownAndCastleState();
+        const worldEnded = this.evaluateWorldEndCondition();
         if (this.occupiedTiles.size > 0) {
             let totalTax = 0;
             let totalUpkeep = 0;
+            let totalHourlyGold = 0;
             this.occupiedTiles.forEach(key => {
                 const [r, c] = key.split(',').map(Number);
                 const type = FIELD_MAP_DATA[r][c];
-                totalTax += this.getTaxRate(type);
+                if (isShopTile(type) || isTavernTile(type)) {
+                    totalHourlyGold += this.getFacilityHourlyGoldIncome(type);
+                } else {
+                    totalTax += this.getTaxRate(type);
+                }
                 totalUpkeep += this.getUpkeepCost(type);
             });
-            const net = totalTax - totalUpkeep;
-            this.income = net; this.gold += net;
+            const baseNet = totalTax - totalUpkeep;
+            const hourlyPerTick = totalHourlyGold / 1200; // 3s tick = 1200 ticks/hour
+            this.hourlyIncomeRemainder = (this.hourlyIncomeRemainder || 0) + hourlyPerTick;
+            const facilityGain = Math.floor(this.hourlyIncomeRemainder);
+            if (facilityGain > 0) this.hourlyIncomeRemainder -= facilityGain;
+            const net = baseNet + facilityGain;
+            const unpaid = totalUpkeep > Math.max(0, this.gold + Math.max(0, totalTax) + Math.max(0, facilityGain));
+            this.income = Math.round((baseNet + hourlyPerTick) * 100) / 100;
+            this.gold += net;
+            const rebellionTriggered = this.maybeTriggerRebellion({ unpaid, totalUpkeep, totalTax });
             this.updateUI();
-            if (document.getElementById('field-modal').classList.contains('open')) {
+            if (net !== 0 && document.getElementById('field-modal').classList.contains('open')) {
                 const sign = net >= 0 ? "+" : "";
                 this.showFloatingText(`${sign}${net} G (Tax)`, this.width / 2, this.height / 4, net >= 0 ? '#ffd700' : '#f87171');
             }
+            if (crownChanged && document.getElementById('field-modal').classList.contains('open')) {
+                if (!this.refreshFieldMapVisuals()) {
+                    this.renderFieldMap();
+                } else if (this.currentFieldTargetKey) {
+                    const [tr, tc] = this.currentFieldTargetKey.split(',').map(Number);
+                    if (!Number.isNaN(tr) && !Number.isNaN(tc)) {
+                        const eventAtTarget = this.fieldEvents?.[`${tr},${tc}`];
+                        this.setFieldInfo(eventAtTarget ? eventAtTarget.type : FIELD_MAP_DATA[tr][tc], tr, tc);
+                    }
+                }
+            }
+            if (rebellionTriggered || crownChanged || worldEnded) this.saveGame();
         } else {
             this.income = 0;
+            this.hourlyIncomeRemainder = 0;
+            if (crownChanged || worldEnded) this.saveGame();
         }
     }
     calcLayout() {
@@ -1676,67 +3323,125 @@ class Game {
         }
         this.requestRender();
     }
-    openCaravanShop() {
-        // Reuse Shop Modal logic but with Caravan data
-        const modal = document.getElementById('field-modal'); const content = document.getElementById('modal-content'); const title = document.getElementById('modal-title');
-        title.innerText = this.tr('ui.modal.caravan_title', {}, 'Caravan Shop'); content.innerHTML = "";
-        modal.hidden = false;
-        modal.dataset.mode = 'caravan'; modal.classList.add('open');
-
-        const grid = document.createElement('div'); grid.className = 'shop-grid';
-        // Mock Caravan Items (Randomize later)
-        const CARAVAN_ITEMS = [
-            { name: this.tr('ui.caravan.item.resource_pack', {}, 'Resource Pack'), icon: "PK", price: 100, type: 9001 },
-            { name: this.tr('ui.caravan.item.mercenary', {}, 'Mercenary'), icon: "MR", price: 500, type: 9002 },
-            { name: this.tr('ui.caravan.item.map_fragment', {}, 'Map Fragment'), icon: "MP", price: 1000, type: 9003 }
-        ];
-
-        CARAVAN_ITEMS.forEach(item => {
-            const div = document.createElement('div'); div.className = 'shop-item';
-            div.innerHTML = `<div class="text-2xl">${item.icon}</div><div class="font-bold text-sm text-white">${item.name}</div><button class="bg-yellow-600 text-white px-3 py-1 mt-2 rounded font-bold text-xs" onclick="game.buyCaravanItem(${item.type}, ${item.price})">${this.tr('ui.shop.price_gold', { price: item.price }, `G ${item.price}`)}</button>`;
-            grid.appendChild(div);
-        });
-        content.appendChild(grid);
-    }
-
-    buyCaravanItem(type, price) {
-        if (this.gold < price) { this.showToast(this.tr('toast.gold_short', {}, 'Not enough gold')); return; }
-        this.gold -= price;
-        this.showToast(this.tr('toast.purchase_done', {}, 'Purchased'));
-        this.updateUI();
-    }
-
-    openPortalModal(r, c) {
-        // Simple teleport to random location
-        const confirm = window.confirm(this.tr('ui.modal.portal_confirm', {}, 'Use portal and move to a random position?'));
-        if (confirm) {
-            // Find random safe tile
-            let nr, nc;
-            let attempts = 0;
-            while (attempts < 100) {
-                nr = Math.floor(Math.random() * MAP_SIZE);
-                nc = Math.floor(Math.random() * MAP_SIZE);
-                if (FIELD_MAP_DATA[nr][nc] !== 0 && !isBorderTerrain(FIELD_MAP_DATA[nr][nc])) break;
-                attempts++;
-            }
-            // Move army instantly
-            const army = this.armies.find(a => a.state === 'IDLE'); // Simplification: assume active army triggered it
-            if (army) {
-                army.r = nr; army.c = nc;
-                this.revealFog(nr, nc, FOG_RADIUS);
-                this.updateArmies();
-                this.renderFieldMap();
-                this.showToast(this.tr('toast.portal_activated', {}, 'Portal activated!'));
-            }
+    openCaravanShop(r, c) {
+        if (this.guardWorldAction(this.tr('ui.field.action.caravan', {}, 'Caravan'))) return;
+        const rr = Number.isFinite(Number(r)) ? Number(r) : -1;
+        const cc = Number.isFinite(Number(c)) ? Number(c) : -1;
+        const key = `caravan:${rr},${cc}`;
+        const state = this.fieldShopState[key] || { lastRefresh: Date.now(), items: [] };
+        const interval = 3 * 60 * 60 * 1000;
+        const now = Date.now();
+        if (now - state.lastRefresh >= interval || !state.items || state.items.length === 0) {
+            state.lastRefresh = now;
+            state.items = this.buildShopCatalog(FIELD_EVENT_TYPES.CARAVAN).map(item => ({ ...item, sold: false, restock: false }));
         }
+        this.fieldShopState[key] = state;
+        this.currentShopContext = { type: FIELD_EVENT_TYPES.CARAVAN, r: rr, c: cc, key };
+        this.renderShopModal(FIELD_EVENT_TYPES.CARAVAN, rr, cc, state);
     }
 
-    showVictoryModal() {
+    getPortalDestination(fromR, fromC) {
+        const portals = Object.values(this.fieldEvents || {})
+            .filter(evt => evt && evt.type === FIELD_EVENT_TYPES.PORTAL)
+            .sort((a, b) => (a.r - b.r) || (a.c - b.c));
+        if (portals.length <= 1) return null;
+        const idx = portals.findIndex(evt => evt.r === fromR && evt.c === fromC);
+        if (idx === -1) return portals[0];
+        return portals[(idx + 1) % portals.length];
+    }
+
+    getRandomPortalFallback() {
+        let attempts = 0;
+        while (attempts < 100) {
+            const r = Math.floor(Math.random() * MAP_SIZE);
+            const c = Math.floor(Math.random() * MAP_SIZE);
+            const terrain = FIELD_MAP_DATA?.[r]?.[c];
+            if (terrain !== 0 && !isBorderTerrain(terrain)) return { r, c };
+            attempts++;
+        }
+        return null;
+    }
+
+    getPortalActorArmy(preferredArmyId = null) {
+        if (preferredArmyId !== null && preferredArmyId !== undefined) {
+            const byId = this.armies.find(a => a && a.id === preferredArmyId);
+            if (byId) return byId;
+        }
+        if (this.selectedArmyId !== null && this.selectedArmyId !== undefined) {
+            const selected = this.armies[this.selectedArmyId];
+            if (selected) return selected;
+        }
+        return this.armies.find(a => a && a.state === 'IDLE') || null;
+    }
+
+    openPortalModal(r, c, preferredArmyId = null) {
+        if (this.guardWorldAction(this.tr('ui.field.action.portal', {}, 'Portal'))) return;
+        const cpCost = Math.max(0, Number(PORTAL_CP_COST || 0));
+        if (this.cp < cpCost) {
+            this.showToast(this.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough CP (${cpCost})`));
+            return;
+        }
+
+        const destination = this.getPortalDestination(r, c);
+        const fallback = destination ? null : this.getRandomPortalFallback();
+        const target = destination || fallback;
+        if (!target) {
+            this.showToast(this.tr('toast.portal_unavailable', {}, 'Portal destination unavailable'));
+            return;
+        }
+
+        const confirmText = destination
+            ? this.tr(
+                'ui.modal.portal_confirm_target',
+                { row: target.r + 1, col: target.c + 1, cost: cpCost },
+                `Use portal (CP ${cpCost}) and move to (${target.r + 1}, ${target.c + 1})?`
+            )
+            : this.tr(
+                'ui.modal.portal_confirm_random_cost',
+                { cost: cpCost },
+                `Use portal (CP ${cpCost}) and move to a random position?`
+            );
+        if (!window.confirm(confirmText)) return;
+
+        const army = this.getPortalActorArmy(preferredArmyId);
+        if (!army) {
+            this.showToast(this.tr('toast.select_army_first', {}, 'Select an army first from the top.'));
+            return;
+        }
+        if (army.state !== 'IDLE') {
+            this.showToast(this.tr('toast.army_moving', {}, 'Army is already moving.'));
+            return;
+        }
+
+        this.cp -= cpCost;
+        army.r = target.r;
+        army.c = target.c;
+        army.target = null;
+        army.path = [];
+        this.revealFog(target.r, target.c, FOG_RADIUS);
+        this.updateUI();
+        this.updateArmies();
+        this.renderFieldMap();
+        this.saveGame();
+        this.showToast(this.tr('toast.portal_activated', {}, 'Portal activated!'));
+    }
+
+    showVictoryModal(dragonKillSummary = null) {
         const modal = document.getElementById('field-modal'); const content = document.getElementById('modal-content'); const title = document.getElementById('modal-title');
         title.innerText = this.tr('ui.modal.victory_title', {}, 'Victory!');
         modal.hidden = false;
         modal.classList.add('open');
         modal.dataset.mode = 'victory';
+
+        const fallbackReward = { gold: 10000, gem: 0, energy: 0, cp: 0, points: 0 };
+        const reward = dragonKillSummary?.reward || fallbackReward;
+        const tier = String(dragonKillSummary?.tier || 'S');
+        const shareText = dragonKillSummary
+            ? `${Math.round(Math.max(0, Math.min(1, Number(dragonKillSummary.contributionShare) || 0)) * 100)}%`
+            : '100%';
+        const rankText = dragonKillSummary
+            ? `${dragonKillSummary.rank || 1}`
+            : '1';
 
         content.innerHTML = `
             <div class="flex flex-col items-center justify-center space-y-4 p-8">
@@ -1748,8 +3453,14 @@ class Game {
                 </div>
                 <div class="border border-yellow-600 bg-black bg-opacity-50 p-4 rounded text-center w-full">
                     <div class="text-yellow-500 font-bold mb-2">${this.tr('ui.modal.victory.rewards', {}, 'Rewards')}</div>
-                    <div class="text-sm">${this.tr('ui.modal.victory.reward_gold', {}, 'Gold +10,000')}</div>
-                    <div class="text-sm">${this.tr('ui.modal.victory.reward_buff', {}, 'All troop stats +20% (permanent)')}</div>
+                    <div class="text-sm">${this.tr('ui.modal.victory.reward_tier', { tier }, `Contribution Tier: ${tier}`)}</div>
+                    <div class="text-sm">${this.tr('ui.modal.victory.reward_share', { value: shareText }, `Contribution Share: ${shareText}`)}</div>
+                    <div class="text-sm">${this.tr('ui.modal.victory.reward_rank', { value: rankText }, `Contribution Rank: #${rankText}`)}</div>
+                    <div class="text-sm">${this.tr('ui.modal.victory.reward_gold_dynamic', { value: reward.gold }, `Gold +${reward.gold}`)}</div>
+                    <div class="text-sm">${this.tr('ui.modal.victory.reward_gem_dynamic', { value: reward.gem }, `GEM +${reward.gem}`)}</div>
+                    <div class="text-sm">${this.tr('ui.modal.victory.reward_energy_dynamic', { value: reward.energy }, `Energy +${reward.energy}`)}</div>
+                    <div class="text-sm">${this.tr('ui.modal.victory.reward_cp_dynamic', { value: reward.cp }, `CP +${reward.cp}`)}</div>
+                    <div class="text-sm">${this.tr('ui.modal.victory.reward_points_dynamic', { value: reward.points }, `PT +${reward.points}`)}</div>
                 </div>
                 <button class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-8 rounded shadow-lg transform hover:scale-105 transition" onclick="game.closeModal()">
                     ${this.tr('ui.common.continue', {}, 'Continue')}
@@ -1757,9 +3468,9 @@ class Game {
             </div>
         `;
 
-        // Grant Rewards
-        this.gold += 10000;
-        Object.keys(this.fieldBuffs).forEach(k => this.fieldBuffs[k] += 0.2); // +20% Stats
+        if (!dragonKillSummary) {
+            this.applyDragonBossReward(fallbackReward);
+        }
         this.updateUI();
         this.saveGame();
 
@@ -1787,13 +3498,19 @@ class Game {
         });
         content.appendChild(grid);
     }
-    toggleField() {
+    toggleField(opts = {}) {
         const modal = document.getElementById('field-modal');
         if (modal.classList.contains('open') && modal.dataset.mode === 'field') { this.closeModal(); return; }
         const preferredArmyId = this.getPreferredFieldArmyId();
         if (preferredArmyId === null) {
             this.showToast(this.tr('toast.field_need_squad', {}, 'Deploy at least one squad before entering the field.'));
             this.sound.playError();
+            return;
+        }
+        const skipLobby = !!opts.skipLobby;
+        const lobby = this.ensureWorldLobbyState();
+        if (!skipLobby && !lobby.entered) {
+            this.openWorldLobbyModal();
             return;
         }
         this.exitMoveTargetMode();
@@ -1841,10 +3558,19 @@ class Game {
                 }
             }
         }
+        this.ensureCrownEventSpawned();
         console.log(`Generated ${Object.keys(this.fieldEvents).length} field events.`);
     }
 
     getFieldDefenders(type) {
+        if (type === FIELD_EVENT_TYPES.CROWN) {
+            return [
+                { code: ITEM_TYPE.UNIT_CAVALRY, count: 20, slot: 4 },
+                { code: ITEM_TYPE.UNIT_INFANTRY, count: 35, slot: 1 },
+                { code: ITEM_TYPE.UNIT_ARCHER, count: 35, slot: 7 }
+            ];
+        }
+
         if (type === FIELD_EVENT_TYPES.DUNGEON) {
             return [
                 { code: ITEM_TYPE.UNIT_CAVALRY, count: 30, slot: 4 },
@@ -1929,6 +3655,7 @@ class Game {
         const b = document.getElementById('object-modal-body');
         if (!modal || !t || !b) return;
         modal.querySelector('.modal-content')?.classList.add('wide');
+        modal.style.display = '';
         t.innerText = title;
         b.innerHTML = bodyHtml;
         modal.classList.add('open');
@@ -1943,21 +3670,33 @@ class Game {
         return `${h}h ${m}m`;
     }
 
+    formatDurationCompact(ms) {
+        const sec = Math.max(0, Math.ceil(ms / 1000));
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        if (h > 0) return `${h}h ${m}m`;
+        if (m > 0) return `${m}m ${s}s`;
+        return `${s}s`;
+    }
+
     formatPercent(value) {
         return `${Math.round(value * 100)}%`;
     }
 
     getFieldObjectData(type) {
         // Field Events (Bandit, Dungeon, etc.)
-        if (type === FIELD_EVENT_TYPES.BANDIT || type === FIELD_EVENT_TYPES.BANDIT_LEADER || type === FIELD_EVENT_TYPES.DUNGEON) {
+        if (type === FIELD_EVENT_TYPES.BANDIT || type === FIELD_EVENT_TYPES.BANDIT_LEADER || type === FIELD_EVENT_TYPES.DUNGEON || type === FIELD_EVENT_TYPES.CROWN) {
             const defenders = this.getFieldDefenders(type);
             return {
                 name: type === FIELD_EVENT_TYPES.BANDIT
                     ? this.tr('ui.field.event.bandit', {}, 'Bandit')
                     : (type === FIELD_EVENT_TYPES.BANDIT_LEADER
                         ? this.tr('ui.field.event.bandit_leader', {}, 'Bandit Leader')
-                        : this.tr('ui.field.event.dungeon', {}, 'Dungeon')),
-                level: 1,
+                        : (type === FIELD_EVENT_TYPES.DUNGEON
+                            ? this.tr('ui.field.event.dungeon', {}, 'Dungeon')
+                            : this.tr('ui.field.event.crown', {}, 'Crown'))),
+                level: type === FIELD_EVENT_TYPES.CROWN ? 7 : (type === FIELD_EVENT_TYPES.DUNGEON ? 5 : (type === FIELD_EVENT_TYPES.BANDIT_LEADER ? 3 : 1)),
                 defenders: defenders,
                 abilities: []
             };
@@ -2202,6 +3941,7 @@ class Game {
     }
 
     collectFieldResource(type, r, c) {
+        if (this.guardWorldAction(this.tr('ui.info.collect', {}, 'Collect'))) return;
         const key = `${r},${c}`;
         if (!this.occupiedTiles.has(key)) { this.showToast(this.tr('toast.collect_after_capture', {}, 'Collectable after capture')); return; }
         const info = this.getFieldResourceState(type, r, c);
@@ -2485,20 +4225,71 @@ class Game {
 
     buildShopCatalog(type) {
         const level = this.getFieldLevel(type);
-        if (isShopTile(type)) {
-            const codes = Object.keys(ITEM_TABLE).map(n => parseInt(n, 10));
-            codes.sort(() => Math.random() - 0.5);
-            return codes.slice(0, 3).map(code => {
+        if (type === FIELD_EVENT_TYPES.CARAVAN) {
+            const maxUnitLevel = Math.max(2, Math.min(10, Math.floor(this.lordLevel / 20) + 3));
+            const itemCodes = Object.keys(ITEM_TABLE).map(n => parseInt(n, 10))
+                .filter(code => {
+                    const info = getInfoFromCode(code);
+                    const data = ITEM_TABLE[code];
+                    return Number.isFinite(code) && !!info && !!data && info.type >= ITEM_TYPE.ITEM_GOLD && info.type <= ITEM_TYPE.ITEM_CRYSTAL;
+                });
+            const unitCodes = Object.keys(UNIT_STATS).map(n => parseInt(n, 10))
+                .filter(code => {
+                    const info = getInfoFromCode(code);
+                    return Number.isFinite(code) && !!info && info.type >= ITEM_TYPE.UNIT_INFANTRY && info.type <= ITEM_TYPE.UNIT_CAVALRY && info.level <= maxUnitLevel;
+                });
+            itemCodes.sort(() => Math.random() - 0.5);
+            unitCodes.sort(() => Math.random() - 0.5);
+
+            const items = itemCodes.slice(0, 2).map(code => {
                 const info = getInfoFromCode(code);
-                const data = ITEM_TABLE[code];
+                const data = ITEM_TABLE[code] || {};
+                const basePrice = this.calcItemPrice(info.type, info.level);
                 return {
                     kind: "item",
                     code,
-                    name: data.name_kr || data.name,
+                    name: data.name_kr || data.name || `Item Lv.${info.level}`,
                     icon: this.getItemIcon(info.type),
                     type: info.type,
                     level: info.level,
-                    earn: data.earn,
+                    earn: Number(data.earn || 0),
+                    price: Math.max(1, Math.floor(basePrice * 0.85))
+                };
+            });
+            const units = unitCodes.slice(0, 2).map(code => {
+                const info = getInfoFromCode(code);
+                const stat = UNIT_STATS[code] || {};
+                const basePrice = this.calcMercPrice(code);
+                return {
+                    kind: "unit",
+                    code,
+                    name: stat.name || stat.name_kr || `Unit Lv.${info.level}`,
+                    level: info.level,
+                    price: Math.max(1, Math.floor(basePrice * 0.9))
+                };
+            });
+
+            return [...items, ...units].sort(() => Math.random() - 0.5);
+        }
+        if (isShopTile(type)) {
+            const codes = Object.keys(ITEM_TABLE).map(n => parseInt(n, 10))
+                .filter(code => {
+                    const info = getInfoFromCode(code);
+                    const data = ITEM_TABLE[code];
+                    return Number.isFinite(code) && !!info && !!data && info.type >= ITEM_TYPE.ITEM_GOLD && info.type <= ITEM_TYPE.ITEM_CRYSTAL;
+                });
+            codes.sort(() => Math.random() - 0.5);
+            return codes.slice(0, 3).map(code => {
+                const info = getInfoFromCode(code);
+                const data = ITEM_TABLE[code] || {};
+                return {
+                    kind: "item",
+                    code,
+                    name: data.name_kr || data.name || `Item Lv.${info.level}`,
+                    icon: this.getItemIcon(info.type),
+                    type: info.type,
+                    level: info.level,
+                    earn: Number(data.earn || 0),
                     price: this.calcItemPrice(info.type, info.level)
                 };
             });
@@ -2507,16 +4298,16 @@ class Game {
             const pool = Object.keys(UNIT_STATS).map(n => parseInt(n, 10))
                 .filter(code => {
                     const info = getInfoFromCode(code);
-                    return info.type >= 10 && info.level <= 5;
+                    return Number.isFinite(code) && !!info && info.type >= ITEM_TYPE.UNIT_INFANTRY && info.type <= ITEM_TYPE.UNIT_CAVALRY && info.level <= 5;
                 });
             pool.sort(() => Math.random() - 0.5);
             return pool.slice(0, 3).map(code => {
                 const info = getInfoFromCode(code);
-                const stat = UNIT_STATS[code];
+                const stat = UNIT_STATS[code] || {};
                 return {
                     kind: "unit",
                     code,
-                    name: stat ? stat.name : `Unit Lv.${info.level}`,
+                    name: stat.name || stat.name_kr || `Unit Lv.${info.level}`,
                     level: info.level,
                     price: this.calcMercPrice(code)
                 };
@@ -2556,8 +4347,8 @@ class Game {
 
     refreshShopModal() {
         if (!this.currentShopContext) return;
-        const { type, r, c } = this.currentShopContext;
-        const key = `${r},${c}`;
+        const { type, r, c, key: contextKey } = this.currentShopContext;
+        const key = contextKey || `${r},${c}`;
         const state = this.fieldShopState[key];
         if (!state) return;
         if (!document.getElementById('modal-object')?.classList.contains('open')) return;
@@ -2578,6 +4369,7 @@ class Game {
     }
 
     openShopOrTavern(type, r, c) {
+        if (this.guardWorldAction(this.tr('ui.field.action.open_shop', {}, 'Shop'))) return;
         const key = `${r},${c}`;
         if (!this.occupiedTiles.has(key)) { this.showToast(this.tr('toast.use_after_capture', {}, 'Usable after capture')); return; }
         const state = this.fieldShopState[key] || { lastRefresh: Date.now(), items: [] };
@@ -2597,13 +4389,15 @@ class Game {
         const now = Date.now();
         const next = state.lastRefresh + interval;
         const remain = this.formatTimeLeft(next - now);
-        const name = this.objectTypeNameByCode(type);
+        const isCaravan = type === FIELD_EVENT_TYPES.CARAVAN;
+        const name = isCaravan ? this.tr('ui.modal.caravan_title', {}, 'Caravan Shop') : this.objectTypeNameByCode(type);
         const level = this.getFieldLevel(type);
 
         const modal = document.getElementById('modal-object');
         const t = document.getElementById('object-modal-title');
         const b = document.getElementById('object-modal-body');
         if (!modal || !t || !b) return;
+        modal.style.display = '';
         modal.classList.add('open');
         t.innerText = name;
         b.innerHTML = "";
@@ -2611,7 +4405,8 @@ class Game {
 
         const header = document.createElement('div');
         header.className = "shop-header";
-        header.innerHTML = `<div class="shop-title">${name} Lv.${level}</div><div class="shop-refresh">${this.tr('ui.shop.refresh_in', {}, 'Refresh in')}: <span id="shop-refresh-timer">${remain}</span></div>`;
+        const titleText = isCaravan ? name : `${name} Lv.${level}`;
+        header.innerHTML = `<div class="shop-title">${titleText}</div><div class="shop-refresh">${this.tr('ui.shop.refresh_in', {}, 'Refresh in')}: <span id="shop-refresh-timer">${remain}</span></div>`;
         b.appendChild(header);
 
         const list = document.createElement('div');
@@ -2679,6 +4474,115 @@ class Game {
         }, 1000);
     }
 
+    getBattleRewardOptions(rewardCtx) {
+        const targetCode = Number(rewardCtx?.targetCode);
+        const fieldLevel = Math.max(1, Number(this.getFieldLevel(targetCode) || 1));
+        const energyGain = Math.max(5, Math.min(20, 3 + (fieldLevel * 2)));
+        const chestLevel = Math.max(1, Math.min(5, Math.ceil(fieldLevel / 2)));
+        const adGold = Math.max(150, fieldLevel * 90);
+        return [
+            {
+                kind: 'energy',
+                icon: '⚡',
+                title: this.tr('ui.battle_reward.energy', { value: energyGain }, `Energy +${energyGain}`),
+                button: this.tr('ui.battle_reward.select', {}, 'Select'),
+                energyGain
+            },
+            {
+                kind: 'chest',
+                icon: '📦',
+                title: this.tr('ui.battle_reward.chest', { level: chestLevel }, `Chest Lv.${chestLevel}`),
+                button: this.tr('ui.battle_reward.select', {}, 'Select'),
+                chestLevel
+            },
+            {
+                kind: 'ad',
+                icon: '▶',
+                title: this.tr('ui.battle_reward.ad_gold', { value: adGold }, `Bonus Gold +${adGold}`),
+                button: this.tr('ui.refill.watch_ad', {}, 'Watch Ad'),
+                adGold
+            }
+        ];
+    }
+
+    openBattleRewardModal(rewardCtx) {
+        const modal = document.getElementById('modal-object');
+        const title = document.getElementById('object-modal-title');
+        const body = document.getElementById('object-modal-body');
+        if (!modal || !title || !body) return;
+
+        this.pendingBattleReward = {
+            ...rewardCtx,
+            options: this.getBattleRewardOptions(rewardCtx),
+            claimed: false
+        };
+
+        modal.style.display = '';
+        modal.classList.add('open');
+        modal.querySelector('.modal-content')?.classList.remove('wide');
+        title.innerText = this.tr('ui.modal.battle_reward_title', {}, 'Battle Reward');
+        body.innerHTML = '';
+
+        const panel = document.createElement('div');
+        panel.className = 'battle-reward-panel';
+
+        const grid = document.createElement('div');
+        grid.className = 'battle-reward-grid';
+
+        this.pendingBattleReward.options.forEach(opt => {
+            const card = document.createElement('div');
+            card.className = 'battle-reward-card';
+            card.innerHTML = `
+                <div class="icon">${opt.icon}</div>
+                <div class="title">${opt.title}</div>
+            `;
+            const btn = document.createElement('button');
+            btn.className = 'battle-reward-btn';
+            btn.innerText = opt.button;
+            btn.onclick = () => this.claimBattleReward(opt.kind);
+            card.appendChild(btn);
+            grid.appendChild(card);
+        });
+
+        panel.appendChild(grid);
+        body.appendChild(panel);
+    }
+
+    claimBattleReward(kind) {
+        const state = this.pendingBattleReward;
+        if (!state || state.claimed) return;
+        const option = (state.options || []).find(opt => opt.kind === kind);
+        if (!option) return;
+
+        if (kind === 'energy') {
+            const gain = Number(option.energyGain || 0);
+            const real = Math.max(0, Math.min(gain, this.maxEnergy - this.energy));
+            this.energy = Math.min(this.maxEnergy, this.energy + gain);
+            this.showToast(this.tr('toast.energy_gain', { value: real }, `+${real}⚡`));
+        } else if (kind === 'chest') {
+            const level = Math.max(1, Number(option.chestLevel || 1));
+            const chest = { type: ITEM_TYPE.BUILDING_CHEST, level, scale: 0, usage: 5 };
+            if (!this.spawnItem(chest)) {
+                this.showToast(this.tr('toast.reward_chest_no_space', {}, 'Reward chest, but no space'));
+                return;
+            }
+            this.showToast(this.tr('ui.battle_reward.chest_granted', { level }, `Chest Lv.${level} obtained`));
+        } else if (kind === 'ad') {
+            const gain = Math.max(0, Number(option.adGold || 0));
+            this.gold += gain;
+            this.showToast(this.tr('ui.battle_reward.ad_granted', { value: gain }, `Bonus Gold +${gain}`));
+        }
+
+        state.claimed = true;
+        this.pendingBattleReward = null;
+        this.updateUI();
+        this.requestRender();
+
+        const modal = document.getElementById('modal-object');
+        modal?.classList.remove('open');
+        document.querySelector('#modal-object .modal-content')?.classList.remove('wide');
+    }
+
     // --- PHASE 4: SOCIAL UI ---
     initSocialUI() {
         // Chat Button is now in Footer (HTML), so we don't create it here.
@@ -2701,18 +4605,18 @@ class Game {
             chatDrawer.className = 'chat-drawer';
             chatDrawer.innerHTML = `
                 <div class="chat-header">
-                    <span>${chatTitle}</span>
-                    <button onclick="game.toggleChat()">${chatClose}</button>
+                    <span id="chat-title">${chatTitle}</span>
+                    <button id="chat-close-btn" onclick="game.toggleChat()">${chatClose}</button>
                 </div>
                 <div class="chat-tabs">
-                    <button class="active">${chatWorld}</button>
-                    <button>${chatGuild}</button>
-                    <button>${chatSystem}</button>
+                    <button id="chat-tab-world" data-channel="world" class="active" onclick="game.setChatChannel('world')">${chatWorld}</button>
+                    <button id="chat-tab-guild" data-channel="guild" onclick="game.setChatChannel('guild')">${chatGuild}</button>
+                    <button id="chat-tab-system" data-channel="system" onclick="game.setChatChannel('system')">${chatSystem}</button>
                 </div>
                 <div id="chat-messages" class="chat-messages"></div>
                 <div class="chat-input-area">
                     <input type="text" id="chat-input" placeholder="${chatPlaceholder}">
-                    <button onclick="game.sendChatMessage()">${chatSend}</button>
+                    <button id="chat-send-btn" onclick="game.sendChatMessage()">${chatSend}</button>
                 </div>
             `;
             gameContainer.appendChild(chatDrawer);
@@ -2735,8 +4639,110 @@ class Game {
         // Update Header
         this.updateHeaderForSocial();
 
+        this.ensureChatState();
+        this.updateChatTabUI();
+        this.refreshChatUI();
+
         // Start Chat Simulation
         setInterval(() => this.simulateChat(), 5000 + Math.random() * 10000);
+    }
+
+    ensureChatState() {
+        if (!this.chatState || typeof this.chatState !== 'object') {
+            this.chatState = { activeChannel: 'world', logsByChannel: { world: [], guild: [], system: [] }, maxLogs: 80 };
+        }
+        const validChannels = ['world', 'guild', 'system'];
+        const current = String(this.chatState.activeChannel || 'world').toLowerCase();
+        this.chatState.activeChannel = validChannels.includes(current) ? current : 'world';
+        if (!this.chatState.logsByChannel || typeof this.chatState.logsByChannel !== 'object') {
+            this.chatState.logsByChannel = { world: [], guild: [], system: [] };
+        }
+        validChannels.forEach((channel) => {
+            if (!Array.isArray(this.chatState.logsByChannel[channel])) this.chatState.logsByChannel[channel] = [];
+        });
+        this.chatState.maxLogs = Math.max(20, Math.min(200, Number(this.chatState.maxLogs || 80)));
+        return this.chatState;
+    }
+
+    ensureSocialState() {
+        if (!this.socialState || typeof this.socialState !== 'object') {
+            this.socialState = {};
+        }
+        const keys = ['players', 'friends', 'friendRequestsIn', 'friendRequestsOut', 'allianceRequestsIn', 'allianceRequestsOut'];
+        keys.forEach((k) => {
+            if (!Array.isArray(this.socialState[k])) this.socialState[k] = [];
+        });
+        if (!this.socialState.players.length) {
+            this.socialState.players = [
+                { uid: 'P1001', name: 'IronWolf', power: 1800 },
+                { uid: 'P1002', name: 'SkyRider', power: 2200 },
+                { uid: 'P1003', name: 'StoneGate', power: 1600 },
+                { uid: 'P1004', name: 'NightLance', power: 2450 }
+            ];
+        }
+        if (!this.socialState.friendRequestsIn.length) this.socialState.friendRequestsIn = ['P1003'];
+        if (!this.socialState.allianceRequestsIn.length) this.socialState.allianceRequestsIn = ['P1002'];
+        return this.socialState;
+    }
+
+    getChatChannelLabel(channel) {
+        if (channel === 'guild') return this.tr('ui.chat.tab.guild', {}, 'Guild');
+        if (channel === 'system') return this.tr('ui.chat.tab.system', {}, 'System');
+        return this.tr('ui.chat.tab.world', {}, 'World');
+    }
+
+    getChatTitleForChannel(channel) {
+        if (channel === 'guild') return this.tr('ui.chat.title.guild', {}, 'Guild Chat');
+        if (channel === 'system') return this.tr('ui.chat.title.system', {}, 'System Chat');
+        return this.tr('ui.chat.title.world', {}, 'World Chat');
+    }
+
+    updateChatTabUI() {
+        const state = this.ensureChatState();
+        ['world', 'guild', 'system'].forEach((channel) => {
+            const tab = document.getElementById(`chat-tab-${channel}`);
+            if (!tab) return;
+            tab.classList.toggle('active', state.activeChannel === channel);
+            tab.innerText = this.getChatChannelLabel(channel);
+        });
+        const title = document.getElementById('chat-title');
+        if (title) title.innerText = this.getChatTitleForChannel(state.activeChannel);
+        const input = document.getElementById('chat-input');
+        if (input) {
+            input.placeholder = this.tr('ui.chat.placeholder', {}, 'Type message...');
+            input.disabled = state.activeChannel === 'system';
+        }
+        const sendBtn = document.getElementById('chat-send-btn');
+        if (sendBtn) {
+            sendBtn.innerText = this.tr('ui.chat.send', {}, 'Send');
+            sendBtn.disabled = state.activeChannel === 'system';
+        }
+    }
+
+    setChatChannel(channel) {
+        const state = this.ensureChatState();
+        const next = String(channel || '').toLowerCase();
+        if (!['world', 'guild', 'system'].includes(next)) return;
+        if (state.activeChannel === next) return;
+        state.activeChannel = next;
+        this.updateChatTabUI();
+        this.refreshChatUI();
+    }
+
+    pushChatMessage(channel, sender, text, type = 'other') {
+        const state = this.ensureChatState();
+        const target = ['world', 'guild', 'system'].includes(channel) ? channel : 'world';
+        const row = {
+            channel: target,
+            sender: String(sender || ''),
+            text: String(text || ''),
+            type: type === 'me' ? 'me' : 'other',
+            at: Date.now()
+        };
+        const list = state.logsByChannel[target];
+        list.push(row);
+        if (list.length > state.maxLogs) list.splice(0, list.length - state.maxLogs);
+        return row;
     }
 
     updateHeaderForSocial() {
@@ -2789,6 +4795,7 @@ class Game {
         const drawer = document.getElementById('chat-drawer');
         if (this.isChatOpen) {
             drawer.classList.add('open');
+            this.updateChatTabUI();
             this.refreshChatUI();
         } else {
             drawer.classList.remove('open');
@@ -2797,32 +4804,44 @@ class Game {
 
     sendChatMessage() {
         this.sanitizeUserProfile();
+        const state = this.ensureChatState();
         const input = document.getElementById('chat-input');
+        if (!input || state.activeChannel === 'system') return;
         const text = input.value.trim();
         if (!text) return;
 
-        this.chatLog.push({ sender: this.userProfile.name, text, type: 'me' });
-        if (this.chatLog.length > 50) this.chatLog.shift();
+        this.pushChatMessage(state.activeChannel, this.userProfile.name, text, 'me');
 
         input.value = "";
         this.refreshChatUI();
         this.showToast(this.tr('toast.message_sent', {}, 'Message sent'));
+        this.saveGame();
     }
 
     simulateChat() {
+        const state = this.ensureChatState();
         const msg = DUMMY_CHAT_MESSAGES[Math.floor(Math.random() * DUMMY_CHAT_MESSAGES.length)];
         const sender = this.tr(msg.senderKey, {}, msg.senderFallback);
         const text = this.tr(msg.textKey, {}, msg.textFallback);
-
-        this.chatLog.push({ sender, text, type: 'other' });
-        if (this.chatLog.length > 50) this.chatLog.shift();
+        let channel = 'world';
+        if (msg.senderKey === 'ui.chat.sender.guild') channel = 'guild';
+        if (msg.senderKey === 'ui.chat.sender.system') channel = 'system';
+        this.pushChatMessage(channel, sender, text, 'other');
+        // Backward compatibility mirror for older uses.
+        this.chatLog = (state.logsByChannel.world || []).slice(-50);
         if (this.isChatOpen) this.refreshChatUI();
     }
 
     refreshChatUI() {
+        const state = this.ensureChatState();
         const container = document.getElementById('chat-messages');
         if (!container) return;
-        container.innerHTML = this.chatLog.map(log => `
+        const list = Array.isArray(state.logsByChannel[state.activeChannel]) ? state.logsByChannel[state.activeChannel] : [];
+        if (!list.length) {
+            container.innerHTML = `<div class="chat-line other"><span class="sender">[${this.tr('ui.chat.tab.system', {}, 'System')}]</span><span class="text">${this.tr('ui.chat.empty', {}, 'No messages yet.')}</span></div>`;
+            return;
+        }
+        container.innerHTML = list.map(log => `
                 <div class="chat-line ${log.type}">
                 <span class="sender">${log.type === 'me' ? '' : `[${log.sender}]`}</span>
                 <span class="text" style="color:white !important;">${log.text}</span>
@@ -2870,11 +4889,177 @@ class Game {
                     <div class="stat-box"><div>${this.tr('ui.profile.vip', {}, 'VIP')}</div><span>${vip}</span></div>
                 </div>
                 <div class="profile-actions">
-                    <button class="btn-action" onclick="game.showToastKey('toast.coming_soon')">${friendsLabel}</button>
-                    <button class="btn-action" onclick="game.showToastKey('toast.coming_soon')">${accountLabel}</button>
+                    <button class="btn-action" onclick="game.openSocialHub('friends')">${friendsLabel}</button>
+                    <button class="btn-action" onclick="game.openSocialHub('alliance')">${accountLabel}</button>
                 </div>
             </div>
         `;
+    }
+
+    isSocialFriend(uid) {
+        const social = this.ensureSocialState();
+        return social.friends.includes(uid);
+    }
+
+    openSocialHub(tab = 'players') {
+        this.ensureSocialState();
+        this.renderSocialHub(tab);
+    }
+
+    renderSocialHub(tab = 'players') {
+        const social = this.ensureSocialState();
+        const active = ['players', 'friends', 'alliance'].includes(tab) ? tab : 'players';
+        const modal = document.getElementById('modal-object');
+        const t = document.getElementById('object-modal-title');
+        const b = document.getElementById('object-modal-body');
+        if (!modal || !t || !b) return;
+        modal.style.display = '';
+        modal.classList.add('open');
+        modal.querySelector('.modal-content')?.classList.add('wide');
+
+        t.innerText = this.tr('ui.social.title', {}, 'Social');
+
+        const tabBtn = (key, fallback) => {
+            const label = this.tr(`ui.social.tab.${key}`, {}, fallback);
+            const cls = active === key ? 'bg-blue-700 border-blue-400' : 'bg-gray-700 border-gray-500';
+            return `<button class="px-2 py-1 text-xs rounded border ${cls}" onclick="game.renderSocialHub('${key}')">${label}</button>`;
+        };
+
+        const players = social.players
+            .filter((p) => p && p.uid !== this.getLocalUid())
+            .map((p) => {
+                const uid = String(p.uid || '');
+                const isFriend = this.isSocialFriend(uid);
+                const outFriend = social.friendRequestsOut.includes(uid);
+                const outAlliance = social.allianceRequestsOut.includes(uid);
+                const friendAction = isFriend
+                    ? this.tr('ui.social.friend.added', {}, 'Friend')
+                    : (outFriend ? this.tr('ui.social.friend.pending', {}, 'Pending') : this.tr('ui.social.friend.add', {}, 'Add Friend'));
+                const allianceAction = outAlliance
+                    ? this.tr('ui.social.alliance.pending', {}, 'Pending')
+                    : this.tr('ui.social.alliance.request', {}, 'Alliance');
+                return `
+                    <div class="bg-gray-800 p-2 rounded border border-gray-700 text-xs flex items-center justify-between gap-2">
+                        <div>
+                            <div class="text-gray-100 font-bold">${p.name}</div>
+                            <div class="text-gray-400">${uid} | ${this.tr('ui.profile.power', {}, 'Power')}: ${Number(p.power || 0)}</div>
+                        </div>
+                        <div class="flex gap-1">
+                            <button class="px-2 py-1 rounded bg-emerald-700 border border-emerald-500 text-[11px]" ${isFriend || outFriend ? 'disabled style="opacity:.6"' : ''} onclick="game.requestFriend('${uid}')">${friendAction}</button>
+                            <button class="px-2 py-1 rounded bg-indigo-700 border border-indigo-500 text-[11px]" ${outAlliance ? 'disabled style="opacity:.6"' : ''} onclick="game.requestAlliance('${uid}')">${allianceAction}</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+        const friendRequests = social.friendRequestsIn.map((uid) => {
+            const player = social.players.find((p) => p.uid === uid);
+            const name = player?.name || uid;
+            return `
+                <div class="bg-gray-800 p-2 rounded border border-gray-700 text-xs flex items-center justify-between gap-2">
+                    <div class="text-gray-100">${name} (${uid})</div>
+                    <div class="flex gap-1">
+                        <button class="px-2 py-1 rounded bg-emerald-700 border border-emerald-500 text-[11px]" onclick="game.acceptFriendRequest('${uid}')">${this.tr('ui.common.accept', {}, 'Accept')}</button>
+                        <button class="px-2 py-1 rounded bg-gray-700 border border-gray-500 text-[11px]" onclick="game.rejectFriendRequest('${uid}')">${this.tr('ui.common.reject', {}, 'Reject')}</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const friends = social.friends.map((uid) => {
+            const player = social.players.find((p) => p.uid === uid);
+            const name = player?.name || uid;
+            return `<div class="bg-gray-800 p-2 rounded border border-gray-700 text-xs text-gray-100">${name} (${uid})</div>`;
+        }).join('');
+
+        const allianceRequests = social.allianceRequestsIn.map((uid) => {
+            const player = social.players.find((p) => p.uid === uid);
+            const name = player?.name || uid;
+            return `
+                <div class="bg-gray-800 p-2 rounded border border-gray-700 text-xs flex items-center justify-between gap-2">
+                    <div class="text-gray-100">${name} (${uid})</div>
+                    <div class="flex gap-1">
+                        <button class="px-2 py-1 rounded bg-indigo-700 border border-indigo-500 text-[11px]" onclick="game.acceptAllianceRequest('${uid}')">${this.tr('ui.common.accept', {}, 'Accept')}</button>
+                        <button class="px-2 py-1 rounded bg-gray-700 border border-gray-500 text-[11px]" onclick="game.rejectAllianceRequest('${uid}')">${this.tr('ui.common.reject', {}, 'Reject')}</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        let content = '';
+        if (active === 'players') {
+            content = players || `<div class="text-xs text-gray-300">${this.tr('ui.social.empty.players', {}, 'No players found.')}</div>`;
+        } else if (active === 'friends') {
+            content = `
+                <div class="text-[11px] text-gray-300 mb-2">${this.tr('ui.social.section.friend_requests', {}, 'Friend Requests')}</div>
+                <div class="space-y-2 mb-3">${friendRequests || `<div class="text-xs text-gray-400">${this.tr('ui.social.empty.friend_requests', {}, 'No friend requests.')}</div>`}</div>
+                <div class="text-[11px] text-gray-300 mb-2">${this.tr('ui.social.section.friends', {}, 'Friends')}</div>
+                <div class="space-y-2">${friends || `<div class="text-xs text-gray-400">${this.tr('ui.social.empty.friends', {}, 'No friends yet.')}</div>`}</div>
+            `;
+        } else {
+            content = `
+                <div class="text-[11px] text-gray-300 mb-2">${this.tr('ui.social.section.alliance_requests', {}, 'Alliance Requests')}</div>
+                <div class="space-y-2 mb-3">${allianceRequests || `<div class="text-xs text-gray-400">${this.tr('ui.social.empty.alliance_requests', {}, 'No alliance requests.')}</div>`}</div>
+                <div class="text-[11px] text-gray-300 mb-2">${this.tr('ui.social.section.outgoing', {}, 'Outgoing')}</div>
+                <div class="space-y-2">${social.allianceRequestsOut.map((uid) => `<div class="bg-gray-800 p-2 rounded border border-gray-700 text-xs text-gray-100">${uid}</div>`).join('') || `<div class="text-xs text-gray-400">${this.tr('ui.social.empty.outgoing', {}, 'No pending requests.')}</div>`}</div>
+            `;
+        }
+
+        b.innerHTML = `
+            <div class="space-y-2">
+                <div class="flex gap-1">${tabBtn('players', 'Players')}${tabBtn('friends', 'Friends')}${tabBtn('alliance', 'Alliance')}</div>
+                <div class="space-y-2">${content}</div>
+            </div>
+        `;
+    }
+
+    requestFriend(uid) {
+        const social = this.ensureSocialState();
+        if (!uid || social.friends.includes(uid) || social.friendRequestsOut.includes(uid)) return;
+        social.friendRequestsOut.push(uid);
+        this.showToast(this.tr('toast.social.friend_requested', {}, 'Friend request sent'));
+        this.saveGame();
+        this.renderSocialHub('players');
+    }
+
+    requestAlliance(uid) {
+        const social = this.ensureSocialState();
+        if (!uid || social.allianceRequestsOut.includes(uid)) return;
+        social.allianceRequestsOut.push(uid);
+        this.showToast(this.tr('toast.social.alliance_requested', {}, 'Alliance request sent'));
+        this.saveGame();
+        this.renderSocialHub('players');
+    }
+
+    acceptFriendRequest(uid) {
+        const social = this.ensureSocialState();
+        social.friendRequestsIn = social.friendRequestsIn.filter((id) => id !== uid);
+        if (!social.friends.includes(uid)) social.friends.push(uid);
+        this.showToast(this.tr('toast.social.friend_added', {}, 'Friend added'));
+        this.saveGame();
+        this.renderSocialHub('friends');
+    }
+
+    rejectFriendRequest(uid) {
+        const social = this.ensureSocialState();
+        social.friendRequestsIn = social.friendRequestsIn.filter((id) => id !== uid);
+        this.saveGame();
+        this.renderSocialHub('friends');
+    }
+
+    acceptAllianceRequest(uid) {
+        const social = this.ensureSocialState();
+        social.allianceRequestsIn = social.allianceRequestsIn.filter((id) => id !== uid);
+        this.showToast(this.tr('toast.social.alliance_accepted', {}, 'Alliance accepted'));
+        this.saveGame();
+        this.renderSocialHub('alliance');
+    }
+
+    rejectAllianceRequest(uid) {
+        const social = this.ensureSocialState();
+        social.allianceRequestsIn = social.allianceRequestsIn.filter((id) => id !== uid);
+        this.saveGame();
+        this.renderSocialHub('alliance');
     }
 
     editName() {
@@ -3143,6 +5328,11 @@ class Game {
             else if (type === FIELD_EVENT_TYPES.DUNGEON) { name = this.tr('ui.field.event.dungeon', {}, 'Dungeon'); level = 5; }
             else if (type === FIELD_EVENT_TYPES.PORTAL) { name = this.tr('ui.field.event.portal', {}, 'Portal'); level = "-"; }
             else if (type === FIELD_EVENT_TYPES.CARAVAN) { name = this.tr('ui.field.event.caravan', {}, 'Caravan'); level = "-"; }
+            else if (type === FIELD_EVENT_TYPES.CROWN) { name = this.tr('ui.field.event.crown', {}, 'Crown'); level = 7; }
+        }
+
+        if (this.isKingCastleTile(r, c)) {
+            name = this.tr('ui.field.object.king_castle', {}, 'King Castle');
         }
 
         defenders = this.getDefendersForTile(type, r, c);
@@ -3198,6 +5388,9 @@ class Game {
         if (code === ABILITY_CODES.ENERGY_CAP) return this.tr('ui.field.effect.energy_cap', { value: val }, `Energy cap +${val}`);
         if (code === ABILITY_CODES.ENERGY_REGEN) return this.tr('ui.field.effect.energy_regen', { value: val }, `Energy regen +${val}/5m`);
         if (code === ABILITY_CODES.TAX) {
+            if (isShopTile(opts.contextType) || isTavernTile(opts.contextType)) {
+                return this.tr('ui.field.effect.income_hourly', { value: val }, `Income +${val}G/h`);
+            }
             if (opts.per3s) return this.tr('ui.field.effect.tax_3s', { value: val }, `Tax +${val}G/3s`);
             return this.tr('ui.field.effect.tax', { value: val }, `Tax +${val}G`);
         }
@@ -3265,12 +5458,41 @@ class Game {
         return "--";
     }
 
+    buildFieldBadge(type, isOccupied, r, c) {
+        let label = "";
+        if (this.isKingCastleTile(r, c)) label = "KG";
+        else if (isGateTile(type)) label = "GT";
+        else if (isCitadelTile(type)) label = "SQ";
+        else if (isRuinsTile(type)) label = "CP";
+        else if (isStatueTile(type)) {
+            const buff = this.getStatueBuff(type);
+            const kind = buff ? buff.kind.toUpperCase() : 'BF';
+            if (kind === 'ATK') label = 'AT';
+            else if (kind === 'DEF') label = 'DF';
+            else if (kind === 'HP') label = 'HP';
+            else if (kind === 'SPD') label = 'SP';
+            else label = kind.slice(0, 2);
+        }
+        if (!label) return null;
+
+        const badge = document.createElement('div');
+        badge.className = 'field-badge';
+        badge.classList.add(isOccupied ? 'active' : 'inactive');
+        if (label === 'KG') {
+            badge.classList.remove('inactive');
+            badge.classList.add('active');
+        }
+        badge.innerText = label;
+        return badge;
+    }
+
     getFieldEventMarkerMeta(type) {
         if (type === FIELD_EVENT_TYPES.BANDIT) return { key: 'bandit', text: 'BN', title: this.tr('ui.field.event.bandit', {}, 'Bandit') };
         if (type === FIELD_EVENT_TYPES.BANDIT_LEADER) return { key: 'leader', text: 'BL', title: this.tr('ui.field.event.bandit_leader', {}, 'Bandit Leader') };
         if (type === FIELD_EVENT_TYPES.DUNGEON) return { key: 'dungeon', text: 'DG', title: this.tr('ui.field.event.dungeon', {}, 'Dungeon') };
         if (type === FIELD_EVENT_TYPES.PORTAL) return { key: 'portal', text: 'PT', title: this.tr('ui.field.event.portal', {}, 'Portal') };
         if (type === FIELD_EVENT_TYPES.CARAVAN) return { key: 'caravan', text: 'CV', title: this.tr('ui.field.event.caravan', {}, 'Caravan') };
+        if (type === FIELD_EVENT_TYPES.CROWN) return { key: 'crown', text: 'CR', title: this.tr('ui.field.event.crown', {}, 'Crown') };
         return { key: 'other', text: 'EV', title: this.tr('ui.field.event.default', {}, 'Event') };
     }
 
@@ -3290,6 +5512,8 @@ class Game {
             svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='1' y='1' width='14' height='14' rx='3' fill='#164e63'/><circle cx='8' cy='8' r='4.5' fill='none' stroke='#67e8f9' stroke-width='2'/><circle cx='8' cy='8' r='1.8' fill='#67e8f9'/></svg>";
         } else if (key === 'caravan') {
             svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='1' y='1' width='14' height='14' rx='3' fill='#78350f'/><rect x='3' y='5' width='8' height='4' rx='1' fill='#fde68a'/><circle cx='5' cy='11' r='1.4' fill='#f8fafc'/><circle cx='10' cy='11' r='1.4' fill='#f8fafc'/></svg>";
+        } else if (key === 'crown') {
+            svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='1' y='1' width='14' height='14' rx='3' fill='#7c2d12'/><path d='M3 11V6l2.3 2.1L8 4l2.7 4.1L13 6v5z' fill='#facc15'/></svg>";
         } else {
             svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='1' y='1' width='14' height='14' rx='3' fill='#334155'/><circle cx='8' cy='8' r='2.5' fill='#f8fafc'/></svg>";
         }
@@ -3374,7 +5598,7 @@ class Game {
         }
         const info = this.getFieldObjectInfo(type, r, c);
         const title = `${info.name}${info.level !== "-" ? ` Lv.${info.level}` : ""}`;
-        const iconEmoji = this.getFieldIconEmoji(type);
+        const iconEmoji = this.isKingCastleTile(r, c) ? "KG" : this.getFieldIconEmoji(type);
         const labelCoord = this.tr('ui.field.coord', {}, 'Coord');
         const labelOwner = this.tr('ui.field.owner', {}, 'Owner');
         const labelDefenders = this.tr('ui.field.defenders', {}, 'Defenders');
@@ -3385,9 +5609,33 @@ class Game {
         const objData = this.getFieldObjectData(type);
         if (objData && objData.abilities && objData.abilities.length > 0) {
             objData.abilities.forEach(ab => {
-                const effectText = this.formatFieldAbilityEffect(ab.code, ab.value, { per3s: true });
+                const effectText = this.formatFieldAbilityEffect(ab.code, ab.value, { per3s: true, contextType: type });
                 if (effectText) effectSummaryParts.push(effectText);
             });
+        }
+        if ((isShopTile(type) || isTavernTile(type)) && !effectSummaryParts.length) {
+            const hourlyIncome = this.getFacilityHourlyGoldIncome(type);
+            if (hourlyIncome > 0) {
+                effectSummaryParts.push(this.tr('ui.field.effect.income_hourly', { value: hourlyIncome }, `Income +${hourlyIncome}G/h`));
+            }
+        }
+        if (type === FIELD_EVENT_TYPES.DUNGEON) {
+            effectSummaryParts.push(this.tr(
+                'ui.field.effect.dungeon_entry',
+                { gold: DUNGEON_ENTRY_GOLD_COST, energy: DUNGEON_ENTRY_ENERGY_COST, cp: DUNGEON_ENTRY_CP_COST },
+                `Entry -${DUNGEON_ENTRY_GOLD_COST}G -${DUNGEON_ENTRY_ENERGY_COST}EN -${DUNGEON_ENTRY_CP_COST}CP`
+            ));
+            const remainingMs = this.getDungeonCooldownRemainingMs(r, c);
+            if (remainingMs > 0) {
+                effectSummaryParts.push(this.tr(
+                    'ui.field.effect.dungeon_cooldown',
+                    { time: this.formatDurationCompact(remainingMs) },
+                    `Cooldown ${this.formatDurationCompact(remainingMs)}`
+                ));
+            }
+        }
+        if (this.isKingCastleTile(r, c)) {
+            effectSummaryParts.push(this.tr('ui.field.effect.king_castle_established', {}, 'King Castle established'));
         }
         if (!effectSummaryParts.length) {
             if (isGateTile(type)) effectSummaryParts.push(this.tr('ui.field.effect.gate_access_unlocked', {}, 'Gate access unlocked'));
@@ -3565,7 +5813,7 @@ class Game {
             const btn = document.createElement('button');
             btn.className = 'field-action-btn';
             btn.innerText = this.tr('ui.field.action.caravan', {}, 'Caravan');
-            btn.onclick = (e) => { e.stopPropagation(); this.openCaravanShop(); };
+            btn.onclick = (e) => { e.stopPropagation(); this.openCaravanShop(r, c); };
             menu.appendChild(btn);
             extraActionCount++;
         }
@@ -3577,11 +5825,8 @@ class Game {
             menu.appendChild(btn);
             extraActionCount++;
         }
-        // Attack Button for Bandits AND Hostile Static Objects
-        const isHostile = (type === FIELD_EVENT_TYPES.BANDIT || type === FIELD_EVENT_TYPES.BANDIT_LEADER || type === FIELD_EVENT_TYPES.DUNGEON);
-        const isUnoccupiedCapturable = this.isCapturableFieldObject(type) && !this.occupiedTiles.has(key);
-
-        if (isHostile || isUnoccupiedCapturable) {
+        const canAttackTarget = this.isHostileTarget(type, r, c);
+        if (canAttackTarget) {
             const btn = document.createElement('button');
             btn.className = 'field-action-btn';
             btn.innerText = this.tr('ui.field.action.attack', {}, 'Attack');
@@ -3758,24 +6003,8 @@ class Game {
 
                 if (this.currentFieldTargetKey === key) cell.classList.add('field-selected');
 
-                if (isGateTile(type) || isCitadelTile(type) || isRuinsTile(type) || isStatueTile(type)) {
-                    const badge = document.createElement('div');
-                    badge.className = 'field-badge';
-                    badge.classList.add(isOccupied ? 'active' : 'inactive');
-                    if (isGateTile(type)) badge.innerText = 'GT';
-                    else if (isCitadelTile(type)) badge.innerText = 'SQ';
-                    else if (isRuinsTile(type)) badge.innerText = 'CP';
-                    else if (isStatueTile(type)) {
-                        const buff = this.getStatueBuff(type);
-                        const kind = buff ? buff.kind.toUpperCase() : 'BF';
-                        if (kind === 'ATK') badge.innerText = 'AT';
-                        else if (kind === 'DEF') badge.innerText = 'DF';
-                        else if (kind === 'HP') badge.innerText = 'HP';
-                        else if (kind === 'SPD') badge.innerText = 'SP';
-                        else badge.innerText = kind.slice(0, 2);
-                    }
-                    cell.appendChild(badge);
-                }
+                const badge = this.buildFieldBadge(type, isOccupied, r, c);
+                if (badge) cell.appendChild(badge);
                 this.appendFieldEventMarker(cell, evt);
             }
         }
@@ -3997,24 +6226,8 @@ class Game {
 
                 if (this.currentFieldTargetKey === key) cell.classList.add('field-selected');
 
-                if (isGateTile(type) || isCitadelTile(type) || isRuinsTile(type) || isStatueTile(type)) {
-                    const badge = document.createElement('div');
-                    badge.className = 'field-badge';
-                    badge.classList.add(isOccupied ? 'active' : 'inactive');
-                    if (isGateTile(type)) badge.innerText = 'GT';
-                    else if (isCitadelTile(type)) badge.innerText = 'SQ';
-                    else if (isRuinsTile(type)) badge.innerText = 'CP';
-                    else if (isStatueTile(type)) {
-                        const buff = this.getStatueBuff(type);
-                        const kind = buff ? buff.kind.toUpperCase() : 'BF';
-                        if (kind === 'ATK') badge.innerText = 'AT';
-                        else if (kind === 'DEF') badge.innerText = 'DF';
-                        else if (kind === 'HP') badge.innerText = 'HP';
-                        else if (kind === 'SPD') badge.innerText = 'SP';
-                        else badge.innerText = kind.slice(0, 2);
-                    }
-                    cell.appendChild(badge);
-                }
+                const badge = this.buildFieldBadge(type, isOccupied, r, c);
+                if (badge) cell.appendChild(badge);
                 this.appendFieldEventMarker(cell, evt);
 
                 // Additional marker classes handled above
@@ -4105,37 +6318,30 @@ class Game {
         const dist = Math.max(0, path.length - 1);
         if (dist > stats.range) return { canMove: false, reason: 'OUT_OF_RANGE', dist, stats };
 
-        let energyCost = 1;
-        let goldCost = 0;
-        if (isGateTile(tileType)) {
-            energyCost = 5;
-            goldCost = 100;
-        }
-        const cpCost = CP_COST_PER_COMMAND;
+        const moveCosts = this.getMoveCostsByRule(tileType);
         const summary = this.getPathSummary(path, stats.speedFactor);
 
         return {
-            canMove: this.energy >= energyCost && this.gold >= goldCost && this.cp >= cpCost,
+            canMove: this.energy >= moveCosts.energyCost && this.gold >= moveCosts.goldCost && this.cp >= moveCosts.cpCost,
             reason: null,
             tileType,
             path,
             dist,
-            cpCost,
-            energyCost,
-            goldCost,
+            cpCost: moveCosts.cpCost,
+            energyCost: moveCosts.energyCost,
+            goldCost: moveCosts.goldCost,
             timeMin: summary.finalMin,
             stats
         };
     }
 
     commandArmy(armyId, targetR, targetC, tileType) {
+        if (this.guardWorldAction(this.tr('ui.field.action.move', {}, 'Move'))) return;
         const army = this.armies[armyId];
         if (army.state !== 'IDLE') { this.showToast(this.tr('toast.army_moving', {}, 'Army is already moving')); return; }
         const regionId = this.getArmyRegionId(army);
         this.lastSelectedArmyId = armyId;
-
-        let energyCost = 1; let goldCost = 0;
-        if (isGateTile(tileType)) { energyCost = 5; goldCost = 100; }
+        const moveCosts = this.getMoveCostsByRule(tileType);
 
         const squadData = this.getSquadByArmyId(army.id);
         const stats = this.getSquadStats(squadData);
@@ -4153,10 +6359,19 @@ class Game {
         if (!path) { this.showToast(this.tr('toast.no_path', {}, 'No valid route')); return; }
         const dist = path.length - 1;
         if (dist > stats.range) { this.showToast(this.tr('toast.range_over', { dist, range: stats.range }, `Out of range (${dist}/${stats.range})`)); return; }
-        const cpCost = CP_COST_PER_COMMAND;
-        if (this.cp < cpCost) { this.showToast(this.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough CP (${cpCost})`)); return; }
+        if (this.cp < moveCosts.cpCost) { this.showToast(this.tr('toast.cp_short_cost', { cost: moveCosts.cpCost }, `Not enough CP (${moveCosts.cpCost})`)); return; }
 
-        this.startMarch(armyId, targetR, targetC, tileType, energyCost, goldCost, cpCost, path, stats.speedFactor);
+        this.startMarch(
+            armyId,
+            targetR,
+            targetC,
+            tileType,
+            moveCosts.energyCost,
+            moveCosts.goldCost,
+            moveCosts.cpCost,
+            path,
+            stats.speedFactor
+        );
     }
 
     getSquadStats(squadData) {
@@ -4203,16 +6418,19 @@ class Game {
     }
 
     isHostileTarget(type, r, c) {
-        // Events
-        if (type === FIELD_EVENT_TYPES.BANDIT || type === FIELD_EVENT_TYPES.BANDIT_LEADER || type === FIELD_EVENT_TYPES.DUNGEON) return true;
-        // Capturable (Gates, Citadels, Dragon) if not occupied
-        // Note: isCapturableFieldObject is likely available, but using raw checks to be safe
-        const isCapturable = isGateTile(type) || isCitadelTile(type) || isDragonTile(type);
-        if (isCapturable && !this.occupiedTiles.has(`${r},${c}`)) return true;
+        const worldRule = this.getWorldRuleSet();
+        if (type === FIELD_EVENT_TYPES.BANDIT || type === FIELD_EVENT_TYPES.BANDIT_LEADER || type === FIELD_EVENT_TYPES.DUNGEON || type === FIELD_EVENT_TYPES.CROWN) {
+            return !!worldRule.allowHostileEventAttack;
+        }
+        const isCapturable = this.isCapturableFieldObject(type);
+        if (isCapturable && !this.occupiedTiles.has(`${r},${c}`)) {
+            return !!worldRule.allowCapturableAttack;
+        }
         return false;
     }
 
     startMarch(armyId, r, c, type, energyCost, goldCost, cpCost, path, speedFactor) {
+        if (this.guardWorldAction(this.tr('ui.field.action.move', {}, 'Move'))) return;
         if (this.energy < energyCost) { this.showToast(this.tr('toast.energy_short_cost', { cost: energyCost }, `Not enough energy (${energyCost})`)); return; }
         if (this.gold < goldCost) { this.showToast(this.tr('toast.gold_short_cost', { cost: goldCost }, `Not enough gold (${goldCost})`)); return; }
         if (this.cp < cpCost) { this.showToast(this.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough CP (${cpCost})`)); return; }
@@ -4288,7 +6506,7 @@ class Game {
             army.state = 'IDLE';
             this.saveGame();
 
-            if (event.type === FIELD_EVENT_TYPES.BANDIT || event.type === FIELD_EVENT_TYPES.BANDIT_LEADER || event.type === FIELD_EVENT_TYPES.DUNGEON) {
+            if (event.type === FIELD_EVENT_TYPES.BANDIT || event.type === FIELD_EVENT_TYPES.BANDIT_LEADER || event.type === FIELD_EVENT_TYPES.DUNGEON || event.type === FIELD_EVENT_TYPES.CROWN) {
                 // Open Menu instead of auto-battle
                 setTimeout(() => {
                     const cell = document.getElementById(`field-cell-${r}-${c}`);
@@ -4300,10 +6518,10 @@ class Game {
                 }, 100);
                 return;
             } else if (event.type === FIELD_EVENT_TYPES.PORTAL) {
-                this.openPortalModal(r, c);
+                this.openPortalModal(r, c, army.id);
                 return;
             } else if (event.type === FIELD_EVENT_TYPES.CARAVAN) {
-                this.openCaravanShop();
+                this.openCaravanShop(r, c);
                 return;
             }
             // Caravan opens menu via click usually, but if arrival triggers it?
@@ -4313,7 +6531,7 @@ class Game {
         let mapChanged = false;
         if (isBorderTerrain(type)) {
             this.showToast(this.tr('toast.reached_border', {}, 'Reached border'));
-        } else if ((this.isCapturableFieldObject(type) && !this.occupiedTiles.has(`${r},${c}`)) || this.isHostileTarget(type, r, c)) {
+        } else if (this.isHostileTarget(type, r, c)) {
             army.state = 'IDLE'; // Stop moving
             this.saveGame();
 
@@ -4484,6 +6702,10 @@ class Game {
         this.exitMoveTargetMode();
         const fieldModal = document.getElementById('field-modal');
         const fieldMode = fieldModal?.dataset?.mode;
+        if (fieldMode === 'world_end') {
+            const claimed = this.claimWorldEndRewards({ silent: true });
+            if (claimed) this.showToast(this.tr('toast.world_end_rewards_claimed', {}, 'World end rewards claimed'));
+        }
         if (fieldMode === 'caravan') {
             if (this.shopTimer) { clearInterval(this.shopTimer); this.shopTimer = null; }
             this.currentShopContext = null;
@@ -4501,6 +6723,8 @@ class Game {
         }
         document.getElementById('modal-refill').classList.remove('open');
         document.getElementById('modal-settings').classList.remove('open');
+        document.getElementById('modal-admin')?.classList.remove('open');
+        document.getElementById('modal-lobby')?.classList.remove('open');
         document.getElementById('modal-object').classList.remove('open');
         if (this.shopTimer) { clearInterval(this.shopTimer); this.shopTimer = null; }
         this.currentShopContext = null;
@@ -4571,20 +6795,21 @@ class Game {
             // Hide panel if nothing selected (or show default message?)
             // Design choice: Show panel with default "Select Object" text
             if (els.panel) els.panel.style.display = 'flex';
-            els.stats.classList.add('hidden'); els.cls.innerText = ""; els.btn.style.opacity = 0.5; els.lbl.innerText = "-";
-            els.name.innerText = "No selection"; els.desc.innerText = "Select an item to see details.";
+            els.stats.classList.add('hidden'); els.cls.innerText = ""; els.btn.style.opacity = 0.5; els.lbl.innerText = this.tr('ui.common.none', {}, '-');
+            els.name.innerText = this.tr('ui.info.no_selection', {}, 'No selection');
+            els.desc.innerText = this.tr('ui.info.select_hint', {}, 'Select an item to see details.');
             return;
         }
 
         if (els.panel) els.panel.style.display = 'flex';
-        els.stats.classList.add('hidden'); els.cls.innerText = ""; els.btn.style.opacity = 0.5; els.lbl.innerText = "-";
+        els.stats.classList.add('hidden'); els.cls.innerText = ""; els.btn.style.opacity = 0.5; els.lbl.innerText = this.tr('ui.common.none', {}, '-');
 
         const item = this.selectedItem.item; const data = getData(item.type, item.level); els.name.innerText = `${data.name} LV.${item.level}`;
         if (item.type < 10) {
-            if (item.type === ITEM_TYPE.BUILDING_CHEST) els.desc.innerText = `Uses left: ${item.usage}`;
-            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = `Stored: ${item.storedUnits ? item.storedUnits.length : 0} / ${CAMP_CAPACITY[item.level]}`; // Modified here
-            else { els.desc.innerText = "Produces units"; const cost = data.energy || 1; els.lbl.innerText = `-${cost}EN`; els.btn.style.opacity = 1; els.icon.innerText = ""; }
-        } else if (item.type >= 20) { els.desc.innerText = "Tap to collect"; els.lbl.innerText = "Collect"; els.btn.style.opacity = 1; }
+            if (item.type === ITEM_TYPE.BUILDING_CHEST) els.desc.innerText = this.tr('ui.info.chest_uses_left', { value: item.usage }, `Uses left: ${item.usage}`);
+            else if (item.type === ITEM_TYPE.BUILDING_CAMP) els.desc.innerText = this.tr('ui.info.camp_stored', { current: item.storedUnits ? item.storedUnits.length : 0, cap: CAMP_CAPACITY[item.level] }, `Stored: ${item.storedUnits ? item.storedUnits.length : 0} / ${CAMP_CAPACITY[item.level]}`); // Modified here
+            else { els.desc.innerText = this.tr('ui.info.produces_units', {}, 'Produces units'); const cost = data.energy || 1; els.lbl.innerText = `-${cost}EN`; els.btn.style.opacity = 1; els.icon.innerText = ""; }
+        } else if (item.type >= 20) { els.desc.innerText = this.tr('ui.info.tap_to_collect', {}, 'Tap to collect'); els.lbl.innerText = this.tr('ui.info.collect', {}, 'Collect'); els.btn.style.opacity = 1; }
         else {
             els.cls.innerText = data.class; els.desc.innerText = ""; els.stats.classList.remove('hidden');
             document.getElementById('st-hp').innerText = data.hp; document.getElementById('st-atk').innerText = data.atk; document.getElementById('st-def').innerText = data.def;
@@ -5018,9 +7243,9 @@ class Game {
     updateUI() {
         document.getElementById('energy-display').innerText = `${this.energy}/${this.maxEnergy}`;
         document.getElementById('cp-display').innerText = `${this.cp}/${this.maxCp}`;
-        document.getElementById('gold-display').innerText = this.gold; document.getElementById('gem-display').innerText = this.gem; document.getElementById('level-display').innerText = `LORD LV.${this.lordLevel}`;
+        document.getElementById('gold-display').innerText = this.gold; document.getElementById('gem-display').innerText = this.gem; document.getElementById('level-display').innerText = this.tr('ui.header.lord_level', { level: this.lordLevel }, `LORD LV.${this.lordLevel}`);
         const isMaxLevel = this.lordLevel >= MAX_LEVEL || this.requiredXp <= 0;
-        document.getElementById('xp-text').innerText = isMaxLevel ? 'MAX' : `${this.currentXp} / ${this.requiredXp}`;
+        document.getElementById('xp-text').innerText = isMaxLevel ? this.tr('ui.header.xp_max', {}, 'MAX') : `${this.currentXp} / ${this.requiredXp}`;
         const xpWidth = isMaxLevel ? 100 : Math.max(0, Math.min(100, (this.currentXp / this.requiredXp) * 100));
         document.getElementById('xp-bar').style.width = `${xpWidth}%`;
         const fieldCp = document.getElementById('field-cp-display'); if (fieldCp) fieldCp.innerText = `${this.cp}/${this.maxCp}`;
@@ -5032,10 +7257,14 @@ class Game {
     // --- BATTLE PREP & SIMULATION ---
 
     openBattlePrepModal(targetType, r, c) {
+        if (this.guardWorldAction(this.tr('ui.field.action.attack', {}, 'Attack'))) return;
         // ... (data fetching)
         const meta = this.getTileMoveMeta(targetType, r, c);
         const objData = this.getFieldObjectData(targetType);
         const baseDefenders = this.getDefendersForTile(targetType, r, c);
+        if (targetType === FIELD_EVENT_TYPES.DUNGEON && !this.canEnterDungeon(r, c, true)) {
+            return;
+        }
         if (!objData || !baseDefenders || baseDefenders.length === 0) {
             this.handleBattleWin(r, c);
             return;
@@ -5054,7 +7283,8 @@ class Game {
             squadRef: this.lastSelectedArmyId !== null ? this.getSquadByArmyId(this.armies[this.lastSelectedArmyId].id) : this.squad1,
             allies: [],
             log: [],
-            active: false
+            active: false,
+            dungeonEntryConsumed: false
         };
         this.resetBattleResultOverlay();
 
@@ -5162,6 +7392,15 @@ class Game {
                 return;
             }
 
+            if (this.battleContext.targetCode === FIELD_EVENT_TYPES.DUNGEON && !this.battleContext.dungeonEntryConsumed) {
+                const { r, c } = this.battleContext;
+                if (!this.canEnterDungeon(r, c, true)) return;
+                this.consumeDungeonEntry(r, c);
+                this.battleContext.dungeonEntryConsumed = true;
+                this.updateUI();
+                this.saveGame();
+            }
+
             // Close Prep, Open Battle
             const prep = document.getElementById('modal-battle-prep');
             if (prep) {
@@ -5222,12 +7461,19 @@ class Game {
 
     closeBattleModal() {
         console.log("Closing Battle Modal (Inline)");
-        const els = document.querySelectorAll('.modal-overlay');
-        els.forEach(el => {
-            el.classList.remove('open');
-            el.style.display = 'none';
-        });
+        const battleModal = document.getElementById('modal-battle');
+        if (battleModal) {
+            battleModal.classList.remove('open');
+            battleModal.style.display = 'none';
+        }
+        const prepModal = document.getElementById('modal-battle-prep');
+        if (prepModal) {
+            prepModal.classList.remove('open');
+            prepModal.style.display = 'none';
+        }
         this.resetBattleResultOverlay();
+        this.clearBattleFxTimers();
+        this.battleFx = null;
         if (this.battleTimer) clearInterval(this.battleTimer);
         this.battleContext = null;
     }
@@ -5243,11 +7489,18 @@ class Game {
                 }
             });
 
-            const els = document.querySelectorAll('.modal-overlay');
-            els.forEach(el => {
-                el.classList.remove('open');
-                el.style.display = 'none';
-            });
+            const prepModal = document.getElementById('modal-battle-prep');
+            if (prepModal) {
+                prepModal.classList.remove('open');
+                prepModal.style.display = 'none';
+            }
+            const battleModal = document.getElementById('modal-battle');
+            if (battleModal) {
+                battleModal.classList.remove('open');
+                battleModal.style.display = 'none';
+            }
+            this.clearBattleFxTimers();
+            this.battleFx = null;
             this.battleContext = null;
             this.saveGame();
         } catch (e) {
@@ -5288,6 +7541,9 @@ class Game {
                     : d.code;
                 const stats = UNIT_STATS[d.code] || UNIT_STATS[lookupCode] || { name: "Enemy", hp: 20, atk: 5, def: 2, spd: 5 };
                 const classType = getUnitClassTypeFromCode(d.code);
+                const spd = Number(stats.spd || 5);
+                const range = Number(stats.range || stats.rng || 1);
+                const move = Number(stats.move || stats.mov || 1);
                 result.push({
                     id: `enemy-${currentSlot}`,
                     name: stats.name,
@@ -5295,6 +7551,9 @@ class Game {
                     maxHp: stats.hp,
                     atk: stats.atk,
                     def: stats.def,
+                    spd,
+                    range,
+                    move,
                     classType,
                     defenderCode: d.code,
                     slot: currentSlot,
@@ -5341,7 +7600,9 @@ class Game {
                     atk: stats.atk,
                     def: stats.def,
                     spd: stats.spd || 5, // Ensure SPD exists
-                    classType: u.type,
+                    range: Number(stats.range || stats.rng || 1),
+                    move: Number(stats.move || stats.mov || 1),
+                    classType: getUnitClassTypeFromCode(u.type),
                     slot: i,
                     isEnemy: false
                 });
@@ -5354,6 +7615,161 @@ class Game {
         if (id === 0) return this.squad1;
         if (id === 1) return this.squad2;
         return this.squad3;
+    }
+
+    clearBattleFxTimers() {
+        if (this.battleFxPhaseTimer) {
+            clearTimeout(this.battleFxPhaseTimer);
+            this.battleFxPhaseTimer = null;
+        }
+        if (this.battleFxClearTimer) {
+            clearTimeout(this.battleFxClearTimer);
+            this.battleFxClearTimer = null;
+        }
+    }
+
+    triggerBattleFx(step) {
+        if (!step || step.type !== 'attack') return;
+        this.clearBattleFxTimers();
+        const move = this.getBattleMoveOffset(step);
+        const shot = this.getBattleShotOffset(step);
+        const hasProjectile = !!step.rangedShot;
+        this.battleFx = {
+            attackerId: step.attackerId,
+            defenderId: step.defenderId,
+            moved: !!step.moved,
+            damage: Number(step.damage || 0),
+            isCrit: !!step.isCrit,
+            phase: step.moved ? 'move' : (hasProjectile ? 'projectile' : 'impact'),
+            moveX: move.x,
+            moveY: move.y,
+            pathSteps: move.steps,
+            shotX: shot.x,
+            shotY: shot.y,
+            hasProjectile
+        };
+        const advanceTo = (phase) => {
+            if (!this.battleFx || this.battleFx.attackerId !== step.attackerId || this.battleFx.defenderId !== step.defenderId) return;
+            this.battleFx.phase = phase;
+            this.renderBattleModal();
+        };
+        let delay = 0;
+        if (step.moved) {
+            delay += 190;
+            this.battleFxPhaseTimer = setTimeout(() => {
+                if (hasProjectile) {
+                    advanceTo('projectile');
+                    this.battleFxPhaseTimer = setTimeout(() => advanceTo('impact'), 160);
+                } else {
+                    advanceTo('impact');
+                }
+            }, delay);
+        } else if (hasProjectile) {
+            delay += 170;
+            this.battleFxPhaseTimer = setTimeout(() => advanceTo('impact'), delay);
+        }
+
+        const clearDelay = step.moved
+            ? (hasProjectile ? 700 : 560)
+            : (hasProjectile ? 580 : 440);
+        this.battleFxClearTimer = setTimeout(() => {
+            this.battleFx = null;
+            this.renderBattleModal();
+        }, clearDelay);
+    }
+
+    getBattleMoveOffset(step) {
+        const movedSteps = Math.max(0, Number(step?.requiredMove || 0));
+        if (!movedSteps) return { x: 0, y: 0, steps: 0 };
+
+        const a = step?.attackerPos || { r: 1, c: 1 };
+        const d = step?.defenderPos || { r: 1, c: 1 };
+        const rowDir = Math.sign((d.r ?? 1) - (a.r ?? 1));
+        const colDir = Math.sign((d.c ?? 1) - (a.c ?? 1));
+        const sideDir = step?.attackerTeam === 'B' ? -1 : 1;
+        const steps = Math.max(1, Math.min(3, movedSteps));
+        const horizontal = (5 + (steps * 3)) * sideDir;
+        const vertical = ((rowDir * 3) + (colDir * 1)) * steps;
+        return { x: horizontal, y: vertical, steps };
+    }
+
+    getBattleShotOffset(step) {
+        const dist = Math.max(1, Number(step?.distance || 1));
+        const a = step?.attackerPos || { r: 1, c: 1 };
+        const d = step?.defenderPos || { r: 1, c: 1 };
+        const sideDir = step?.attackerTeam === 'B' ? -1 : 1;
+        const rowDelta = (d.r ?? 1) - (a.r ?? 1);
+        const colDelta = (d.c ?? 1) - (a.c ?? 1);
+        const travel = Math.max(14, Math.min(28, 8 + (dist * 4)));
+        const x = travel * sideDir;
+        const y = Math.max(-10, Math.min(10, (rowDelta * 4) + (colDelta * 1.5)));
+        return { x, y };
+    }
+
+    escapeHtml(text) {
+        return String(text ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    formatBattleLogLine(msg) {
+        const safe = this.escapeHtml(msg);
+        let line = safe;
+        line = line.replace(/\[CRIT\]/g, '<span class="battle-log-crit">[CRIT]</span>');
+        line = line.replace(/(\d+\s*dmg)/gi, '<span class="battle-log-dmg">$1</span>');
+        line = line.replace(/hp\s*(\d+\s*->\s*\d+)/gi, 'hp <span class="battle-log-hp">$1</span>');
+        line = line.replace(/\((x\d+,y\d+)\)/gi, '(<span class="battle-log-coord">$1</span>)');
+        const isHit = /-&gt;|->|dmg/i.test(safe);
+        const cls = isHit ? 'battle-log-line hit' : 'battle-log-line';
+        return `<div class="${cls}">${line}</div>`;
+    }
+
+    localizeBattleSide(side) {
+        if (side === 'allies') return this.tr('battle.side.allies', {}, 'Allies');
+        if (side === 'defenders') return this.tr('battle.side.defenders', {}, 'Defenders');
+        return side;
+    }
+
+    localizeBattleLogMessage(msg) {
+        if (typeof msg !== 'string') return msg;
+        const text = msg.trim();
+        if (!text) return msg;
+
+        if (text === 'Battle simulation start') {
+            return this.tr('battle.log.start', {}, 'Battle started!');
+        }
+
+        let m = text.match(/^\[Turn\s+(\d+)\]$/i);
+        if (m) {
+            return this.tr('battle.log.turn', { turn: m[1] }, `[Turn ${m[1]}]`);
+        }
+
+        m = text.match(/^(.+)\s+cannot reach a target$/i);
+        if (m) {
+            return this.tr('battle.log.cannot_reach', { name: m[1] }, `${m[1]} cannot reach a target`);
+        }
+
+        m = text.match(/^Winner:\s*(allies|defenders)$/i);
+        if (m) {
+            const side = this.localizeBattleSide(m[1].toLowerCase());
+            return this.tr('battle.log.winner', { winner: side }, `Winner: ${side}`);
+        }
+
+        m = text.match(/^Max turns reached,\s*winner by remaining HP:\s*(allies|defenders)$/i);
+        if (m) {
+            const side = this.localizeBattleSide(m[1].toLowerCase());
+            return this.tr('battle.log.max_turns_winner', { winner: side }, `Max turns reached, winner by remaining HP: ${side}`);
+        }
+
+        m = text.match(/^(.+)\s+defeated$/i);
+        if (m) {
+            return this.tr('battle.log.kill', { name: m[1] }, `${m[1]} defeated!`);
+        }
+
+        return msg;
     }
 
     renderBattleModal() {
@@ -5376,12 +7792,39 @@ class Game {
                 const unit = ctx.allies.find(u => u.slot === i);
 
                 if (unit) {
+                    const fx = this.battleFx;
+                    const isActor = !!fx && fx.attackerId === unit.id;
+                    const isTarget = !!fx && fx.defenderId === unit.id;
+                    if (isActor) {
+                        cell.classList.add('battle-cell-actor');
+                        if (fx.phase === 'move') {
+                            cell.classList.add('battle-cell-move');
+                            cell.style.setProperty('--fx-move-x', `${Number(fx.moveX || 0)}px`);
+                            cell.style.setProperty('--fx-move-y', `${Number(fx.moveY || 0)}px`);
+                        }
+                        if (fx.phase === 'projectile') {
+                            cell.classList.add('battle-cell-shot');
+                            cell.style.setProperty('--fx-shot-x', `${Number(fx.shotX || 0)}px`);
+                            cell.style.setProperty('--fx-shot-y', `${Number(fx.shotY || 0)}px`);
+                        }
+                        if (fx.phase === 'impact') cell.classList.add('battle-cell-attack');
+                    }
+                    if (isTarget) {
+                        cell.classList.add('battle-cell-target');
+                        if (fx.phase === 'impact') cell.classList.add('battle-cell-hit');
+                    }
                     cell.innerHTML = `
                         <div class="battle-unit">
                             <div style="font-size:20px;">${this.isDead(unit) ? 'DEAD' : this.getUnitIcon(unit.classType)}</div>
                             <div class="battle-hp-bar"><div class="battle-hp-fill" style="width:${(unit.hp / unit.maxHp) * 100}%"></div></div>
                         </div>
                     `;
+                    if (isTarget && fx.phase === 'impact' && fx.damage > 0) {
+                        const dmg = document.createElement('div');
+                        dmg.className = `battle-dmg-float${fx.isCrit ? ' crit' : ''}`;
+                        dmg.innerText = `-${fx.damage}${fx.isCrit ? ' CRIT' : ''}`;
+                        cell.appendChild(dmg);
+                    }
                 }
                 allyGrid.appendChild(cell);
             }
@@ -5395,12 +7838,39 @@ class Game {
                 cell.className = 'battle-cell enemy';
                 const unit = ctx.defenders.find(u => u.slot === i);
                 if (unit) {
+                    const fx = this.battleFx;
+                    const isActor = !!fx && fx.attackerId === unit.id;
+                    const isTarget = !!fx && fx.defenderId === unit.id;
+                    if (isActor) {
+                        cell.classList.add('battle-cell-actor');
+                        if (fx.phase === 'move') {
+                            cell.classList.add('battle-cell-move');
+                            cell.style.setProperty('--fx-move-x', `${Number(fx.moveX || 0)}px`);
+                            cell.style.setProperty('--fx-move-y', `${Number(fx.moveY || 0)}px`);
+                        }
+                        if (fx.phase === 'projectile') {
+                            cell.classList.add('battle-cell-shot');
+                            cell.style.setProperty('--fx-shot-x', `${Number(fx.shotX || 0)}px`);
+                            cell.style.setProperty('--fx-shot-y', `${Number(fx.shotY || 0)}px`);
+                        }
+                        if (fx.phase === 'impact') cell.classList.add('battle-cell-attack');
+                    }
+                    if (isTarget) {
+                        cell.classList.add('battle-cell-target');
+                        if (fx.phase === 'impact') cell.classList.add('battle-cell-hit');
+                    }
                     cell.innerHTML = `
                         <div class="battle-unit">
                             <div style="font-size:20px;">${this.isDead(unit) ? 'DEAD' : this.getUnitIcon(unit.classType)}</div>
                             <div class="battle-hp-bar"><div class="battle-hp-fill" style="width:${(unit.hp / unit.maxHp) * 100}%"></div></div>
                         </div>
                     `;
+                    if (isTarget && fx.phase === 'impact' && fx.damage > 0) {
+                        const dmg = document.createElement('div');
+                        dmg.className = `battle-dmg-float${fx.isCrit ? ' crit' : ''}`;
+                        dmg.innerText = `-${fx.damage}${fx.isCrit ? ' CRIT' : ''}`;
+                        cell.appendChild(dmg);
+                    }
                 }
                 enemyGrid.appendChild(cell);
             }
@@ -5408,7 +7878,7 @@ class Game {
 
         const logDiv = document.getElementById('battle-log');
         if (logDiv) {
-            logDiv.innerHTML = ctx.log.map(l => `<div>${l}</div>`).join('');
+            logDiv.innerHTML = ctx.log.map(l => this.formatBattleLogLine(l)).join('');
             logDiv.scrollTop = logDiv.scrollHeight;
         }
     }
@@ -5482,6 +7952,7 @@ class Game {
                 unit.hp = step.targetHp;
                 // Don't full re-render here if possible, but renderBattleModal does it safest.
             }
+            this.triggerBattleFx(step);
         }
 
         this.renderBattleModal();
@@ -5489,7 +7960,7 @@ class Game {
 
     addBattleLog(msg) {
         if (this.battleContext) {
-            this.battleContext.log.push(msg);
+            this.battleContext.log.push(this.localizeBattleLogMessage(msg));
             this.renderBattleModal();
         }
     }
@@ -5497,9 +7968,14 @@ class Game {
     endBattle(isWin) {
         clearInterval(this.battleTimer);
         this.battleContext.active = false;
+        this.clearBattleFxTimers();
+        this.battleFx = null;
         this.applyDefenderLoss(isWin);
         this.applyAllyLoss();
         this.handleEmptySquadRetreat(isWin);
+        const rewardCtx = this.battleContext
+            ? { targetCode: this.battleContext.targetCode, r: this.battleContext.r, c: this.battleContext.c }
+            : null;
 
         const title = document.getElementById('battle-result-title');
         const overlay = document.getElementById('battle-result-overlay');
@@ -5513,8 +7989,9 @@ class Game {
             this.sound.playLevelUp();
             this.addBattleLog(this.tr('battle.log.victory_capture', {}, 'Battle won! Capturing tile.'));
             setTimeout(() => {
-                this.handleBattleWin(this.battleContext.r, this.battleContext.c);
+                if (rewardCtx) this.handleBattleWin(rewardCtx.r, rewardCtx.c);
                 this.closeBattleModal();
+                if (rewardCtx) this.openBattleRewardModal(rewardCtx);
             }, 1500);
         } else {
             if (title) {
@@ -5834,6 +8311,10 @@ class Game {
                 });
             }
 
+            if (evt.type === FIELD_EVENT_TYPES.CROWN) {
+                this.onCrownCaptured(r, c);
+            }
+
             // Remove Event
             delete this.fieldEvents[key];
             const marker = document.querySelector(`.event-marker[data-r="${r}"][data-c="${c}"]`)
@@ -5842,8 +8323,10 @@ class Game {
             if (marker) marker.remove();
 
             this.updateUI();
-            this.saveGame();
-            return; // Don't process tile capture for transient events
+            if (!evt.captureAfterWin) {
+                this.saveGame();
+                return; // Don't process tile capture for transient events
+            }
         }
 
         if (this.occupiedTiles.has(key)) return;
@@ -5855,10 +8338,15 @@ class Game {
             this.sound.playUnlock();
             this.spawnParticles(this.width / 2, this.height / 2, "#FF0000", 50, "confetti");
         } else if (isDragonTile(type)) {
+            const dragonSummary = this.finalizeDragonBossKill();
             this.showToast(this.tr('toast.dragon_kill', {}, 'Dragon defeated!'));
+            if (dragonSummary) {
+                const pct = Math.round(Math.max(0, Math.min(1, Number(dragonSummary.contributionShare) || 0)) * 100);
+                this.showToast(this.tr('toast.dragon_contribution_tier', { tier: dragonSummary.tier, share: pct }, `Dragon contribution: ${dragonSummary.tier} (${pct}%)`));
+            }
             this.sound.playUnlock();
             this.spawnParticles(this.width / 2, this.height / 2, "#ff6b6b", 50, "confetti");
-            setTimeout(() => this.showVictoryModal(), 2000); // Trigger Victory after delay
+            setTimeout(() => this.showVictoryModal(dragonSummary), 2000); // Trigger Victory after delay
         } else {
             this.showToast(this.tr('toast.capture_success', {}, 'Capture successful!'));
             this.sound.playCollect();

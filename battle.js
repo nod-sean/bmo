@@ -81,6 +81,7 @@
         return {
             enemy,
             dist,
+            requiredMove,
             reachable,
             stationary,
             hp20,
@@ -112,6 +113,9 @@
     attack(attacker, defender, steps, config, metadata) {
         const attackerAdv = this.isAdvantage(attacker.classType, defender.classType);
         const defenderAdv = this.isAdvantage(defender.classType, attacker.classType);
+        const attackerPos = this.getPos(attacker.slot);
+        const defenderPos = this.getPos(defender.slot);
+        const hpBefore = defender.currentHp;
 
         let effectiveAtk = attacker.atk;
         let effectiveDef = defender.def;
@@ -130,9 +134,10 @@
         damage = Math.max(1, Math.floor(damage));
         defender.currentHp = Math.max(0, defender.currentHp - damage);
 
-        let msg = `${attacker.name} -> ${defender.name}: ${damage} damage`;
+        let msg = `${attacker.name} (x${attackerPos.c + 1},y${attackerPos.r + 1}) -> ${defender.name} (x${defenderPos.c + 1},y${defenderPos.r + 1}) : ${damage} dmg, hp ${hpBefore}->${defender.currentHp}`;
         if (metadata && metadata.hasAdvantage) msg += ' (advantage)';
         if (metadata && metadata.stationary) msg += ' (no-move)';
+        else if (metadata && metadata.requiredMove > 0) msg += ` (move ${metadata.requiredMove})`;
         if (isCrit) msg = `[CRIT] ${msg}`;
 
         steps.push({
@@ -140,6 +145,19 @@
             msg,
             attackerId: attacker.id,
             defenderId: defender.id,
+            attackerTeam: attacker.team,
+            defenderTeam: defender.team,
+            attackerSlot: attacker.slot,
+            defenderSlot: defender.slot,
+            attackerPos,
+            defenderPos,
+            moved: !!(metadata && metadata.requiredMove > 0),
+            requiredMove: metadata && Number.isFinite(metadata.requiredMove) ? metadata.requiredMove : 0,
+            distance: metadata && Number.isFinite(metadata.dist) ? metadata.dist : 1,
+            rangedShot: !!(metadata && metadata.stationary && metadata.dist > 1),
+            hpBefore,
+            hpAfter: defender.currentHp,
+            isCrit,
             damage,
             targetHp: defender.currentHp
         });
