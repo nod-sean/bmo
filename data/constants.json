@@ -184,6 +184,78 @@
       "name": "마구간",
       "price": 0,
       "icon": "🏠"
+    },
+    {
+      "type": 2101,
+      "name": "병영",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2201,
+      "name": "사격장",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2301,
+      "name": "마구간",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2101,
+      "name": "병영",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2201,
+      "name": "사격장",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2301,
+      "name": "마구간",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2101,
+      "name": "병영",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2201,
+      "name": "사격장",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2301,
+      "name": "마구간",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2101,
+      "name": "병영",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2201,
+      "name": "사격장",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2301,
+      "name": "마구간",
+      "price": 0,
+      "icon": "🏠"
     }
   ],
   "FIELD_OBJECT_REWARDS": {
@@ -194,37 +266,17 @@
           {
             "kind": "item_code",
             "code": 1101,
-            "weight": 12
+            "weight": 30
           },
           {
             "kind": "item_code",
             "code": 1102,
-            "weight": 2
-          },
-          {
-            "kind": "item_code",
-            "code": 1201,
-            "weight": 12
-          },
-          {
-            "kind": "item_code",
-            "code": 1202,
-            "weight": 2
-          },
-          {
-            "kind": "item_code",
-            "code": 1301,
-            "weight": 12
-          },
-          {
-            "kind": "item_code",
-            "code": 1302,
-            "weight": 2
+            "weight": 5
           },
           {
             "kind": "item_code",
             "code": 1801,
-            "weight": 20
+            "weight": 25
           },
           {
             "kind": "item_code",
@@ -234,7 +286,7 @@
           {
             "kind": "item_code",
             "code": 1811,
-            "weight": 20
+            "weight": 25
           },
           {
             "kind": "item_code",
@@ -244,12 +296,7 @@
           {
             "kind": "item_code",
             "code": 2801,
-            "weight": 5
-          },
-          {
-            "kind": "item_code",
-            "code": 3101,
-            "weight": 1
+            "weight": 3
           }
         ]
       }
@@ -261,37 +308,17 @@
           {
             "kind": "item_code",
             "code": 1101,
-            "weight": 12
+            "weight": 25
           },
           {
             "kind": "item_code",
             "code": 1102,
-            "weight": 2
-          },
-          {
-            "kind": "item_code",
-            "code": 1201,
-            "weight": 12
-          },
-          {
-            "kind": "item_code",
-            "code": 1202,
-            "weight": 2
-          },
-          {
-            "kind": "item_code",
-            "code": 1301,
-            "weight": 12
-          },
-          {
-            "kind": "item_code",
-            "code": 1302,
-            "weight": 2
+            "weight": 10
           },
           {
             "kind": "item_code",
             "code": 1801,
-            "weight": 20
+            "weight": 25
           },
           {
             "kind": "item_code",
@@ -301,7 +328,7 @@
           {
             "kind": "item_code",
             "code": 1811,
-            "weight": 20
+            "weight": 25
           },
           {
             "kind": "item_code",
@@ -311,12 +338,7 @@
           {
             "kind": "item_code",
             "code": 2801,
-            "weight": 5
-          },
-          {
-            "kind": "item_code",
-            "code": 3101,
-            "weight": 2
+            "weight": 3
           }
         ]
       }
@@ -328,32 +350,12 @@
           {
             "kind": "item_code",
             "code": 1101,
-            "weight": 12
+            "weight": 20
           },
           {
             "kind": "item_code",
             "code": 1102,
-            "weight": 2
-          },
-          {
-            "kind": "item_code",
-            "code": 1201,
-            "weight": 12
-          },
-          {
-            "kind": "item_code",
-            "code": 1202,
-            "weight": 2
-          },
-          {
-            "kind": "item_code",
-            "code": 1301,
-            "weight": 12
-          },
-          {
-            "kind": "item_code",
-            "code": 1302,
-            "weight": 2
+            "weight": 15
           },
           {
             "kind": "item_code",
@@ -363,7 +365,7 @@
           {
             "kind": "item_code",
             "code": 1802,
-            "weight": 6
+            "weight": 11
           },
           {
             "kind": "item_code",
@@ -373,16 +375,11 @@
           {
             "kind": "item_code",
             "code": 1812,
-            "weight": 6
+            "weight": 11
           },
           {
             "kind": "item_code",
             "code": 2801,
-            "weight": 5
-          },
-          {
-            "kind": "item_code",
-            "code": 3101,
             "weight": 3
           }
         ]
@@ -395,92 +392,1279 @@
           {
             "kind": "item_code",
             "code": 1101,
-            "weight": 3
+            "weight": 15
           },
           {
             "kind": "item_code",
             "code": 1102,
-            "weight": 3
+            "weight": 15
           },
           {
             "kind": "item_code",
             "code": 1103,
-            "weight": 3
-          },
-          {
-            "kind": "item_code",
-            "code": 1104,
-            "weight": 3
-          },
-          {
-            "kind": "item_code",
-            "code": 1201,
-            "weight": 3
-          },
-          {
-            "kind": "item_code",
-            "code": 1202,
-            "weight": 3
-          },
-          {
-            "kind": "item_code",
-            "code": 1203,
-            "weight": 3
-          },
-          {
-            "kind": "item_code",
-            "code": 1204,
-            "weight": 3
-          },
-          {
-            "kind": "item_code",
-            "code": 1301,
-            "weight": 3
-          },
-          {
-            "kind": "item_code",
-            "code": 1302,
-            "weight": 3
-          },
-          {
-            "kind": "item_code",
-            "code": 1303,
-            "weight": 3
-          },
-          {
-            "kind": "item_code",
-            "code": 1304,
-            "weight": 3
+            "weight": 5
           },
           {
             "kind": "item_code",
             "code": 1801,
-            "weight": 3
+            "weight": 20
           },
           {
             "kind": "item_code",
             "code": 1802,
-            "weight": 3
-          },
-          {
-            "kind": "item_code",
-            "code": 1803,
-            "weight": 3
+            "weight": 7
           },
           {
             "kind": "item_code",
             "code": 1811,
-            "weight": 3
+            "weight": 20
           },
           {
             "kind": "item_code",
             "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 2101,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
             "weight": 3
           },
           {
             "kind": "item_code",
-            "code": 1813,
+            "code": 2802,
+            "weight": 2
+          }
+        ]
+      }
+    ],
+    "5": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1103,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 4
+          },
+          {
+            "kind": "item_code",
+            "code": 2101,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "6": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 30
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
             "weight": 3
+          }
+        ]
+      }
+    ],
+    "7": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 3
+          }
+        ]
+      }
+    ],
+    "8": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 11
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 11
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 3
+          }
+        ]
+      }
+    ],
+    "9": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1203,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 2201,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 2
+          }
+        ]
+      }
+    ],
+    "10": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1203,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 4
+          },
+          {
+            "kind": "item_code",
+            "code": 2201,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "11": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 30
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 3
+          }
+        ]
+      }
+    ],
+    "12": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 6
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 3
+          }
+        ]
+      }
+    ],
+    "13": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 11
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 11
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 3
+          }
+        ]
+      }
+    ],
+    "14": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1303,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 2301,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 2
+          }
+        ]
+      }
+    ],
+    "15": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1303,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 4
+          },
+          {
+            "kind": "item_code",
+            "code": 2301,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "16": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1111,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1112,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1211,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1212,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 24
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "17": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1111,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1112,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1211,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1212,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 23
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 22
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "18": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1111,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1112,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1211,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1212,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 9
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 9
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          }
+        ]
+      }
+    ],
+    "19": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1111,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1112,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1113,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1211,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1212,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1213,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 19
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 9
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 18
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 9
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "20": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1111,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1112,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1113,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1211,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1212,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1213,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 16
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 16
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 4
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 2
+          }
+        ]
+      }
+    ],
+    "21": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1111,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1112,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1211,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1212,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1311,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1312,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 17
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 18
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "22": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1111,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1112,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1211,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1212,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1311,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1312,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 16
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 4
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 4
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "23": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1111,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1112,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1211,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1212,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1311,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1312,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          }
+        ]
+      }
+    ],
+    "24": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1111,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1112,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1113,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1211,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1212,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1213,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1311,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1312,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1313,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 11
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "25": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1111,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1112,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1113,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1211,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1212,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1213,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1311,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1312,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1313,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 8
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 8
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 8
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 8
           },
           {
             "kind": "item_code",
@@ -489,63 +1673,1593 @@
           },
           {
             "kind": "item_code",
-            "code": 1822,
-            "weight": 3
+            "code": 2801,
+            "weight": 2
           },
           {
             "kind": "item_code",
-            "code": 1823,
-            "weight": 3
+            "code": 2802,
+            "weight": 2
           },
           {
             "kind": "item_code",
-            "code": 2101,
-            "weight": 3
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "26": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1121,
+            "weight": 15
           },
           {
             "kind": "item_code",
-            "code": 2102,
-            "weight": 3
+            "code": 1122,
+            "weight": 5
           },
           {
             "kind": "item_code",
-            "code": 2201,
-            "weight": 3
+            "code": 1221,
+            "weight": 15
           },
           {
             "kind": "item_code",
-            "code": 2202,
-            "weight": 3
+            "code": 1222,
+            "weight": 5
           },
           {
             "kind": "item_code",
-            "code": 2301,
-            "weight": 3
+            "code": 1801,
+            "weight": 24
           },
           {
             "kind": "item_code",
-            "code": 2302,
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 25
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "27": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1121,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1122,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1221,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1222,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 23
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 22
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "28": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1121,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1122,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1221,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1222,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 9
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 20
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 9
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          }
+        ]
+      }
+    ],
+    "29": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1121,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1122,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1123,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1221,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1222,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1223,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 19
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 9
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 18
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 9
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "30": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1121,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1122,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1123,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1221,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1222,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1223,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 16
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 16
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
             "weight": 3
           },
           {
             "kind": "item_code",
             "code": 2801,
-            "weight": 5
+            "weight": 2
           },
           {
             "kind": "item_code",
             "code": 2802,
-            "weight": 5
+            "weight": 2
           },
           {
             "kind": "item_code",
             "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "31": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1121,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1122,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1221,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1222,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1321,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1322,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 17
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 18
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "32": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1121,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1122,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1221,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1222,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1321,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1322,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 16
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 4
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 4
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "33": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1121,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1122,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1221,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1222,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1321,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1322,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          }
+        ]
+      }
+    ],
+    "34": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1121,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1122,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1123,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1221,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1222,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1223,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1321,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1322,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1323,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 11
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "35": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1121,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1122,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1123,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1221,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1222,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1223,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1321,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1322,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1323,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 8
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 8
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 8
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 8
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "36": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 11
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "37": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1103,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1203,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 7
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1303,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 12
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 11
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "38": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2101,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2201,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2301,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "39": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2101,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2201,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2301,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "40": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1103,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1203,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1303,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2101,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2201,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2301,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "41": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1103,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1203,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1303,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2101,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2201,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2301,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "42": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 15
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2101,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2201,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2301,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "43": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1101,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1103,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1201,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1203,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1301,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1303,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2101,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2201,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2301,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "44": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1102,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1103,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1202,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1203,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1302,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1303,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1801,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1802,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1811,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1812,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1821,
+            "weight": 3
+          },
+          {
+            "kind": "item_code",
+            "code": 2101,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2201,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2301,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 2801,
+            "weight": 2
+          },
+          {
+            "kind": "item_code",
+            "code": 2802,
+            "weight": 1
+          },
+          {
+            "kind": "item_code",
+            "code": 3101,
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "45": [
+      {
+        "kind": "pool",
+        "pool": [
+          {
+            "kind": "item_code",
+            "code": 1401,
+            "weight": 30
+          },
+          {
+            "kind": "item_code",
+            "code": 1402,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1803,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1804,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1813,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1814,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 1823,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 1824,
+            "weight": 10
+          },
+          {
+            "kind": "item_code",
+            "code": 2102,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 2202,
+            "weight": 5
+          },
+          {
+            "kind": "item_code",
+            "code": 2302,
             "weight": 5
           },
           {
             "kind": "item_code",
             "code": 3102,
-            "weight": 4
+            "weight": 5
           }
         ]
       }
@@ -562,6 +3276,85 @@
   "GAMEPLAY": {
     "MOVE_MS_PER_MIN": 120,
     "CP_COST_PER_TILE": 1,
+    "ENABLE_DUNGEON": false,
+    "ENABLE_REBELLION": false,
+    "ENABLE_PORTAL": false,
+    "ENABLE_CROWN_CASTLE": false,
+    "WORLD_RULESET_DEFAULT": "neutral",
+    "WORLD_RULESETS": {
+      "kind": {
+        "allowHostileEventAttack": true,
+        "allowCapturableAttack": true,
+        "allowRebellion": true,
+        "taxMultiplier": 1.0,
+        "upkeepMultiplier": 0.9,
+        "rebellionRandomMultiplier": 0.75,
+        "rebellionUnpaidMultiplier": 0.85,
+        "moveEnergyMultiplier": 0.9,
+        "moveGoldMultiplier": 1.0,
+        "cpCostMultiplier": 1.0
+      },
+      "neutral": {
+        "allowHostileEventAttack": true,
+        "allowCapturableAttack": true,
+        "allowRebellion": true,
+        "taxMultiplier": 1.0,
+        "upkeepMultiplier": 1.0,
+        "rebellionRandomMultiplier": 1.0,
+        "rebellionUnpaidMultiplier": 1.0,
+        "moveEnergyMultiplier": 1.0,
+        "moveGoldMultiplier": 1.0,
+        "cpCostMultiplier": 1.0
+      },
+      "cruel": {
+        "allowHostileEventAttack": true,
+        "allowCapturableAttack": true,
+        "allowRebellion": true,
+        "taxMultiplier": 0.9,
+        "upkeepMultiplier": 1.15,
+        "rebellionRandomMultiplier": 1.25,
+        "rebellionUnpaidMultiplier": 1.35,
+        "moveEnergyMultiplier": 1.1,
+        "moveGoldMultiplier": 1.1,
+        "cpCostMultiplier": 1.0
+      }
+    },
+    "WORLD_END_CONDITIONS": {
+      "enabled": true,
+      "type": "king_castle_hold",
+      "target_hold_ms": 1800000,
+      "target_score": 1000,
+      "lock_actions_on_end": true,
+      "allow_next_season_transition": true
+    },
+    "WORLD_SEASON_POLICY": {
+      "keep_merge_grid": true,
+      "keep_squads": true,
+      "keep_resources": true,
+      "keep_points": true,
+      "resource_carryover": {
+        "gold": 1,
+        "gem": 1,
+        "energy": 1,
+        "cp": 1,
+        "points": 1
+      }
+    },
+    "WORLD_PRESET_DEFAULT": "regular",
+    "WORLD_PRESETS": {
+      "regular": {
+        "label": "Regular",
+        "rule_set": "neutral"
+      },
+      "seasonal": {
+        "label": "Seasonal",
+        "rule_set": "kind"
+      },
+      "hardcore": {
+        "label": "Hardcore",
+        "rule_set": "cruel"
+      }
+    },
     "TERRAIN_COLORS": {
       "100": "#4a6e3a",
       "200": "#2e5a2a",
@@ -601,160 +3394,6 @@
       "3": 6,
       "4": 14,
       "5": 32
-    },
-    "CP_COST_PER_COMMAND": 1,
-    "PORTAL_CP_COST": 1,
-    "DUNGEON_COOLDOWN_MS": 300000,
-    "DUNGEON_ENTRY_GOLD_COST": 200,
-    "DUNGEON_ENTRY_ENERGY_COST": 5,
-    "DUNGEON_ENTRY_CP_COST": 1,
-    "REBELLION_RANDOM_CHANCE": 0.0008,
-    "REBELLION_UNPAID_CHANCE": 0.2,
-    "REBELLION_COOLDOWN_MS": 300000,
-    "CROWN_HOLD_MS": 600000,
-    "SHOP_HOURLY_GOLD_FALLBACK": 120,
-    "TAVERN_HOURLY_GOLD_FALLBACK": 120,
-    "WORLD_RULESET_DEFAULT": "neutral",
-    "WORLD_RULESETS": {
-      "kind": {
-        "allowHostileEventAttack": true,
-        "allowCapturableAttack": true,
-        "allowRebellion": true,
-        "taxMultiplier": 1,
-        "upkeepMultiplier": 0.85,
-        "rebellionRandomMultiplier": 0.7,
-        "rebellionUnpaidMultiplier": 0.8,
-        "moveEnergyMultiplier": 0.9,
-        "moveGoldMultiplier": 0.9,
-        "cpCostMultiplier": 1
-      },
-      "neutral": {
-        "allowHostileEventAttack": true,
-        "allowCapturableAttack": true,
-        "allowRebellion": true,
-        "taxMultiplier": 1,
-        "upkeepMultiplier": 1,
-        "rebellionRandomMultiplier": 1,
-        "rebellionUnpaidMultiplier": 1,
-        "moveEnergyMultiplier": 1,
-        "moveGoldMultiplier": 1,
-        "cpCostMultiplier": 1
-      },
-      "cruel": {
-        "allowHostileEventAttack": true,
-        "allowCapturableAttack": true,
-        "allowRebellion": true,
-        "taxMultiplier": 0.9,
-        "upkeepMultiplier": 1.2,
-        "rebellionRandomMultiplier": 1.35,
-        "rebellionUnpaidMultiplier": 1.5,
-        "moveEnergyMultiplier": 1.15,
-        "moveGoldMultiplier": 1.15,
-        "cpCostMultiplier": 1
-      }
-    },
-    "WORLD_END_CONDITIONS": {
-      "enabled": true,
-      "type": "king_castle_hold",
-      "lock_actions_on_end": true,
-      "allow_next_season_transition": true,
-      "target_hold_ms": 1800000,
-      "target_score": 1000
-    },
-    "WORLD_SEASON_POLICY": {
-      "keep_merge_grid": true,
-      "keep_squads": true,
-      "keep_resources": true,
-      "keep_points": true,
-      "resource_carryover": {
-        "gold": 1,
-        "gem": 1,
-        "energy": 1,
-        "cp": 1,
-        "points": 1
-      }
-    },
-    "DRAGON_BOSS": {
-      "baseRewards": {
-        "gold": 3000,
-        "gem": 20,
-        "energy": 15,
-        "cp": 5,
-        "points": 25
-      },
-      "tierMultiplier": {
-        "s": 1.4,
-        "a": 1.15,
-        "b": 1,
-        "c": 0.8
-      },
-      "minShareByTier": {
-        "s": 0.5,
-        "a": 0.3,
-        "b": 0.15
-      },
-      "killBonusGold": 500,
-      "killBonusPoints": 5
-    },
-    "WORLD_PRESET_DEFAULT": "regular",
-    "WORLD_PRESETS": {
-      "regular": {
-        "label": "Regular",
-        "rule_set": "neutral",
-        "world_end_conditions": {
-          "enabled": true,
-          "type": "king_castle_hold",
-          "lock_actions_on_end": true,
-          "allow_next_season_transition": true,
-          "target_hold_ms": 1800000,
-          "target_score": 1000
-        },
-        "season_policy": {
-          "keep_merge_grid": true,
-          "keep_squads": true,
-          "keep_resources": true,
-          "keep_points": true,
-          "resource_carryover": { "gold": 1, "gem": 1, "energy": 1, "cp": 1, "points": 1 }
-        }
-      },
-      "seasonal": {
-        "label": "Seasonal",
-        "rule_set": "kind",
-        "world_end_conditions": {
-          "enabled": true,
-          "type": "score",
-          "lock_actions_on_end": true,
-          "allow_next_season_transition": true,
-          "target_hold_ms": 1500000,
-          "target_score": 750
-        },
-        "season_policy": {
-          "keep_merge_grid": true,
-          "keep_squads": true,
-          "keep_resources": true,
-          "keep_points": true,
-          "resource_carryover": { "gold": 0.8, "gem": 1, "energy": 1, "cp": 1, "points": 0.9 }
-        }
-      },
-      "hardcore": {
-        "label": "Hardcore",
-        "rule_set": "cruel",
-        "world_end_conditions": {
-          "enabled": true,
-          "type": "hybrid",
-          "lock_actions_on_end": true,
-          "allow_next_season_transition": true,
-          "target_hold_ms": 1200000,
-          "target_score": 1200
-        },
-        "season_policy": {
-          "keep_merge_grid": true,
-          "keep_squads": true,
-          "keep_resources": true,
-          "keep_points": true,
-          "resource_carryover": { "gold": 0.6, "gem": 0.9, "energy": 1, "cp": 1, "points": 0.75 }
-        }
-      }
     }
   },
   "FIELD_EVENTS": {

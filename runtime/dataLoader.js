@@ -90,10 +90,11 @@
         try {
             const manifest = await loadManifest();
             window.__GAME_DATA_MANIFEST__ = manifest;
-            window.GAME_DATA = await loadGameData(manifest);
+            const gameData = await loadGameData(manifest);
+            window.__KOV_BOOT_GAME_DATA__ = gameData;
             mountGameScript();
         } catch (err) {
-            console.error('[data_loader] failed to initialize GAME_DATA:', err);
+            console.error('[data_loader] failed to initialize boot game data:', err);
             const isFileProtocol = window.location.protocol === 'file:';
             if (isFileProtocol) {
                 renderBootError(
@@ -110,7 +111,7 @@
             }
 
             renderBootError(
-                '[KOV] Failed to initialize GAME_DATA.\n'
+                '[KOV] Failed to initialize boot game data.\n'
                 + 'Check console/network and verify data files exist under src/data.',
                 String(err && err.message ? err.message : err)
             );

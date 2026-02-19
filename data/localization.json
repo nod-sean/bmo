@@ -246,6 +246,7 @@
     "ui.battle_reward.chest": "ui.battle_reward.chest",
     "ui.battle_reward.ad_gold": "ui.battle_reward.ad_gold",
     "ui.modal.battle_reward_title": "ui.modal.battle_reward_title",
+    "ui.battle_reward.object_reward_title": "ui.battle_reward.object_reward_title",
     "toast.reward_chest_no_space": "toast.reward_chest_no_space",
     "ui.battle_reward.chest_granted": "ui.battle_reward.chest_granted",
     "ui.battle_reward.ad_granted": "ui.battle_reward.ad_granted",
@@ -370,6 +371,7 @@
     "toast.require_building_level": "toast.require_building_level",
     "toast.max_level": "toast.max_level",
     "toast.chest_gone": "toast.chest_gone",
+    "toast.chest_reward_invalid": "toast.chest_reward_invalid",
     "toast.empty": "toast.empty",
     "toast.withdrawn": "toast.withdrawn",
     "toast.no_adjacent_space": "toast.no_adjacent_space",
@@ -397,7 +399,8 @@
     "toast.reward_item_no_space": "toast.reward_item_no_space",
     "toast.reward_unknown": "toast.reward_unknown",
     "toast.reward_missed": "toast.reward_missed",
-    "toast.dragon_contribution_tier": "toast.dragon_contribution_tier"
+    "toast.dragon_contribution_tier": "toast.dragon_contribution_tier",
+    "toast.feature_disabled_beta": "Disabled in beta."
   },
   "en": {
     "1101": "Militia",
@@ -646,6 +649,7 @@
     "ui.battle_reward.chest": "ui.battle_reward.chest",
     "ui.battle_reward.ad_gold": "ui.battle_reward.ad_gold",
     "ui.modal.battle_reward_title": "ui.modal.battle_reward_title",
+    "ui.battle_reward.object_reward_title": "ui.battle_reward.object_reward_title",
     "toast.reward_chest_no_space": "toast.reward_chest_no_space",
     "ui.battle_reward.chest_granted": "ui.battle_reward.chest_granted",
     "ui.battle_reward.ad_granted": "ui.battle_reward.ad_granted",
@@ -770,6 +774,7 @@
     "toast.require_building_level": "toast.require_building_level",
     "toast.max_level": "toast.max_level",
     "toast.chest_gone": "toast.chest_gone",
+    "toast.chest_reward_invalid": "toast.chest_reward_invalid",
     "toast.empty": "toast.empty",
     "toast.withdrawn": "toast.withdrawn",
     "toast.no_adjacent_space": "toast.no_adjacent_space",
@@ -797,6 +802,7 @@
     "toast.reward_item_no_space": "toast.reward_item_no_space",
     "toast.reward_unknown": "toast.reward_unknown",
     "toast.reward_missed": "toast.reward_missed",
-    "toast.dragon_contribution_tier": "toast.dragon_contribution_tier"
+    "toast.dragon_contribution_tier": "toast.dragon_contribution_tier",
+    "toast.feature_disabled_beta": "This feature is disabled in beta."
   }
 }

@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
 *,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}
-/* ... (기존 스타일 유지) ... */
+﻿/* Core styles */
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -400,12 +400,12 @@ canvas {
 
 .field-wall::after {
     content: '🧱';
-    font-size: 9px;
+    font-size: 8px;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 0.45;
+    opacity: 0.55;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
 }
 
@@ -439,17 +439,22 @@ canvas {
     transform: translate(-50%, 1px);
     padding: 0 1px;
     border-radius: 2px;
-    font-size: 3px;
+    font-size: 4px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.2px;
     color: #f8fafc;
     background: rgba(0, 0, 0, 0.2);
     z-index: 18;
-    opacity: 0.4;
+    opacity: 0.5;
     pointer-events: none;
 }
 
+.field-badge.strategic {
+    font-size: 5px;
+    opacity: 0.8;
+    transform: translate(-50%, 0px);
+}
 .field-badge.active {
     color: #d1fae5;
     background: rgba(34, 197, 94, 0.25);
@@ -472,8 +477,8 @@ canvas {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
     transform: translate(-50%, -55%);
     background-size: contain;
     background-repeat: no-repeat;
@@ -490,14 +495,14 @@ canvas {
     transform: translate(-50%, 1px);
     padding: 0 1px;
     border-radius: 2px;
-    font-size: 3px;
+    font-size: 4px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.2px;
     color: var(--event-color, #f1f5f9);
     background: rgba(0, 0, 0, 0.2);
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75);
-    opacity: 0.7;
+    opacity: 0.78;
 }
 
 .event-marker-bandit {
@@ -1124,7 +1129,7 @@ canvas {
 }
 
 .field-shop::after {
-    content: '🛒';
+    content: '🏪';
     font-size: 8px;
     position: absolute;
     top: 50%;
@@ -1142,7 +1147,7 @@ canvas {
 }
 
 .field-ruins::after {
-    content: '🏛️';
+    content: '🗿';
     font-size: 8px;
     position: absolute;
     top: 50%;
@@ -1151,7 +1156,7 @@ canvas {
 }
 
 .field-statue::after {
-    content: '🗿';
+    content: '🗽';
     font-size: 8px;
     position: absolute;
     top: 50%;
@@ -1161,7 +1166,7 @@ canvas {
 
 /* New Objects: Gold Mine & Fountain */
 .field-goldmine::after {
-    content: '⛏️';
+    content: '🪙';
     font-size: 8px;
     position: absolute;
     top: 50%;
@@ -1170,7 +1175,7 @@ canvas {
 }
 
 .field-fountain::after {
-    content: '⛲';
+    content: '💧';
     font-size: 8px;
     position: absolute;
     top: 50%;
@@ -1316,6 +1321,13 @@ canvas {
 
 .field-action-btn.disabled {
     opacity: 0.5;
+}
+
+.field-action-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
+    filter: grayscale(0.2);
 }
 
 .field-info-bar {
@@ -2009,24 +2021,24 @@ canvas {
         <!-- Header -->
         <div class="header-panel">
             <div class="flex justify-between mb-1">
-                <div class="res-pill" onclick="game.openRefill('energy')">
+                <div class="res-pill" onclick="window.KOVSettingsRefillModule.openRefill(window.game, 'energy', window.game.refillDeps)">
                     <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/energy.png" class="res-icon"
                         onerror="this.style.display='none';this.nextElementSibling.innerText='⚡'+this.nextElementSibling.innerText">
                     <span id="energy-display">50/50</span>
                     <span class="text-gray-400 text-[10px] ml-1">+</span>
                 </div>
-                <div class="res-pill" onclick="game.openRefill('cp')">
+                <div class="res-pill" onclick="window.KOVSettingsRefillModule.openRefill(window.game, 'cp', window.game.refillDeps)">
                     <span class="res-icon">🧭</span>
                     <span id="cp-display">20/20</span>
                     <span class="text-gray-400 text-[10px] ml-1">+</span>
                 </div>
-                <div class="res-pill" onclick="game.openRefill('gold')">
+                <div class="res-pill" onclick="window.KOVSettingsRefillModule.openRefill(window.game, 'gold', window.game.refillDeps)">
                     <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/gold.png" class="res-icon"
                         onerror="this.style.display='none';this.nextElementSibling.innerText='💰'+this.nextElementSibling.innerText">
                     <span id="gold-display">3000</span>
                     <span class="text-gray-400 text-[10px] ml-1">+</span>
                 </div>
-                <div class="res-pill" onclick="game.openRefill('crystal')">
+                <div class="res-pill" onclick="window.KOVSettingsRefillModule.openRefill(window.game, 'crystal', window.game.refillDeps)">
                     <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/crystal.png" class="res-icon"
                         onerror="this.style.display='none';this.nextElementSibling.innerText='💎'+this.nextElementSibling.innerText">
                     <span id="gem-display">50</span>
@@ -2047,7 +2059,7 @@ canvas {
             <!-- Dev Tools -->
             <div class="flex gap-2 mt-1 opacity-30 hover:opacity-100 transition-opacity justify-end items-center"
                 style="display:none;">
-                <button onclick="game.resetGame()"
+                <button onclick="window.KOVPersistenceModule.resetGame(window.game)"
                     class="bg-red-800 text-white px-2 py-1 rounded text-[10px] border border-red-500 hover:bg-red-600">🔄리셋</button>
                 <button onclick="game.cheatEnergy()"
                     class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⚡+30</button>
@@ -2065,7 +2077,7 @@ canvas {
 
         <!-- Footer -->
         <div class="footer-panel">
-            <button class="action-btn chat-btn bg-gray-700 border-gray-600" id="chat-btn" onclick="game.toggleChat()">
+            <button class="action-btn chat-btn bg-gray-700 border-gray-600" id="chat-btn" onclick="window.KOVSocialProfileModule.toggleChat(window.game)">
                 <span class="text-2xl filter drop-shadow">💬</span>
             </button>
             <div class="info-box" id="info-panel">
@@ -2083,15 +2095,15 @@ canvas {
                 <div class="text-[10px] text-gray-600 truncate mt-1" id="info-desc">오브젝트를 선택하세요.</div>
             </div>
 
-            <button class="action-btn" id="btn-action" onclick="game.handleAction()">
+            <button class="action-btn" id="btn-action" onclick="window.KOVMergeBoardModule.handleAction(window.game, window.game.mergeActionDeps)">
                 <span class="btn-icon" id="action-icon">💰</span>
                 <span class="btn-label" id="action-label">-</span>
             </button>
-            <button class="action-btn build-btn" style="margin-left:5px;" onclick="game.toggleShop()">
+            <button class="action-btn build-btn" style="margin-left:5px;" onclick="window.game.mergeController.toggleShop()">
                 <span class="btn-icon">🏠</span>
                 <span class="btn-label" id="footer-build-label">Build</span>
             </button>
-            <button class="action-btn world-btn" style="margin-left:5px;" onclick="game.toggleField()">
+            <button class="action-btn world-btn" style="margin-left:5px;" onclick="window.game.fieldController.toggleField()">
                 <span class="btn-icon">🌍</span>
                 <span class="btn-label" id="footer-field-label">Field</span>
             </button>
@@ -2101,7 +2113,7 @@ canvas {
         <div id="field-modal">
             <div class="flex justify-between items-center px-3 py-2 border-b border-gray-600 bg-gray-900">
                 <h2 class="text-lg font-bold text-yellow-400" id="modal-title">메뉴</h2>
-                <button onclick="game.closeModal()" class="w-7 h-7 text-gray-400 font-bold text-sm">✖</button>
+                <button onclick="window.KOVUiShellModule.closeModal(window.game)" class="w-7 h-7 text-gray-400 font-bold text-sm">✖</button>
             </div>
             <div class="flex-1 overflow-auto bg-gray-800 p-2 relative" id="modal-content"></div>
         </div>
@@ -2144,25 +2156,25 @@ canvas {
                 <div class="space-y-4 text-left">
                     <div class="flex justify-between items-center bg-gray-800 p-3 rounded">
                         <span id="settings-bgm-label">BGM</span>
-                        <div id="settings-bgm-toggle" class="toggle-switch on" onclick="game.toggleSetting('bgm', this)">
+                        <div id="settings-bgm-toggle" class="toggle-switch on" onclick="window.KOVSettingsRefillModule.toggleSetting(window.game, 'bgm', this)">
                             <div class="toggle-knob"></div>
                         </div>
                     </div>
                     <div class="flex justify-between items-center bg-gray-800 p-3 rounded">
                         <span id="settings-sfx-label">SFX</span>
-                        <div id="settings-sfx-toggle" class="toggle-switch on" onclick="game.toggleSetting('sfx', this)">
+                        <div id="settings-sfx-toggle" class="toggle-switch on" onclick="window.KOVSettingsRefillModule.toggleSetting(window.game, 'sfx', this)">
                             <div class="toggle-knob"></div>
                         </div>
                     </div>
                     <div class="flex justify-between items-center bg-gray-800 p-3 rounded">
                         <span id="settings-push-label">Push Notifications</span>
-                        <div id="settings-push-toggle" class="toggle-switch on" onclick="game.toggleSetting('push', this)">
+                        <div id="settings-push-toggle" class="toggle-switch on" onclick="window.KOVSettingsRefillModule.toggleSetting(window.game, 'push', this)">
                             <div class="toggle-knob"></div>
                         </div>
                     </div>
                     <div class="flex justify-between items-center bg-gray-800 p-3 rounded">
                         <label id="locale-label" for="locale-select">언어 (Language)</label>
-                        <select id="locale-select" onchange="game.setLocale(this.value)"
+                        <select id="locale-select" onchange="window.KOVUiShellModule.setLocale(window.game, this.value)"
                             class="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-gray-100">
                             <option value="ko">한국어</option>
                             <option value="en">English</option>
@@ -2170,7 +2182,7 @@ canvas {
                     </div>
                     <div class="flex justify-between items-center bg-gray-800 p-3 rounded">
                         <label id="world-ruleset-label" for="world-ruleset-select">World Ruleset</label>
-                        <select id="world-ruleset-select" onchange="game.onWorldRuleSetChange(this.value)"
+                        <select id="world-ruleset-select" onchange="window.KOVWorldSeasonModule.onWorldRuleSetChange(window.game, this.value)"
                             class="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-gray-100">
                             <option value="kind">Kind</option>
                             <option value="neutral">Neutral</option>
@@ -2186,22 +2198,22 @@ canvas {
                         <div class="flex gap-2">
                             <input id="settings-redeem-input" type="text" maxlength="24" placeholder="Enter code"
                                 class="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-gray-100">
-                            <button id="settings-redeem-btn" onclick="game.applyRedeemCode()"
+                            <button id="settings-redeem-btn" onclick="window.KOVSettingsRefillModule.applyRedeemCode(window.game)"
                                 class="bg-indigo-700 px-3 py-1 rounded text-xs text-indigo-100 border border-indigo-500 hover:bg-indigo-600">Apply</button>
                         </div>
                     </div>
                 </div>
                 <div class="mt-4 flex gap-2">
-                    <button id="settings-support-btn" onclick="game.openSupport()"
+                    <button id="settings-support-btn" onclick="window.KOVSettingsRefillModule.openSupport(window.game)"
                         class="flex-1 bg-slate-700 py-2 rounded text-xs text-slate-100 border border-slate-500 hover:bg-slate-600">Support</button>
-                    <button id="settings-delete-btn" onclick="game.requestAccountDeletion()"
+                    <button id="settings-delete-btn" onclick="window.KOVSettingsRefillModule.requestAccountDeletion(window.game)"
                         class="flex-1 bg-rose-900 py-2 rounded text-xs text-rose-100 border border-rose-700 hover:bg-rose-800">Delete Account</button>
                 </div>
                 <div class="mt-2 flex gap-2">
-                    <button id="settings-reset-btn" onclick="game.resetGame()"
+                    <button id="settings-reset-btn" onclick="window.KOVPersistenceModule.resetGame(window.game)"
                         class="flex-1 bg-red-800 py-2 rounded text-xs text-red-200 border border-red-600 hover:bg-red-700">계정
                         초기화</button>
-                    <button id="settings-admin-btn" onclick="game.openAdminModal()"
+                    <button id="settings-admin-btn" onclick="window.KOVUiShellModule.openAdminModal(window.game)"
                         class="flex-1 bg-indigo-700 py-2 rounded text-xs text-indigo-100 border border-indigo-500 hover:bg-indigo-600">관리자</button>
                     <button id="settings-close-btn" onclick="document.getElementById('modal-settings').classList.remove('open')"
                         class="flex-1 bg-gray-600 py-2 rounded text-xs border border-gray-500 hover:bg-gray-500">닫기</button>
@@ -2213,20 +2225,20 @@ canvas {
             <div class="modal-content">
                 <div class="flex justify-between items-center mb-4">
                     <h2 id="admin-title" class="text-lg font-bold text-white">Admin Console</h2>
-                    <button onclick="game.closeAdminModal()" class="text-gray-400">✖</button>
+                    <button onclick="window.KOVUiShellModule.closeAdminModal()" class="text-gray-400">✖</button>
                 </div>
                 <div class="space-y-3 text-left">
                     <div class="flex justify-between items-center bg-gray-800 p-3 rounded">
                         <label id="admin-preset-label" for="admin-preset-select">World Preset</label>
-                        <select id="admin-preset-select" onchange="game.onAdminPresetChange()"
+                        <select id="admin-preset-select" onchange="window.KOVAdminUiModule.onAdminPresetChange(window.game)"
                             class="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-gray-100"></select>
                     </div>
                     <div id="admin-preset-summary" class="bg-gray-900 border border-gray-700 p-3 rounded space-y-1"></div>
                 </div>
                 <div class="mt-4 flex gap-2">
-                    <button id="admin-apply-btn" onclick="game.applyAdminPresetFromUI()"
+                    <button id="admin-apply-btn" onclick="window.KOVAdminUiModule.applyAdminPresetFromUI(window.game)"
                         class="flex-1 bg-emerald-700 py-2 rounded text-xs text-emerald-100 border border-emerald-500 hover:bg-emerald-600">Apply Preset</button>
-                    <button id="admin-close-btn" onclick="game.closeAdminModal()"
+                    <button id="admin-close-btn" onclick="window.KOVUiShellModule.closeAdminModal()"
                         class="flex-1 bg-gray-600 py-2 rounded text-xs border border-gray-500 hover:bg-gray-500">Close</button>
                 </div>
             </div>
@@ -2236,7 +2248,7 @@ canvas {
             <div class="modal-content">
                 <div class="flex justify-between items-center mb-4">
                     <h2 id="lobby-title" class="text-lg font-bold text-white">Inter-World Lobby</h2>
-                    <button id="lobby-close-btn" onclick="game.closeWorldLobbyModal()" class="text-gray-400">✖</button>
+                    <button id="lobby-close-btn" onclick="window.game.fieldController.closeWorldLobbyModal()" class="text-gray-400">✖</button>
                 </div>
                 <div class="space-y-3 text-left">
                     <div class="bg-gray-800 p-3 rounded text-xs text-gray-300" id="lobby-desc">
@@ -2244,7 +2256,7 @@ canvas {
                     </div>
                     <div class="flex justify-between items-center bg-gray-800 p-3 rounded">
                         <label id="lobby-channel-label" for="lobby-channel-select">Channel</label>
-                        <select id="lobby-channel-select" onchange="game.renderLobbyChannelStatus()"
+                        <select id="lobby-channel-select" onchange="window.KOVLobbyChatModule.renderLobbyChannelStatus(window.game)"
                             class="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-gray-100">
                             <option value="alpha">Alpha</option>
                             <option value="beta">Beta</option>
@@ -2254,9 +2266,9 @@ canvas {
                     <div id="lobby-channel-status" class="bg-gray-900 border border-gray-700 p-3 rounded text-xs text-gray-200"></div>
                 </div>
                 <div class="mt-4 flex gap-2">
-                    <button id="lobby-enter-btn" onclick="game.confirmWorldLobbyEntry()"
+                    <button id="lobby-enter-btn" onclick="window.game.fieldController.confirmWorldLobbyEntry()"
                         class="flex-1 bg-emerald-700 py-2 rounded text-xs text-emerald-100 border border-emerald-500 hover:bg-emerald-600">Enter World</button>
-                    <button id="lobby-cancel-btn" onclick="game.closeWorldLobbyModal()"
+                    <button id="lobby-cancel-btn" onclick="window.game.fieldController.closeWorldLobbyModal()"
                         class="flex-1 bg-gray-600 py-2 rounded text-xs border border-gray-500 hover:bg-gray-500">Cancel</button>
                 </div>
             </div>
@@ -2298,12 +2310,12 @@ canvas {
                         </div>
                         <div class="battle-result-overlay" id="battle-result-overlay">
                             <div class="battle-result-text" id="battle-result-title">VICTORY</div>
-                            <button id="battle-result-close-btn" onclick="game.closeBattleModal()" class="battle-btn close">Close</button>
+                            <button id="battle-result-close-btn" onclick="window.KOVBattleUiModule.closeBattleModal(window.game)" class="battle-btn close">Close</button>
                         </div>
                     </div>
                     <div class="battle-log" id="battle-log"></div>
                     <div class="battle-controls" id="battle-controls">
-                        <button id="battle-cancel-btn" class="battle-btn close" onclick="game.closeBattleModal()">Cancel</button>
+                        <button id="battle-cancel-btn" class="battle-btn close" onclick="window.KOVBattleUiModule.closeBattleModal(window.game)">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -2329,9 +2341,9 @@ canvas {
                     </div>
                     <div class="flex gap-4">
                         <button id="battle-prep-cancel-btn" class="battle-btn close"
-                            onclick="this.closest('.modal-overlay').classList.remove('open'); this.closest('.modal-overlay').style.display='none'; game.closeBattlePrepModal()">Cancel</button>
+                            onclick="this.closest('.modal-overlay').classList.remove('open'); this.closest('.modal-overlay').style.display='none'; window.KOVBattleFlowModule.closeBattlePrepModal(window.game)">Cancel</button>
                         <button id="battle-prep-start-btn" class="battle-btn start"
-                            onclick="this.closest('.modal-overlay').classList.remove('open'); this.closest('.modal-overlay').style.display='none'; game.confirmBattleStart()">Start Battle</button>
+                            onclick="this.closest('.modal-overlay').classList.remove('open'); this.closest('.modal-overlay').style.display='none'; window.KOVBattleFlowModule.confirmBattleStart(window.game, window.game.battleStartDeps)">Start Battle</button>
                     </div>
                 </div>
             </div>
@@ -2340,8 +2352,68 @@ canvas {
         <div id="toast">Message</div>
     </div>
 
-    <script src="battle.js"></script>
-    <script src="data_loader.js" data-game-script="game.js?v=40"></script>
+    <script src="battle/simulator.js"></script>
+    <script src="field/fieldConsts.js"></script>
+    <script src="field/fieldSpawn.js"></script>
+    <script src="core/dataLookup.js"></script>
+    <script src="core/runtimeClasses.js"></script>
+    <script src="core/pathfinding.js"></script>
+    <script src="core/persistence.js"></script>
+    <script src="ui/adminUi.js"></script>
+    <script src="ui/lobbyChat.js"></script>
+    <script src="world/worldConfig.js"></script>
+    <script src="ui/localizationRuntime.js"></script>
+    <script src="world/worldSeason.js"></script>
+    <script src="field/fieldEconomy.js"></script>
+    <script src="field/fieldRules.js"></script>
+    <script src="field/fieldNavigation.js"></script>
+    <script src="field/fieldState.js"></script>
+    <script src="field/fieldEventLogic.js"></script>
+    <script src="field/fieldCommand.js"></script>
+    <script src="field/fieldFlow.js"></script>
+    <script src="field/fieldEventUi.js"></script>
+    <script src="field/fieldRender.js"></script>
+    <script src="battle/battleResult.js"></script>
+    <script src="battle/battleUi.js"></script>
+    <script src="battle/battleCore.js"></script>
+    <script src="battle/battleFlow.js"></script>
+    <script src="battle/dragonBoss.js"></script>
+    <script src="battle/battleReward.js"></script>
+    <script src="merge/mergeController.js"></script>
+    <script src="field/fieldController.js"></script>
+    <script src="ui/uiShell.js"></script>
+    <script src="field/fieldUiEffects.js"></script>
+    <script src="field/fieldUi.js"></script>
+    <script src="field/fieldCamera.js"></script>
+    <script src="ui/uiFormat.js"></script>
+    <script src="ui/settingsRefill.js"></script>
+    <script src="ui/socialProfile.js"></script>
+    <script src="merge/shop.js"></script>
+    <script src="core/moduleUtils.js"></script>
+    <script src="runtime/statics.js"></script>
+    <script src="runtime/defaults.js"></script>
+    <script src="runtime/dataNormalization.js"></script>
+    <script src="runtime/dataTransforms.js"></script>
+    <script src="merge/mergeData.js"></script>
+    <script src="runtime/levelRuntime.js"></script>
+    <script src="world/worldRuntime.js"></script>
+    <script src="runtime/dummyData.js"></script>
+    <script src="runtime/aStarAdapter.js"></script>
+    <script src="runtime/methodDeps.js"></script>
+    <script src="runtime/runtimeBaseSlice.js"></script>
+    <script src="world/runtimeWorldSlice.js"></script>
+    <script src="merge/runtimeMergeSlice.js"></script>
+    <script src="field/runtimeFieldSlice.js"></script>
+    <script src="runtime/runtimeDepsAssembler.js"></script>
+    <script src="runtime/runtimeGroups.js"></script>
+    <script src="runtime/runtimeContext.js"></script>
+    <script src="runtime/instanceSetup.js"></script>
+    <script src="merge/mergeSetup.js"></script>
+    <script src="merge/mergeBoard.js"></script>
+    <script src="runtime/coreLogic.js"></script>
+    <script src="runtime/progression.js"></script>
+    <script src="runtime/bootstrap.js"></script>
+    <script src="runtime/dataLoader.js" data-game-script="game.js?v=40"></script>
 </body>
 
 </html>
