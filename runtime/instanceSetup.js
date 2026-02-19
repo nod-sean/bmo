@@ -59,6 +59,7 @@
             CONFIG: core.CONFIG,
             FIELD_MAP_DATA: field.FIELD_MAP_DATA,
             GAMEPLAY: world.GAMEPLAY,
+            ABILITY_CODES: shared.ABILITY_CODES,
             isStatueTile: field.isStatueTile,
             isRuinsTile: field.isRuinsTile,
             isCitadelTile: field.isCitadelTile

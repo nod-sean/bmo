@@ -225,6 +225,7 @@
 
         const UPDATE_ARMIES_DEPS = Object.freeze({
             FOG_RADIUS,
+            ITEM_TYPE,
             FIELD_EVENT_TYPES,
             FIELD_MAP_DATA,
             FIELD_TERRAIN_DATA,

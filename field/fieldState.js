@@ -49,6 +49,18 @@
         return found ? Number(found.value) : 0;
     }
 
+    function resolveAbilityCodes(deps) {
+        const fallback = {
+            GOLD_CAP: 1,
+            GOLD_REGEN: 2,
+            ENERGY_CAP: 3,
+            ENERGY_REGEN: 4,
+            CP_CAP: 5,
+            CP_REGEN: 6
+        };
+        return Object.assign({}, fallback, deps?.ABILITY_CODES || {});
+    }
+
     function getFieldLevel(game, type, deps) {
         const data = window.KOVFieldEventLogicModule.getFieldObjectData(game, type, game.fieldObjectDataDeps);
         if (data && data.level) return data.level;
@@ -70,8 +82,9 @@
         if (!deps.isRuinsTile(type)) return null;
         const data = window.KOVFieldEventLogicModule.getFieldObjectData(game, type, game.fieldObjectDataDeps);
         if (!data) return null;
-        const cpCap = getAbilityValue(data, deps.ABILITY_CODES.CP_CAP);
-        const cpRegen = getAbilityValue(data, deps.ABILITY_CODES.CP_REGEN);
+        const ability = resolveAbilityCodes(deps);
+        const cpCap = getAbilityValue(data, ability.CP_CAP);
+        const cpRegen = getAbilityValue(data, ability.CP_REGEN);
         if (!cpCap && !cpRegen) return null;
         return { level: data.level || getFieldLevel(game, type, deps), cpCap, cpRegen };
     }
@@ -79,11 +92,12 @@
     function getFieldResourceConfig(game, type, deps) {
         const data = window.KOVFieldEventLogicModule.getFieldObjectData(game, type, game.fieldObjectDataDeps);
         if (!data) return null;
-        const goldCap = getAbilityValue(data, deps.ABILITY_CODES.GOLD_CAP);
-        const goldRegen = getAbilityValue(data, deps.ABILITY_CODES.GOLD_REGEN);
+        const ability = resolveAbilityCodes(deps);
+        const goldCap = getAbilityValue(data, ability.GOLD_CAP);
+        const goldRegen = getAbilityValue(data, ability.GOLD_REGEN);
         if (goldCap || goldRegen) return { kind: 'gold', cap: goldCap, regen5: goldRegen };
-        const energyCap = getAbilityValue(data, deps.ABILITY_CODES.ENERGY_CAP);
-        const energyRegen = getAbilityValue(data, deps.ABILITY_CODES.ENERGY_REGEN);
+        const energyCap = getAbilityValue(data, ability.ENERGY_CAP);
+        const energyRegen = getAbilityValue(data, ability.ENERGY_REGEN);
         if (energyCap || energyRegen) return { kind: 'energy', cap: energyCap, regen5: energyRegen };
         return null;
     }

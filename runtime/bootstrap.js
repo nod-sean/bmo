@@ -198,6 +198,7 @@
             CONFIG: deps.CONFIG,
             FIELD_MAP_DATA: deps.FIELD_MAP_DATA,
             GAMEPLAY: deps.GAMEPLAY,
+            ABILITY_CODES: deps.ABILITY_CODES,
             isStatueTile: deps.isStatueTile,
             isRuinsTile: deps.isRuinsTile,
             isCitadelTile: deps.isCitadelTile
