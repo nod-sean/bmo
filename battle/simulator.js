@@ -2,6 +2,7 @@
     constructor() {
         this.log = [];
         this.maxTurns = 50;
+        this.maxStallTurns = 3;
         this.defaultConfig = {
             BASE_DMG: 1,
             ADVANTAGE_BONUS: 1.5,
@@ -183,10 +184,13 @@
 
         let turn = 0;
         let winner = null;
+        let stallTurns = 0;
 
         while (turn < this.maxTurns) {
             turn += 1;
             steps.push({ type: 'log', msg: `[Turn ${turn}]` });
+            let attacksThisTurn = 0;
+            let noTargetCount = 0;
 
             const activeUnits = [...teamA, ...teamB]
                 .filter((u) => u.currentHp > 0)
@@ -206,16 +210,36 @@
 
                 const selected = this.selectTarget(unit, liveEnemies);
                 if (!selected) {
-                    steps.push({ type: 'log', msg: `${unit.name} cannot reach a target` });
+                    noTargetCount += 1;
                     continue;
                 }
 
                 this.attack(unit, selected.enemy, steps, config, selected);
+                attacksThisTurn += 1;
             }
 
             if (winner) break;
             if (teamA.every((u) => u.currentHp <= 0)) { winner = 'defenders'; break; }
             if (teamB.every((u) => u.currentHp <= 0)) { winner = 'allies'; break; }
+
+            if (attacksThisTurn <= 0) {
+                stallTurns += 1;
+                if (noTargetCount > 0) {
+                    steps.push({
+                        type: 'log',
+                        msg: `No units can engage this turn (${stallTurns}/${this.maxStallTurns})`
+                    });
+                }
+                if (stallTurns >= this.maxStallTurns) {
+                    const hpA = teamA.reduce((sum, u) => sum + Math.max(0, u.currentHp), 0);
+                    const hpB = teamB.reduce((sum, u) => sum + Math.max(0, u.currentHp), 0);
+                    winner = hpA >= hpB ? 'allies' : 'defenders';
+                    steps.push({ type: 'log', msg: `Stalemate detected, winner by remaining HP: ${winner}` });
+                    break;
+                }
+            } else {
+                stallTurns = 0;
+            }
         }
 
         if (!winner) {

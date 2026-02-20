@@ -61,7 +61,7 @@
             lines.push(game.tr('ui.battle_reward.object_reward_title', { code: summary.rewardCode }, `Object Reward (Code ${summary.rewardCode})`));
             if (summary.gold > 0) lines.push(`- Gold +${summary.gold}`);
             if (summary.energy > 0) lines.push(`- Energy +${summary.energy}`);
-            if (summary.cp > 0) lines.push(`- CP +${summary.cp}`);
+            if (summary.cp > 0) lines.push(`- AP +${summary.cp}`);
             if (summary.gem > 0) lines.push(`- GEM +${summary.gem}`);
             if (Array.isArray(summary.chests)) {
                 summary.chests.forEach((entry) => {

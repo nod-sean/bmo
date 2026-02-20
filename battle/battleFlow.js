@@ -216,7 +216,7 @@
         let nextDelay = 920;
         if (step.type === 'log') {
             addBattleLog(game, step.msg);
-            nextDelay = 680;
+            nextDelay = 320;
         } else if (step.type === 'attack') {
             addBattleLog(game, step.msg);
             const fxDelay = Number(window.KOVBattleCoreModule.triggerBattleFx(game, step) || 0);

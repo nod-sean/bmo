@@ -315,7 +315,7 @@
             const gained = Math.max(0, Math.min(amount, game.maxCp - game.cp));
             game.cp = Math.min(game.maxCp, game.cp + amount);
             if (summary) summary.cp += gained;
-            window.KOVUiShellModule.showToast(game, game.tr('toast.cp_gain', { value: gained }, `+${gained}CP`));
+            window.KOVUiShellModule.showToast(game, game.tr('toast.cp_gain', { value: gained }, `+${gained}AP`));
             return gained > 0;
         }
 

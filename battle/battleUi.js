@@ -148,18 +148,8 @@
     function updateBattleStageImpactFx(game) {
         const stage = document.getElementById('battle-stage');
         if (!stage) return;
-        const fx = game?.battleFx;
-        const shouldImpact = !!fx && fx.phase === 'impact' && Number(fx.damage || 0) > 0;
-        if (!shouldImpact) {
-            stage.classList.remove('battle-stage-impact', 'battle-stage-impact-ally', 'battle-stage-impact-enemy');
-            return;
-        }
+        // Disable stage flash/shake to avoid battle flicker.
         stage.classList.remove('battle-stage-impact', 'battle-stage-impact-ally', 'battle-stage-impact-enemy');
-        // restart animation
-        // eslint-disable-next-line no-unused-expressions
-        stage.offsetWidth;
-        stage.classList.add('battle-stage-impact');
-        stage.classList.add(fx.attackerTeam === 'A' ? 'battle-stage-impact-ally' : 'battle-stage-impact-enemy');
     }
 
     function resetBattleResultOverlay() {
