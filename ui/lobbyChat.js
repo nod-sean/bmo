@@ -76,6 +76,42 @@
         return game.socialState;
     }
 
+    function normalizeSocialStatePayload(payload) {
+        if (!payload || typeof payload !== 'object') return null;
+        const src = (payload.social && typeof payload.social === 'object') ? payload.social : payload;
+        const toUidList = (value) => {
+            if (!Array.isArray(value)) return [];
+            return value
+                .map((item) => {
+                    if (typeof item === 'string') return item;
+                    if (item && typeof item === 'object') return String(item.uid || item.id || '').trim();
+                    return '';
+                })
+                .filter(Boolean);
+        };
+        const playersRaw = Array.isArray(src.players) ? src.players : [];
+        const players = playersRaw
+            .map((item) => {
+                if (!item || typeof item !== 'object') return null;
+                const uid = String(item.uid || item.id || '').trim();
+                if (!uid) return null;
+                return {
+                    uid,
+                    name: String(item.name || uid),
+                    power: Math.max(0, Number(item.power || 0))
+                };
+            })
+            .filter(Boolean);
+        return {
+            players,
+            friends: toUidList(src.friends),
+            friendRequestsIn: toUidList(src.friendRequestsIn || src.friend_requests_in),
+            friendRequestsOut: toUidList(src.friendRequestsOut || src.friend_requests_out),
+            allianceRequestsIn: toUidList(src.allianceRequestsIn || src.alliance_requests_in),
+            allianceRequestsOut: toUidList(src.allianceRequestsOut || src.alliance_requests_out)
+        };
+    }
+
     function getChatChannelLabel(game, channel) {
         if (channel === 'guild') return game.tr('ui.chat.tab.guild', {}, 'Guild');
         if (channel === 'system') return game.tr('ui.chat.tab.system', {}, 'System');
@@ -118,6 +154,9 @@
         state.activeChannel = next;
         updateChatTabUI(game);
         window.KOVSocialProfileModule.refreshChatUI(game);
+        fetchChatMessagesFromApi(game, next, false).then((updated) => {
+            if (updated) window.KOVSocialProfileModule.refreshChatUI(game);
+        }).catch(() => { });
     }
 
     function pushChatMessage(game, channel, sender, text, type = 'other') {
@@ -136,6 +175,35 @@
         return row;
     }
 
+    function normalizeChatMessagesPayload(payload, fallbackChannel) {
+        const channel = VALID_CHAT_CHANNELS.includes(String(fallbackChannel || '').toLowerCase())
+            ? String(fallbackChannel).toLowerCase()
+            : 'world';
+        if (!payload) return [];
+        const list = Array.isArray(payload)
+            ? payload
+            : (Array.isArray(payload.messages) ? payload.messages : (Array.isArray(payload.logs) ? payload.logs : []));
+        return list
+            .map((item) => {
+                if (!item || typeof item !== 'object') return null;
+                const rowChannel = String(item.channel || item.channelId || channel).trim().toLowerCase();
+                const sender = String(item.sender || item.user || item.uid || '');
+                const text = String(item.text || item.message || '');
+                if (!text.trim()) return null;
+                const at = Number(item.at || item.timestamp || Date.now());
+                const typeRaw = String(item.type || '').toLowerCase();
+                const type = typeRaw === 'me' ? 'me' : 'other';
+                return {
+                    channel: VALID_CHAT_CHANNELS.includes(rowChannel) ? rowChannel : channel,
+                    sender: sender || 'System',
+                    text,
+                    type,
+                    at: Number.isFinite(at) ? at : Date.now()
+                };
+            })
+            .filter(Boolean);
+    }
+
     function renderLobbyChannelStatus(game) {
         const select = document.getElementById('lobby-channel-select');
         const panel = document.getElementById('lobby-channel-status');
@@ -147,6 +215,10 @@
         const profile = getLobbyCongestionProfile(row.ratio);
         const pct = Math.round(row.ratio * 100);
         const sourceText = game.lobbyChannelStatusSource === 'server' ? 'Server' : 'Local estimate (skeleton)';
+        const fetchedAt = Number(game.lobbyChannelStatusFetchedAt || 0);
+        const syncText = fetchedAt > 0
+            ? `${sourceText} · ${formatSyncAge(fetchedAt)}`
+            : sourceText;
 
         panel.innerHTML = `
             <div class="flex items-center justify-between mb-1">
@@ -160,9 +232,38 @@
             <div class="w-full h-2 rounded bg-gray-700 overflow-hidden">
                 <div class="h-full ${row.ratio >= 0.85 ? 'bg-red-500' : (row.ratio >= 0.55 ? 'bg-yellow-500' : 'bg-emerald-500')}" style="width:${pct}%;"></div>
             </div>
-            <div class="text-[10px] text-gray-400 mt-2">${sourceText}</div>
+            <div class="text-[10px] text-gray-400 mt-2">${syncText}</div>
         `;
         if (game.lobbyChannelStatusSource !== 'server') fetchLobbyChannelStatusFromApi(game, false);
+    }
+
+    function formatSyncAge(timestamp) {
+        const ts = Number(timestamp || 0);
+        if (!Number.isFinite(ts) || ts <= 0) return 'not synced';
+        const diffSec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+        if (diffSec < 5) return 'just now';
+        if (diffSec < 60) return `${diffSec}s ago`;
+        const diffMin = Math.floor(diffSec / 60);
+        if (diffMin < 60) return `${diffMin}m ago`;
+        const diffHour = Math.floor(diffMin / 60);
+        return `${diffHour}h ago`;
+    }
+
+    function getSocialSyncStatus(game) {
+        return {
+            source: String(game.socialStateSource || 'local'),
+            fetchedAt: Number(game.socialStateFetchedAt || 0)
+        };
+    }
+
+    function getChatSyncStatus(game, channel) {
+        const state = ensureChatState(game);
+        const target = VALID_CHAT_CHANNELS.includes(String(channel || '').toLowerCase())
+            ? String(channel).toLowerCase()
+            : state.activeChannel;
+        const fetchedAt = Number(game?.chatStateMeta?.lastFetchedAt?.[target] || 0);
+        const source = fetchedAt > 0 ? 'server' : String(game.chatStateSource || 'local');
+        return { source, fetchedAt, channel: target };
     }
 
     function getApiBaseUrl() {
@@ -216,6 +317,76 @@
         }
     }
 
+    async function fetchSocialStateFromApi(game, force = false) {
+        const now = Date.now();
+        if (!force && Number(game.socialStateFetchedAt || 0) > 0 && now - Number(game.socialStateFetchedAt) < 15000) {
+            return false;
+        }
+        if (game.socialStateFetchPending) return false;
+        game.socialStateFetchPending = true;
+        let updated = false;
+        try {
+            const payload = await fetchApiJson('/v1/social/state');
+            const normalized = normalizeSocialStatePayload(payload);
+            if (!normalized) return false;
+            game.socialState = normalized;
+            game.socialStateSource = 'server';
+            game.socialStateFetchedAt = now;
+            updated = true;
+            return true;
+        } finally {
+            game.socialStateFetchPending = false;
+            if (!updated && !game.socialStateSource) game.socialStateSource = 'local';
+        }
+    }
+
+    async function fetchChatMessagesFromApi(game, channel, force = false) {
+        const state = ensureChatState(game);
+        const target = VALID_CHAT_CHANNELS.includes(String(channel || '').toLowerCase())
+            ? String(channel).toLowerCase()
+            : state.activeChannel;
+        if (target === 'system') return false;
+        if (!game.chatStateMeta || typeof game.chatStateMeta !== 'object') game.chatStateMeta = {};
+        if (!game.chatStateMeta.lastFetchedAt || typeof game.chatStateMeta.lastFetchedAt !== 'object') {
+            game.chatStateMeta.lastFetchedAt = {};
+        }
+        if (!game.chatStateMeta.fetchPending || typeof game.chatStateMeta.fetchPending !== 'object') {
+            game.chatStateMeta.fetchPending = {};
+        }
+        const now = Date.now();
+        const lastFetched = Number(game.chatStateMeta.lastFetchedAt[target] || 0);
+        if (!force && lastFetched > 0 && now - lastFetched < 5000) return false;
+        if (game.chatStateMeta.fetchPending[target]) return false;
+        game.chatStateMeta.fetchPending[target] = true;
+        try {
+            const payload = await fetchApiJson(`/v1/chat/messages?channel=${encodeURIComponent(target)}`);
+            const rows = normalizeChatMessagesPayload(payload, target);
+            if (!rows.length) return false;
+            state.logsByChannel[target] = rows.slice(-state.maxLogs);
+            game.chatStateMeta.lastFetchedAt[target] = now;
+            game.chatStateSource = 'server';
+            return true;
+        } finally {
+            game.chatStateMeta.fetchPending[target] = false;
+        }
+    }
+
+    async function sendChatMessageToApi(game, channel, text) {
+        const target = VALID_CHAT_CHANNELS.includes(String(channel || '').toLowerCase())
+            ? String(channel).toLowerCase()
+            : 'world';
+        if (target === 'system') return false;
+        const body = {
+            channel: target,
+            text: String(text || '')
+        };
+        const payload = await fetchApiJson('/v1/chat/send', {
+            method: 'POST',
+            body: JSON.stringify(body)
+        });
+        return !!payload;
+    }
+
     global.KOVLobbyChatModule = {
         VALID_LOBBY_CHANNELS,
         VALID_CHAT_CHANNELS,
@@ -224,14 +395,22 @@
         getLobbyCongestionProfile,
         ensureChatState,
         ensureSocialState,
+        normalizeSocialStatePayload,
         getChatChannelLabel,
         getChatTitleForChannel,
         updateChatTabUI,
         setChatChannel,
         pushChatMessage,
+        normalizeChatMessagesPayload,
         renderLobbyChannelStatus,
         getApiBaseUrl,
         fetchApiJson,
-        fetchLobbyChannelStatusFromApi
+        fetchLobbyChannelStatusFromApi,
+        fetchSocialStateFromApi,
+        fetchChatMessagesFromApi,
+        sendChatMessageToApi,
+        formatSyncAge,
+        getSocialSyncStatus,
+        getChatSyncStatus
     };
 })(window);

@@ -54,38 +54,6 @@
         overlay.appendChild(line);
     }
 
-    function clearMoveTimeOverlay() {
-        document.querySelectorAll('.field-time').forEach((el) => el.remove());
-        document.querySelectorAll('.field-move-eligible').forEach((el) => el.classList.remove('field-move-eligible'));
-        document.querySelectorAll('.field-move-source').forEach((el) => el.classList.remove('field-move-source'));
-    }
-
-    function renderMoveTimeOverlay(game, deps) {
-        clearMoveTimeOverlay();
-        if (!game.moveTargetMode) return;
-        const { times, armyId } = game.moveTargetMode;
-        times.forEach((info, key) => {
-            const [r, c] = key.split(',').map(Number);
-            const cell = document.getElementById(`field-cell-${r}-${c}`);
-            if (!cell || cell.classList.contains('field-fog')) return;
-            if (info.cpCost > game.cp) return;
-            const label = document.createElement('div');
-            label.className = 'field-time';
-            const tileType = deps.FIELD_MAP_DATA[r][c];
-            const isBorderTile = game.occupiedTiles.has(key) || deps.isGateTile(tileType);
-            if (isBorderTile) label.classList.add('lower');
-            const display = Math.max(1, Math.round(info.timeMin));
-            label.innerText = `${display} m`;
-            cell.appendChild(label);
-            cell.classList.add('field-move-eligible');
-        });
-        const army = game.armies[armyId];
-        if (army) {
-            const startCell = document.getElementById(`field-cell-${army.r}-${army.c}`);
-            if (startCell) startCell.classList.add('field-move-source');
-        }
-    }
-
     function hideFieldActionMenu() {
         const menu = document.getElementById('field-action-menu');
         if (menu) menu.remove();
@@ -725,7 +693,6 @@
             }
         }
         if (game.previewPath) applyPathPreview(game, game.previewPath);
-        if (game.moveTargetMode) renderMoveTimeOverlay(game, deps);
         updateFloatingPanelPositionFromSelection(game);
         return true;
     }
@@ -733,8 +700,6 @@
         setMovePreview,
         clearPathPreview,
         applyPathPreview,
-        clearMoveTimeOverlay,
-        renderMoveTimeOverlay,
         hideFieldActionMenu,
         showFieldActionMenu,
         formatStatueBuffEffect,

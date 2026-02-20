@@ -92,13 +92,13 @@
         });
 
         return {
-            canMove: game.energy >= moveCosts.energyCost && game.gold >= moveCosts.goldCost && game.cp >= moveCosts.cpCost,
+            canMove: game.gold >= moveCosts.goldCost && game.cp >= moveCosts.cpCost,
             reason: null,
             tileType,
             path,
             dist,
             cpCost: moveCosts.cpCost,
-            energyCost: moveCosts.energyCost,
+            energyCost: 0,
             goldCost: moveCosts.goldCost,
             timeMin: summary.finalMin,
             stats
@@ -158,7 +158,7 @@
             targetR,
             targetC,
             tileType,
-            moveCosts.energyCost,
+            0,
             moveCosts.goldCost,
             moveCosts.cpCost,
             path,
@@ -226,41 +226,26 @@
         exitMoveTargetMode(game);
         game.selectedArmyId = army.id;
         game.lastSelectedArmyId = army.id;
-        const times = buildMoveTimeMap(game, army, stats, deps);
-        game.moveTargetMode = { armyId: army.id, stats, times };
+        game.moveTargetMode = { armyId: army.id, stats };
         const squadNo = army.id + 1;
         const squadLabel = game.tr('ui.squad.label', {}, 'Squad');
         const label = game.tr('ui.field.move_preview', {}, 'ETA preview active (tap label to cancel)');
         window.KOVFieldUiModule.setMovePreview(game, `${squadLabel} ${squadNo} | ${label}`);
         if (center) window.KOVFieldCameraModule.centerCameraOnArmy(game, army.id);
         updateSelectedArmyUI(game);
-        window.KOVFieldUiModule.renderMoveTimeOverlay(game, {
-            FIELD_MAP_DATA: deps.FIELD_MAP_DATA,
-            isGateTile: deps.isGateTile
-        });
     }
 
     function exitMoveTargetMode(game) {
         if (!game.moveTargetMode) return;
         game.moveTargetMode = null;
-        window.KOVFieldUiModule.clearMoveTimeOverlay(game);
         window.KOVFieldUiModule.clearPathPreview(game);
         window.KOVFieldUiModule.setMovePreview(game, '');
     }
 
     function previewMoveTarget(game, r, c, deps) {
         if (!game.moveTargetMode) return;
-        const { armyId, times } = game.moveTargetMode;
-        const info = times.get(`${r},${c}`);
-        if (!info) {
-            window.KOVFieldUiModule.clearPathPreview(game);
-            const army = game.armies?.[armyId];
-            const squadNo = (army?.id ?? 0) + 1;
-            const squadLabel = game.tr('ui.squad.label', {}, 'Squad');
-            const label = game.tr('ui.field.move_preview', {}, 'ETA preview active (tap label to cancel)');
-            window.KOVFieldUiModule.setMovePreview(game, `${squadLabel} ${squadNo} | ${label}`);
-            return;
-        }
+        const gp = deps.GAMEPLAY || deps;
+        const { armyId } = game.moveTargetMode;
         const army = game.armies?.[armyId];
         if (!army || army.state !== 'IDLE') return;
         const regionId = resolveArmyRegionId(game, army, deps);
@@ -279,13 +264,21 @@
             window.KOVFieldUiModule.setMovePreview(game, `${squadLabel} ${squadNo} | ${label}`);
             return;
         }
+        const dist = Math.max(0, path.length - 1);
+        if (dist > game.moveTargetMode.stats.range) {
+            window.KOVFieldUiModule.clearPathPreview(game);
+            const squadNo = army.id + 1;
+            const squadLabel = game.tr('ui.squad.label', {}, 'Squad');
+            const label = game.tr('ui.field.move_preview', {}, 'ETA preview active (tap label to cancel)');
+            window.KOVFieldUiModule.setMovePreview(game, `${squadLabel} ${squadNo} | ${label}`);
+            return;
+        }
         window.KOVFieldUiModule.applyPathPreview(game, path);
-        const eta = Math.max(1, Math.round(Number(info.timeMin) || 1));
         const squadNo = army.id + 1;
         const squadLabel = game.tr('ui.squad.label', {}, 'Squad');
         const cpLabel = game.tr('ui.field.header.cp', {}, 'CP');
         const label = game.tr('ui.field.move_preview', {}, 'ETA preview active (tap label to cancel)');
-        window.KOVFieldUiModule.setMovePreview(game, `${squadLabel} ${squadNo} | ${eta}m | ${cpLabel} ${info.cpCost} | ${label}`);
+        window.KOVFieldUiModule.setMovePreview(game, `${squadLabel} ${squadNo} | ${cpLabel} ${gp.CP_COST_PER_COMMAND} | ${label}`);
     }
 
     function updateSelectedArmyUI(game) {
@@ -304,53 +297,10 @@
         });
     }
 
-    function buildMoveTimeMap(game, army, stats, deps) {
-        const gp = deps.GAMEPLAY || deps;
-        const times = new Map();
-        const origin = { r: army.r, c: army.c };
-        const regionId = resolveArmyRegionId(game, army, deps);
-        for (let r = 0; r < deps.MAP_SIZE; r++) {
-            for (let c = 0; c < deps.MAP_SIZE; c++) {
-                const key = `${r},${c}`;
-                if (!game.visibilityMap.has(key)) continue;
-                if (r === origin.r && c === origin.c) continue;
-                const path = deps.AStar.findPath(
-                    origin,
-                    { r, c },
-                    deps.FIELD_MAP_DATA,
-                    game.occupiedTiles,
-                    (cur, nr, nc, type, isOcc, isTarget) => isTileBlocked(game, cur, nr, nc, type, isOcc, isTarget, regionId, deps)
-                );
-                if (!path) continue;
-                const dist = path.length - 1;
-                if (dist <= 0 || dist > stats.range) continue;
-                const summary = window.KOVFieldNavigationModule.getPathSummary(game, path, stats.speedFactor, {
-                    FIELD_MAP_DATA: deps.FIELD_MAP_DATA,
-                    FIELD_TERRAIN_DATA: deps.FIELD_TERRAIN_DATA,
-                    isGateTile: deps.isGateTile,
-                    isCitadelTile: deps.isCitadelTile,
-                    isDragonTile: deps.isDragonTile,
-                    isTerrainCode: deps.isTerrainCode,
-                    getTerrainBase: deps.getTerrainBase,
-                    isWallTile: deps.isWallTile,
-                    getFieldObjectKind: deps.getFieldObjectKind
-                });
-                times.set(key, { timeMin: summary.finalMin, dist, cpCost: gp.CP_COST_PER_COMMAND });
-            }
-        }
-        return times;
-    }
-
     function handleMoveTargetClick(game, r, c, type, deps) {
         const gp = deps.GAMEPLAY || deps;
         if (!game.moveTargetMode) return;
-        const { armyId, stats, times } = game.moveTargetMode;
-        const info = times.get(`${r},${c}`);
-        if (!info) {
-            window.KOVUiShellModule.showToast(game, game.tr('toast.cannot_move', {}, 'Cannot move to this tile'));
-            game.sound.playError();
-            return;
-        }
+        const { armyId, stats } = game.moveTargetMode;
         const army = game.armies[armyId];
         if (!army || army.state !== 'IDLE') {
             window.KOVUiShellModule.showToast(game, game.tr('toast.army_moving', {}, 'Army is already moving'));
@@ -375,19 +325,17 @@
             game.sound.playError();
             return;
         }
-        let energyCost = 1;
         let goldCost = 0;
-        if (deps.isGateTile(type)) { energyCost = 5; goldCost = 100; }
+        if (deps.isGateTile(type)) { goldCost = 100; }
         const cpCost = gp.CP_COST_PER_COMMAND;
-        if (game.energy < energyCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.energy_short_cost', { cost: energyCost }, `Not enough energy (${energyCost})`)); return; }
         if (game.gold < goldCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.gold_short_cost', { cost: goldCost }, `Not enough gold (${goldCost})`)); return; }
         if (game.cp < cpCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough CP (${cpCost})`)); return; }
         exitMoveTargetMode(game);
         game.selectedArmyId = armyId;
-        startMarch(game, armyId, r, c, type, energyCost, goldCost, cpCost, path, stats.speedFactor, deps);
+        startMarch(game, armyId, r, c, type, goldCost, cpCost, path, stats.speedFactor, deps);
     }
 
-    function startMarch(game, armyId, r, c, type, energyCost, goldCost, cpCost, path, speedFactor, deps) {
+    function startMarch(game, armyId, r, c, type, goldCost, cpCost, path, speedFactor, deps) {
         const gp = deps.GAMEPLAY || deps;
         if (window.KOVWorldSeasonModule.guardWorldAction(
             game,
@@ -395,10 +343,8 @@
             window.KOVWorldSeasonModule.ensureWorldState(game),
             window.KOVWorldSeasonModule.getActiveWorldEndConditions(game, game.worldAdminDeps)
         )) return;
-        if (game.energy < energyCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.energy_short_cost', { cost: energyCost }, `Not enough energy (${energyCost})`)); return; }
         if (game.gold < goldCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.gold_short_cost', { cost: goldCost }, `Not enough gold (${goldCost})`)); return; }
         if (game.cp < cpCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough CP (${cpCost})`)); return; }
-        game.energy -= energyCost;
         game.gold -= goldCost;
         game.cp -= cpCost;
         window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
@@ -521,7 +467,6 @@
         exitMoveTargetMode,
         previewMoveTarget,
         updateSelectedArmyUI,
-        buildMoveTimeMap,
         handleMoveTargetClick,
         startMarch,
         updateArmies

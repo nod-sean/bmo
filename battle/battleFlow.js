@@ -212,10 +212,6 @@
             addBattleLog(game, step.msg);
         } else if (step.type === 'attack') {
             addBattleLog(game, step.msg);
-            const targetId = step.defenderId;
-            let unit = game.battleContext.allies.find((u) => u.id === targetId);
-            if (!unit) unit = game.battleContext.defenders.find((u) => u.id === targetId);
-            if (unit) unit.hp = step.targetHp;
             window.KOVBattleCoreModule.triggerBattleFx(game, step);
         }
         window.KOVBattleUiModule.renderBattleModal(game);
@@ -246,6 +242,7 @@
             addBattleLog(game, game.tr('battle.log.victory_capture', {}, 'Battle won! Capturing tile.'));
             setTimeout(() => {
                 if (rewardCtx) window.KOVBattleResultModule.handleBattleWin(game, rewardCtx.r, rewardCtx.c);
+                if (window.KOVBattleResultModule.handleAllSquadsEmptyAfterBattle(game)) return;
                 window.KOVBattleUiModule.closeBattleModal(game);
                 if (rewardCtx) window.KOVBattleRewardModule.openBattleRewardModal(game, rewardCtx);
             }, 1500);
@@ -256,6 +253,9 @@
             }
             game.sound.playError();
             addBattleLog(game, game.tr('battle.log.defeat_retreat', {}, 'Battle lost. Army retreats.'));
+            setTimeout(() => {
+                window.KOVBattleResultModule.handleAllSquadsEmptyAfterBattle(game);
+            }, 200);
         }
     }
 

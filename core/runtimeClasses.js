@@ -78,10 +78,13 @@
                         this.images[key] = img;
                         done();
                     };
-                    const ext = key === 'field_bg' ? '.jpg' : '.png';
-                    const localSrc = `${localBase}/${key}${ext}`;
-                    const remoteSrc = `${remoteBase}/${key}${ext}`;
-                    const sources = localSrc === remoteSrc ? [localSrc] : [localSrc, remoteSrc];
+                    const exts = key === 'field_bg' ? ['.jpg', '.png'] : ['.png'];
+                    const sources = [];
+                    exts.forEach((ext) => {
+                        sources.push(`${localBase}/${key}${ext}`);
+                        const remote = `${remoteBase}/${key}${ext}`;
+                        if (remote !== sources[sources.length - 1]) sources.push(remote);
+                    });
                     let idx = 0;
                     img.onerror = () => {
                         idx++;

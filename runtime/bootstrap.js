@@ -148,6 +148,27 @@
         game.fieldController = (typeof window !== 'undefined' && typeof window.KOVFieldController === 'function')
             ? new window.KOVFieldController(game)
             : null;
+        game.cheatEnergy = () => {
+            game.energy = Math.min(game.maxEnergy, game.energy + 30);
+            window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
+            window.KOVUiShellModule.showToast(game, game.tr('toast.energy_gain', { value: 30 }, '+30 Energy'));
+        };
+        game.cheatLevelUp = () => {
+            window.KOVGameCoreModule.levelUp(game, game.levelDeps);
+        };
+        game.spawnChest = () => {
+            const ok = window.KOVMergeBoardModule.spawnItem(
+                game,
+                { type: deps.ITEM_TYPE.BUILDING_CHEST, level: 1, scale: 0 },
+                game.spawnItemDeps
+            );
+            if (!ok) {
+                window.KOVUiShellModule.showToast(game, game.tr('toast.space_short', {}, 'No space available'));
+                return;
+            }
+            window.KOVUiShellModule.showToast(game, game.tr('toast.stored', {}, 'Stored'));
+            game.requestRender();
+        };
 
         game.armies = [
             { id: 0, name: window.KOVSocialProfileModule.getDefaultSquadName(game, 1), color: "#4caf50", state: 'IDLE', r: deps.PLAYER_START.r, c: deps.PLAYER_START.c, path: [], nextStepIndex: 0, target: null, lastMoveTime: 0, moveInterval: 0 },

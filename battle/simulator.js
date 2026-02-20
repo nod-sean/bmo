@@ -49,14 +49,18 @@
         };
     }
 
-    getPos(slot) {
+    getPos(slot, team) {
         const clamped = Math.max(0, Math.min(8, Number.isFinite(slot) ? slot : 0));
-        return { r: Math.floor(clamped / 3), c: clamped % 3 };
+        const base = { r: Math.floor(clamped / 3), c: clamped % 3 };
+        // Keep a fixed lane gap between ally and enemy formations.
+        // Gap 3 keeps "approach before attack" while avoiding excessive unreachable turns.
+        if (team === 'B') base.c += 3;
+        return base;
     }
 
     getDistance(attacker, target) {
-        const a = this.getPos(attacker.slot);
-        const b = this.getPos(target.slot);
+        const a = this.getPos(attacker.slot, attacker.team);
+        const b = this.getPos(target.slot, target.team);
         return Math.abs(a.r - b.r) + Math.abs(a.c - b.c);
     }
 
@@ -113,8 +117,8 @@
     attack(attacker, defender, steps, config, metadata) {
         const attackerAdv = this.isAdvantage(attacker.classType, defender.classType);
         const defenderAdv = this.isAdvantage(defender.classType, attacker.classType);
-        const attackerPos = this.getPos(attacker.slot);
-        const defenderPos = this.getPos(defender.slot);
+        const attackerPos = this.getPos(attacker.slot, attacker.team);
+        const defenderPos = this.getPos(defender.slot, defender.team);
         const hpBefore = defender.currentHp;
 
         let effectiveAtk = attacker.atk;
@@ -147,6 +151,7 @@
             defenderId: defender.id,
             attackerTeam: attacker.team,
             defenderTeam: defender.team,
+            attackerSpd: Number(attacker.spd || 1),
             attackerSlot: attacker.slot,
             defenderSlot: defender.slot,
             attackerPos,

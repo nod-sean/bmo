@@ -237,6 +237,7 @@
             if (optCruel) optCruel.innerText = game.tr('ui.world_ruleset.cruel', {}, 'Cruel');
         }
 
+        document.title = game.tr('ui.page.title', {}, 'KOV');
         const settingsTitle = document.getElementById('settings-title');
         if (settingsTitle) settingsTitle.innerText = game.tr('ui.settings.title', {}, 'Settings');
         const resetBtn = document.getElementById('settings-reset-btn');
@@ -259,10 +260,12 @@
 
         setText('footer-build-label', 'ui.footer.build', 'Build');
         setText('footer-field-label', 'ui.footer.field', 'Field');
+        setText('modal-title', 'ui.modal.menu_title', 'Menu');
         setText('levelup-title', 'ui.modal.levelup.title', 'LEVEL UP!');
         setText('levelup-level-label', 'ui.modal.levelup.level', 'Level (Lord Level)');
         setText('levelup-energy-label', 'ui.modal.levelup.max_energy', 'Max Energy');
         setText('levelup-confirm-btn', 'ui.common.confirm', 'Confirm');
+        setText('refill-title', 'ui.modal.refill_title', 'Refill');
         setText('settings-bgm-label', 'ui.settings.bgm', 'BGM');
         setText('settings-sfx-label', 'ui.settings.sfx', 'SFX');
         setText('settings-push-label', 'ui.settings.push', 'Push Notifications');
@@ -272,6 +275,7 @@
         setText('settings-redeem-btn', 'ui.settings.apply', 'Apply');
         setText('settings-support-btn', 'ui.settings.support', 'Support');
         setText('settings-delete-btn', 'ui.settings.delete', 'Delete Account');
+        setText('object-modal-title', 'ui.modal.object_title', 'Object');
         setText('object-modal-close-btn', 'ui.settings.close', 'Close');
         setText('battle-title-label', 'ui.battle.title', '? BATTLE');
         setText('battle-target-name', 'ui.battle.target', 'Target');
@@ -285,6 +289,7 @@
         setText('battle-prep-enemies-label', 'ui.battle.prep.enemies', 'Enemies');
         setText('battle-prep-cancel-btn', 'ui.common.cancel', 'Cancel');
         setText('battle-prep-start-btn', 'ui.battle.prep.start', 'Start Battle');
+        setText('battle-result-title', 'ui.battle.result.victory', 'VICTORY');
         setText('info-name', 'ui.info.no_selection', 'No selection');
         setText('info-desc', 'ui.info.select_hint', 'Select an item to see details.');
         setText('action-label', 'ui.common.none', '-');
@@ -301,6 +306,7 @@
         setText('lobby-cancel-btn', 'ui.common.cancel', 'Cancel');
         setText('chat-close-btn', 'ui.chat.close', 'Close');
         setText('chat-send-btn', 'ui.chat.send', 'Send');
+        setText('toast', 'ui.toast.default', 'Message');
         const redeemInput = document.getElementById('settings-redeem-input');
         if (redeemInput) redeemInput.placeholder = game.tr('ui.settings.redeem_placeholder', {}, 'Enter code');
         const lobbySelect = document.getElementById('lobby-channel-select');

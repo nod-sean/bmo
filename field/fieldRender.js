@@ -434,7 +434,6 @@
             window.KOVFieldUiModule.setFieldInfo(game, null, undefined, undefined, game.fieldInfoDeps);
         }
         if (game.previewPath) window.KOVFieldUiModule.applyPathPreview(game, game.previewPath);
-        if (game.moveTargetMode) window.KOVFieldUiModule.renderMoveTimeOverlay(game, deps);
         window.KOVFieldCameraModule.initFieldCamera(game, viewport, mapLayer, { PLAYER_START: deps.PLAYER_START });
     }
 

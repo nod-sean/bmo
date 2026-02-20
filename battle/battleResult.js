@@ -160,6 +160,41 @@
         retreatArmyToBase(game, armyId, resolved);
     }
 
+    function hasAnyUnitInSquad(squad) {
+        return Array.isArray(squad) && squad.some((u) => !!u);
+    }
+
+    function isAllSquadsEmpty(game) {
+        const squads = [game?.squad1, game?.squad2];
+        if (Array.isArray(game?.squad3)) squads.push(game.squad3);
+        return !squads.some((squad) => hasAnyUnitInSquad(squad));
+    }
+
+    function handleAllSquadsEmptyAfterBattle(game) {
+        if (!isAllSquadsEmpty(game)) return false;
+        if (window.KOVBattleUiModule && typeof window.KOVBattleUiModule.closeBattleModal === 'function') {
+            window.KOVBattleUiModule.closeBattleModal(game);
+        }
+        if (window.KOVUiShellModule && typeof window.KOVUiShellModule.closeModal === 'function') {
+            window.KOVUiShellModule.closeModal(game);
+        }
+        if (window.KOVUiShellModule && typeof window.KOVUiShellModule.openObjectModal === 'function') {
+            const title = game.tr('ui.guide.no_squad.title', {}, 'No Troops Available');
+            const body = `
+                <div style="font-size:13px;line-height:1.55;color:#e5e7eb;">
+                    ${game.tr('ui.guide.no_squad.body', {}, 'All squads are empty after battle. You have been moved to Merge scene. Recruit or merge units, then re-enter the field.')}
+                </div>
+            `;
+            window.KOVUiShellModule.openObjectModal(title, body);
+        }
+        if (window.KOVUiShellModule && typeof window.KOVUiShellModule.showToast === 'function') {
+            window.KOVUiShellModule.showToast(game, game.tr('toast.field_need_squad', {}, 'Deploy at least one squad before entering the field.'));
+        }
+        window.KOVPersistenceModule.saveGame(game);
+        game.requestRender();
+        return true;
+    }
+
     function getFieldObjectRewardEntries(rewardCode, deps) {
         const resolved = resolveBattleResultDeps(null, deps);
         const raw = resolved.FIELD_OBJECT_REWARD_TABLE?.[rewardCode] ?? resolved.FIELD_OBJECT_REWARD_TABLE?.[String(rewardCode)];
@@ -486,6 +521,8 @@
         applyDefenderLoss,
         applyAllyLoss,
         handleEmptySquadRetreat,
+        isAllSquadsEmpty,
+        handleAllSquadsEmptyAfterBattle,
         retreatArmyToBase,
         getFieldObjectRewardEntries,
         rollRewardValue,

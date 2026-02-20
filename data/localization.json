@@ -93,9 +93,11 @@
     "ui.world_ruleset.kind": "ui.world_ruleset.kind",
     "ui.world_ruleset.neutral": "ui.world_ruleset.neutral",
     "ui.world_ruleset.cruel": "ui.world_ruleset.cruel",
+    "ui.page.title": "ui.page.title",
     "ui.settings.title": "ui.settings.title",
     "ui.settings.reset": "ui.settings.reset",
     "ui.settings.close": "ui.settings.close",
+    "ui.modal.object_title": "ui.modal.object_title",
     "ui.settings.redeem_placeholder": "ui.settings.redeem_placeholder",
     "ui.lobby.channel.alpha": "ui.lobby.channel.alpha",
     "ui.lobby.channel.beta": "ui.lobby.channel.beta",
@@ -400,7 +402,9 @@
     "toast.reward_unknown": "toast.reward_unknown",
     "toast.reward_missed": "toast.reward_missed",
     "toast.dragon_contribution_tier": "toast.dragon_contribution_tier",
-    "toast.feature_disabled_beta": "Disabled in beta."
+    "toast.feature_disabled_beta": "Disabled in beta.",
+    "ui.guide.no_squad.title": "No Troops Available",
+    "ui.guide.no_squad.body": "All squads are empty after battle. You have been moved to Merge scene. Recruit or merge units, then re-enter the field."
   },
   "en": {
     "1101": "Militia",
@@ -496,9 +500,11 @@
     "ui.world_ruleset.kind": "ui.world_ruleset.kind",
     "ui.world_ruleset.neutral": "ui.world_ruleset.neutral",
     "ui.world_ruleset.cruel": "ui.world_ruleset.cruel",
+    "ui.page.title": "ui.page.title",
     "ui.settings.title": "ui.settings.title",
     "ui.settings.reset": "ui.settings.reset",
     "ui.settings.close": "ui.settings.close",
+    "ui.modal.object_title": "ui.modal.object_title",
     "ui.settings.redeem_placeholder": "ui.settings.redeem_placeholder",
     "ui.lobby.channel.alpha": "ui.lobby.channel.alpha",
     "ui.lobby.channel.beta": "ui.lobby.channel.beta",
@@ -803,6 +809,8 @@
     "toast.reward_unknown": "toast.reward_unknown",
     "toast.reward_missed": "toast.reward_missed",
     "toast.dragon_contribution_tier": "toast.dragon_contribution_tier",
-    "toast.feature_disabled_beta": "This feature is disabled in beta."
+    "toast.feature_disabled_beta": "This feature is disabled in beta.",
+    "ui.guide.no_squad.title": "No Troops Available",
+    "ui.guide.no_squad.body": "All squads are empty after battle. You have been moved to Merge scene. Recruit or merge units, then re-enter the field."
   }
 }

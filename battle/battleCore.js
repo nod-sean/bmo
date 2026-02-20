@@ -145,6 +145,10 @@
         const move = getBattleMoveOffset(step);
         const shot = getBattleShotOffset(step);
         const hasProjectile = !!step.rangedShot;
+        const moveDuration = getBattleMoveDuration(step, move.steps);
+        const shotDuration = 170;
+        const impactDuration = 140;
+        const impactDelayNoTravel = 110;
 
         game.battleFx = {
             attackerId: step.attackerId,
@@ -158,38 +162,60 @@
             pathSteps: move.steps,
             shotX: shot.x,
             shotY: shot.y,
-            hasProjectile
+            hasProjectile,
+            moveDuration,
+            shotDuration
         };
 
         const advanceTo = (phase) => {
             if (!game.battleFx || game.battleFx.attackerId !== step.attackerId || game.battleFx.defenderId !== step.defenderId) return;
+            if (phase === 'impact') applyStepDamage(game, step);
             game.battleFx.phase = phase;
             window.KOVBattleUiModule.renderBattleModal(game);
         };
 
         let delay = 0;
         if (step.moved) {
-            delay += 190;
+            delay += moveDuration;
             game.battleFxPhaseTimer = setTimeout(() => {
                 if (hasProjectile) {
                     advanceTo('projectile');
-                    game.battleFxPhaseTimer = setTimeout(() => advanceTo('impact'), 160);
+                    game.battleFxPhaseTimer = setTimeout(() => advanceTo('impact'), shotDuration);
                 } else {
                     advanceTo('impact');
                 }
             }, delay);
         } else if (hasProjectile) {
-            delay += 170;
+            delay += shotDuration;
             game.battleFxPhaseTimer = setTimeout(() => advanceTo('impact'), delay);
+        } else {
+            game.battleFxPhaseTimer = setTimeout(() => advanceTo('impact'), impactDelayNoTravel);
         }
 
         const clearDelay = step.moved
-            ? (hasProjectile ? 700 : 560)
-            : (hasProjectile ? 580 : 440);
+            ? (moveDuration + (hasProjectile ? shotDuration : 0) + impactDuration + 180)
+            : ((hasProjectile ? shotDuration : 0) + impactDuration + 300);
         game.battleFxClearTimer = setTimeout(() => {
             game.battleFx = null;
             window.KOVBattleUiModule.renderBattleModal(game);
         }, clearDelay);
+    }
+
+    function applyStepDamage(game, step) {
+        const targetId = step?.defenderId;
+        if (!targetId || !game?.battleContext) return;
+        let unit = game.battleContext.allies?.find((u) => u.id === targetId);
+        if (!unit) unit = game.battleContext.defenders?.find((u) => u.id === targetId);
+        if (!unit) return;
+        unit.hp = Number.isFinite(Number(step?.targetHp)) ? Number(step.targetHp) : unit.hp;
+    }
+
+    function getBattleMoveDuration(step, movedSteps) {
+        const steps = Math.max(1, Number(movedSteps || step?.requiredMove || 1));
+        const spd = Math.max(1, Number(step?.attackerSpd || 5));
+        const speedScale = 6 / Math.min(20, spd); // higher spd => shorter duration
+        const ms = Math.round(steps * 170 * speedScale);
+        return Math.max(140, Math.min(680, ms));
     }
 
     function getBattleMoveOffset(step) {
@@ -198,12 +224,15 @@
 
         const a = step?.attackerPos || { r: 1, c: 1 };
         const d = step?.defenderPos || { r: 1, c: 1 };
-        const rowDir = Math.sign((d.r ?? 1) - (a.r ?? 1));
-        const colDir = Math.sign((d.c ?? 1) - (a.c ?? 1));
-        const sideDir = step?.attackerTeam === 'B' ? -1 : 1;
+        const rowDelta = (d.r ?? 1) - (a.r ?? 1);
+        const colDelta = (d.c ?? 1) - (a.c ?? 1);
+        const dist = Math.max(1, Math.abs(rowDelta) + Math.abs(colDelta));
         const steps = Math.max(1, Math.min(3, movedSteps));
-        const horizontal = (5 + (steps * 3)) * sideDir;
-        const vertical = ((rowDir * 3) + (colDir * 1)) * steps;
+        // Move proportional to path progress so attacker visually approaches right before target.
+        const stepRatio = Math.max(0, Math.min(1, movedSteps / dist));
+        const cellPitch = 60; // battle cell + gap
+        const horizontal = colDelta * cellPitch * stepRatio * 0.95;
+        const vertical = rowDelta * cellPitch * stepRatio * 0.95;
         return { x: horizontal, y: vertical, steps };
     }
 

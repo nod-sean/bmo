@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KOV - Field Objects Update</title>
+    <title>KOV</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
 *,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}
@@ -529,43 +529,8 @@ canvas {
     --event-color: #facc15;
 }
 
-.field-time {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(4px, 0.5vw, 6px);
-    font-weight: 700;
-    color: #ffe08a;
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75);
-    pointer-events: none;
-    letter-spacing: -0.35px;
-    z-index: 25;
-    line-height: 1;
-    opacity: 0.5;
-    transform: translateY(var(--label-offset, -1px)) scale(var(--label-scale, 1));
-    transform-origin: center bottom;
-}
-
-.field-time.lower {
-    --label-offset: 0px;
-}
-
 .field-cell::after {
     z-index: 12;
-}
-
-.field-move-eligible {
-    outline: 1px dashed rgba(255, 255, 255, 0.35);
-}
-
-.field-move-source {
-    outline: 1px solid #4ade80;
-    box-shadow: 0 0 4px rgba(74, 222, 128, 0.9);
 }
 
 /* --- Phase 4: Social & BM Styles --- */
@@ -1670,14 +1635,34 @@ canvas {
 
 /* Battle System Styles */
 #modal-battle .modal-content {
-    max-width: 400px;
-    padding: 10px;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    padding: 8px 10px;
+    border-radius: 0;
+    border-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#modal-battle-prep .modal-content {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    border-width: 0;
+    overflow: hidden;
 }
 
 .battle-container {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    flex: 1;
+    min-height: 0;
 }
 
 .battle-header {
@@ -1692,22 +1677,86 @@ canvas {
 .battle-stage {
     position: relative;
     width: 100%;
-    height: 200px;
-    background: #222;
+    height: clamp(260px, 52vh, 560px);
+    background:
+        radial-gradient(circle at 30% 45%, rgba(37, 99, 235, 0.12), transparent 42%),
+        radial-gradient(circle at 70% 45%, rgba(220, 38, 38, 0.12), transparent 42%),
+        linear-gradient(180deg, #23262c 0%, #1a1d23 100%);
     border: 1px solid #444;
     border-radius: 6px;
     overflow: hidden;
+}
+
+.battle-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(
+            45deg,
+            rgba(255, 255, 255, 0.03) 0 2px,
+            rgba(0, 0, 0, 0.03) 2px 4px
+        );
+    pointer-events: none;
+}
+
+.battle-front {
+    position: absolute;
+    inset: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: clamp(6px, 1.8vw, 14px);
+}
+
+.battle-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    z-index: 2;
+}
+
+.battle-side-ally {
+    align-items: flex-start;
+}
+
+.battle-side-enemy {
+    align-items: flex-end;
+}
+
+.battle-prep-front {
+    position: static;
+    inset: auto;
+    margin-bottom: 8px;
 }
 
 .battle-stage.active {
     background: #331111;
 }
 
+.battle-stage-impact {
+    animation: battleStageShake 160ms ease-out;
+}
+
+.battle-stage-impact::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: battleStageFlash 150ms ease-out;
+}
+
+.battle-stage-impact-ally::after {
+    background: radial-gradient(circle at 32% 48%, rgba(96, 165, 250, 0.22) 0%, rgba(96, 165, 250, 0.0) 55%);
+}
+
+.battle-stage-impact-enemy::after {
+    background: radial-gradient(circle at 68% 48%, rgba(248, 113, 113, 0.22) 0%, rgba(248, 113, 113, 0.0) 55%);
+}
+
 .battle-log {
-    height: 80px;
+    height: clamp(110px, 22vh, 220px);
     overflow-y: auto;
     background: rgba(0, 0, 0, 0.5);
     font-size: 10px;
@@ -1749,14 +1798,14 @@ canvas {
 .battle-grid-check {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-    margin: 10px auto;
-    width: 140px;
+    gap: clamp(4px, 1.1vw, 8px);
+    margin: 6px auto;
+    width: min(43vw, 236px);
 }
 
 .battle-cell {
-    width: 40px;
-    height: 40px;
+    width: auto;
+    aspect-ratio: 1 / 1;
     background: rgba(255, 255, 255, 0.05);
     border: 1px dashed #666;
     display: flex;
@@ -1764,8 +1813,10 @@ canvas {
     justify-content: center;
     font-size: 20px;
     position: relative;
+    overflow: visible;
     --fx-move-x: 6px;
     --fx-move-y: 0px;
+    --fx-move-ms: 190ms;
     --fx-shot-x: 18px;
     --fx-shot-y: 0px;
 }
@@ -1800,7 +1851,11 @@ canvas {
 }
 
 .battle-cell-move .battle-unit {
-    animation: battlePathMove 190ms ease-out;
+    animation: battlePathMove var(--fx-move-ms) linear forwards;
+}
+
+.battle-cell-forward .battle-unit {
+    transform: translate(var(--fx-move-x), var(--fx-move-y));
 }
 
 .battle-cell-move::after {
@@ -1814,7 +1869,7 @@ canvas {
     background: rgba(147, 197, 253, 0.75);
     filter: blur(1px);
     opacity: 0;
-    animation: battleTrail 190ms ease-out;
+    animation: battleTrail var(--fx-move-ms) linear;
     pointer-events: none;
 }
 
@@ -1826,8 +1881,8 @@ canvas {
     width: 8px;
     height: 8px;
     border-radius: 999px;
-    background: radial-gradient(circle at 30% 30%, #fef9c3 0%, #f59e0b 55%, #b45309 100%);
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.75), 0 0 14px rgba(251, 191, 36, 0.55);
+    background: radial-gradient(circle at 30% 30%, #ffe4e6 0%, #ef4444 55%, #7f1d1d 100%);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.82), 0 0 14px rgba(248, 113, 113, 0.62);
     opacity: 0;
     animation: battleProjectile 170ms ease-out forwards;
     pointer-events: none;
@@ -1837,31 +1892,54 @@ canvas {
     animation: battleStrike 140ms ease-out;
 }
 
+.battle-cell-lunge .battle-unit {
+    animation: battleLungeAttack 300ms cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+.battle-cell-lunge::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    width: 32px;
+    height: 8px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.96), transparent);
+    filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.95));
+    pointer-events: none;
+    z-index: 7;
+    transform-origin: left center;
+    animation: battleSlashEffect 300ms ease-out forwards;
+}
+
 .battle-cell-hit .battle-unit {
     animation: battleShake 220ms ease-out;
 }
 
 .battle-dmg-float {
     position: absolute;
-    top: -8px;
+    top: 38%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -35%);
     color: #ef4444;
-    font-weight: 800;
-    font-size: 10px;
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.85);
+    font-weight: 900;
+    font-size: clamp(22px, 6.2vw, 34px);
+    letter-spacing: 0.2px;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.95), 0 0 4px rgba(239, 68, 68, 0.55);
     pointer-events: none;
-    animation: battleDamageFloat 420ms ease-out forwards;
+    z-index: 6;
+    animation: battleDamageFloat 4600ms ease-out forwards;
 }
 
 .battle-dmg-float.crit {
-    color: #f59e0b;
+    color: #ef4444 !important;
+    font-size: clamp(33px, 9.3vw, 51px);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.98), 0 0 12px rgba(239, 68, 68, 1), 0 0 24px rgba(248, 113, 113, 0.9);
 }
 
 @keyframes battlePathMove {
     0% { transform: translate(0, 0); }
-    62% { transform: translate(var(--fx-move-x), var(--fx-move-y)); }
-    100% { transform: translate(0, 0); }
+    100% { transform: translate(var(--fx-move-x), var(--fx-move-y)); }
 }
 
 @keyframes battleTrail {
@@ -1877,9 +1955,46 @@ canvas {
 }
 
 @keyframes battleStrike {
-    0% { transform: scale(1); }
-    60% { transform: scale(1.08); }
-    100% { transform: scale(1); }
+    0% { transform: translate(var(--fx-move-x), var(--fx-move-y)) scale(1); }
+    60% { transform: translate(var(--fx-move-x), var(--fx-move-y)) scale(1.08); }
+    100% { transform: translate(var(--fx-move-x), var(--fx-move-y)) scale(1); }
+}
+
+@keyframes battleLungeAttack {
+    0% {
+        transform: translate(var(--fx-move-x), var(--fx-move-y)) translateX(0) rotate(0deg);
+    }
+    18% {
+        transform: translate(var(--fx-move-x), var(--fx-move-y)) translateX(calc(-10px * var(--fx-lunge-dir, 1))) rotate(calc(-4deg * var(--fx-lunge-dir, 1)));
+    }
+    42% {
+        transform: translate(var(--fx-move-x), var(--fx-move-y)) translateX(calc(24px * var(--fx-lunge-dir, 1))) rotate(calc(7deg * var(--fx-lunge-dir, 1)));
+    }
+    70% {
+        transform: translate(var(--fx-move-x), var(--fx-move-y)) translateX(calc(18px * var(--fx-lunge-dir, 1))) rotate(calc(5deg * var(--fx-lunge-dir, 1)));
+    }
+    100% {
+        transform: translate(var(--fx-move-x), var(--fx-move-y)) translateX(0) rotate(0deg);
+    }
+}
+
+@keyframes battleSlashEffect {
+    0% {
+        opacity: 0;
+        transform: translate(calc(-50% + (0px * var(--fx-lunge-dir, 1))), -50%) scaleX(0.5);
+    }
+    25% {
+        opacity: 1;
+        transform: translate(calc(-50% + (16px * var(--fx-lunge-dir, 1))), -56%) scaleX(1);
+    }
+    65% {
+        opacity: 0.85;
+        transform: translate(calc(-50% + (42px * var(--fx-lunge-dir, 1))), -66%) scaleX(1.6);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + (58px * var(--fx-lunge-dir, 1))), -72%) scaleX(2);
+    }
 }
 
 @keyframes battleShake {
@@ -1891,8 +2006,45 @@ canvas {
 }
 
 @keyframes battleDamageFloat {
-    0% { opacity: 1; transform: translate(-50%, 0); }
-    100% { opacity: 0; transform: translate(-50%, -10px); }
+    0% { opacity: 0; transform: translate(-50%, -22%); }
+    8% { opacity: 1; transform: translate(-50%, -34%); }
+    78% { opacity: 1; transform: translate(-50%, -118%); }
+    100% { opacity: 0; transform: translate(-50%, -176%); }
+}
+
+.battle-hit-particle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--p-s, 6px);
+    height: var(--p-s, 6px);
+    border-radius: 999px;
+    background: radial-gradient(circle at 35% 35%, #ffe4e6 0%, #ef4444 48%, rgba(127, 29, 29, 0.98) 100%);
+    box-shadow: 0 0 8px rgba(248, 113, 113, 0.95), 0 0 14px rgba(239, 68, 68, 0.82);
+    pointer-events: none;
+    z-index: 8;
+    transform: translate(-50%, -50%);
+    animation: battleHitParticle var(--p-d, 220ms) ease-out forwards;
+}
+
+@keyframes battleHitParticle {
+    0% { opacity: 0.95; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--p-x, 0px)), calc(-50% + var(--p-y, -16px))) scale(0.4); }
+}
+
+@keyframes battleStageFlash {
+    0% { opacity: 0; }
+    28% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes battleStageShake {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-1px, 0); }
+    40% { transform: translate(1px, 0); }
+    60% { transform: translate(-1px, 0); }
+    80% { transform: translate(1px, 0); }
+    100% { transform: translate(0, 0); }
 }
 
 .battle-cell.enemy {
@@ -1912,15 +2064,20 @@ canvas {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .battle-hp-bar {
     width: 90%;
     height: 4px;
     background: #444;
-    margin-top: 2px;
+    margin-top: 0;
     border-radius: 2px;
     overflow: hidden;
+    position: absolute;
+    left: 5%;
+    bottom: 2px;
+    z-index: 3;
 }
 
 .battle-hp-fill {
@@ -2009,6 +2166,76 @@ canvas {
     cursor: default;
     opacity: 0.8;
 }
+
+.battle-unit-icon {
+    width: clamp(24px, 7.4vw, 42px);
+    height: clamp(24px, 7.4vw, 42px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(18px, 5.4vw, 30px);
+}
+
+.battle-cell:not(.prep) .battle-unit-icon {
+    width: 150%;
+    height: 172%;
+    transform: translateY(-12%);
+}
+
+.battle-cell.prep .battle-unit-icon {
+    width: 150%;
+    height: 172%;
+    transform: translateY(14%);
+}
+
+.battle-cell.prep .battle-unit {
+    justify-content: flex-end;
+    padding-bottom: 0;
+}
+
+.battle-prep-name {
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    transform: translateX(-50%);
+    width: 90%;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(8, 12, 24, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    text-align: center;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.95);
+    pointer-events: none;
+    z-index: 7;
+}
+
+.battle-cell:not(.prep) .battle-unit-sprite {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.battle-cell.enemy .battle-unit-sprite {
+    transform: scaleX(-1);
+}
+
+.battle-side .text-blue-400,
+.battle-side .text-red-400 {
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.battle-unit-sprite {
+    display: block;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
 </style>
 </head>
 
@@ -2060,11 +2287,11 @@ canvas {
             <div class="flex gap-2 mt-1 opacity-30 hover:opacity-100 transition-opacity justify-end items-center"
                 style="display:none;">
                 <button onclick="window.KOVPersistenceModule.resetGame(window.game)"
-                    class="bg-red-800 text-white px-2 py-1 rounded text-[10px] border border-red-500 hover:bg-red-600">🔄리셋</button>
+                    class="bg-red-800 text-white px-2 py-1 rounded text-[10px] border border-red-500 hover:bg-red-600">🔄Reset</button>
                 <button onclick="game.cheatEnergy()"
                     class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⚡+30</button>
                 <button onclick="game.spawnChest()"
-                    class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">🎁상자</button>
+                    class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">🎁Chest</button>
                 <button onclick="game.cheatLevelUp()"
                     class="bg-gray-700 text-white px-2 py-1 rounded text-[10px]">⬆️LvUP</button>
             </div>
@@ -2082,7 +2309,7 @@ canvas {
             </button>
             <div class="info-box" id="info-panel">
                 <div class="flex justify-between items-center"><span class="font-bold text-sm truncate"
-                        id="info-name">선택 없음</span><span class="text-[10px] text-gray-500 font-bold"
+                        id="info-name">No selection</span><span class="text-[10px] text-gray-500 font-bold"
                         id="info-class"></span></div>
                 <div class="stat-grid hidden" id="unit-stats-grid">
                     <div class="stat-item">❤<span id="st-hp">0</span></div>
@@ -2092,7 +2319,7 @@ canvas {
                     <div class="stat-item">🎯<span id="st-rng">0</span></div>
                     <div class="stat-item">🏃<span id="st-mov">0</span></div>
                 </div>
-                <div class="text-[10px] text-gray-600 truncate mt-1" id="info-desc">오브젝트를 선택하세요.</div>
+                <div class="text-[10px] text-gray-600 truncate mt-1" id="info-desc">Select an item to see details.</div>
             </div>
 
             <button class="action-btn" id="btn-action" onclick="window.KOVMergeBoardModule.handleAction(window.game, window.game.mergeActionDeps)">
@@ -2112,7 +2339,7 @@ canvas {
         <!-- Modals -->
         <div id="field-modal">
             <div class="flex justify-between items-center px-3 py-2 border-b border-gray-600 bg-gray-900">
-                <h2 class="text-lg font-bold text-yellow-400" id="modal-title">메뉴</h2>
+                <h2 class="text-lg font-bold text-yellow-400" id="modal-title">Menu</h2>
                 <button onclick="window.KOVUiShellModule.closeModal(window.game)" class="w-7 h-7 text-gray-400 font-bold text-sm">✖</button>
             </div>
             <div class="flex-1 overflow-auto bg-gray-800 p-2 relative" id="modal-content"></div>
@@ -2135,14 +2362,14 @@ canvas {
                     </div>
                 </div>
                 <button id="levelup-confirm-btn" onclick="document.getElementById('modal-levelup').classList.remove('open')"
-                    class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold">확인</button>
+                    class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold">Confirm</button>
             </div>
         </div>
 
         <div id="modal-refill" class="modal-overlay">
             <div class="modal-content">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold text-white" id="refill-title">리소스 충전</h2>
+                    <h2 class="text-lg font-bold text-white" id="refill-title">Refill</h2>
                     <button id="refill-close-btn" onclick="document.getElementById('modal-refill').classList.remove('open')"
                         class="text-gray-400">✖</button>
                 </div>
@@ -2152,7 +2379,7 @@ canvas {
 
         <div id="modal-settings" class="modal-overlay">
             <div class="modal-content">
-                <h2 id="settings-title" class="text-xl font-bold text-gray-200 mb-6">설정 (Settings)</h2>
+                <h2 id="settings-title" class="text-xl font-bold text-gray-200 mb-6">Settings</h2>
                 <div class="space-y-4 text-left">
                     <div class="flex justify-between items-center bg-gray-800 p-3 rounded">
                         <span id="settings-bgm-label">BGM</span>
@@ -2173,10 +2400,10 @@ canvas {
                         </div>
                     </div>
                     <div class="flex justify-between items-center bg-gray-800 p-3 rounded">
-                        <label id="locale-label" for="locale-select">언어 (Language)</label>
+                        <label id="locale-label" for="locale-select">Language</label>
                         <select id="locale-select" onchange="window.KOVUiShellModule.setLocale(window.game, this.value)"
                             class="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-gray-100">
-                            <option value="ko">한국어</option>
+                            <option value="ko">Korean</option>
                             <option value="en">English</option>
                         </select>
                     </div>
@@ -2211,12 +2438,11 @@ canvas {
                 </div>
                 <div class="mt-2 flex gap-2">
                     <button id="settings-reset-btn" onclick="window.KOVPersistenceModule.resetGame(window.game)"
-                        class="flex-1 bg-red-800 py-2 rounded text-xs text-red-200 border border-red-600 hover:bg-red-700">계정
-                        초기화</button>
+                        class="flex-1 bg-red-800 py-2 rounded text-xs text-red-200 border border-red-600 hover:bg-red-700">Reset Account</button>
                     <button id="settings-admin-btn" onclick="window.KOVUiShellModule.openAdminModal(window.game)"
-                        class="flex-1 bg-indigo-700 py-2 rounded text-xs text-indigo-100 border border-indigo-500 hover:bg-indigo-600">관리자</button>
+                        class="flex-1 bg-indigo-700 py-2 rounded text-xs text-indigo-100 border border-indigo-500 hover:bg-indigo-600">Admin</button>
                     <button id="settings-close-btn" onclick="document.getElementById('modal-settings').classList.remove('open')"
-                        class="flex-1 bg-gray-600 py-2 rounded text-xs border border-gray-500 hover:bg-gray-500">닫기</button>
+                        class="flex-1 bg-gray-600 py-2 rounded text-xs border border-gray-500 hover:bg-gray-500">Close</button>
                 </div>
             </div>
         </div>
@@ -2277,7 +2503,7 @@ canvas {
         <div id="modal-object" class="modal-overlay">
             <div class="modal-content">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold text-white" id="object-modal-title">오브젝트</h2>
+                    <h2 class="text-lg font-bold text-white" id="object-modal-title">Object</h2>
                     <button
                         onclick="document.getElementById('modal-object').classList.remove('open'); document.querySelector('#modal-object .modal-content')?.classList.remove('wide')"
                         class="text-gray-400">✖</button>
@@ -2285,7 +2511,7 @@ canvas {
                 <div id="object-modal-body" class="text-left text-sm text-gray-200 space-y-2"></div>
                 <button id="object-modal-close-btn"
                     onclick="document.getElementById('modal-object').classList.remove('open'); document.querySelector('#modal-object .modal-content')?.classList.remove('wide')"
-                    class="w-full bg-gray-700 hover:bg-gray-600 py-2 rounded text-xs border border-gray-600 mt-4">닫기</button>
+                    class="w-full bg-gray-700 hover:bg-gray-600 py-2 rounded text-xs border border-gray-600 mt-4">Close</button>
             </div>
         </div>
 
@@ -2297,13 +2523,12 @@ canvas {
                 </div>
                 <div class="battle-container">
                     <div class="battle-stage" id="battle-stage">
-                        <div class="flex gap-8 items-center">
-                            <div class="flex flex-col items-center">
+                        <div class="battle-front">
+                            <div class="battle-side battle-side-ally">
                                 <span id="battle-allies-label" class="text-blue-400 font-bold text-xs mb-1">ALLIES</span>
                                 <div class="battle-grid-check" id="battle-grid-ally"></div>
                             </div>
-                            <div class="text-2xl font-bold text-gray-500">VS</div>
-                            <div class="flex flex-col items-center">
+                            <div class="battle-side battle-side-enemy">
                                 <span id="battle-enemies-label" class="text-red-400 font-bold text-xs mb-1">ENEMIES</span>
                                 <div class="battle-grid-check" id="battle-grid-enemy"></div>
                             </div>
@@ -2328,13 +2553,12 @@ canvas {
                     <div id="battle-prep-subtitle" class="text-xs text-gray-400">Drag to change formation</div>
                 </div>
                 <div class="battle-container">
-                    <div class="flex justify-around items-center w-full mb-4">
-                        <div class="flex flex-col items-center">
+                    <div class="battle-front battle-prep-front">
+                        <div class="battle-side battle-side-ally">
                             <span id="battle-prep-allies-label" class="text-blue-400 font-bold text-sm mb-2">Allies (Drag)</span>
                             <div class="battle-grid-check" id="prep-grid-ally"></div>
                         </div>
-                        <div class="text-2xl font-bold text-gray-500">VS</div>
-                        <div class="flex flex-col items-center">
+                        <div class="battle-side battle-side-enemy">
                             <span id="battle-prep-enemies-label" class="text-red-400 font-bold text-sm mb-2">Enemies</span>
                             <div class="battle-grid-check" id="prep-grid-enemy"></div>
                         </div>
