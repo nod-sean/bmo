@@ -527,6 +527,9 @@
     }
 
     function produceFromChest(game, chest, r, c, deps) {
+        if (!Number.isFinite(Number(chest.usage))) {
+            chest.usage = 5;
+        }
         if (game.energy < 1) {
             window.KOVUiShellModule.showToast(game, game.tr('toast.energy_short_cost', { cost: 1 }, 'Not enough energy'));
             return;

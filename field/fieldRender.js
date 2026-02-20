@@ -374,11 +374,29 @@
                 cell.onclick = (e) => {
                     e.stopPropagation();
                     if (!game.isDraggingMap) {
+                        const displayType = evt ? evt.type : type;
                         if (game.moveTargetMode) {
+                            const moveArmy = game.armies?.[game.moveTargetMode.armyId];
+                            const isOnSameTile = !!moveArmy && moveArmy.r === r && moveArmy.c === c;
+                            const menuDeps = game.fieldActionMenuDeps || {};
+                            const has = (name) => typeof menuDeps[name] === 'function';
+                            const isMenuObject = (has('isShopTile') && menuDeps.isShopTile(displayType))
+                                || (has('isTavernTile') && menuDeps.isTavernTile(displayType))
+                                || (has('isGoldMineTile') && menuDeps.isGoldMineTile(displayType))
+                                || (has('isFountainTile') && menuDeps.isFountainTile(displayType))
+                                || (has('isGateTile') && menuDeps.isGateTile(displayType))
+                                || (has('isCitadelTile') && menuDeps.isCitadelTile(displayType))
+                                || (has('isRuinsTile') && menuDeps.isRuinsTile(displayType))
+                                || (has('isStatueTile') && menuDeps.isStatueTile(displayType));
+                            if (isOnSameTile && isMenuObject) {
+                                window.KOVFieldCommandModule.exitMoveTargetMode(game);
+                                window.KOVFieldUiModule.setFieldInfo(game, displayType, r, c, game.fieldInfoDeps);
+                                window.KOVFieldUiModule.showFieldActionMenu(game, r, c, displayType, e.clientX, e.clientY, game.fieldActionMenuDeps);
+                                return;
+                            }
                             window.KOVFieldCommandModule.handleMoveTargetClick(game, r, c, type, commandDeps);
                             return;
                         }
-                        const displayType = evt ? evt.type : type;
                         window.KOVFieldUiModule.setFieldInfo(game, displayType, r, c, game.fieldInfoDeps);
                         window.KOVFieldUiModule.showFieldActionMenu(game, r, c, displayType, e.clientX, e.clientY, game.fieldActionMenuDeps);
                     }

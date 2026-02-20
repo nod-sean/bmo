@@ -32,15 +32,16 @@
     }
 
     function placeUnitPreferred(game, item, deps) {
+        const Z = deps?.ZONES || { SQUAD1: 'SQUAD1', SQUAD2: 'SQUAD2', SQUAD3: 'SQUAD3', GRID: 'GRID' };
         let idx = placeUnitInSquad(item, game.squad1);
-        if (idx !== -1) return { placed: true, zone: deps.ZONES.SQUAD1, idx };
+        if (idx !== -1) return { placed: true, zone: Z.SQUAD1, idx };
         idx = placeUnitInSquad(item, game.squad2);
-        if (idx !== -1) return { placed: true, zone: deps.ZONES.SQUAD2, idx };
+        if (idx !== -1) return { placed: true, zone: Z.SQUAD2, idx };
         if (game.thirdSquadUnlocked) {
             idx = placeUnitInSquad(item, game.squad3);
-            if (idx !== -1) return { placed: true, zone: deps.ZONES.SQUAD3, idx };
+            if (idx !== -1) return { placed: true, zone: Z.SQUAD3, idx };
         }
-        if (window.KOVMergeBoardModule.spawnItem(game, item, game.spawnItemDeps)) return { placed: true, zone: deps.ZONES.GRID, idx: null };
+        if (window.KOVMergeBoardModule.spawnItem(game, item, game.spawnItemDeps)) return { placed: true, zone: Z.GRID, idx: null };
         return { placed: false };
     }
 
@@ -184,14 +185,15 @@
 
     function playSquadJoinFx(game, zone, idx, deps) {
         if (idx === null || idx === undefined) return;
-        const rect = zone === deps.ZONES.SQUAD1 ? game.squad1Rect : (zone === deps.ZONES.SQUAD2 ? game.squad2Rect : game.squad3Rect);
+        const Z = deps?.ZONES || { SQUAD1: 'SQUAD1', SQUAD2: 'SQUAD2', SQUAD3: 'SQUAD3' };
+        const rect = zone === Z.SQUAD1 ? game.squad1Rect : (zone === Z.SQUAD2 ? game.squad2Rect : game.squad3Rect);
         const size = game.squadCellSize;
         const x = rect.x + (idx % 3) * size + size / 2;
         const y = rect.y + Math.floor(idx / 3) * size + size / 2;
         game.spawnParticles(x, y, '#4ade80', 16, 'spark');
-        const name = zone === deps.ZONES.SQUAD1
+        const name = zone === Z.SQUAD1
             ? game.tr('ui.squad.joined', { index: 1 }, 'Squad 1 joined')
-            : (zone === deps.ZONES.SQUAD2
+            : (zone === Z.SQUAD2
                 ? game.tr('ui.squad.joined', { index: 2 }, 'Squad 2 joined')
                 : game.tr('ui.squad.joined', { index: 3 }, 'Squad 3 joined'));
         window.KOVUiShellModule.showJoinNotice(name);

@@ -70,6 +70,7 @@
             ITEM_TABLE: shared.ITEM_TABLE,
             UNIT_STATS: shared.UNIT_STATS,
             ITEM_TYPE: merge.ITEM_TYPE,
+            ZONES: merge.ZONES,
             getInfoFromCode: field.getInfoFromCode,
             isShopTile: field.isShopTile,
             isTavernTile: field.isTavernTile

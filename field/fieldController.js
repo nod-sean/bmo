@@ -33,7 +33,7 @@
             window.KOVFieldCommandModule.enterMoveTargetMode(
                 game,
                 preferredArmyId,
-                { center: false },
+                { center: true },
                 game.fieldMapRenderDeps
             );
         }

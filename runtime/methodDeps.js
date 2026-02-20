@@ -183,6 +183,8 @@
             isFountainTile,
             isShopTile,
             isTavernTile,
+            isRuinsTile,
+            isStatueTile,
             FIELD_EVENT_TYPES,
             FIELD_MAP_DATA,
             FIELD_TERRAIN_DATA,

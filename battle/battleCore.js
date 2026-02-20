@@ -17,6 +17,12 @@
                 const lookupCode = (d.code >= 10 && d.code < 20 && lv)
                     ? deps.getCode(d.code, lv)
                     : d.code;
+                const parsedType = (Number.isFinite(Number(lookupCode)) && Number(lookupCode) >= 1000)
+                    ? Math.floor(Number(lookupCode) / 100)
+                    : Number(d.code);
+                const parsedLevel = (Number.isFinite(Number(lookupCode)) && Number(lookupCode) >= 1000)
+                    ? Math.max(1, Number(lookupCode) % 100)
+                    : Math.max(1, Number(lv || 1));
                 const stats = deps.UNIT_STATS[d.code] || deps.UNIT_STATS[lookupCode] || { name: 'Enemy', hp: 20, atk: 5, def: 2, spd: 5 };
                 const classType = deps.getUnitClassTypeFromCode(d.code);
                 const spd = Number(stats.spd || 5);
@@ -33,8 +39,11 @@
                     spd,
                     range,
                     move,
+                    type: parsedType,
+                    level: parsedLevel,
+                    code: Number.isFinite(Number(lookupCode)) ? Number(lookupCode) : Number(d.code),
                     classType,
-                    defenderCode: d.code,
+                    defenderCode: Number.isFinite(Number(lookupCode)) ? Number(lookupCode) : d.code,
                     slot: currentSlot,
                     isEnemy: true
                 });
@@ -66,6 +75,9 @@
                 const stats = window.KOVGameCoreModule.applyFieldBuffsToStats(game, data);
                 units.push({
                     id: `ally-${i}`,
+                    type: Number(u.type),
+                    level: Math.max(1, Number(u.level || 1)),
+                    code: Number(u.type) >= 1000 ? Number(u.type) : Number(deps.getCode(u.type, u.level)),
                     name: data.name,
                     hp: stats.hp,
                     maxHp: stats.hp,
@@ -153,6 +165,10 @@
         game.battleFx = {
             attackerId: step.attackerId,
             defenderId: step.defenderId,
+            attackerTeam: step.attackerTeam,
+            defenderTeam: step.defenderTeam,
+            attackerSlot: Number(step.attackerSlot),
+            defenderSlot: Number(step.defenderSlot),
             moved: !!step.moved,
             damage: Number(step.damage || 0),
             isCrit: !!step.isCrit,
@@ -178,12 +194,7 @@
         if (step.moved) {
             delay += moveDuration;
             game.battleFxPhaseTimer = setTimeout(() => {
-                if (hasProjectile) {
-                    advanceTo('projectile');
-                    game.battleFxPhaseTimer = setTimeout(() => advanceTo('impact'), shotDuration);
-                } else {
-                    advanceTo('impact');
-                }
+                advanceTo('impact');
             }, delay);
         } else if (hasProjectile) {
             delay += shotDuration;
@@ -193,20 +204,30 @@
         }
 
         const clearDelay = step.moved
-            ? (moveDuration + (hasProjectile ? shotDuration : 0) + impactDuration + 180)
+            ? (moveDuration + impactDuration + 180)
             : ((hasProjectile ? shotDuration : 0) + impactDuration + 300);
         game.battleFxClearTimer = setTimeout(() => {
             game.battleFx = null;
-            window.KOVBattleUiModule.renderBattleModal(game);
         }, clearDelay);
         return clearDelay;
     }
 
     function applyStepDamage(game, step) {
+        if (!game?.battleContext) return;
+        let unit = null;
         const targetId = step?.defenderId;
-        if (!targetId || !game?.battleContext) return;
-        let unit = game.battleContext.allies?.find((u) => u.id === targetId);
-        if (!unit) unit = game.battleContext.defenders?.find((u) => u.id === targetId);
+        if (targetId) {
+            unit = game.battleContext.allies?.find((u) => u.id === targetId || u.sourceId === targetId);
+            if (!unit) unit = game.battleContext.defenders?.find((u) => u.id === targetId || u.sourceId === targetId);
+        }
+        if (!unit && Number.isFinite(Number(step?.defenderSlot))) {
+            const slot = Number(step.defenderSlot);
+            if (step?.defenderTeam === 'A') {
+                unit = game.battleContext.allies?.find((u) => Number(u.slot) === slot) || null;
+            } else if (step?.defenderTeam === 'B') {
+                unit = game.battleContext.defenders?.find((u) => Number(u.slot) === slot) || null;
+            }
+        }
         if (!unit) return;
         unit.hp = Number.isFinite(Number(step?.targetHp)) ? Number(step.targetHp) : unit.hp;
     }

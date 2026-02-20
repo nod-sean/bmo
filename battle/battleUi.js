@@ -64,19 +64,55 @@
         if (!game.battleContext) return;
         const ctx = game.battleContext;
         updateBattleStageImpactFx(game);
+        const isFxActor = (fx, unit, sideClass) => {
+            if (!fx || !unit) return false;
+            if (fx.attackerId && (fx.attackerId === unit.id || fx.attackerId === unit.sourceId)) return true;
+            const team = sideClass === 'ally' ? 'A' : 'B';
+            return fx.attackerTeam === team && Number.isFinite(Number(fx.attackerSlot)) && Number(unit.slot) === Number(fx.attackerSlot);
+        };
+        const isFxTarget = (fx, unit, sideClass) => {
+            if (!fx || !unit) return false;
+            if (fx.defenderId && (fx.defenderId === unit.id || fx.defenderId === unit.sourceId)) return true;
+            const team = sideClass === 'ally' ? 'A' : 'B';
+            return fx.defenderTeam === team && Number.isFinite(Number(fx.defenderSlot)) && Number(unit.slot) === Number(fx.defenderSlot);
+        };
 
         const renderSide = (gridId, sideClass, units) => {
             const grid = document.getElementById(gridId);
             if (!grid) return;
-            grid.innerHTML = '';
+            if (grid.children.length !== 9) {
+                grid.innerHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = `battle-cell ${sideClass}`;
+                    cell.innerHTML = `
+                        <div class="battle-unit">
+                            <div class="battle-unit-icon"></div>
+                            <div class="battle-hp-bar"><div class="battle-hp-fill"></div></div>
+                        </div>
+                    `;
+                    grid.appendChild(cell);
+                }
+            }
             for (let i = 0; i < 9; i++) {
-                const cell = document.createElement('div');
+                const cell = grid.children[i];
+                if (!cell) continue;
                 cell.className = `battle-cell ${sideClass}`;
+                cell.style.removeProperty('--fx-move-x');
+                cell.style.removeProperty('--fx-move-y');
+                cell.style.removeProperty('--fx-move-ms');
+                cell.style.removeProperty('--fx-shot-x');
+                cell.style.removeProperty('--fx-shot-y');
+                cell.style.removeProperty('--fx-lunge-dir');
+                cell.querySelectorAll('.battle-dmg-float, .battle-hit-particle').forEach((el) => el.remove());
                 const unit = units.find((u) => u.slot === i);
+                const iconEl = cell.querySelector('.battle-unit-icon');
+                const hpBarEl = cell.querySelector('.battle-hp-bar');
+                const hpFillEl = cell.querySelector('.battle-hp-fill');
                 if (unit) {
                     const fx = game.battleFx;
-                    const isActor = !!fx && fx.attackerId === unit.id;
-                    const isTarget = !!fx && fx.defenderId === unit.id;
+                    const isActor = isFxActor(fx, unit, sideClass);
+                    const isTarget = isFxTarget(fx, unit, sideClass);
                     if (isActor) {
                         cell.classList.add('battle-cell-actor');
                         if (fx.moved) {
@@ -96,6 +132,11 @@
                             cell.style.setProperty('--fx-shot-y', `${Number(fx.shotY || 0)}px`);
                         }
                         if (fx.phase === 'impact') {
+                            if (fx.hasProjectile) {
+                                cell.classList.add('battle-cell-shot');
+                                cell.style.setProperty('--fx-shot-x', `${Number(fx.shotX || 0)}px`);
+                                cell.style.setProperty('--fx-shot-y', `${Number(fx.shotY || 0)}px`);
+                            }
                             cell.classList.add('battle-cell-attack', 'battle-cell-lunge');
                             cell.style.setProperty('--fx-lunge-dir', fx.attackerTeam === 'B' ? '-1' : '1');
                         }
@@ -104,13 +145,15 @@
                         cell.classList.add('battle-cell-target');
                         if (fx.phase === 'impact') cell.classList.add('battle-cell-hit');
                     }
-                    const iconHtml = isDead(unit) ? 'DEAD' : getUnitSpriteHtml(game, unit, '100%');
-                    cell.innerHTML = `
-                        <div class="battle-unit">
-                            <div class="battle-unit-icon">${iconHtml}</div>
-                            <div class="battle-hp-bar"><div class="battle-hp-fill" style="width:${(unit.hp / unit.maxHp) * 100}%"></div></div>
-                        </div>
-                    `;
+                    const sprite = isDead(unit)
+                        ? { key: 'dead', html: '<span class="battle-dead-label">DEAD</span>' }
+                        : getUnitSpriteRenderData(game, unit, '100%');
+                    if (iconEl && iconEl.dataset.spriteKey !== sprite.key) {
+                        iconEl.innerHTML = sprite.html;
+                        iconEl.dataset.spriteKey = sprite.key;
+                    }
+                    if (hpBarEl) hpBarEl.style.display = '';
+                    if (hpFillEl) hpFillEl.style.width = `${(unit.hp / unit.maxHp) * 100}%`;
                     if (isTarget && fx.phase === 'impact' && fx.damage > 0) {
                         const dmg = document.createElement('div');
                         dmg.className = `battle-dmg-float${fx.isCrit ? ' crit' : ''}`;
@@ -130,19 +173,28 @@
                             cell.appendChild(particle);
                         }
                     }
+                } else {
+                    if (iconEl) {
+                        iconEl.innerHTML = '';
+                        iconEl.dataset.spriteKey = '';
+                    }
+                    if (hpBarEl) hpBarEl.style.display = 'none';
                 }
-                grid.appendChild(cell);
             }
         };
 
         renderSide('battle-grid-ally', 'ally', ctx.allies);
         renderSide('battle-grid-enemy', 'enemy', ctx.defenders);
 
+        renderBattleLog(game);
+    }
+
+    function renderBattleLog(game) {
+        if (!game?.battleContext) return;
         const logDiv = document.getElementById('battle-log');
-        if (logDiv) {
-            logDiv.innerHTML = ctx.log.map((l) => formatBattleLogLine(l)).join('');
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
+        if (!logDiv) return;
+        logDiv.innerHTML = game.battleContext.log.map((l) => formatBattleLogLine(l)).join('');
+        logDiv.scrollTop = logDiv.scrollHeight;
     }
 
     function updateBattleStageImpactFx(game) {
@@ -223,6 +275,10 @@
     }
 
     function getUnitSpriteHtml(game, unit, sizePx = 20) {
+        return getUnitSpriteRenderData(game, unit, sizePx).html;
+    }
+
+    function getUnitSpriteRenderData(game, unit, sizePx = 20) {
         const sizeValue = (typeof sizePx === 'number') ? `${sizePx}px` : String(sizePx || '100%');
         const assets = game?.assets;
         if (assets && typeof assets.getImage === 'function') {
@@ -231,23 +287,33 @@
             if (Number.isFinite(directType) && Number.isFinite(directLevel)) {
                 const direct = assets.getImage(directType, directLevel);
                 if (direct && direct.src) {
-                    return `<img class="battle-unit-sprite" style="width:${sizeValue};height:${sizeValue}" src="${direct.src}" alt="">`;
+                    return {
+                        key: `t:${directType}:l:${directLevel}`,
+                        html: `<img class="battle-unit-sprite" style="width:${sizeValue};height:${sizeValue}" src="${direct.src}" alt="">`
+                    };
                 }
             }
             const repCode = resolveRepresentativeCode(unit);
             if (repCode) {
                 const rep = assets.getImage(repCode);
                 if (rep && rep.src) {
-                    return `<img class="battle-unit-sprite" style="width:${sizeValue};height:${sizeValue}" src="${rep.src}" alt="">`;
+                    return {
+                        key: `c:${repCode}`,
+                        html: `<img class="battle-unit-sprite" style="width:${sizeValue};height:${sizeValue}" src="${rep.src}" alt="">`
+                    };
                 }
             }
         }
-        return getUnitIcon(Number(unit?.classType || unit?.type || 0));
+        return {
+            key: `icon:${Number(unit?.classType || unit?.type || 0)}`,
+            html: getUnitIcon(Number(unit?.classType || unit?.type || 0))
+        };
     }
 
     global.KOVBattleUiModule = {
         renderPrepGrid,
         renderBattleModal,
+        renderBattleLog,
         resetBattleResultOverlay,
         closeBattleModal,
         escapeHtml,

@@ -164,6 +164,19 @@
             const side = localizeBattleSide(game, m[1].toLowerCase());
             return game.tr('battle.log.max_turns_winner', { winner: side }, `Max turns reached, winner by remaining HP: ${side}`);
         }
+        m = text.match(/^No units can engage this turn\s*\((\d+)\/(\d+)\)$/i);
+        if (m) {
+            return game.tr(
+                'battle.log.stall_turn',
+                { cur: m[1], max: m[2] },
+                `No units can engage this turn (${m[1]}/${m[2]})`
+            );
+        }
+        m = text.match(/^Stalemate detected,\s*winner by remaining HP:\s*(allies|defenders)$/i);
+        if (m) {
+            const side = localizeBattleSide(game, m[1].toLowerCase());
+            return game.tr('battle.log.stalemate_winner', { winner: side }, `Stalemate detected, winner by remaining HP: ${side}`);
+        }
         m = text.match(/^(.+)\s+defeated$/i);
         if (m) return game.tr('battle.log.kill', { name: m[1] }, `${m[1]} defeated!`);
         return msg;
@@ -172,7 +185,9 @@
     function addBattleLog(game, msg) {
         if (!game.battleContext) return;
         game.battleContext.log.push(localizeBattleLogMessage(game, msg));
-        window.KOVBattleUiModule.renderBattleModal(game);
+        if (window.KOVBattleUiModule && typeof window.KOVBattleUiModule.renderBattleLog === 'function') {
+            window.KOVBattleUiModule.renderBattleLog(game);
+        }
     }
 
     function startBattleSimulation(game, deps) {
@@ -191,6 +206,7 @@
             game.battleSimulation = result;
             game.battleStepIndex = 0;
             game.battleContext.log = [];
+            window.KOVBattleUiModule.renderBattleModal(game);
             if (game.battleTimer) clearTimeout(game.battleTimer);
             battleTick(game);
         } catch (e) {
@@ -221,8 +237,8 @@
             addBattleLog(game, step.msg);
             const fxDelay = Number(window.KOVBattleCoreModule.triggerBattleFx(game, step) || 0);
             if (fxDelay > 0) nextDelay = fxDelay + 140;
+            window.KOVBattleUiModule.renderBattleModal(game);
         }
-        window.KOVBattleUiModule.renderBattleModal(game);
         if (game.battleContext && game.battleContext.active) {
             scheduleNextBattleTick(game, nextDelay);
         }
@@ -234,9 +250,11 @@
         game.battleContext.active = false;
         window.KOVBattleCoreModule.clearBattleFxTimers(game);
         game.battleFx = null;
-        window.KOVBattleResultModule.applyDefenderLoss(game, isWin);
+        const outcome = String(game.battleSimulation?.outcome || 'wipeout');
+        const decisiveWin = !!isWin && outcome === 'wipeout';
+        window.KOVBattleResultModule.applyDefenderLoss(game, decisiveWin);
         window.KOVBattleResultModule.applyAllyLoss(game);
-        window.KOVBattleResultModule.handleEmptySquadRetreat(game, isWin);
+        window.KOVBattleResultModule.handleEmptySquadRetreat(game, decisiveWin);
         const rewardCtx = game.battleContext
             ? { targetCode: game.battleContext.targetCode, r: game.battleContext.r, c: game.battleContext.c }
             : null;
@@ -245,7 +263,7 @@
         const overlay = document.getElementById('battle-result-overlay');
         if (overlay) overlay.style.display = 'flex';
 
-        if (isWin) {
+        if (decisiveWin) {
             if (title) {
                 title.innerText = game.tr('battle.result.victory', {}, 'VICTORY');
                 title.className = 'battle-result-text win';
@@ -264,7 +282,11 @@
                 title.className = 'battle-result-text lose';
             }
             game.sound.playError();
-            addBattleLog(game, game.tr('battle.log.defeat_retreat', {}, 'Battle lost. Army retreats.'));
+            if (isWin && outcome !== 'wipeout') {
+                addBattleLog(game, game.tr('battle.log.stalemate_retreat', {}, 'Battle ended without wipeout. Army retreats.'));
+            } else {
+                addBattleLog(game, game.tr('battle.log.defeat_retreat', {}, 'Battle lost. Army retreats.'));
+            }
             setTimeout(() => {
                 window.KOVBattleResultModule.handleAllSquadsEmptyAfterBattle(game);
             }, 200);

@@ -32,10 +32,13 @@
         const move = Number.isFinite(unit.move) ? unit.move : 1;
         const classType = Number.isFinite(unit.classType) ? unit.classType : 0;
 
+        const simId = `${team}-${slot}-${fallbackId}`;
+
         return {
             ...unit,
             team,
-            id: unit.id || fallbackId,
+            id: simId,
+            sourceId: unit.id || fallbackId,
             name: unit.name || fallbackId,
             hp,
             maxHp,
@@ -46,7 +49,8 @@
             range,
             move,
             classType,
-            slot
+            slot,
+            pos: this.getPos(slot, team)
         };
     }
 
@@ -60,9 +64,26 @@
     }
 
     getDistance(attacker, target) {
-        const a = this.getPos(attacker.slot, attacker.team);
-        const b = this.getPos(target.slot, target.team);
+        const a = attacker.pos || this.getPos(attacker.slot, attacker.team);
+        const b = target.pos || this.getPos(target.slot, target.team);
         return Math.abs(a.r - b.r) + Math.abs(a.c - b.c);
+    }
+
+    moveUnitToward(attacker, target, steps) {
+        if (!attacker || !target || steps <= 0) return 0;
+        if (!attacker.pos) attacker.pos = this.getPos(attacker.slot, attacker.team);
+        if (!target.pos) target.pos = this.getPos(target.slot, target.team);
+        let moved = 0;
+        while (moved < steps) {
+            const dr = target.pos.r - attacker.pos.r;
+            const dc = target.pos.c - attacker.pos.c;
+            if (dr === 0 && dc === 0) break;
+            if (Math.abs(dc) >= Math.abs(dr) && dc !== 0) attacker.pos.c += Math.sign(dc);
+            else if (dr !== 0) attacker.pos.r += Math.sign(dr);
+            else attacker.pos.c += Math.sign(dc);
+            moved += 1;
+        }
+        return moved;
     }
 
     isAdvantage(attackerClass, defenderClass) {
@@ -118,8 +139,8 @@
     attack(attacker, defender, steps, config, metadata) {
         const attackerAdv = this.isAdvantage(attacker.classType, defender.classType);
         const defenderAdv = this.isAdvantage(defender.classType, attacker.classType);
-        const attackerPos = this.getPos(attacker.slot, attacker.team);
-        const defenderPos = this.getPos(defender.slot, defender.team);
+        const attackerPos = attacker.pos || this.getPos(attacker.slot, attacker.team);
+        const defenderPos = defender.pos || this.getPos(defender.slot, defender.team);
         const hpBefore = defender.currentHp;
 
         let effectiveAtk = attacker.atk;
@@ -184,6 +205,7 @@
 
         let turn = 0;
         let winner = null;
+        let outcome = 'wipeout';
         let stallTurns = 0;
 
         while (turn < this.maxTurns) {
@@ -191,6 +213,7 @@
             steps.push({ type: 'log', msg: `[Turn ${turn}]` });
             let attacksThisTurn = 0;
             let noTargetCount = 0;
+            let movementThisTurn = 0;
 
             const activeUnits = [...teamA, ...teamB]
                 .filter((u) => u.currentHp > 0)
@@ -210,10 +233,42 @@
 
                 const selected = this.selectTarget(unit, liveEnemies);
                 if (!selected) {
-                    noTargetCount += 1;
+                    const nearest = liveEnemies
+                        .map((enemy) => ({ enemy, dist: this.getDistance(unit, enemy) }))
+                        .sort((a, b) => a.dist - b.dist)[0];
+                    if (nearest) {
+                        const need = Math.max(0, nearest.dist - Math.max(0, unit.range || 0));
+                        const advance = Math.min(Math.max(0, unit.move || 0), need);
+                        if (advance > 0) {
+                            const moved = this.moveUnitToward(unit, nearest.enemy, advance);
+                            movementThisTurn += moved;
+                            if (moved > 0) {
+                                const p = unit.pos || this.getPos(unit.slot, unit.team);
+                                steps.push({ type: 'log', msg: `${unit.name} advances to (x${p.c + 1},y${p.r + 1})` });
+                            } else {
+                                noTargetCount += 1;
+                            }
+                        } else {
+                            noTargetCount += 1;
+                        }
+                    } else {
+                        noTargetCount += 1;
+                    }
                     continue;
                 }
 
+                if (selected.requiredMove > 0) {
+                    const moved = this.moveUnitToward(unit, selected.enemy, selected.requiredMove);
+                    movementThisTurn += moved;
+                    selected.requiredMove = moved;
+                    selected.dist = this.getDistance(unit, selected.enemy);
+                    selected.stationary = selected.requiredMove <= 0;
+                }
+                // Strict guard: attack is valid only if final distance is within attack range.
+                if (selected.dist > Math.max(0, unit.range || 0)) {
+                    noTargetCount += 1;
+                    continue;
+                }
                 this.attack(unit, selected.enemy, steps, config, selected);
                 attacksThisTurn += 1;
             }
@@ -222,7 +277,7 @@
             if (teamA.every((u) => u.currentHp <= 0)) { winner = 'defenders'; break; }
             if (teamB.every((u) => u.currentHp <= 0)) { winner = 'allies'; break; }
 
-            if (attacksThisTurn <= 0) {
+            if (attacksThisTurn <= 0 && movementThisTurn <= 0) {
                 stallTurns += 1;
                 if (noTargetCount > 0) {
                     steps.push({
@@ -234,6 +289,7 @@
                     const hpA = teamA.reduce((sum, u) => sum + Math.max(0, u.currentHp), 0);
                     const hpB = teamB.reduce((sum, u) => sum + Math.max(0, u.currentHp), 0);
                     winner = hpA >= hpB ? 'allies' : 'defenders';
+                    outcome = 'stalemate';
                     steps.push({ type: 'log', msg: `Stalemate detected, winner by remaining HP: ${winner}` });
                     break;
                 }
@@ -246,6 +302,7 @@
             const hpA = teamA.reduce((sum, u) => sum + Math.max(0, u.currentHp), 0);
             const hpB = teamB.reduce((sum, u) => sum + Math.max(0, u.currentHp), 0);
             winner = hpA >= hpB ? 'allies' : 'defenders';
+            outcome = 'max_turns';
             steps.push({ type: 'log', msg: `Max turns reached, winner by remaining HP: ${winner}` });
         } else {
             steps.push({ type: 'log', msg: `Winner: ${winner}` });
@@ -253,6 +310,7 @@
 
         return {
             winner,
+            outcome,
             steps,
             survivors: winner === 'allies' ? teamA : teamB
         };
