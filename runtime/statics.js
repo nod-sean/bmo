@@ -12,7 +12,8 @@
         '2301', '2302', '2303', '2304', '2801', '2802', '2803', '2804', '2805',
         '3101', '3102', '3103', '3104', '3105',
         '1801', '1802', '1803', '1804', '1805', '1811', '1812', '1813', '1814', '1815',
-        '1821', '1822', '1823', '1824', '1825', 'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', 'field_bg'
+        '1821', '1822', '1823', '1824', '1825', '1831', '1832', '1833', '1834', '1835',
+        'lock', 'gold', 'energy', 'crystal', 'xp', 'levelup', 'field_bg'
     ];
 
     const CONFIG = Object.freeze({
@@ -42,7 +43,8 @@
         UNIT_DRAGON: 9999,
         ITEM_GOLD: 20,
         ITEM_ENERGY: 21,
-        ITEM_CRYSTAL: 22
+        ITEM_CRYSTAL: 22,
+        ITEM_AP: 23
     });
 
     const LOCK_TYPE = Object.freeze({ OPEN: 0, GOLD: 1, LEVEL: 2 });
@@ -58,4 +60,3 @@
         ZONES
     };
 })(window);
-

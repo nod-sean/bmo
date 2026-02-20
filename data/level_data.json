@@ -2,7 +2,7 @@
   {
     "level": 1,
     "xp": 0,
-    "energy_max": 50,
+    "energy_max": 30,
     "energy_regen": 1,
     "cp_max": 20,
     "cp_regen": 1
@@ -10,7 +10,7 @@
   {
     "level": 2,
     "xp": 10,
-    "energy_max": 52,
+    "energy_max": 32,
     "energy_regen": 1,
     "cp_max": 20,
     "cp_regen": 1
@@ -18,7 +18,7 @@
   {
     "level": 3,
     "xp": 25,
-    "energy_max": 54,
+    "energy_max": 34,
     "energy_regen": 1,
     "cp_max": 20,
     "cp_regen": 1
@@ -26,7 +26,7 @@
   {
     "level": 4,
     "xp": 43,
-    "energy_max": 56,
+    "energy_max": 36,
     "energy_regen": 1,
     "cp_max": 20,
     "cp_regen": 1
@@ -34,7 +34,7 @@
   {
     "level": 5,
     "xp": 65,
-    "energy_max": 58,
+    "energy_max": 38,
     "energy_regen": 1,
     "cp_max": 20,
     "cp_regen": 1
@@ -42,7 +42,7 @@
   {
     "level": 6,
     "xp": 91,
-    "energy_max": 60,
+    "energy_max": 40,
     "energy_regen": 1,
     "cp_max": 20,
     "cp_regen": 1
@@ -50,7 +50,7 @@
   {
     "level": 7,
     "xp": 122,
-    "energy_max": 62,
+    "energy_max": 42,
     "energy_regen": 1,
     "cp_max": 20,
     "cp_regen": 1
@@ -58,7 +58,7 @@
   {
     "level": 8,
     "xp": 157,
-    "energy_max": 64,
+    "energy_max": 44,
     "energy_regen": 1,
     "cp_max": 20,
     "cp_regen": 1
@@ -66,7 +66,7 @@
   {
     "level": 9,
     "xp": 197,
-    "energy_max": 66,
+    "energy_max": 46,
     "energy_regen": 1,
     "cp_max": 20,
     "cp_regen": 1
@@ -74,7 +74,7 @@
   {
     "level": 10,
     "xp": 242,
-    "energy_max": 68,
+    "energy_max": 48,
     "energy_regen": 1,
     "cp_max": 22,
     "cp_regen": 1
@@ -82,7 +82,7 @@
   {
     "level": 11,
     "xp": 292,
-    "energy_max": 70,
+    "energy_max": 50,
     "energy_regen": 1,
     "cp_max": 22,
     "cp_regen": 1
@@ -90,7 +90,7 @@
   {
     "level": 12,
     "xp": 347,
-    "energy_max": 72,
+    "energy_max": 51,
     "energy_regen": 1,
     "cp_max": 22,
     "cp_regen": 1
@@ -98,7 +98,7 @@
   {
     "level": 13,
     "xp": 408,
-    "energy_max": 74,
+    "energy_max": 52,
     "energy_regen": 1,
     "cp_max": 22,
     "cp_regen": 1
@@ -106,7 +106,7 @@
   {
     "level": 14,
     "xp": 474,
-    "energy_max": 76,
+    "energy_max": 53,
     "energy_regen": 1,
     "cp_max": 22,
     "cp_regen": 1
@@ -114,7 +114,7 @@
   {
     "level": 15,
     "xp": 546,
-    "energy_max": 78,
+    "energy_max": 54,
     "energy_regen": 1,
     "cp_max": 22,
     "cp_regen": 1
@@ -122,7 +122,7 @@
   {
     "level": 16,
     "xp": 624,
-    "energy_max": 80,
+    "energy_max": 55,
     "energy_regen": 1,
     "cp_max": 22,
     "cp_regen": 1
@@ -130,7 +130,7 @@
   {
     "level": 17,
     "xp": 708,
-    "energy_max": 82,
+    "energy_max": 56,
     "energy_regen": 1,
     "cp_max": 22,
     "cp_regen": 1
@@ -138,7 +138,7 @@
   {
     "level": 18,
     "xp": 798,
-    "energy_max": 84,
+    "energy_max": 57,
     "energy_regen": 1,
     "cp_max": 22,
     "cp_regen": 1
@@ -146,7 +146,7 @@
   {
     "level": 19,
     "xp": 894,
-    "energy_max": 86,
+    "energy_max": 58,
     "energy_regen": 1,
     "cp_max": 22,
     "cp_regen": 1
@@ -154,7 +154,7 @@
   {
     "level": 20,
     "xp": 996,
-    "energy_max": 88,
+    "energy_max": 59,
     "energy_regen": 1,
     "cp_max": 24,
     "cp_regen": 1
@@ -162,7 +162,7 @@
   {
     "level": 21,
     "xp": 1104,
-    "energy_max": 90,
+    "energy_max": 60,
     "energy_regen": 1,
     "cp_max": 24,
     "cp_regen": 1
@@ -170,7 +170,7 @@
   {
     "level": 22,
     "xp": 1219,
-    "energy_max": 92,
+    "energy_max": 61,
     "energy_regen": 1,
     "cp_max": 24,
     "cp_regen": 1
@@ -178,7 +178,7 @@
   {
     "level": 23,
     "xp": 1340,
-    "energy_max": 94,
+    "energy_max": 62,
     "energy_regen": 1,
     "cp_max": 24,
     "cp_regen": 1
@@ -186,7 +186,7 @@
   {
     "level": 24,
     "xp": 1468,
-    "energy_max": 96,
+    "energy_max": 63,
     "energy_regen": 1,
     "cp_max": 24,
     "cp_regen": 1
@@ -194,7 +194,7 @@
   {
     "level": 25,
     "xp": 1603,
-    "energy_max": 98,
+    "energy_max": 64,
     "energy_regen": 1,
     "cp_max": 24,
     "cp_regen": 1
@@ -202,7 +202,7 @@
   {
     "level": 26,
     "xp": 1744,
-    "energy_max": 100,
+    "energy_max": 65,
     "energy_regen": 1,
     "cp_max": 24,
     "cp_regen": 1
@@ -210,7 +210,7 @@
   {
     "level": 27,
     "xp": 1892,
-    "energy_max": 102,
+    "energy_max": 66,
     "energy_regen": 1,
     "cp_max": 24,
     "cp_regen": 1
@@ -218,7 +218,7 @@
   {
     "level": 28,
     "xp": 2047,
-    "energy_max": 104,
+    "energy_max": 67,
     "energy_regen": 1,
     "cp_max": 24,
     "cp_regen": 1
@@ -226,7 +226,7 @@
   {
     "level": 29,
     "xp": 2209,
-    "energy_max": 106,
+    "energy_max": 68,
     "energy_regen": 1,
     "cp_max": 24,
     "cp_regen": 1
@@ -234,7 +234,7 @@
   {
     "level": 30,
     "xp": 2378,
-    "energy_max": 108,
+    "energy_max": 69,
     "energy_regen": 1,
     "cp_max": 26,
     "cp_regen": 1
@@ -242,7 +242,7 @@
   {
     "level": 31,
     "xp": 2554,
-    "energy_max": 110,
+    "energy_max": 70,
     "energy_regen": 1,
     "cp_max": 26,
     "cp_regen": 1
@@ -250,7 +250,7 @@
   {
     "level": 32,
     "xp": 2738,
-    "energy_max": 112,
+    "energy_max": 71,
     "energy_regen": 1,
     "cp_max": 26,
     "cp_regen": 1
@@ -258,7 +258,7 @@
   {
     "level": 33,
     "xp": 2929,
-    "energy_max": 114,
+    "energy_max": 72,
     "energy_regen": 1,
     "cp_max": 26,
     "cp_regen": 1
@@ -266,7 +266,7 @@
   {
     "level": 34,
     "xp": 3127,
-    "energy_max": 116,
+    "energy_max": 73,
     "energy_regen": 1,
     "cp_max": 26,
     "cp_regen": 1
@@ -274,7 +274,7 @@
   {
     "level": 35,
     "xp": 3333,
-    "energy_max": 118,
+    "energy_max": 74,
     "energy_regen": 1,
     "cp_max": 26,
     "cp_regen": 1
@@ -282,7 +282,7 @@
   {
     "level": 36,
     "xp": 3546,
-    "energy_max": 120,
+    "energy_max": 75,
     "energy_regen": 1,
     "cp_max": 26,
     "cp_regen": 1
@@ -290,7 +290,7 @@
   {
     "level": 37,
     "xp": 3767,
-    "energy_max": 122,
+    "energy_max": 76,
     "energy_regen": 1,
     "cp_max": 26,
     "cp_regen": 1
@@ -298,7 +298,7 @@
   {
     "level": 38,
     "xp": 3996,
-    "energy_max": 124,
+    "energy_max": 77,
     "energy_regen": 1,
     "cp_max": 26,
     "cp_regen": 1
@@ -306,7 +306,7 @@
   {
     "level": 39,
     "xp": 4232,
-    "energy_max": 126,
+    "energy_max": 78,
     "energy_regen": 1,
     "cp_max": 26,
     "cp_regen": 1
@@ -314,7 +314,7 @@
   {
     "level": 40,
     "xp": 4476,
-    "energy_max": 128,
+    "energy_max": 79,
     "energy_regen": 1,
     "cp_max": 28,
     "cp_regen": 1
@@ -322,7 +322,7 @@
   {
     "level": 41,
     "xp": 4728,
-    "energy_max": 130,
+    "energy_max": 80,
     "energy_regen": 1,
     "cp_max": 28,
     "cp_regen": 1
@@ -330,7 +330,7 @@
   {
     "level": 42,
     "xp": 4988,
-    "energy_max": 132,
+    "energy_max": 81,
     "energy_regen": 1,
     "cp_max": 28,
     "cp_regen": 1
@@ -338,7 +338,7 @@
   {
     "level": 43,
     "xp": 5256,
-    "energy_max": 134,
+    "energy_max": 82,
     "energy_regen": 1,
     "cp_max": 28,
     "cp_regen": 1
@@ -346,7 +346,7 @@
   {
     "level": 44,
     "xp": 5532,
-    "energy_max": 136,
+    "energy_max": 83,
     "energy_regen": 1,
     "cp_max": 28,
     "cp_regen": 1
@@ -354,7 +354,7 @@
   {
     "level": 45,
     "xp": 5816,
-    "energy_max": 138,
+    "energy_max": 84,
     "energy_regen": 1,
     "cp_max": 28,
     "cp_regen": 1
@@ -362,7 +362,7 @@
   {
     "level": 46,
     "xp": 6108,
-    "energy_max": 140,
+    "energy_max": 85,
     "energy_regen": 1,
     "cp_max": 28,
     "cp_regen": 1
@@ -370,7 +370,7 @@
   {
     "level": 47,
     "xp": 6408,
-    "energy_max": 142,
+    "energy_max": 86,
     "energy_regen": 1,
     "cp_max": 28,
     "cp_regen": 1
@@ -378,7 +378,7 @@
   {
     "level": 48,
     "xp": 6716,
-    "energy_max": 144,
+    "energy_max": 87,
     "energy_regen": 1,
     "cp_max": 28,
     "cp_regen": 1
@@ -386,7 +386,7 @@
   {
     "level": 49,
     "xp": 7033,
-    "energy_max": 146,
+    "energy_max": 88,
     "energy_regen": 1,
     "cp_max": 28,
     "cp_regen": 1
@@ -394,7 +394,7 @@
   {
     "level": 50,
     "xp": 7358,
-    "energy_max": 148,
+    "energy_max": 89,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -402,7 +402,7 @@
   {
     "level": 51,
     "xp": 7691,
-    "energy_max": 150,
+    "energy_max": 90,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -410,7 +410,7 @@
   {
     "level": 52,
     "xp": 8033,
-    "energy_max": 152,
+    "energy_max": 91,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -418,7 +418,7 @@
   {
     "level": 53,
     "xp": 8383,
-    "energy_max": 154,
+    "energy_max": 92,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -426,7 +426,7 @@
   {
     "level": 54,
     "xp": 8742,
-    "energy_max": 156,
+    "energy_max": 93,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -434,7 +434,7 @@
   {
     "level": 55,
     "xp": 9109,
-    "energy_max": 158,
+    "energy_max": 94,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -442,7 +442,7 @@
   {
     "level": 56,
     "xp": 9485,
-    "energy_max": 160,
+    "energy_max": 95,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -450,7 +450,7 @@
   {
     "level": 57,
     "xp": 9870,
-    "energy_max": 162,
+    "energy_max": 96,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -458,7 +458,7 @@
   {
     "level": 58,
     "xp": 10263,
-    "energy_max": 164,
+    "energy_max": 97,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -466,7 +466,7 @@
   {
     "level": 59,
     "xp": 10665,
-    "energy_max": 166,
+    "energy_max": 98,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -474,7 +474,7 @@
   {
     "level": 60,
     "xp": 11076,
-    "energy_max": 168,
+    "energy_max": 99,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -482,7 +482,7 @@
   {
     "level": 61,
     "xp": 11496,
-    "energy_max": 170,
+    "energy_max": 100,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -490,7 +490,7 @@
   {
     "level": 62,
     "xp": 11925,
-    "energy_max": 172,
+    "energy_max": 101,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -498,7 +498,7 @@
   {
     "level": 63,
     "xp": 12363,
-    "energy_max": 174,
+    "energy_max": 102,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -506,7 +506,7 @@
   {
     "level": 64,
     "xp": 12810,
-    "energy_max": 176,
+    "energy_max": 103,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -514,7 +514,7 @@
   {
     "level": 65,
     "xp": 13266,
-    "energy_max": 178,
+    "energy_max": 104,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -522,7 +522,7 @@
   {
     "level": 66,
     "xp": 13731,
-    "energy_max": 180,
+    "energy_max": 105,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -530,7 +530,7 @@
   {
     "level": 67,
     "xp": 14205,
-    "energy_max": 182,
+    "energy_max": 106,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -538,7 +538,7 @@
   {
     "level": 68,
     "xp": 14688,
-    "energy_max": 184,
+    "energy_max": 107,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -546,7 +546,7 @@
   {
     "level": 69,
     "xp": 15180,
-    "energy_max": 186,
+    "energy_max": 108,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -554,7 +554,7 @@
   {
     "level": 70,
     "xp": 15682,
-    "energy_max": 188,
+    "energy_max": 109,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -562,7 +562,7 @@
   {
     "level": 71,
     "xp": 16193,
-    "energy_max": 190,
+    "energy_max": 110,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -570,7 +570,7 @@
   {
     "level": 72,
     "xp": 16713,
-    "energy_max": 192,
+    "energy_max": 111,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -578,7 +578,7 @@
   {
     "level": 73,
     "xp": 17242,
-    "energy_max": 194,
+    "energy_max": 112,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -586,7 +586,7 @@
   {
     "level": 74,
     "xp": 17781,
-    "energy_max": 196,
+    "energy_max": 113,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -594,7 +594,7 @@
   {
     "level": 75,
     "xp": 18329,
-    "energy_max": 198,
+    "energy_max": 114,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -602,7 +602,7 @@
   {
     "level": 76,
     "xp": 18887,
-    "energy_max": 200,
+    "energy_max": 115,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -610,7 +610,7 @@
   {
     "level": 77,
     "xp": 19454,
-    "energy_max": 200,
+    "energy_max": 116,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -618,7 +618,7 @@
   {
     "level": 78,
     "xp": 20031,
-    "energy_max": 200,
+    "energy_max": 117,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -626,7 +626,7 @@
   {
     "level": 79,
     "xp": 20617,
-    "energy_max": 200,
+    "energy_max": 118,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -634,7 +634,7 @@
   {
     "level": 80,
     "xp": 21213,
-    "energy_max": 200,
+    "energy_max": 119,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -642,7 +642,7 @@
   {
     "level": 81,
     "xp": 21819,
-    "energy_max": 200,
+    "energy_max": 120,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -650,7 +650,7 @@
   {
     "level": 82,
     "xp": 22434,
-    "energy_max": 200,
+    "energy_max": 121,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -658,7 +658,7 @@
   {
     "level": 83,
     "xp": 23059,
-    "energy_max": 200,
+    "energy_max": 122,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -666,7 +666,7 @@
   {
     "level": 84,
     "xp": 23694,
-    "energy_max": 200,
+    "energy_max": 123,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -674,7 +674,7 @@
   {
     "level": 85,
     "xp": 24339,
-    "energy_max": 200,
+    "energy_max": 124,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -682,7 +682,7 @@
   {
     "level": 86,
     "xp": 24994,
-    "energy_max": 200,
+    "energy_max": 125,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -690,7 +690,7 @@
   {
     "level": 87,
     "xp": 25658,
-    "energy_max": 200,
+    "energy_max": 126,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -698,7 +698,7 @@
   {
     "level": 88,
     "xp": 26332,
-    "energy_max": 200,
+    "energy_max": 127,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -706,7 +706,7 @@
   {
     "level": 89,
     "xp": 27016,
-    "energy_max": 200,
+    "energy_max": 128,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -714,7 +714,7 @@
   {
     "level": 90,
     "xp": 27710,
-    "energy_max": 200,
+    "energy_max": 129,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -722,7 +722,7 @@
   {
     "level": 91,
     "xp": 28414,
-    "energy_max": 200,
+    "energy_max": 130,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -730,7 +730,7 @@
   {
     "level": 92,
     "xp": 29128,
-    "energy_max": 200,
+    "energy_max": 131,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -738,7 +738,7 @@
   {
     "level": 93,
     "xp": 29852,
-    "energy_max": 200,
+    "energy_max": 132,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -746,7 +746,7 @@
   {
     "level": 94,
     "xp": 30587,
-    "energy_max": 200,
+    "energy_max": 133,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -754,7 +754,7 @@
   {
     "level": 95,
     "xp": 31332,
-    "energy_max": 200,
+    "energy_max": 134,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -762,7 +762,7 @@
   {
     "level": 96,
     "xp": 32087,
-    "energy_max": 200,
+    "energy_max": 135,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -770,7 +770,7 @@
   {
     "level": 97,
     "xp": 32852,
-    "energy_max": 200,
+    "energy_max": 136,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -778,7 +778,7 @@
   {
     "level": 98,
     "xp": 33627,
-    "energy_max": 200,
+    "energy_max": 137,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -786,7 +786,7 @@
   {
     "level": 99,
     "xp": 34413,
-    "energy_max": 200,
+    "energy_max": 138,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -794,7 +794,7 @@
   {
     "level": 100,
     "xp": 35209,
-    "energy_max": 200,
+    "energy_max": 139,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -802,7 +802,7 @@
   {
     "level": 101,
     "xp": 36015,
-    "energy_max": 200,
+    "energy_max": 140,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -810,7 +810,7 @@
   {
     "level": 102,
     "xp": 36832,
-    "energy_max": 200,
+    "energy_max": 141,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -818,7 +818,7 @@
   {
     "level": 103,
     "xp": 37659,
-    "energy_max": 200,
+    "energy_max": 142,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -826,7 +826,7 @@
   {
     "level": 104,
     "xp": 38496,
-    "energy_max": 200,
+    "energy_max": 143,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -834,7 +834,7 @@
   {
     "level": 105,
     "xp": 39344,
-    "energy_max": 200,
+    "energy_max": 144,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -842,7 +842,7 @@
   {
     "level": 106,
     "xp": 40202,
-    "energy_max": 200,
+    "energy_max": 145,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -850,7 +850,7 @@
   {
     "level": 107,
     "xp": 41071,
-    "energy_max": 200,
+    "energy_max": 146,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -858,7 +858,7 @@
   {
     "level": 108,
     "xp": 41950,
-    "energy_max": 200,
+    "energy_max": 147,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -866,7 +866,7 @@
   {
     "level": 109,
     "xp": 42840,
-    "energy_max": 200,
+    "energy_max": 148,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -874,7 +874,7 @@
   {
     "level": 110,
     "xp": 43741,
-    "energy_max": 200,
+    "energy_max": 149,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -882,7 +882,7 @@
   {
     "level": 111,
     "xp": 44652,
-    "energy_max": 200,
+    "energy_max": 150,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -890,7 +890,7 @@
   {
     "level": 112,
     "xp": 45574,
-    "energy_max": 200,
+    "energy_max": 151,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -898,7 +898,7 @@
   {
     "level": 113,
     "xp": 46507,
-    "energy_max": 200,
+    "energy_max": 152,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -906,7 +906,7 @@
   {
     "level": 114,
     "xp": 47450,
-    "energy_max": 200,
+    "energy_max": 153,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -914,7 +914,7 @@
   {
     "level": 115,
     "xp": 48404,
-    "energy_max": 200,
+    "energy_max": 154,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -922,7 +922,7 @@
   {
     "level": 116,
     "xp": 49369,
-    "energy_max": 200,
+    "energy_max": 155,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -930,7 +930,7 @@
   {
     "level": 117,
     "xp": 50345,
-    "energy_max": 200,
+    "energy_max": 156,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -938,7 +938,7 @@
   {
     "level": 118,
     "xp": 51331,
-    "energy_max": 200,
+    "energy_max": 157,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -946,7 +946,7 @@
   {
     "level": 119,
     "xp": 52328,
-    "energy_max": 200,
+    "energy_max": 158,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -954,7 +954,7 @@
   {
     "level": 120,
     "xp": 53336,
-    "energy_max": 200,
+    "energy_max": 159,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -962,7 +962,7 @@
   {
     "level": 121,
     "xp": 54355,
-    "energy_max": 200,
+    "energy_max": 160,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -970,7 +970,7 @@
   {
     "level": 122,
     "xp": 55385,
-    "energy_max": 200,
+    "energy_max": 161,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -978,7 +978,7 @@
   {
     "level": 123,
     "xp": 56426,
-    "energy_max": 200,
+    "energy_max": 162,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -986,7 +986,7 @@
   {
     "level": 124,
     "xp": 57478,
-    "energy_max": 200,
+    "energy_max": 163,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -994,7 +994,7 @@
   {
     "level": 125,
     "xp": 58541,
-    "energy_max": 200,
+    "energy_max": 164,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1002,7 +1002,7 @@
   {
     "level": 126,
     "xp": 59615,
-    "energy_max": 200,
+    "energy_max": 165,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1010,7 +1010,7 @@
   {
     "level": 127,
     "xp": 60700,
-    "energy_max": 200,
+    "energy_max": 166,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1018,7 +1018,7 @@
   {
     "level": 128,
     "xp": 61796,
-    "energy_max": 200,
+    "energy_max": 167,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1026,7 +1026,7 @@
   {
     "level": 129,
     "xp": 62903,
-    "energy_max": 200,
+    "energy_max": 168,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1034,7 +1034,7 @@
   {
     "level": 130,
     "xp": 64022,
-    "energy_max": 200,
+    "energy_max": 169,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1042,7 +1042,7 @@
   {
     "level": 131,
     "xp": 65152,
-    "energy_max": 200,
+    "energy_max": 170,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1050,7 +1050,7 @@
   {
     "level": 132,
     "xp": 66293,
-    "energy_max": 200,
+    "energy_max": 171,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1058,7 +1058,7 @@
   {
     "level": 133,
     "xp": 67445,
-    "energy_max": 200,
+    "energy_max": 172,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1066,7 +1066,7 @@
   {
     "level": 134,
     "xp": 68609,
-    "energy_max": 200,
+    "energy_max": 173,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1074,7 +1074,7 @@
   {
     "level": 135,
     "xp": 69784,
-    "energy_max": 200,
+    "energy_max": 174,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1082,7 +1082,7 @@
   {
     "level": 136,
     "xp": 70970,
-    "energy_max": 200,
+    "energy_max": 175,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1090,7 +1090,7 @@
   {
     "level": 137,
     "xp": 72167,
-    "energy_max": 200,
+    "energy_max": 176,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1098,7 +1098,7 @@
   {
     "level": 138,
     "xp": 73376,
-    "energy_max": 200,
+    "energy_max": 177,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1106,7 +1106,7 @@
   {
     "level": 139,
     "xp": 74596,
-    "energy_max": 200,
+    "energy_max": 178,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1114,7 +1114,7 @@
   {
     "level": 140,
     "xp": 75828,
-    "energy_max": 200,
+    "energy_max": 179,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1122,7 +1122,7 @@
   {
     "level": 141,
     "xp": 77071,
-    "energy_max": 200,
+    "energy_max": 180,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1130,7 +1130,7 @@
   {
     "level": 142,
     "xp": 78326,
-    "energy_max": 200,
+    "energy_max": 181,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1138,7 +1138,7 @@
   {
     "level": 143,
     "xp": 79592,
-    "energy_max": 200,
+    "energy_max": 182,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1146,7 +1146,7 @@
   {
     "level": 144,
     "xp": 80870,
-    "energy_max": 200,
+    "energy_max": 183,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1154,7 +1154,7 @@
   {
     "level": 145,
     "xp": 82159,
-    "energy_max": 200,
+    "energy_max": 184,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1162,7 +1162,7 @@
   {
     "level": 146,
     "xp": 83460,
-    "energy_max": 200,
+    "energy_max": 185,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1170,7 +1170,7 @@
   {
     "level": 147,
     "xp": 84772,
-    "energy_max": 200,
+    "energy_max": 186,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1178,7 +1178,7 @@
   {
     "level": 148,
     "xp": 86096,
-    "energy_max": 200,
+    "energy_max": 187,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1186,7 +1186,7 @@
   {
     "level": 149,
     "xp": 87431,
-    "energy_max": 200,
+    "energy_max": 188,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1194,7 +1194,7 @@
   {
     "level": 150,
     "xp": 88778,
-    "energy_max": 200,
+    "energy_max": 189,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1202,7 +1202,7 @@
   {
     "level": 151,
     "xp": 90137,
-    "energy_max": 200,
+    "energy_max": 190,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1210,7 +1210,7 @@
   {
     "level": 152,
     "xp": 91508,
-    "energy_max": 200,
+    "energy_max": 191,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1218,7 +1218,7 @@
   {
     "level": 153,
     "xp": 92890,
-    "energy_max": 200,
+    "energy_max": 192,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1226,7 +1226,7 @@
   {
     "level": 154,
     "xp": 94284,
-    "energy_max": 200,
+    "energy_max": 193,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1234,7 +1234,7 @@
   {
     "level": 155,
     "xp": 95690,
-    "energy_max": 200,
+    "energy_max": 194,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1242,7 +1242,7 @@
   {
     "level": 156,
     "xp": 97108,
-    "energy_max": 200,
+    "energy_max": 195,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1250,7 +1250,7 @@
   {
     "level": 157,
     "xp": 98537,
-    "energy_max": 200,
+    "energy_max": 196,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1258,7 +1258,7 @@
   {
     "level": 158,
     "xp": 99978,
-    "energy_max": 200,
+    "energy_max": 197,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1266,7 +1266,7 @@
   {
     "level": 159,
     "xp": 101431,
-    "energy_max": 200,
+    "energy_max": 198,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1
@@ -1274,7 +1274,7 @@
   {
     "level": 160,
     "xp": 102896,
-    "energy_max": 200,
+    "energy_max": 199,
     "energy_regen": 1,
     "cp_max": 30,
     "cp_regen": 1

@@ -19,12 +19,14 @@
 
         const unlockGoldMap = gameData.unlock_conditions?.gold || [];
         const unlockLevelMap = gameData.unlock_conditions?.level || [];
+        const unlockItemMap = gameData.unlock_conditions?.item || [];
 
         return {
             MERGE_XP_DATA: mergeXpData,
             ITEM_VALUES: itemValues,
             UNLOCK_GOLD_MAP: unlockGoldMap,
-            UNLOCK_LEVEL_MAP: unlockLevelMap
+            UNLOCK_LEVEL_MAP: unlockLevelMap,
+            UNLOCK_ITEM_MAP: unlockItemMap
         };
     }
 

@@ -333,7 +333,10 @@
             game.gold += net;
             const rebellionTriggered = maybeTriggerRebellion(game, { unpaid, totalUpkeep, totalTax }, deps);
             window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
-            if (net !== 0 && document.getElementById('field-modal').classList.contains('open')) {
+            const isFieldOpen = document.getElementById('field-modal')?.classList.contains('open');
+            const isBattleOpen = document.getElementById('modal-battle')?.classList.contains('open')
+                || document.getElementById('modal-battle-prep')?.classList.contains('open');
+            if (net !== 0 && isFieldOpen && !isBattleOpen) {
                 const sign = net >= 0 ? '+' : '';
                 window.KOVUiShellModule.showFloatingText(`${sign}${net} G (Tax)`, net >= 0 ? '#ffd700' : '#f87171');
             }

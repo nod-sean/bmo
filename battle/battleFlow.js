@@ -191,12 +191,17 @@
             game.battleSimulation = result;
             game.battleStepIndex = 0;
             game.battleContext.log = [];
-            if (game.battleTimer) clearInterval(game.battleTimer);
+            if (game.battleTimer) clearTimeout(game.battleTimer);
             battleTick(game);
-            game.battleTimer = setInterval(() => battleTick(game), 800);
         } catch (e) {
             addBattleLog(game, game.tr('battle.error.simulation', { message: e.message }, `Simulation Error: ${e.message}`));
         }
+    }
+
+    function scheduleNextBattleTick(game, delayMs) {
+        if (game.battleTimer) clearTimeout(game.battleTimer);
+        const delay = Math.max(360, Number(delayMs || 1000));
+        game.battleTimer = setTimeout(() => battleTick(game), delay);
     }
 
     function battleTick(game) {
@@ -208,17 +213,24 @@
         }
         const step = steps[game.battleStepIndex];
         game.battleStepIndex++;
+        let nextDelay = 920;
         if (step.type === 'log') {
             addBattleLog(game, step.msg);
+            nextDelay = 680;
         } else if (step.type === 'attack') {
             addBattleLog(game, step.msg);
-            window.KOVBattleCoreModule.triggerBattleFx(game, step);
+            const fxDelay = Number(window.KOVBattleCoreModule.triggerBattleFx(game, step) || 0);
+            if (fxDelay > 0) nextDelay = fxDelay + 140;
         }
         window.KOVBattleUiModule.renderBattleModal(game);
+        if (game.battleContext && game.battleContext.active) {
+            scheduleNextBattleTick(game, nextDelay);
+        }
     }
 
     function endBattle(game, isWin) {
-        clearInterval(game.battleTimer);
+        clearTimeout(game.battleTimer);
+        game.battleTimer = null;
         game.battleContext.active = false;
         window.KOVBattleCoreModule.clearBattleFxTimers(game);
         game.battleFx = null;

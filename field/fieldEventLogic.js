@@ -37,7 +37,7 @@
             return false;
         }
         if (game.cp < gp.DUNGEON_ENTRY_CP_COST) {
-            if (showToast) window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: gp.DUNGEON_ENTRY_CP_COST }, `Not enough CP (${gp.DUNGEON_ENTRY_CP_COST})`));
+            if (showToast) window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: gp.DUNGEON_ENTRY_CP_COST }, `Not enough AP (${gp.DUNGEON_ENTRY_CP_COST})`));
             return false;
         }
         return true;
@@ -55,7 +55,7 @@
         window.KOVUiShellModule.showToast(game, game.tr(
             'toast.dungeon_entry_paid',
             { gold: gp.DUNGEON_ENTRY_GOLD_COST, energy: gp.DUNGEON_ENTRY_ENERGY_COST, cp: gp.DUNGEON_ENTRY_CP_COST },
-            `Dungeon entry: -${gp.DUNGEON_ENTRY_GOLD_COST}G -${gp.DUNGEON_ENTRY_ENERGY_COST}EN -${gp.DUNGEON_ENTRY_CP_COST}CP`
+            `Dungeon entry: -${gp.DUNGEON_ENTRY_GOLD_COST}G -${gp.DUNGEON_ENTRY_ENERGY_COST}EN -${gp.DUNGEON_ENTRY_CP_COST}AP`
         ));
     }
 
@@ -118,12 +118,16 @@
     function populateFieldEvents(game, deps) {
         if (Object.keys(game.fieldEvents).length > 0) return;
         const gp = deps.GAMEPLAY || {};
+        const detectObjectKind = typeof deps.getFieldObjectKind === 'function'
+            ? deps.getFieldObjectKind
+            : ((code) => (Number(code) >= 5000 ? 'object' : null));
         for (let r = 0; r < deps.MAP_SIZE; r++) {
             for (let c = 0; c < deps.MAP_SIZE; c++) {
                 const terrain = deps.FIELD_MAP_DATA[r][c];
                 if (terrain === 0) continue;
                 if (deps.isBlockingField(terrain)) continue;
                 if (deps.isBorderTerrain(terrain)) continue;
+                if (detectObjectKind(terrain)) continue;
                 if (Math.abs(r - deps.PLAYER_START.r) < 3 && Math.abs(c - deps.PLAYER_START.c) < 3) continue;
                 const rand = Math.random() * 1000;
                 let cumulative = 0;

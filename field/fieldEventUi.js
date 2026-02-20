@@ -15,7 +15,7 @@
         }
         const cpCost = Math.max(0, Number(gp.PORTAL_CP_COST));
         if (game.cp < cpCost) {
-            window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough CP (${cpCost})`));
+            window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough AP (${cpCost})`));
             return;
         }
 
@@ -34,8 +34,8 @@
         }
 
         const confirmText = destination
-            ? game.tr('ui.modal.portal_confirm_target', { row: target.r + 1, col: target.c + 1, cost: cpCost }, `Use portal (CP ${cpCost}) and move to (${target.r + 1}, ${target.c + 1})?`)
-            : game.tr('ui.modal.portal_confirm_random_cost', { cost: cpCost }, `Use portal (CP ${cpCost}) and move to a random position?`);
+            ? game.tr('ui.modal.portal_confirm_target', { row: target.r + 1, col: target.c + 1, cost: cpCost }, `Use portal (AP ${cpCost}) and move to (${target.r + 1}, ${target.c + 1})?`)
+            : game.tr('ui.modal.portal_confirm_random_cost', { cost: cpCost }, `Use portal (AP ${cpCost}) and move to a random position?`);
         if (!window.confirm(confirmText)) return;
 
         const army = window.KOVFieldEventLogicModule.getPortalActorArmy(game, preferredArmyId);
@@ -94,7 +94,7 @@
                     <div class="text-sm">${game.tr('ui.modal.victory.reward_gold_dynamic', { value: reward.gold }, `Gold +${reward.gold}`)}</div>
                     <div class="text-sm">${game.tr('ui.modal.victory.reward_gem_dynamic', { value: reward.gem }, `GEM +${reward.gem}`)}</div>
                     <div class="text-sm">${game.tr('ui.modal.victory.reward_energy_dynamic', { value: reward.energy }, `Energy +${reward.energy}`)}</div>
-                    <div class="text-sm">${game.tr('ui.modal.victory.reward_cp_dynamic', { value: reward.cp }, `CP +${reward.cp}`)}</div>
+                    <div class="text-sm">${game.tr('ui.modal.victory.reward_cp_dynamic', { value: reward.cp }, `AP +${reward.cp}`)}</div>
                     <div class="text-sm">${game.tr('ui.modal.victory.reward_points_dynamic', { value: reward.points }, `PT +${reward.points}`)}</div>
                 </div>
                 <button class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-8 rounded shadow-lg transform hover:scale-105 transition" onclick="window.KOVUiShellModule.closeModal(window.game)">

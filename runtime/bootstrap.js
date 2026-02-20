@@ -60,7 +60,8 @@
             PLAYER_START: deps.PLAYER_START,
             FIELD_EVENT_RATES: deps.FIELD_EVENT_RATES,
             isBlockingField: deps.isBlockingField,
-            isBorderTerrain: deps.isBorderTerrain
+            isBorderTerrain: deps.isBorderTerrain,
+            getFieldObjectKind: deps.getFieldObjectKind
         });
         game.occupiedTiles.add(`${deps.PLAYER_START.r},${deps.PLAYER_START.c}`);
         game.income = 0;
@@ -195,6 +196,7 @@
             LOCK_TYPE: deps.LOCK_TYPE,
             UNLOCK_LEVEL_MAP: deps.UNLOCK_LEVEL_MAP,
             UNLOCK_GOLD_MAP: deps.UNLOCK_GOLD_MAP,
+            UNLOCK_ITEM_MAP: deps.UNLOCK_ITEM_MAP,
             PLAYER_START: deps.PLAYER_START,
             FOG_RADIUS: deps.FOG_RADIUS,
             FIELD_EVENT_TYPES: deps.FIELD_EVENT_TYPES,
@@ -205,9 +207,11 @@
             LOCK_TYPE: deps.LOCK_TYPE,
             UNLOCK_LEVEL_MAP: deps.UNLOCK_LEVEL_MAP,
             UNLOCK_GOLD_MAP: deps.UNLOCK_GOLD_MAP,
+            UNLOCK_ITEM_MAP: deps.UNLOCK_ITEM_MAP,
             ITEM_TYPE: deps.ITEM_TYPE,
             CAMP_CAPACITY: deps.CAMP_CAPACITY,
-            getData: deps.getData
+            getData: deps.getData,
+            getInfoFromCode: deps.getInfoFromCode
         });
 
         window.KOVWorldSeasonModule.ensureAdminState(game, deps.WORLD_ADMIN_DEPS);

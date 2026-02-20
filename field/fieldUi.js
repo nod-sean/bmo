@@ -302,7 +302,7 @@
             effectSummaryParts.push(game.tr(
                 'ui.field.effect.dungeon_entry',
                 { gold: gp.DUNGEON_ENTRY_GOLD_COST, energy: gp.DUNGEON_ENTRY_ENERGY_COST, cp: gp.DUNGEON_ENTRY_CP_COST },
-                `Entry -${gp.DUNGEON_ENTRY_GOLD_COST}G -${gp.DUNGEON_ENTRY_ENERGY_COST}EN -${gp.DUNGEON_ENTRY_CP_COST}CP`
+                `Entry -${gp.DUNGEON_ENTRY_GOLD_COST}G -${gp.DUNGEON_ENTRY_ENERGY_COST}EN -${gp.DUNGEON_ENTRY_CP_COST}AP`
             ));
             const remainingMs = window.KOVFieldEventLogicModule.getDungeonCooldownRemainingMs(game, r, c, deps);
             if (remainingMs > 0) {

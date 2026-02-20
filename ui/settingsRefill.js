@@ -166,10 +166,11 @@
         content.innerHTML = '';
         modal.classList.add('open');
 
-        const data = Array.isArray(deps.REFILL_DATA[type]) ? deps.REFILL_DATA[type] : [];
+        const sourceKey = (type === 'cp' && Array.isArray(deps.REFILL_DATA.ap)) ? 'ap' : type;
+        const data = Array.isArray(deps.REFILL_DATA[sourceKey]) ? deps.REFILL_DATA[sourceKey] : [];
         title.innerText = type === 'energy' ? game.tr('ui.refill.energy', {}, 'Energy Refill')
             : (type === 'gold' ? game.tr('ui.refill.gold', {}, 'Gold Refill')
-                : (type === 'cp' ? game.tr('ui.refill.cp', {}, 'CP Refill')
+                : (type === 'cp' ? game.tr('ui.refill.ap', {}, 'AP Refill')
                     : game.tr('ui.refill.crystal', {}, 'Crystal Shop')));
 
         if (!data.length) {
@@ -198,7 +199,7 @@
             return;
         }
 
-        const refillKey = `${type}_refill`;
+        const refillKey = `${sourceKey}_refill`;
         data.forEach((row) => {
             const amount = Number(row[refillKey] || 0);
             const costCrystal = Number(row.crystal || 0);

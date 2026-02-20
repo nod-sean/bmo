@@ -24,6 +24,7 @@
             LOCK_TYPE,
             UNLOCK_LEVEL_MAP,
             UNLOCK_GOLD_MAP,
+            UNLOCK_ITEM_MAP,
             FIELD_OBJECT_REGEN,
             applyObjectRegenCycle,
             CAMP_CAPACITY,
@@ -85,6 +86,7 @@
             LOCK_TYPE,
             UNLOCK_LEVEL_MAP,
             UNLOCK_GOLD_MAP,
+            UNLOCK_ITEM_MAP,
             FIELD_OBJECT_REGEN,
             applyObjectRegenCycle,
             CAMP_CAPACITY,
@@ -158,7 +160,8 @@
             PLAYER_START,
             FIELD_EVENT_RATES,
             isBlockingField,
-            isBorderTerrain
+            isBorderTerrain,
+            getFieldObjectKind
         });
 
         const MERGE_LOOP_DEPS = Object.freeze({

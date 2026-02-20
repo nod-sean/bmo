@@ -42,6 +42,8 @@
                 armies: game.armies,
                 chatState: game.chatState,
                 socialState: game.socialState
+                ,
+                equipmentState: game.equipmentState
             };
             localStorage.setItem('kov_save_v1', JSON.stringify(data));
         } catch (e) { }
@@ -97,6 +99,7 @@
             if (data.settings) { game.settings = data.settings; window.KOVSettingsRefillModule.applySettings(game); }
             if (data.chatState && typeof data.chatState === 'object') game.chatState = data.chatState;
             if (data.socialState && typeof data.socialState === 'object') game.socialState = data.socialState;
+            if (data.equipmentState && typeof data.equipmentState === 'object') game.equipmentState = data.equipmentState;
             if (Array.isArray(data.chatLog) && data.chatLog.length) {
                 window.KOVLobbyChatModule.ensureChatState(game);
                 game.chatState.logsByChannel.world = data.chatLog.slice(-game.chatState.maxLogs);

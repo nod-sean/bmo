@@ -259,6 +259,74 @@ canvas {
     max-width: 360px;
 }
 
+.equipment-slot-card {
+    background: #1f2937;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: left;
+}
+
+.equipment-slot-label {
+    font-size: 10px;
+    color: #9ca3af;
+    margin-bottom: 2px;
+}
+
+.equipment-slot-name {
+    font-size: 13px;
+    color: #f3f4f6;
+    font-weight: 700;
+}
+
+.equipment-slot-desc {
+    font-size: 11px;
+    color: #d1d5db;
+}
+
+.equipment-bag-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: left;
+}
+
+.equipment-item-name {
+    font-size: 12px;
+    color: #f3f4f6;
+    font-weight: 700;
+}
+
+.equipment-item-meta {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.equipment-btn {
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.equipment-btn.equip {
+    background: #2563eb;
+    border-color: #1d4ed8;
+    color: #eff6ff;
+}
+
+.equipment-btn.unequip {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+
 .close-modal {
     position: absolute;
     top: 10px;
@@ -1736,7 +1804,7 @@ canvas {
 }
 
 .battle-stage-impact {
-    animation: battleStageShake 160ms ease-out;
+    animation: battleStageShake 120ms ease-out;
 }
 
 .battle-stage-impact::after {
@@ -1744,15 +1812,15 @@ canvas {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    animation: battleStageFlash 150ms ease-out;
+    animation: battleStageFlash 120ms ease-out;
 }
 
 .battle-stage-impact-ally::after {
-    background: radial-gradient(circle at 32% 48%, rgba(96, 165, 250, 0.22) 0%, rgba(96, 165, 250, 0.0) 55%);
+    background: radial-gradient(circle at 32% 48%, rgba(96, 165, 250, 0.08) 0%, rgba(96, 165, 250, 0.0) 52%);
 }
 
 .battle-stage-impact-enemy::after {
-    background: radial-gradient(circle at 68% 48%, rgba(248, 113, 113, 0.22) 0%, rgba(248, 113, 113, 0.0) 55%);
+    background: radial-gradient(circle at 68% 48%, rgba(248, 113, 113, 0.08) 0%, rgba(248, 113, 113, 0.0) 52%);
 }
 
 .battle-log {
@@ -1881,19 +1949,19 @@ canvas {
     width: 8px;
     height: 8px;
     border-radius: 999px;
-    background: radial-gradient(circle at 30% 30%, #ffe4e6 0%, #ef4444 55%, #7f1d1d 100%);
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.82), 0 0 14px rgba(248, 113, 113, 0.62);
+    background: radial-gradient(circle at 30% 30%, #fff7cc 0%, #f59e0b 55%, #92400e 100%);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.82), 0 0 14px rgba(251, 191, 36, 0.62);
     opacity: 0;
-    animation: battleProjectile 170ms ease-out forwards;
+    animation: battleProjectile 300ms ease-out forwards;
     pointer-events: none;
 }
 
 .battle-cell-attack .battle-unit {
-    animation: battleStrike 140ms ease-out;
+    animation: battleStrike 220ms ease-out;
 }
 
 .battle-cell-lunge .battle-unit {
-    animation: battleLungeAttack 300ms cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+    animation: battleLungeAttack 460ms cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
 }
 
 .battle-cell-lunge::after {
@@ -1904,16 +1972,16 @@ canvas {
     width: 32px;
     height: 8px;
     border-radius: 999px;
-    background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.96), transparent);
-    filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.95));
+    background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.96), transparent);
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.95));
     pointer-events: none;
     z-index: 7;
     transform-origin: left center;
-    animation: battleSlashEffect 300ms ease-out forwards;
+    animation: battleSlashEffect 420ms ease-out forwards;
 }
 
 .battle-cell-hit .battle-unit {
-    animation: battleShake 220ms ease-out;
+    animation: battleShake 300ms ease-out;
 }
 
 .battle-dmg-float {
@@ -2019,8 +2087,8 @@ canvas {
     width: var(--p-s, 6px);
     height: var(--p-s, 6px);
     border-radius: 999px;
-    background: radial-gradient(circle at 35% 35%, #ffe4e6 0%, #ef4444 48%, rgba(127, 29, 29, 0.98) 100%);
-    box-shadow: 0 0 8px rgba(248, 113, 113, 0.95), 0 0 14px rgba(239, 68, 68, 0.82);
+    background: radial-gradient(circle at 35% 35%, #fff7cc 0%, #f59e0b 48%, rgba(146, 64, 14, 0.98) 100%);
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.95), 0 0 14px rgba(245, 158, 11, 0.82);
     pointer-events: none;
     z-index: 8;
     transform: translate(-50%, -50%);
@@ -2034,7 +2102,7 @@ canvas {
 
 @keyframes battleStageFlash {
     0% { opacity: 0; }
-    28% { opacity: 1; }
+    24% { opacity: 1; }
     100% { opacity: 0; }
 }
 
@@ -2326,6 +2394,10 @@ canvas {
                 <span class="btn-icon" id="action-icon">💰</span>
                 <span class="btn-label" id="action-label">-</span>
             </button>
+            <button class="action-btn build-btn" style="margin-left:5px;" onclick="window.KOVEquipmentUiModule.openEquipmentModal(window.game)">
+                <span class="btn-icon">🛡️</span>
+                <span class="btn-label" id="footer-equipment-label">Equip</span>
+            </button>
             <button class="action-btn build-btn" style="margin-left:5px;" onclick="window.game.mergeController.toggleShop()">
                 <span class="btn-icon">🏠</span>
                 <span class="btn-label" id="footer-build-label">Build</span>
@@ -2515,6 +2587,18 @@ canvas {
             </div>
         </div>
 
+        <div id="modal-equipment" class="modal-overlay">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="equipment-title" class="text-lg font-bold text-white">Equipment</h2>
+                    <button id="equipment-close-btn" onclick="window.KOVEquipmentUiModule.closeEquipmentModal()" class="text-gray-400">✖</button>
+                </div>
+                <div id="equipment-slots" class="grid gap-2"></div>
+                <div class="mt-3 text-xs text-gray-300 font-semibold text-left" id="equipment-bag-title">Bag</div>
+                <div id="equipment-bag" class="mt-2 grid gap-2 max-h-48 overflow-y-auto"></div>
+            </div>
+        </div>
+
         <div id="modal-battle" class="modal-overlay">
             <div class="modal-content">
                 <div class="battle-header">
@@ -2612,6 +2696,7 @@ canvas {
     <script src="ui/uiFormat.js"></script>
     <script src="ui/settingsRefill.js"></script>
     <script src="ui/socialProfile.js"></script>
+    <script src="ui/equipmentUi.js"></script>
     <script src="merge/shop.js"></script>
     <script src="core/moduleUtils.js"></script>
     <script src="runtime/statics.js"></script>

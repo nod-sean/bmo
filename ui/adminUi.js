@@ -39,7 +39,7 @@
             <div class="text-[12px] text-gray-200">${game.tr('ui.admin.summary.end_type', {}, 'End Type')}: <b>${endType}</b></div>
             <div class="text-[12px] text-gray-300">${game.tr('ui.admin.summary.end_target', {}, 'Targets')}: hold ${Math.floor((endCfg.targetHoldMs || 0) / 60000)}m / score ${endCfg.targetScore || 0}</div>
             <div class="text-[12px] text-gray-300">${game.tr('ui.admin.summary.season_policy', {}, 'Season Policy')}: grid=${seasonCfg.keepMergeGrid ? 'keep' : 'reset'}, squad=${seasonCfg.keepSquads ? 'keep' : 'reset'}, res=${seasonCfg.keepResources ? 'keep' : 'reset'}, pt=${seasonCfg.keepPoints ? 'keep' : 'reset'}</div>
-            <div class="text-[12px] text-gray-300">${game.tr('ui.admin.summary.carryover', {}, 'Carryover')}: G ${carry.gold ?? 1}, GEM ${carry.gem ?? 1}, EN ${carry.energy ?? 1}, CP ${carry.cp ?? 1}, PT ${carry.points ?? 1}</div>
+            <div class="text-[12px] text-gray-300">${game.tr('ui.admin.summary.carryover', {}, 'Carryover')}: G ${carry.gold ?? 1}, GEM ${carry.gem ?? 1}, EN ${carry.energy ?? 1}, AP ${carry.cp ?? 1}, PT ${carry.points ?? 1}</div>
         `;
     }
 

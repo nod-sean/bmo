@@ -4,104 +4,159 @@
     "name": "골드",
     "name_kr": "Gold",
     "level": 1,
-    "earn": 1
+    "earn": 1,
+    "sell": 1
   },
   "1802": {
     "code": 1802,
     "name": "골드",
     "name_kr": "Gold",
     "level": 2,
-    "earn": 2
+    "earn": 2,
+    "sell": 2
   },
   "1803": {
     "code": 1803,
     "name": "골드",
     "name_kr": "Gold",
     "level": 3,
-    "earn": 6
+    "earn": 6,
+    "sell": 6
   },
   "1804": {
     "code": 1804,
     "name": "골드",
     "name_kr": "Gold",
     "level": 4,
-    "earn": 14
+    "earn": 14,
+    "sell": 14
   },
   "1805": {
     "code": 1805,
     "name": "골드",
     "name_kr": "Gold",
     "level": 5,
-    "earn": 32
+    "earn": 32,
+    "sell": 32
   },
   "1811": {
     "code": 1811,
     "name": "에너지",
     "name_kr": "Energy",
     "level": 1,
-    "earn": 1
+    "earn": 1,
+    "sell": 1
   },
   "1812": {
     "code": 1812,
     "name": "에너지",
     "name_kr": "Energy",
     "level": 2,
-    "earn": 2
+    "earn": 2,
+    "sell": 2
   },
   "1813": {
     "code": 1813,
     "name": "에너지",
     "name_kr": "Energy",
     "level": 3,
-    "earn": 6
+    "earn": 6,
+    "sell": 6
   },
   "1814": {
     "code": 1814,
     "name": "에너지",
     "name_kr": "Energy",
     "level": 4,
-    "earn": 14
+    "earn": 14,
+    "sell": 14
   },
   "1815": {
     "code": 1815,
     "name": "에너지",
     "name_kr": "Energy",
     "level": 5,
-    "earn": 32
+    "earn": 32,
+    "sell": 32
   },
   "1821": {
     "code": 1821,
     "name": "크리스탈",
     "name_kr": "Crystal",
     "level": 1,
-    "earn": 1
+    "earn": 1,
+    "sell": 2
   },
   "1822": {
     "code": 1822,
     "name": "크리스탈",
     "name_kr": "Crystal",
     "level": 2,
-    "earn": 2
+    "earn": 2,
+    "sell": 5
   },
   "1823": {
     "code": 1823,
     "name": "크리스탈",
     "name_kr": "Crystal",
     "level": 3,
-    "earn": 6
+    "earn": 6,
+    "sell": 15
   },
   "1824": {
     "code": 1824,
     "name": "크리스탈",
     "name_kr": "Crystal",
     "level": 4,
-    "earn": 14
+    "earn": 14,
+    "sell": 42
   },
   "1825": {
     "code": 1825,
     "name": "크리스탈",
     "name_kr": "Crystal",
     "level": 5,
-    "earn": 32
+    "earn": 32,
+    "sell": 80
+  },
+  "1831": {
+    "code": 1831,
+    "name": "행동력",
+    "name_kr": "AP",
+    "level": 1,
+    "earn": 1,
+    "sell": 1
+  },
+  "1832": {
+    "code": 1832,
+    "name": "행동력",
+    "name_kr": "AP",
+    "level": 2,
+    "earn": 2,
+    "sell": 2
+  },
+  "1833": {
+    "code": 1833,
+    "name": "행동력",
+    "name_kr": "AP",
+    "level": 3,
+    "earn": 6,
+    "sell": 6
+  },
+  "1834": {
+    "code": 1834,
+    "name": "행동력",
+    "name_kr": "AP",
+    "level": 4,
+    "earn": 14,
+    "sell": 14
+  },
+  "1835": {
+    "code": 1835,
+    "name": "행동력",
+    "name_kr": "AP",
+    "level": 5,
+    "earn": 32,
+    "sell": 32
   }
 }

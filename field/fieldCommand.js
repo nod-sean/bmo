@@ -148,7 +148,7 @@
             return;
         }
         if (game.cp < moveCosts.cpCost) {
-            window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: moveCosts.cpCost }, `Not enough CP (${moveCosts.cpCost})`));
+            window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: moveCosts.cpCost }, `Not enough AP (${moveCosts.cpCost})`));
             return;
         }
 
@@ -276,7 +276,7 @@
         window.KOVFieldUiModule.applyPathPreview(game, path);
         const squadNo = army.id + 1;
         const squadLabel = game.tr('ui.squad.label', {}, 'Squad');
-        const cpLabel = game.tr('ui.field.header.cp', {}, 'CP');
+        const cpLabel = game.tr('ui.field.header.cp', {}, 'AP');
         const label = game.tr('ui.field.move_preview', {}, 'ETA preview active (tap label to cancel)');
         window.KOVFieldUiModule.setMovePreview(game, `${squadLabel} ${squadNo} | ${cpLabel} ${gp.CP_COST_PER_COMMAND} | ${label}`);
     }
@@ -329,7 +329,7 @@
         if (deps.isGateTile(type)) { goldCost = 100; }
         const cpCost = gp.CP_COST_PER_COMMAND;
         if (game.gold < goldCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.gold_short_cost', { cost: goldCost }, `Not enough gold (${goldCost})`)); return; }
-        if (game.cp < cpCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough CP (${cpCost})`)); return; }
+        if (game.cp < cpCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough AP (${cpCost})`)); return; }
         exitMoveTargetMode(game);
         game.selectedArmyId = armyId;
         startMarch(game, armyId, r, c, type, goldCost, cpCost, path, stats.speedFactor, deps);
@@ -344,7 +344,7 @@
             window.KOVWorldSeasonModule.getActiveWorldEndConditions(game, game.worldAdminDeps)
         )) return;
         if (game.gold < goldCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.gold_short_cost', { cost: goldCost }, `Not enough gold (${goldCost})`)); return; }
-        if (game.cp < cpCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough CP (${cpCost})`)); return; }
+        if (game.cp < cpCost) { window.KOVUiShellModule.showToast(game, game.tr('toast.cp_short_cost', { cost: cpCost }, `Not enough AP (${cpCost})`)); return; }
         game.gold -= goldCost;
         game.cp -= cpCost;
         window.KOVUiShellModule.updateUI(game, game.uiShellDeps);

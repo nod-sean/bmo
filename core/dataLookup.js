@@ -16,6 +16,7 @@
             if (type === ITEM_TYPE.ITEM_GOLD) return 1800 + level;
             if (type === ITEM_TYPE.ITEM_ENERGY) return 1810 + level;
             if (type === ITEM_TYPE.ITEM_CRYSTAL) return 1820 + level;
+            if (type === ITEM_TYPE.ITEM_AP) return 1830 + level;
             return 0;
         }
 
@@ -31,6 +32,7 @@
             if (code >= 1800 && code < 1810) return { type: ITEM_TYPE.ITEM_GOLD, level: code - 1800 };
             if (code >= 1810 && code < 1820) return { type: ITEM_TYPE.ITEM_ENERGY, level: code - 1810 };
             if (code >= 1820 && code < 1830) return { type: ITEM_TYPE.ITEM_CRYSTAL, level: code - 1820 };
+            if (code >= 1830 && code < 1840) return { type: ITEM_TYPE.ITEM_AP, level: code - 1830 };
             return null;
         }
 
@@ -48,6 +50,7 @@
                 if (type === ITEM_TYPE.ITEM_GOLD) return { name: 'Gold', earn: ITEM_VALUES[level] };
                 if (type === ITEM_TYPE.ITEM_ENERGY) return { name: 'Energy', earn: ITEM_VALUES[level] };
                 if (type === ITEM_TYPE.ITEM_CRYSTAL) return { name: 'Crystal', earn: ITEM_VALUES[level] };
+                if (type === ITEM_TYPE.ITEM_AP) return { name: 'AP', earn: ITEM_VALUES[level] };
             }
             if (type < 10) {
                 if (type === ITEM_TYPE.BUILDING_BARRACKS) return { name: 'Barracks', energy: BUILDING_DATA[ITEM_TYPE.BUILDING_BARRACKS][level]?.energy };

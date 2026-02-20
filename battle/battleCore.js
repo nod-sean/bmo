@@ -146,9 +146,9 @@
         const shot = getBattleShotOffset(step);
         const hasProjectile = !!step.rangedShot;
         const moveDuration = getBattleMoveDuration(step, move.steps);
-        const shotDuration = 170;
-        const impactDuration = 140;
-        const impactDelayNoTravel = 110;
+        const shotDuration = 320;
+        const impactDuration = 260;
+        const impactDelayNoTravel = 180;
 
         game.battleFx = {
             attackerId: step.attackerId,
@@ -199,6 +199,7 @@
             game.battleFx = null;
             window.KOVBattleUiModule.renderBattleModal(game);
         }, clearDelay);
+        return clearDelay;
     }
 
     function applyStepDamage(game, step) {
@@ -214,8 +215,8 @@
         const steps = Math.max(1, Number(movedSteps || step?.requiredMove || 1));
         const spd = Math.max(1, Number(step?.attackerSpd || 5));
         const speedScale = 6 / Math.min(20, spd); // higher spd => shorter duration
-        const ms = Math.round(steps * 170 * speedScale);
-        return Math.max(140, Math.min(680, ms));
+        const ms = Math.round(steps * 260 * speedScale);
+        return Math.max(260, Math.min(1200, ms));
     }
 
     function getBattleMoveOffset(step) {

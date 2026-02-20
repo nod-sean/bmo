@@ -7,10 +7,11 @@
     }
 
     function getItemIcon(type) {
-        if (type === 1) return 'G';
-        if (type === 2) return 'EN';
-        if (type === 3) return 'CP';
-        if (type === 4) return 'CR';
+        if (type === 1 || type === 20) return 'G';
+        if (type === 2 || type === 21) return 'EN';
+        if (type === 3 || type === 22) return 'CR';
+        if (type === 4) return 'CP';
+        if (type === 5 || type === 23) return 'AP';
         return '?';
     }
 
@@ -65,7 +66,7 @@
                 .filter((code) => {
                     const info = deps.getInfoFromCode(code);
                     const data = deps.ITEM_TABLE[code];
-                    return Number.isFinite(code) && !!info && !!data && info.type >= deps.ITEM_TYPE.ITEM_GOLD && info.type <= deps.ITEM_TYPE.ITEM_CRYSTAL;
+                    return Number.isFinite(code) && !!info && !!data && info.type >= deps.ITEM_TYPE.ITEM_GOLD && info.type <= deps.ITEM_TYPE.ITEM_AP;
                 });
             const unitCodes = Object.keys(deps.UNIT_STATS).map((n) => parseInt(n, 10))
                 .filter((code) => {
@@ -110,7 +111,7 @@
                 .filter((code) => {
                     const info = deps.getInfoFromCode(code);
                     const data = deps.ITEM_TABLE[code];
-                    return Number.isFinite(code) && !!info && !!data && info.type >= deps.ITEM_TYPE.ITEM_GOLD && info.type <= deps.ITEM_TYPE.ITEM_CRYSTAL;
+                    return Number.isFinite(code) && !!info && !!data && info.type >= deps.ITEM_TYPE.ITEM_GOLD && info.type <= deps.ITEM_TYPE.ITEM_AP;
                 });
             codes.sort(() => Math.random() - 0.5);
             return codes.slice(0, 3).map((code) => {

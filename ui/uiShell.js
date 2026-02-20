@@ -126,8 +126,8 @@
         if (m) return game.tr('toast.gold_short_cost', { cost: m[1] }, text);
         m = text.match(/^Not enough energy \((\d+)\)$/i);
         if (m) return game.tr('toast.energy_short_cost', { cost: m[1] }, text);
-        m = text.match(/^Not enough CP \((\d+)\)$/i);
-        if (m) return game.tr('toast.cp_short_cost', { cost: m[1] }, text);
+        m = text.match(/^Not enough (CP|AP) \((\d+)\)$/i);
+        if (m) return game.tr('toast.cp_short_cost', { cost: m[2] }, text);
         m = text.match(/^Out of range \((\d+)\s*\/\s*(\d+)\)$/i);
         if (m) return game.tr('toast.range_over', { dist: m[1], range: m[2] }, text);
         m = text.match(/^(.+)\s+march started$/i);
@@ -174,6 +174,9 @@
     }
 
     function showFloatingText(text, color) {
+        const battleOpen = document.getElementById('modal-battle')?.classList.contains('open')
+            || document.getElementById('modal-battle-prep')?.classList.contains('open');
+        if (battleOpen) return;
         const el = document.createElement('div');
         el.innerText = text;
         el.id = 'income-float';
@@ -260,6 +263,7 @@
 
         setText('footer-build-label', 'ui.footer.build', 'Build');
         setText('footer-field-label', 'ui.footer.field', 'Field');
+        setText('footer-equipment-label', 'ui.footer.equipment', 'Equip');
         setText('modal-title', 'ui.modal.menu_title', 'Menu');
         setText('levelup-title', 'ui.modal.levelup.title', 'LEVEL UP!');
         setText('levelup-level-label', 'ui.modal.levelup.level', 'Level (Lord Level)');
@@ -277,6 +281,9 @@
         setText('settings-delete-btn', 'ui.settings.delete', 'Delete Account');
         setText('object-modal-title', 'ui.modal.object_title', 'Object');
         setText('object-modal-close-btn', 'ui.settings.close', 'Close');
+        setText('equipment-title', 'ui.equipment.title', 'Equipment');
+        setText('equipment-bag-title', 'ui.equipment.bag', 'Bag');
+        setText('equipment-close-btn', 'ui.settings.close', 'Close');
         setText('battle-title-label', 'ui.battle.title', '? BATTLE');
         setText('battle-target-name', 'ui.battle.target', 'Target');
         setText('battle-allies-label', 'ui.battle.allies', 'ALLIES');

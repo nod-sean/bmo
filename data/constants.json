@@ -78,37 +78,37 @@
     ],
     "cp": [
       {
-        "cp_refill": 5,
+        "ap_refill": 5,
         "crystal": 2,
         "ad": 0,
         "limit": 0
       },
       {
-        "cp_refill": 10,
+        "ap_refill": 10,
         "crystal": 4,
         "ad": 0,
         "limit": 0
       },
       {
-        "cp_refill": 30,
+        "ap_refill": 30,
         "crystal": 11,
         "ad": 0,
         "limit": 0
       },
       {
-        "cp_refill": 50,
+        "ap_refill": 50,
         "crystal": 18,
         "ad": 0,
         "limit": 0
       },
       {
-        "cp_refill": 100,
+        "ap_refill": 100,
         "crystal": 35,
         "ad": 0,
         "limit": 0
       },
       {
-        "cp_refill": 3,
+        "ap_refill": 3,
         "crystal": 0,
         "ad": 1,
         "limit": 3
@@ -167,6 +167,60 @@
   },
   "BUILDING_LIMITS": {},
   "SHOP_DATA": [
+    {
+      "type": 2101,
+      "name": "병영",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2201,
+      "name": "사격장",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2301,
+      "name": "마구간",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2101,
+      "name": "병영",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2201,
+      "name": "사격장",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2301,
+      "name": "마구간",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2101,
+      "name": "병영",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2201,
+      "name": "사격장",
+      "price": 0,
+      "icon": "🏠"
+    },
+    {
+      "type": 2301,
+      "name": "마구간",
+      "price": 0,
+      "icon": "🏠"
+    },
     {
       "type": 2101,
       "name": "병영",

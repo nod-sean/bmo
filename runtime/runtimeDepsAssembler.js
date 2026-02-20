@@ -25,6 +25,7 @@
             LOCK_TYPE: base.LOCK_TYPE,
             UNLOCK_LEVEL_MAP: mergeSlice.UNLOCK_LEVEL_MAP,
             UNLOCK_GOLD_MAP: mergeSlice.UNLOCK_GOLD_MAP,
+            UNLOCK_ITEM_MAP: mergeSlice.UNLOCK_ITEM_MAP,
             FIELD_OBJECT_REGEN: fieldSlice.FIELD_OBJECT_REGEN,
             applyObjectRegenCycle: fieldSlice.applyObjectRegenCycle,
             CAMP_CAPACITY: base.CAMP_CAPACITY,

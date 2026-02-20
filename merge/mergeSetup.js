@@ -56,6 +56,28 @@
         game.grid[3][3] = { type: deps.ITEM_TYPE.BUILDING_BARRACKS, level: 1, scale: 1 };
         game.grid[4][4] = { type: deps.ITEM_TYPE.BUILDING_CHEST, level: 1, scale: 1, usage: 5 };
         game.grid[5][5] = { type: deps.ITEM_TYPE.BUILDING_CAMP, level: 1, scale: 1, storedUnits: [] };
+
+        // Seed locked slots with design-specified unlock items.
+        // Items become visible/collectable after the slot is unlocked.
+        const unlockItemMap = Array.isArray(deps.UNLOCK_ITEM_MAP) ? deps.UNLOCK_ITEM_MAP : [];
+        const decode = typeof deps.getInfoFromCode === 'function' ? deps.getInfoFromCode : null;
+        if (decode) {
+            for (let r = 0; r < deps.CONFIG.gridRows; r++) {
+                const row = unlockItemMap[r];
+                if (!Array.isArray(row)) continue;
+                for (let c = 0; c < deps.CONFIG.gridCols; c++) {
+                    const code = Number(row[c] || 0);
+                    if (!Number.isFinite(code) || code <= 0) continue;
+                    if (game.grid[r][c]) continue;
+                    const lock = game.gridState[r][c];
+                    if (!lock || lock.type === deps.LOCK_TYPE.OPEN) continue;
+                    const info = decode(code);
+                    if (!info || !Number.isFinite(info.type) || !Number.isFinite(info.level)) continue;
+                    game.grid[r][c] = { type: info.type, level: info.level, scale: 1 };
+                }
+            }
+        }
+
         window.KOVGameCoreModule.updateLevelStats(game, game.levelDeps);
         window.KOVMergeBoardModule.updateInfoPanel(game, {
             ITEM_TYPE: deps.ITEM_TYPE,

@@ -94,7 +94,7 @@
         const incomeSign = game.income >= 0 ? "+" : "";
         const occupiedLabel = game.tr('ui.field.header.occupied', {}, 'Occupied');
         const incomeLabel = game.tr('ui.field.header.income', {}, 'Income');
-        const cpLabel = game.tr('ui.field.header.cp', {}, 'CP');
+        const cpLabel = game.tr('ui.field.header.cp', {}, 'AP');
         const per3secLabel = game.tr('ui.field.header.per_3sec', {}, '/3sec');
         headerDiv.innerHTML = `<div>${occupiedLabel}: <span class="text-white font-bold">${game.occupiedTiles.size}</span></div><div>${incomeLabel}: <span class="text-yellow-400 font-bold">${incomeSign}${game.income}${per3secLabel}</span></div><div>${cpLabel}: <span id="field-cp-display" class="text-white font-bold">${game.cp}/${game.maxCp}</span></div>`;
         overlay.appendChild(headerDiv);

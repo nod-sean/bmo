@@ -399,6 +399,7 @@
             else if (item.type === deps.ITEM_TYPE.ITEM_GOLD) { c = '#fff176'; sym = 'G'; }
             else if (item.type === deps.ITEM_TYPE.ITEM_ENERGY) { c = '#80deea'; sym = 'E'; }
             else if (item.type === deps.ITEM_TYPE.ITEM_CRYSTAL) { c = '#e1bee7'; sym = 'GM'; }
+            else if (item.type === deps.ITEM_TYPE.ITEM_AP) { c = '#b39ddb'; sym = 'AP'; }
             const drawSize = ds * 1.2;
             const drawOffset = (s - drawSize) / 2;
             game.ctx.fillStyle = c;
@@ -606,6 +607,10 @@
             game.energy = Math.min(game.energy + val, game.maxEnergy);
             window.KOVUiShellModule.showToast(game, game.tr('toast.energy_gain', { value: val }, `+${val}EN`));
             pColor = '#00FFFF';
+        } else if (item.type === deps.ITEM_TYPE.ITEM_AP) {
+            game.cp = Math.min(game.cp + val, game.maxCp);
+            window.KOVUiShellModule.showToast(game, game.tr('toast.cp_gain', { value: val }, `+${val}AP`));
+            pColor = '#b39ddb';
         } else {
             game.gem += val;
             window.KOVUiShellModule.showToast(game, game.tr('toast.gem_gain', { value: val }, `+${val}GEM`));
@@ -621,6 +626,27 @@
     }
 
     function tryUnlock(game, r, c, deps) {
+        const showUnlockItemFx = () => {
+            const unlockedItem = game.grid?.[r]?.[c];
+            if (!unlockedItem) return;
+            const itemInfo = (typeof deps.getData === 'function')
+                ? deps.getData(unlockedItem.type, unlockedItem.level)
+                : null;
+            const itemName = itemInfo?.name || `${unlockedItem.type}${unlockedItem.level || 1}`;
+            window.KOVUiShellModule.showToast(
+                game,
+                game.tr('toast.unlock_item_ready', { name: itemName }, `${itemName} unlocked`)
+            );
+            const cx = game.gridStartX + c * game.gridTileSize + game.gridTileSize / 2;
+            const cy = game.gridStartY + r * game.gridTileSize + game.gridTileSize / 2;
+            window.KOVUiShellModule.showFloatingImage(
+                game,
+                `${unlockedItem.type}${unlockedItem.level || 1}`,
+                cx,
+                cy
+            );
+        };
+
         const l = game.gridState[r][c];
         if (l.type === deps.LOCK_TYPE.GOLD) {
             if (game.gold >= l.value) {
@@ -629,6 +655,7 @@
                 window.KOVUiShellModule.showToast(game, game.tr('toast.unlock_done', {}, 'Unlocked'));
                 game.spawnParticles(game.gridStartX + c * game.gridTileSize + game.gridTileSize / 2, game.gridStartY + r * game.gridTileSize + game.gridTileSize / 2, '#FFF', 20, 'confetti');
                 game.sound.playUnlock();
+                showUnlockItemFx();
             } else {
                 window.KOVUiShellModule.showToast(game, game.tr('toast.gold_short', {}, 'Not enough gold'));
                 game.sound.playError();
@@ -639,6 +666,7 @@
                 window.KOVUiShellModule.showToast(game, game.tr('toast.unlock_done', {}, 'Unlocked'));
                 game.spawnParticles(game.gridStartX + c * game.gridTileSize + game.gridTileSize / 2, game.gridStartY + r * game.gridTileSize + game.gridTileSize / 2, '#FFF', 20, 'confetti');
                 game.sound.playUnlock();
+                showUnlockItemFx();
             } else {
                 window.KOVUiShellModule.showToast(game, game.tr('toast.require_level', { level: l.value }, `Requires LV.${l.value}`));
                 game.sound.playError();

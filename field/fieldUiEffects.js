@@ -20,8 +20,8 @@
             const amount = Number.isFinite(val) && val > 0 ? val : 1;
             return game.tr('ui.field.effect.squad_slot', { value: amount }, `Squad slot +${amount}`);
         }
-        if (code === deps.ABILITY_CODES.CP_CAP) return game.tr('ui.field.effect.cp_cap', { value: val }, `CP cap +${val}`);
-        if (code === deps.ABILITY_CODES.CP_REGEN) return game.tr('ui.field.effect.cp_regen', { value: val }, `CP regen +${val}/5m`);
+        if (code === deps.ABILITY_CODES.CP_CAP) return game.tr('ui.field.effect.cp_cap', { value: val }, `AP cap +${val}`);
+        if (code === deps.ABILITY_CODES.CP_REGEN) return game.tr('ui.field.effect.cp_regen', { value: val }, `AP regen +${val}/5m`);
         if (code === deps.ABILITY_CODES.GOLD_CAP) return game.tr('ui.field.effect.gold_cap', { value: val }, `Gold cap +${val}`);
         if (code === deps.ABILITY_CODES.GOLD_REGEN) return game.tr('ui.field.effect.gold_regen', { value: val }, `Gold regen +${val}/5m`);
         if (code === deps.ABILITY_CODES.ENERGY_CAP) return game.tr('ui.field.effect.energy_cap', { value: val }, `Energy cap +${val}`);
@@ -83,4 +83,3 @@
         renderEffectLog
     };
 })(window);
-
