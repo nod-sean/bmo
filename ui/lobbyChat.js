@@ -33,10 +33,10 @@
         };
     }
 
-    function getLobbyCongestionProfile(ratio) {
-        if (ratio >= 0.85) return { label: 'High', cls: 'text-red-300' };
-        if (ratio >= 0.55) return { label: 'Medium', cls: 'text-yellow-300' };
-        return { label: 'Low', cls: 'text-emerald-300' };
+    function getLobbyCongestionProfile(game, ratio) {
+        if (ratio >= 0.85) return { label: game.tr('ui.lobby.congestion.high', {}, 'High'), cls: 'text-red-300' };
+        if (ratio >= 0.55) return { label: game.tr('ui.lobby.congestion.medium', {}, 'Medium'), cls: 'text-yellow-300' };
+        return { label: game.tr('ui.lobby.congestion.low', {}, 'Low'), cls: 'text-emerald-300' };
     }
 
     function ensureChatState(game) {
@@ -212,21 +212,23 @@
         const table = game.lobbyChannelStatusTable || buildLobbyChannelStatusTable();
         const row = table[selected] || table.alpha;
         if (!row) return;
-        const profile = getLobbyCongestionProfile(row.ratio);
+        const profile = getLobbyCongestionProfile(game, row.ratio);
         const pct = Math.round(row.ratio * 100);
-        const sourceText = game.lobbyChannelStatusSource === 'server' ? 'Server' : 'Local estimate (skeleton)';
+        const sourceText = game.lobbyChannelStatusSource === 'server'
+            ? game.tr('ui.lobby.sync.server', {}, 'Server')
+            : game.tr('ui.lobby.sync.local', {}, 'Local estimate (skeleton)');
         const fetchedAt = Number(game.lobbyChannelStatusFetchedAt || 0);
         const syncText = fetchedAt > 0
-            ? `${sourceText} · ${formatSyncAge(fetchedAt)}`
+            ? `${sourceText} · ${formatSyncAge(game, fetchedAt)}`
             : sourceText;
 
         panel.innerHTML = `
             <div class="flex items-center justify-between mb-1">
-                <span class="text-gray-300">Population</span>
+                <span class="text-gray-300">${game.tr('ui.lobby.population', {}, 'Population')}</span>
                 <span class="font-bold text-gray-100">${row.occupied}/${row.cap}</span>
             </div>
             <div class="flex items-center justify-between mb-2">
-                <span class="text-gray-300">Congestion</span>
+                <span class="text-gray-300">${game.tr('ui.lobby.congestion', {}, 'Congestion')}</span>
                 <span class="font-bold ${profile.cls}">${profile.label} (${pct}%)</span>
             </div>
             <div class="w-full h-2 rounded bg-gray-700 overflow-hidden">
@@ -237,16 +239,16 @@
         if (game.lobbyChannelStatusSource !== 'server') fetchLobbyChannelStatusFromApi(game, false);
     }
 
-    function formatSyncAge(timestamp) {
+    function formatSyncAge(game, timestamp) {
         const ts = Number(timestamp || 0);
-        if (!Number.isFinite(ts) || ts <= 0) return 'not synced';
+        if (!Number.isFinite(ts) || ts <= 0) return game.tr('ui.sync.not_synced', {}, 'not synced');
         const diffSec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
-        if (diffSec < 5) return 'just now';
-        if (diffSec < 60) return `${diffSec}s ago`;
+        if (diffSec < 5) return game.tr('ui.sync.just_now', {}, 'just now');
+        if (diffSec < 60) return game.tr('ui.sync.seconds_ago', { value: diffSec }, '{value}s ago');
         const diffMin = Math.floor(diffSec / 60);
-        if (diffMin < 60) return `${diffMin}m ago`;
+        if (diffMin < 60) return game.tr('ui.sync.minutes_ago', { value: diffMin }, '{value}m ago');
         const diffHour = Math.floor(diffMin / 60);
-        return `${diffHour}h ago`;
+        return game.tr('ui.sync.hours_ago', { value: diffHour }, '{value}h ago');
     }
 
     function getSocialSyncStatus(game) {
@@ -269,6 +271,89 @@
     function getApiBaseUrl() {
         const raw = String(window.KOV_API_BASE_URL || '').trim();
         return raw.replace(/\/+$/, '');
+    }
+
+    function getChatWsUrl() {
+        const raw = String(window.KOV_CHAT_WS_URL || '').trim();
+        if (!raw) return '';
+        return raw.replace(/\/+$/, '');
+    }
+
+    function normalizeChatSocketEvent(payload) {
+        if (!payload || typeof payload !== 'object') return null;
+        const channelRaw = String(payload.channel || payload.channelId || '').trim().toLowerCase();
+        const channel = VALID_CHAT_CHANNELS.includes(channelRaw) ? channelRaw : 'world';
+        const sender = String(payload.sender || payload.user || payload.uid || '').trim();
+        const text = String(payload.text || payload.message || '').trim();
+        if (!text) return null;
+        const at = Number(payload.at || payload.timestamp || Date.now());
+        return {
+            channel,
+            sender: sender || 'System',
+            text,
+            type: payload.type === 'me' ? 'me' : 'other',
+            at: Number.isFinite(at) ? at : Date.now()
+        };
+    }
+
+    function applySocketChatEvent(game, payload) {
+        const row = normalizeChatSocketEvent(payload);
+        if (!row) return false;
+        const state = ensureChatState(game);
+        const list = state.logsByChannel[row.channel];
+        list.push(row);
+        if (list.length > state.maxLogs) list.splice(0, list.length - state.maxLogs);
+        if (!game.chatStateMeta || typeof game.chatStateMeta !== 'object') game.chatStateMeta = {};
+        if (!game.chatStateMeta.lastFetchedAt || typeof game.chatStateMeta.lastFetchedAt !== 'object') {
+            game.chatStateMeta.lastFetchedAt = {};
+        }
+        game.chatStateMeta.lastFetchedAt[row.channel] = Date.now();
+        game.chatStateSource = 'socket';
+        return true;
+    }
+
+    function ensureChatSocket(game) {
+        if (game.chatSocket && game.chatSocket.readyState === WebSocket.OPEN) return game.chatSocket;
+        if (game.chatSocket && game.chatSocket.readyState === WebSocket.CONNECTING) return game.chatSocket;
+        const wsUrl = getChatWsUrl();
+        if (!wsUrl || typeof WebSocket === 'undefined') return null;
+        let socket = null;
+        try {
+            socket = new WebSocket(wsUrl);
+        } catch (e) {
+            return null;
+        }
+        game.chatSocket = socket;
+        socket.onopen = () => {
+            try {
+                const state = ensureChatState(game);
+                socket.send(JSON.stringify({
+                    type: 'subscribe',
+                    channels: VALID_CHAT_CHANNELS.filter((ch) => ch !== 'system'),
+                    active: state.activeChannel
+                }));
+            } catch (e) { }
+        };
+        socket.onmessage = (event) => {
+            let payload = null;
+            try {
+                payload = JSON.parse(String(event?.data || '{}'));
+            } catch (e) {
+                return;
+            }
+            const data = payload && payload.type === 'chat_message'
+                ? payload.message
+                : payload;
+            if (!applySocketChatEvent(game, data)) return;
+            if (game.isChatOpen && window.KOVSocialProfileModule && typeof window.KOVSocialProfileModule.refreshChatUI === 'function') {
+                window.KOVSocialProfileModule.refreshChatUI(game);
+            }
+        };
+        socket.onclose = () => {
+            if (game.chatSocket === socket) game.chatSocket = null;
+        };
+        socket.onerror = () => { };
+        return socket;
     }
 
     async function fetchApiJson(path, options = {}) {
@@ -315,6 +400,24 @@
                 if (modal?.classList?.contains('open')) renderLobbyChannelStatus(game);
             }
         }
+    }
+
+    async function enterLobbyChannelViaApi(game, channel) {
+        const requested = String(channel || 'alpha').trim().toLowerCase();
+        const fallbackChannel = VALID_LOBBY_CHANNELS.includes(requested) ? requested : 'alpha';
+        const payload = await fetchApiJson('/v1/lobby/enter', {
+            method: 'POST',
+            body: JSON.stringify({ channel: fallbackChannel })
+        });
+        if (!payload || typeof payload !== 'object') {
+            return { ok: false, channel: fallbackChannel };
+        }
+        const acceptedRaw = String(payload.channelId || payload.channel || fallbackChannel).trim().toLowerCase();
+        const accepted = VALID_LOBBY_CHANNELS.includes(acceptedRaw) ? acceptedRaw : fallbackChannel;
+        game.lobbyChannelStatusSource = 'server';
+        game.lobbyChannelStatusFetchedAt = Date.now();
+        fetchLobbyChannelStatusFromApi(game, true).catch(() => { });
+        return { ok: true, channel: accepted };
     }
 
     async function fetchSocialStateFromApi(game, force = false) {
@@ -376,6 +479,17 @@
             ? String(channel).toLowerCase()
             : 'world';
         if (target === 'system') return false;
+        const socket = ensureChatSocket(game);
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            try {
+                socket.send(JSON.stringify({
+                    type: 'chat_send',
+                    channel: target,
+                    text: String(text || '')
+                }));
+                return true;
+            } catch (e) { }
+        }
         const body = {
             channel: target,
             text: String(text || '')
@@ -404,8 +518,11 @@
         normalizeChatMessagesPayload,
         renderLobbyChannelStatus,
         getApiBaseUrl,
+        getChatWsUrl,
+        ensureChatSocket,
         fetchApiJson,
         fetchLobbyChannelStatusFromApi,
+        enterLobbyChannelViaApi,
         fetchSocialStateFromApi,
         fetchChatMessagesFromApi,
         sendChatMessageToApi,

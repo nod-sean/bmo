@@ -110,6 +110,7 @@
         if (!drawer) return;
         if (game.isChatOpen) {
             drawer.classList.add('open');
+            window.KOVLobbyChatModule.ensureChatSocket(game);
             window.KOVLobbyChatModule.updateChatTabUI(game);
             refreshChatUI(game);
             const active = window.KOVLobbyChatModule.ensureChatState(game).activeChannel;
@@ -175,10 +176,12 @@
         const el = document.getElementById('chat-sync-status');
         if (!el) return;
         const status = window.KOVLobbyChatModule.getChatSyncStatus(game);
-        const source = status.source === 'server' ? 'Server' : 'Local';
+        const source = status.source === 'server'
+            ? game.tr('ui.lobby.sync.server', {}, 'Server')
+            : game.tr('ui.lobby.sync.local', {}, 'Local');
         const age = status.fetchedAt > 0
-            ? window.KOVLobbyChatModule.formatSyncAge(status.fetchedAt)
-            : 'not synced';
+            ? window.KOVLobbyChatModule.formatSyncAge(game, status.fetchedAt)
+            : game.tr('ui.sync.not_synced', {}, 'not synced');
         el.innerText = `${source} · ${age}`;
     }
 
@@ -336,10 +339,12 @@
         }
 
         const sync = window.KOVLobbyChatModule.getSocialSyncStatus(game);
-        const syncSource = sync.source === 'server' ? 'Server' : 'Local';
+        const syncSource = sync.source === 'server'
+            ? game.tr('ui.lobby.sync.server', {}, 'Server')
+            : game.tr('ui.lobby.sync.local', {}, 'Local');
         const syncAge = sync.fetchedAt > 0
-            ? window.KOVLobbyChatModule.formatSyncAge(sync.fetchedAt)
-            : 'not synced';
+            ? window.KOVLobbyChatModule.formatSyncAge(game, sync.fetchedAt)
+            : game.tr('ui.sync.not_synced', {}, 'not synced');
 
         body.innerHTML = `
             <div class="space-y-2">
@@ -423,6 +428,7 @@
             const chatSystem = game.tr('ui.chat.tab.system', {}, 'System');
             const chatPlaceholder = game.tr('ui.chat.placeholder', {}, 'Type message...');
             const chatSend = game.tr('ui.chat.send', {}, 'Send');
+            const chatSyncDefault = `${game.tr('ui.lobby.sync.local', {}, 'Local')} · ${game.tr('ui.sync.not_synced', {}, 'not synced')}`;
             const chatDrawer = document.createElement('div');
             chatDrawer.id = 'chat-drawer';
             chatDrawer.className = 'chat-drawer';
@@ -431,7 +437,7 @@
                     <span id="chat-title">${chatTitle}</span>
                     <button id="chat-close-btn" onclick="window.KOVSocialProfileModule.toggleChat(window.game)">${chatClose}</button>
                 </div>
-                <div id="chat-sync-status" class="px-3 pb-1 text-[10px] text-gray-400">Local · not synced</div>
+                <div id="chat-sync-status" class="px-3 pb-1 text-[10px] text-gray-400">${chatSyncDefault}</div>
                 <div class="chat-tabs">
                     <button id="chat-tab-world" data-channel="world" class="active" onclick="window.KOVLobbyChatModule.setChatChannel(window.game, 'world')">${chatWorld}</button>
                     <button id="chat-tab-guild" data-channel="guild" onclick="window.KOVLobbyChatModule.setChatChannel(window.game, 'guild')">${chatGuild}</button>

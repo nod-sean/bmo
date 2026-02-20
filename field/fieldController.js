@@ -55,12 +55,17 @@
             if (modal) modal.classList.remove('open');
         }
 
-        confirmWorldLobbyEntry() {
+        async confirmWorldLobbyEntry() {
             const game = this.game;
             const select = document.getElementById('lobby-channel-select');
             const channel = String(select?.value || 'alpha').trim().toLowerCase();
             const state = window.KOVLobbyChatModule.ensureWorldLobbyState(game);
-            state.channel = ['alpha', 'beta', 'gamma'].includes(channel) ? channel : 'alpha';
+            let acceptedChannel = ['alpha', 'beta', 'gamma'].includes(channel) ? channel : 'alpha';
+            try {
+                const result = await window.KOVLobbyChatModule.enterLobbyChannelViaApi(game, acceptedChannel);
+                if (result && result.channel) acceptedChannel = result.channel;
+            } catch (e) { }
+            state.channel = acceptedChannel;
             state.entered = true;
             state.enteredAt = Date.now();
             window.KOVLobbyChatModule.renderLobbyChannelStatus(game);
