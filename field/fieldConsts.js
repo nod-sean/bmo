@@ -98,7 +98,8 @@
         const FIELD_TERRAIN_DATA = FIELD_MAP_DATA.map((row) => row.slice());
         const MAP_SIZE = FIELD_MAP_DATA.length;
 
-        const PLAYER_START = { r: 18, c: 4 };
+        // Base spawn location (e.g. grass tile in front of the castle)
+        const PLAYER_START = { r: 17, c: 3 };
 
         const FOG_RADIUS = 8;
 
