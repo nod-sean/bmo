@@ -57,17 +57,12 @@
     getPos(slot, team) {
         const clamped = Math.max(0, Math.min(8, Number.isFinite(slot) ? slot : 0));
         // 8x8 Grid System (r: 0~7, c: 0~7)
-        // Team A (Allies) starts on the left, Team B (Enemies) starts on the right.
-        // Rows: Center them vertically, so slot%3 maps to rows 2, 3, 4
-        const r = 2 + (clamped % 3);
-        
+        const r = 2 + Math.floor(clamped / 3);
         let c;
         if (team === 'A') {
-            // Frontline (slots 0,1,2) at c=2, Mid (3,4,5) at c=1, Back (6,7,8) at c=0
-            c = 2 - Math.floor(clamped / 3);
+            c = (clamped % 3);
         } else {
-            // Frontline (slots 0,1,2) at c=5, Mid (3,4,5) at c=6, Back (6,7,8) at c=7
-            c = 5 + Math.floor(clamped / 3);
+            c = 5 + (2 - (clamped % 3));
         }
         return { r, c };
     }

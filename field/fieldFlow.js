@@ -205,6 +205,18 @@
             isTerrainCode: deps.isTerrainCode,
             getInfoFromCode: deps.getInfoFromCode
         });
+
+        // Offline / Client-side fallback for Object Rewards (e.g. 2001 Wood Chest)
+        const isRewardObject = type >= 2000 && type < 3000 && type !== deps.FIELD_EVENT_TYPES.PORTAL && type !== deps.FIELD_EVENT_TYPES.CARAVAN;
+        if (!collectibleInfo && isRewardObject) {
+            const rewardConfig = game.fieldObjectRewards ? game.fieldObjectRewards[type] : null;
+            if (rewardConfig || game.isOfflineMode) {
+                // If it's a known reward object, we process it like a battle win (no defenders)
+                window.KOVBattleResultModule.handleBattleWin(game, r, c);
+                return;
+            }
+        }
+
         if (collectibleInfo && canCollectFieldObject(game, r, c, deps)) {
             const item = window.KOVFieldStateModule.createMergeItemFromInfo(game, collectibleInfo, { ITEM_TYPE: deps.ITEM_TYPE });
             if (window.KOVMergeBoardModule.spawnItem(game, item, game.spawnItemDeps)) {

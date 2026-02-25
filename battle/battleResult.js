@@ -398,10 +398,16 @@
     function applyFieldObjectReward(game, type, deps) {
         const resolved = resolveBattleResultDeps(game, deps);
         const data = window.KOVFieldEventLogicModule.getFieldObjectData(game, type, game.fieldObjectDataDeps);
-        const rewardCode = Number(data?.reward);
+        
+        let rewardCode = Number(data?.reward);
         if (!Number.isFinite(rewardCode) || rewardCode <= 0) {
-            game.lastFieldObjectRewardSummary = null;
-            return null;
+            // Fallback: if type itself exists in EVENT_DROP_TABLE, use type as rewardCode
+            if (resolved.EVENT_DROP_TABLE && resolved.EVENT_DROP_TABLE[String(type)]) {
+                rewardCode = type;
+            } else {
+                game.lastFieldObjectRewardSummary = null;
+                return null;
+            }
         }
 
         const summary = createFieldObjectRewardSummary(rewardCode);
@@ -466,6 +472,14 @@
                 drop.items.forEach((d) => {
                     if (Math.random() * 100 < d.prob) {
                         window.KOVUiShellModule.showToast(game, game.tr('toast.event_item_gain', { code: d.code }, `Item obtained (Code ${d.code})`));
+                        const info = resolved.getInfoFromCode(d.code);
+                        if (info) {
+                            window.KOVMergeBoardModule.spawnItem(
+                                game,
+                                { type: info.type, level: info.level, scale: 0 },
+                                game.spawnItemDeps
+                            );
+                        }
                     }
                 });
             }
@@ -517,6 +531,16 @@
         const effectMsg = window.KOVFieldUiModule.getCaptureEffectToast(game, type, game.captureEffectDeps);
         if (effectMsg) window.KOVFieldUiModule.pushEffectLog(game, effectMsg);
         applyFieldObjectReward(game, type, resolved);
+
+        // Clear one-time interactive objects like Chests (2000-2999) from the map
+        if (type >= 2000 && type < 3000 && type !== resolved.FIELD_EVENT_TYPES.PORTAL && type !== resolved.FIELD_EVENT_TYPES.CARAVAN) {
+            if (window.KOVFieldStateModule && typeof window.KOVFieldStateModule.clearFieldObjectFromMap === 'function') {
+                window.KOVFieldStateModule.clearFieldObjectFromMap(game, r, c, {
+                    FIELD_MAP_DATA: resolved.FIELD_MAP_DATA,
+                    FIELD_TERRAIN_DATA: resolved.FIELD_TERRAIN_DATA
+                });
+            }
+        }
 
         window.KOVFieldFlowModule.updateOpenBorders(game, game.fieldFlowDeps);
         if (document.getElementById('field-modal').classList.contains('open')) {

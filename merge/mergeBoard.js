@@ -649,6 +649,7 @@
                 const cx = game.gridStartX + c * game.gridTileSize + game.gridTileSize / 2;
                 const cy = game.gridStartY + r * game.gridTileSize + game.gridTileSize / 2;
                 game.spawnParticles(cx, cy, '#EEE', 10, 'smoke');
+                game.requestRender();
                 return { r, c };
             }
         }

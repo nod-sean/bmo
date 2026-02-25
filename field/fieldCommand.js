@@ -173,8 +173,7 @@
         // No, calling AStar for every tile in range could be slow, but for range=5..15 it's fast enough.
         // Actually, BFS is exactly what we need. We'll check 8 directions.
         const dirs = [
-            [-1, 0], [1, 0], [0, -1], [0, 1],
-            [-1, -1], [-1, 1], [1, -1], [1, 1]
+            [-1, 0], [1, 0], [0, -1], [0, 1]
         ];
 
         while (queue.length > 0) {

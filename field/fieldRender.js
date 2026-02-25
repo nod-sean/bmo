@@ -32,6 +32,7 @@
             || deps.isShopTile(type)
             || deps.isTavernTile(type)
             || deps.isRuinsTile(type)
+            || deps.isTerritoryTile(type)
             || deps.isStatueTile(type);
     }
 
@@ -54,6 +55,7 @@
             isShopTile,
             isTavernTile,
             isRuinsTile,
+            isTerritoryTile,
             isStatueTile,
             isBorderTerrain
         } = deps;
@@ -318,10 +320,12 @@
                 }
 
                 if (!isVisible) {
-                    cell.classList.add('field-fog');
                     appendCloudLayer(cell, r, c, type);
-                    mapLayer.appendChild(cell);
-                    continue;
+                    if (!isWallTile(type) && !isBorderTerrain(type)) {
+                        cell.classList.add('field-fog');
+                        mapLayer.appendChild(cell);
+                        continue;
+                    }
                 }
 
                 let color = 'rgba(0, 0, 0, 0)';
@@ -357,6 +361,9 @@
                 } else if (isRuinsTile(type)) {
                     color = '#9ca3af';
                     cell.classList.add('field-ruins');
+                } else if (isTerritoryTile && isTerritoryTile(type)) {
+                    color = '#4ade80';
+                    cell.classList.add('field-territory');
                 } else if (isStatueTile(type)) {
                     color = '#94a3b8';
                     cell.classList.add('field-statue');
@@ -393,6 +400,7 @@
                             'field-shop',
                             'field-tavern',
                             'field-ruins',
+                            'field-territory',
                             'field-statue',
                             'locked',
                             'unlocked'

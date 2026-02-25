@@ -78,8 +78,22 @@
         const FIELD_MAP_DATA = getFallbackFieldMap();
         const dataFieldMap = Array.isArray(gameData?.field_map) ? gameData.field_map : null;
         if (dataFieldMap && dataFieldMap.length > 0 && dataFieldMap.every((row) => Array.isArray(row))) {
+            const maxRows = dataFieldMap.length;
+            const maxCols = Math.max(...dataFieldMap.map((r) => r.length));
+            const targetSize = Math.max(maxRows, maxCols, 19);
+
             FIELD_MAP_DATA.length = 0;
-            dataFieldMap.forEach((row) => FIELD_MAP_DATA.push(row.map((cell) => Number(cell))));
+            for (let r = 0; r < targetSize; r++) {
+                const newRow = [];
+                for (let c = 0; c < targetSize; c++) {
+                    if (r < maxRows && c < dataFieldMap[r].length) {
+                        newRow.push(Number(dataFieldMap[r][c]));
+                    } else {
+                        newRow.push(0); // Pad with walls
+                    }
+                }
+                FIELD_MAP_DATA.push(newRow);
+            }
         }
         const FIELD_TERRAIN_DATA = FIELD_MAP_DATA.map((row) => row.slice());
         const MAP_SIZE = FIELD_MAP_DATA.length;

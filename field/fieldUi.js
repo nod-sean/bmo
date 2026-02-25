@@ -228,7 +228,7 @@
             } else {
                 window.KOVUiShellModule.showToast(game, game.tr('toast.select_army_first', {}, 'Select a squad first'));
             }
-        }, { cost: actualCpCost });
+        }, { cost: actualCpCost, disabled: moveInfo ? !moveInfo.canMove : false });
         
         menu.appendChild(moveBtn);
 
@@ -717,9 +717,12 @@
                 cell.style.opacity = '';
 
                 if (!isVisible) {
-                    cell.classList.add('field-fog');
                     appendCloudLayer(cell, type);
-                    continue;
+                    // If it's not a wall or border, we skip drawing the actual terrain/icon to hide it
+                    if (!deps.isWallTile(type) && !deps.isBorderTerrain(type)) {
+                        cell.classList.add('field-fog');
+                        continue;
+                    }
                 }
 
                 let color = 'rgba(0, 0, 0, 0)';
