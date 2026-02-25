@@ -140,6 +140,23 @@
     }
 
     function getDefendersForTile(game, type, r, c) {
+        // Check for other armies (PvP)
+        if (Array.isArray(game.otherArmies) && r !== undefined && c !== undefined) {
+             const otherArmy = game.otherArmies.find(a => {
+                const targetR = a.moving?.to ? a.moving.to.r : a.r;
+                const targetC = a.moving?.to ? a.moving.to.c : a.c;
+                return targetR === r && targetC === c;
+            });
+            if (otherArmy && Array.isArray(otherArmy.units)) {
+                 const units = otherArmy.units.map((u, i) => {
+                     if (!u) return null;
+                     const code = (Number(u.type) * 100) + Number(u.level);
+                     return { code, count: 1, slot: i };
+                 }).filter(Boolean);
+                 if (units.length > 0) return units;
+            }
+        }
+
         const data = window.KOVFieldEventLogicModule.getFieldObjectData(game, type, game.fieldObjectDataDeps);
         const base = data && Array.isArray(data.defenders) ? cloneDefenders(data.defenders) : [];
         if (r === undefined || c === undefined) return base;
@@ -152,11 +169,11 @@
     }
 
     function triggerBattleFx(game, step) {
-        if (!step || step.type !== 'attack') return;
+        if (!step || (step.type !== 'attack' && step.type !== 'move')) return;
         clearBattleFxTimers(game);
-        const move = getBattleMoveOffset(step);
-        const shot = getBattleShotOffset(step);
-        const hasProjectile = !!step.rangedShot;
+        const move = getBattleMoveOffset(game, step);
+        const shot = step.type === 'attack' ? getBattleShotOffset(game, step) : { x: 0, y: 0 };
+        const hasProjectile = step.type === 'attack' && !!step.rangedShot;
         const moveDuration = getBattleMoveDuration(step, move.steps);
         const shotDuration = 320;
         const impactDuration = 260;
@@ -169,12 +186,16 @@
             defenderTeam: step.defenderTeam,
             attackerSlot: Number(step.attackerSlot),
             defenderSlot: Number(step.defenderSlot),
+            attackerPos: step.attackerPos,
+            defenderPos: step.defenderPos,
             moved: !!step.moved,
             damage: Number(step.damage || 0),
             isCrit: !!step.isCrit,
             phase: step.moved ? 'move' : (hasProjectile ? 'projectile' : 'impact'),
             moveX: move.x,
             moveY: move.y,
+            lungeX: move.lungeX || 0,
+            lungeY: move.lungeY || 0,
             pathSteps: move.steps,
             shotX: shot.x,
             shotY: shot.y,
@@ -184,8 +205,8 @@
         };
 
         const advanceTo = (phase) => {
-            if (!game.battleFx || game.battleFx.attackerId !== step.attackerId || game.battleFx.defenderId !== step.defenderId) return;
-            if (phase === 'impact') applyStepDamage(game, step);
+            if (!game.battleFx || game.battleFx.attackerId !== step.attackerId) return;
+            if (phase === 'impact' || phase === 'done') applyStepDamage(game, step);
             game.battleFx.phase = phase;
             window.KOVBattleUiModule.renderBattleModal(game);
         };
@@ -194,7 +215,7 @@
         if (step.moved) {
             delay += moveDuration;
             game.battleFxPhaseTimer = setTimeout(() => {
-                advanceTo('impact');
+                advanceTo(step.type === 'move' ? 'done' : 'impact');
             }, delay);
         } else if (hasProjectile) {
             delay += shotDuration;
@@ -204,7 +225,7 @@
         }
 
         const clearDelay = step.moved
-            ? (moveDuration + impactDuration + 180)
+            ? (moveDuration + (step.type === 'move' ? 100 : impactDuration + 180))
             : ((hasProjectile ? shotDuration : 0) + impactDuration + 300);
         game.battleFxClearTimer = setTimeout(() => {
             game.battleFx = null;
@@ -214,18 +235,39 @@
 
     function applyStepDamage(game, step) {
         if (!game?.battleContext) return;
+        
+        // Update attacker position if moved
+        if (step.attackerPos) {
+            let attacker = null;
+            if (step.attackerTeam === 'A') {
+                attacker = game.battleContext.allies?.find((u) => u.id === step.attackerId || Number(u.slot) === Number(step.attackerSlot));
+            } else if (step.attackerTeam === 'B') {
+                attacker = game.battleContext.defenders?.find((u) => u.id === step.attackerId || Number(u.slot) === Number(step.attackerSlot));
+            }
+            if (attacker) {
+                attacker.pos = { r: step.attackerPos.r, c: step.attackerPos.c };
+            }
+        }
+
         let unit = null;
         const targetId = step?.defenderId;
-        if (targetId) {
+        const targetTeam = step?.defenderTeam;
+        const targetSlot = Number(step?.defenderSlot);
+
+        if (targetTeam === 'A') {
+            unit = game.battleContext.allies?.find((u) => u.id === targetId || u.sourceId === targetId || (Number.isFinite(targetSlot) && Number(u.slot) === targetSlot));
+        } else if (targetTeam === 'B') {
+            unit = game.battleContext.defenders?.find((u) => u.id === targetId || u.sourceId === targetId || (Number.isFinite(targetSlot) && Number(u.slot) === targetSlot));
+        } else if (targetId) {
             unit = game.battleContext.allies?.find((u) => u.id === targetId || u.sourceId === targetId);
             if (!unit) unit = game.battleContext.defenders?.find((u) => u.id === targetId || u.sourceId === targetId);
         }
-        if (!unit && Number.isFinite(Number(step?.defenderSlot))) {
-            const slot = Number(step.defenderSlot);
-            if (step?.defenderTeam === 'A') {
-                unit = game.battleContext.allies?.find((u) => Number(u.slot) === slot) || null;
-            } else if (step?.defenderTeam === 'B') {
-                unit = game.battleContext.defenders?.find((u) => Number(u.slot) === slot) || null;
+        
+        if (!unit && Number.isFinite(targetSlot)) {
+            if (targetTeam === 'A') {
+                unit = game.battleContext.allies?.find((u) => Number(u.slot) === targetSlot) || null;
+            } else if (targetTeam === 'B') {
+                unit = game.battleContext.defenders?.find((u) => Number(u.slot) === targetSlot) || null;
             }
         }
         if (!unit) return;
@@ -240,25 +282,55 @@
         return Math.max(260, Math.min(1200, ms));
     }
 
-    function getBattleMoveOffset(step) {
-        const movedSteps = Math.max(0, Number(step?.requiredMove || 0));
-        if (!movedSteps) return { x: 0, y: 0, steps: 0 };
-
-        const a = step?.attackerPos || { r: 1, c: 1 };
-        const d = step?.defenderPos || { r: 1, c: 1 };
-        const rowDelta = (d.r ?? 1) - (a.r ?? 1);
-        const colDelta = (d.c ?? 1) - (a.c ?? 1);
-        const dist = Math.max(1, Math.abs(rowDelta) + Math.abs(colDelta));
-        const steps = Math.max(1, Math.min(3, movedSteps));
-        // Move proportional to path progress so attacker visually approaches right before target.
-        const stepRatio = Math.max(0, Math.min(1, movedSteps / dist));
-        const cellPitch = 60; // battle cell + gap
-        const horizontal = colDelta * cellPitch * stepRatio * 0.95;
-        const vertical = rowDelta * cellPitch * stepRatio * 0.95;
-        return { x: horizontal, y: vertical, steps };
+    function getUnitPos(unit) {
+        if (!unit) return { r: 1, c: 1 };
+        if (unit.pos) return unit.pos;
+        const slot = unit.slot || 0;
+        const clamped = Math.max(0, Math.min(8, Number.isFinite(slot) ? slot : 0));
+        const r = 2 + Math.floor(clamped / 3);
+        const c = unit.isEnemy ? 5 + (2 - (clamped % 3)) : (clamped % 3);
+        return { r, c };
     }
 
-    function getBattleShotOffset(step) {
+    function getBattleMoveOffset(game, step) {
+        let unit = null;
+        if (game && game.battleContext) {
+            if (step.attackerTeam === 'A') {
+                unit = game.battleContext.allies?.find(u => u.id === step.attackerId || Number(u.slot) === Number(step.attackerSlot));
+            } else {
+                unit = game.battleContext.defenders?.find(u => u.id === step.attackerId || Number(u.slot) === Number(step.attackerSlot));
+            }
+        }
+        
+        const oldPos = getUnitPos(unit);
+        const newPos = step?.attackerPos || oldPos;
+        const d = step?.defenderPos || oldPos;
+        
+        // Offset to new position from old position
+        const toNewR = newPos.r - oldPos.r;
+        const toNewC = newPos.c - oldPos.c;
+        
+        // Offset from new position towards defender (lunge)
+        const rowDelta = d.r - newPos.r;
+        const colDelta = d.c - newPos.c;
+        const distToDef = Math.max(1, Math.abs(rowDelta) + Math.abs(colDelta));
+        const movedSteps = Math.max(0, Number(step?.requiredMove || 0));
+        const steps = Math.max(1, Math.min(3, movedSteps));
+        const stepRatio = Math.max(0, Math.min(1, movedSteps / distToDef));
+        
+        // Output raw percentages (1 cell = 100%)
+        // No large grid-cell lunge needed in 8x8, just move to newPos. 
+        // Small pixel stab is handled by CSS battleRetreat.
+        const moveX = `calc(${toNewC * 100}% + ${toNewC} * var(--grid-gap, 0px))`; 
+        const moveY = `calc(${toNewR * 100}% + ${toNewR} * var(--grid-gap, 0px))`;
+        
+        const lungeX = 0;
+        const lungeY = 0;
+        
+        return { x: moveX, y: moveY, lungeX, lungeY, steps };
+    }
+
+    function getBattleShotOffset(game, step) {
         const dist = Math.max(1, Number(step?.distance || 1));
         const a = step?.attackerPos || { r: 1, c: 1 };
         const d = step?.defenderPos || { r: 1, c: 1 };

@@ -76,7 +76,7 @@
         }
         game.currentShopContext = null;
         document.querySelector('#modal-object .modal-content')?.classList.remove('wide');
-        window.KOVFieldUiModule.hideFieldActionMenu();
+        window.KOVFieldUiModule.hideFieldActionMenu(game);
         window.KOVFieldUiModule.clearPathPreview(game);
         window.KOVFieldUiModule.setMovePreview(game, '');
         game.isDraggingMap = false;
@@ -197,6 +197,11 @@
     }
 
     function updateUI(game, deps) {
+        if (game.isOfflineMode) {
+            const indicator = document.getElementById('offline-mode-indicator');
+            if (indicator) indicator.style.display = 'block';
+        }
+
         document.getElementById('energy-display').innerText = `${game.energy}/${game.maxEnergy}`;
         document.getElementById('cp-display').innerText = `${game.cp}/${game.maxCp}`;
         document.getElementById('gold-display').innerText = game.gold;
@@ -208,6 +213,18 @@
         document.getElementById('xp-bar').style.width = `${xpWidth}%`;
         const fieldCp = document.getElementById('field-cp-display');
         if (fieldCp) fieldCp.innerText = `${game.cp}/${game.maxCp}`;
+        
+        const mapLabel = document.getElementById('current-map-label');
+        if (mapLabel) {
+            const lobbyState = window.KOVLobbyChatModule?.ensureWorldLobbyState(game);
+            if (lobbyState && lobbyState.entered) {
+                mapLabel.style.display = 'block';
+                mapLabel.innerText = `Map: ${lobbyState.channel || 'map_0'}`;
+            } else {
+                mapLabel.style.display = 'none';
+            }
+        }
+        
         window.KOVPersistenceModule.saveGame(game);
     }
 
@@ -261,7 +278,6 @@
             });
         }
 
-        setText('footer-build-label', 'ui.footer.build', 'Build');
         setText('footer-field-label', 'ui.footer.field', 'Field');
         setText('footer-equipment-label', 'ui.footer.equipment', 'Equip');
         setText('modal-title', 'ui.modal.menu_title', 'Menu');
@@ -319,9 +335,8 @@
         const lobbySelect = document.getElementById('lobby-channel-select');
         if (lobbySelect) {
             const labels = {
-                alpha: game.tr('ui.lobby.channel.alpha', {}, 'Alpha'),
-                beta: game.tr('ui.lobby.channel.beta', {}, 'Beta'),
-                gamma: game.tr('ui.lobby.channel.gamma', {}, 'Gamma')
+                map_0: game.tr('ui.lobby.channel.map_0', {}, 'Tutorial Map'),
+                map_1: game.tr('ui.lobby.channel.map_1', {}, 'World Map')
             };
             Array.from(lobbySelect.options).forEach((opt) => {
                 const k = String(opt.value || '').toLowerCase();

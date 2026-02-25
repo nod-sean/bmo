@@ -1,7 +1,7 @@
 (function (global) {
     'use strict';
 
-    function bootstrapGameState(game, deps) {
+    async function bootstrapGameState(game, deps) {
         game.grid = Array(deps.CONFIG.gridRows).fill().map(() => Array(deps.CONFIG.gridCols).fill(null));
         game.gridState = Array(deps.CONFIG.gridRows).fill().map(() => Array(deps.CONFIG.gridCols).fill(null));
         game.squad1 = Array(9).fill(null);
@@ -12,7 +12,7 @@
         game.currentXp = 0;
         game.energy = 50;
         game.gold = 3000;
-        game.gems = 100;
+        game.gem = 100;
         game.points = 0;
         game.cp = 20;
 
@@ -80,7 +80,7 @@
             rewardsClaimed: false,
             dragonBoss: { season: 1, killCount: 0, byUid: {}, lastKill: null }
         };
-        game.worldLobbyState = { entered: false, channel: 'alpha', enteredAt: 0 };
+        game.worldLobbyState = { entered: false, channel: 'map_0', enteredAt: 0 };
         game.lobbyChannelStatusTable = window.KOVLobbyChatModule.buildLobbyChannelStatusTable();
         game.lobbyChannelStatusSource = 'local';
         game.lobbyChannelStatusFetchedAt = 0;
@@ -191,28 +191,130 @@
                 }
             } catch (e) { }
         }
-        if (!resetFlag && window.KOVPersistenceModule.loadGame(game, {
-            CONFIG: deps.CONFIG,
-            LOCK_TYPE: deps.LOCK_TYPE,
-            UNLOCK_LEVEL_MAP: deps.UNLOCK_LEVEL_MAP,
-            UNLOCK_GOLD_MAP: deps.UNLOCK_GOLD_MAP,
-            UNLOCK_ITEM_MAP: deps.UNLOCK_ITEM_MAP,
-            PLAYER_START: deps.PLAYER_START,
-            FOG_RADIUS: deps.FOG_RADIUS,
-            FIELD_EVENT_TYPES: deps.FIELD_EVENT_TYPES,
-            normalizeWorldRuleSetName: deps.normalizeWorldRuleSetName
-        })) window.KOVGameCoreModule.updateLevelStats(game, game.levelDeps);
-        else window.KOVMergeSetupModule.initGame(game, {
-            CONFIG: deps.CONFIG,
-            LOCK_TYPE: deps.LOCK_TYPE,
-            UNLOCK_LEVEL_MAP: deps.UNLOCK_LEVEL_MAP,
-            UNLOCK_GOLD_MAP: deps.UNLOCK_GOLD_MAP,
-            UNLOCK_ITEM_MAP: deps.UNLOCK_ITEM_MAP,
-            ITEM_TYPE: deps.ITEM_TYPE,
-            CAMP_CAPACITY: deps.CAMP_CAPACITY,
-            getData: deps.getData,
-            getInfoFromCode: deps.getInfoFromCode
-        });
+
+        let loadedLocalState = false;
+        
+        // 1. Try to load local state first (for settings, currency, etc.)
+        if (!resetFlag) {
+            loadedLocalState = window.KOVPersistenceModule.loadGame(game, {
+                CONFIG: deps.CONFIG,
+                LOCK_TYPE: deps.LOCK_TYPE,
+                UNLOCK_LEVEL_MAP: deps.UNLOCK_LEVEL_MAP,
+                UNLOCK_GOLD_MAP: deps.UNLOCK_GOLD_MAP,
+                UNLOCK_ITEM_MAP: deps.UNLOCK_ITEM_MAP,
+                PLAYER_START: deps.PLAYER_START,
+                FOG_RADIUS: deps.FOG_RADIUS,
+                FIELD_EVENT_TYPES: deps.FIELD_EVENT_TYPES,
+                normalizeWorldRuleSetName: deps.normalizeWorldRuleSetName
+            });
+        }
+
+        let loadedRuntimeState = false;
+        let needsInit = false;
+
+        // 2. Overwrite State from runtime (Online)
+        if (!resetFlag && game.runtime) {
+            if (game.runtime.getMergeState) {
+                const res = await game.runtime.getMergeState();
+                if (res && res.success && res.data) {
+                    const state = res.data;
+                    const hasGridData = state.grid && (
+                        (Array.isArray(state.grid) && state.grid.some(row => row && row.some(cell => cell))) ||
+                        (typeof state.grid === 'object' && Object.keys(state.grid).length > 0)
+                    );
+                    
+                    if (hasGridData) {
+                        if (Array.isArray(state.grid)) {
+                            game.grid = state.grid;
+                        } else {
+                            // Dict mapping "grid_r_c" -> item
+                            game.grid = Array(deps.CONFIG.gridRows).fill().map(() => Array(deps.CONFIG.gridCols).fill(null));
+                            for (const key in state.grid) {
+                                const item = state.grid[key];
+                                if (key.startsWith('grid_')) {
+                                    const parts = key.split('_');
+                                    const r = parseInt(parts[1], 10);
+                                    const c = parseInt(parts[2], 10);
+                                    if (r >= 0 && r < deps.CONFIG.gridRows && c >= 0 && c < deps.CONFIG.gridCols) {
+                                        game.grid[r][c] = { type: item.type, level: item.level, scale: 1, ...item };
+                                    }
+                                } else if (key.includes(',')) {
+                                    const [r, c] = key.split(',').map(Number);
+                                    if (r >= 0 && r < deps.CONFIG.gridRows && c >= 0 && c < deps.CONFIG.gridCols) {
+                                        game.grid[r][c] = { type: item.type, level: item.level, scale: 1, ...item };
+                                    }
+                                }
+                            }
+                        }
+                        if (state.gridState && Array.isArray(state.gridState)) {
+                            game.gridState = state.gridState;
+                        } else {
+                            for (let r = 0; r < deps.CONFIG.gridRows; r++) {
+                                for (let c = 0; c < deps.CONFIG.gridCols; c++) {
+                                    if (!game.gridState[r][c]) {
+                                        game.gridState[r][c] = { type: deps.LOCK_TYPE.OPEN };
+                                    }
+                                }
+                            }
+                        }
+                        if (state.squad1 && Array.isArray(state.squad1)) game.squad1 = state.squad1;
+                        if (state.squad2 && Array.isArray(state.squad2)) game.squad2 = state.squad2;
+                        if (state.squad3 && Array.isArray(state.squad3)) game.squad3 = state.squad3;
+                        
+                        loadedRuntimeState = true;
+                    } else {
+                        needsInit = true;
+                    }
+                } else {
+                    needsInit = true;
+                }
+            }
+
+            if (game.runtime.getProgressionState) {
+                const progRes = await game.runtime.getProgressionState(game);
+                if (progRes && progRes.success && progRes.data) {
+                    const pd = progRes.data;
+                    if (Number.isFinite(pd.level)) game.lordLevel = pd.level;
+                    if (Number.isFinite(pd.xp)) game.currentXp = pd.xp;
+                    if (Number.isFinite(pd.energy)) game.energy = pd.energy;
+                    if (Number.isFinite(pd.cp)) game.cp = pd.cp;
+                    if (Array.isArray(pd.unlockedUnits)) game.unlockedUnits = pd.unlockedUnits;
+                    loadedRuntimeState = true;
+                }
+            }
+        }
+
+        if ((loadedLocalState || loadedRuntimeState) && !needsInit) {
+            window.KOVGameCoreModule.updateLevelStats(game, game.levelDeps);
+        } else {
+            window.KOVMergeSetupModule.initGame(game, {
+                CONFIG: deps.CONFIG,
+                LOCK_TYPE: deps.LOCK_TYPE,
+                UNLOCK_LEVEL_MAP: deps.UNLOCK_LEVEL_MAP,
+                UNLOCK_GOLD_MAP: deps.UNLOCK_GOLD_MAP,
+                UNLOCK_ITEM_MAP: deps.UNLOCK_ITEM_MAP,
+                ITEM_TYPE: deps.ITEM_TYPE,
+                CAMP_CAPACITY: deps.CAMP_CAPACITY,
+                getData: deps.getData,
+                getInfoFromCode: deps.getInfoFromCode
+            });
+            
+            // Sync initial board to server if online
+            if (game.runtime && game.runtime.executeMergeAction) {
+                const gridPayload = {};
+                for (let r = 0; r < deps.CONFIG.gridRows; r++) {
+                    for (let c = 0; c < deps.CONFIG.gridCols; c++) {
+                        if (game.grid[r][c]) {
+                            gridPayload[`grid_${r}_${c}`] = game.grid[r][c];
+                        }
+                    }
+                }
+                game.runtime.executeMergeAction(game, {
+                    type: 'sync_board',
+                    payload: { grid: gridPayload }
+                }).catch(e => console.error("Initial board sync failed", e));
+            }
+        }
 
         window.KOVWorldSeasonModule.ensureAdminState(game, deps.WORLD_ADMIN_DEPS);
         const activePresetId = window.KOVWorldSeasonModule.getActiveWorldPresetId(game, deps.WORLD_ADMIN_DEPS);
@@ -286,6 +388,14 @@
         if (!localStorage.getItem('kov_uid')) localStorage.setItem('kov_uid', `U${Math.floor(Math.random() * 1000000)}`);
         document.getElementById('settings-uid').innerText = localStorage.getItem('kov_uid');
         window.KOVUiShellModule.refreshLocaleControls(game, game.localeControlDeps);
+ 
+        if (window.gachaUi) {
+            window.gachaUi.init();
+        }
+
+        if (window.KOVAuthSessionModule && typeof window.KOVAuthSessionModule.ensureGuestSession === 'function') {
+            window.KOVAuthSessionModule.ensureGuestSession(game).catch(() => { });
+        }
     }
 
     global.KOVGameBootstrapModule = {

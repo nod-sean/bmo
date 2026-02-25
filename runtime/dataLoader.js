@@ -5,11 +5,17 @@
         'chests.json',
         'constants.json',
         'field_map.json',
+        'field_map_0.json',
+        'field_map_conquest.json',
         'field_objects.json',
         'items.json',
         'level_data.json',
         'localization.json',
         'merge_xp.json',
+        'object_regen_0.json',
+        'object_regen_conquest.json',
+        'object_start_0.json',
+        'object_start_conquest.json',
         'units.json',
         'unlock_conditions.json'
     ];
@@ -73,6 +79,29 @@
         const gameData = Object.fromEntries(loadedPairs);
         gameData.build_timestamp = (manifest && manifest.generated_at) || new Date().toISOString();
         gameData.build_version = (manifest && manifest.version) || 'dev';
+        
+        try {
+            let channel = 'map_0'; // Default to map_0
+            const saved = localStorage.getItem('kov_save_v1');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.worldLobbyState && parsed.worldLobbyState.channel) {
+                    channel = parsed.worldLobbyState.channel;
+                }
+            }
+            if (channel === 'map_0' && gameData.field_map_0) {
+                gameData.field_map = gameData.field_map_0;
+                gameData.object_start = gameData.object_start_0;
+                gameData.object_regen = gameData.object_regen_0;
+            } else if (channel === 'conquest' && gameData.field_map_conquest) {
+                gameData.field_map = gameData.field_map_conquest;
+                gameData.object_start = gameData.object_start_conquest;
+                gameData.object_regen = gameData.object_regen_conquest;
+            }
+        } catch (e) {
+            console.warn('[data_loader] failed to read lobby channel from save:', e);
+        }
+
         return gameData;
     }
 

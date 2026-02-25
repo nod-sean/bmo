@@ -447,6 +447,12 @@ canvas {
     z-index: 16;
 }
 
+.field-movable {
+    background-color: rgba(59, 130, 246, 0.35) !important;
+    border: 1px dashed rgba(255, 255, 255, 0.6) !important;
+    z-index: 11;
+}
+
 .field-path {
     outline: 1px solid rgba(255, 255, 255, 0.5);
     background: rgba(255, 255, 255, 0.08);
@@ -1557,25 +1563,79 @@ canvas {
 .field-action-menu {
     position: absolute;
     background: rgba(15, 15, 15, 0.95);
-    border: 1px solid #666;
+    border: 1px solid #444;
     border-radius: 8px;
-    padding: 6px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
     gap: 6px;
     z-index: 120;
-    min-width: 90px;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+    min-width: 140px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+    color: #e5e7eb;
+}
+
+.action-menu-header {
+    border-bottom: 1px solid #333;
+    padding-bottom: 6px;
+    margin-bottom: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.action-menu-title {
+    font-weight: bold;
+    font-size: 14px;
+    color: #fcd34d;
+}
+
+.action-menu-difficulty {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    align-self: flex-start;
 }
 
 .field-action-btn {
-    background: #2f2f2f;
-    border: 1px solid #555;
-    color: #fff;
-    padding: 6px 8px;
+    background: #1f2937;
+    border: 1px solid #374151;
+    color: #f3f4f6;
+    padding: 8px 10px;
     border-radius: 6px;
     font-size: 12px;
     font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s, border-color 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.action-btn-cost {
+    color: #9ca3af;
+    font-size: 10px;
+    font-weight: normal;
+    background: rgba(0,0,0,0.3);
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.field-action-btn:hover {
+    background: #374151;
+    border-color: #4b5563;
+}
+
+.field-action-btn.action-btn-cancel {
+    margin-top: 4px;
+    background: #7f1d1d;
+    border-color: #ef4444;
+}
+
+.field-action-btn.action-btn-cancel:hover {
+    background: #991b1b;
 }
 
 .field-action-btn:active {
@@ -1777,21 +1837,7 @@ canvas {
     gap: clamp(6px, 1.8vw, 14px);
 }
 
-.battle-side {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 0;
-    z-index: 2;
-}
 
-.battle-side-ally {
-    align-items: flex-start;
-}
-
-.battle-side-enemy {
-    align-items: flex-end;
-}
 
 .battle-prep-front {
     position: static;
@@ -1863,19 +1909,33 @@ canvas {
     color: #93c5fd;
 }
 
-.battle-grid-check {
+.battle-grid-unified {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: clamp(4px, 1.1vw, 8px);
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-rows: repeat(8, minmax(0, 1fr));
+    gap: clamp(2px, 0.5vw, 4px);
     margin: 6px auto;
-    width: min(43vw, 236px);
+    width: min(86vw, 480px);
+    aspect-ratio: 1 / 1;
+    --grid-gap: clamp(2px, 0.5vw, 4px);
+    position: relative;
 }
 
-.battle-cell {
+.battle-cell-bg {
     width: auto;
     aspect-ratio: 1 / 1;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px dashed #666;
+    border: 1px dashed #555;
+    pointer-events: none;
+}
+
+.battle-cell-bg.prep {
+    pointer-events: auto;
+}
+
+.battle-cell {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1887,6 +1947,9 @@ canvas {
     --fx-move-ms: 190ms;
     --fx-shot-x: 18px;
     --fx-shot-y: 0px;
+    --overlap-x: 0px;
+    --overlap-y: 0px;
+    transform: translate(var(--overlap-x), var(--overlap-y));
 }
 
 .battle-cell-actor {
@@ -2126,12 +2189,12 @@ canvas {
 }
 
 .battle-cell.enemy {
-    border-color: #ef4444;
+    border: 1px dashed #ef4444;
     background: rgba(239, 68, 68, 0.1);
 }
 
 .battle-cell.ally {
-    border-color: #3b82f6;
+    border: 1px dashed #3b82f6;
     background: rgba(59, 130, 246, 0.1);
 }
 
@@ -2328,18 +2391,61 @@ canvas {
     object-fit: contain;
     image-rendering: pixelated;
 }
+
+
+
+
+#offline-mode-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: red;
+    color: white;
+    text-align: center;
+    padding: 5px;
+    font-weight: bold;
+    z-index: 10000;
+    display: none;
+    pointer-events: none;
+    opacity: 0.8;
+}
 </style>
+    <script>
+        window.KOV_API_BASE_URL = 'http://localhost:10001';
+    </script>
 </head>
 
 <body>
 
     <div id="game-container">
+        <div id="offline-mode-indicator" style="display:none;">Offline Mode</div>
+        <!-- Title Scene -->
+        <div id="title-scene" class="fixed inset-0 bg-gray-900 z-50 flex flex-col items-center justify-center text-white" style="display:none;">
+            <div class="mb-8">
+                <h1 class="text-6xl font-bold text-yellow-400 drop-shadow-lg mb-2">KOV</h1>
+                <p class="text-gray-400 text-sm tracking-widest">KINGDOM OF VALOR</p>
+            </div>
+            <div class="space-y-4 w-64">
+                <button id="title-guest-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-lg font-bold text-lg shadow-lg transform transition active:scale-95">
+                    Guest Login
+                </button>
+                <button id="title-login-btn" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold text-md shadow-lg transform transition active:scale-95">
+                    Log In
+                </button>
+            </div>
+            <div class="absolute bottom-8 text-xs text-gray-600">v0.4.0</div>
+        </div>
+
         <div id="levelup-banner"><img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/levelup.png"
                 onerror="this.style.display='none'"></div>
 
         <!-- Header -->
-        <div class="header-panel">
-            <div class="flex justify-between mb-1">
+        <div class="header-panel relative">
+            <div id="current-map-label" class="absolute -top-3 left-0 bg-blue-600/80 text-white text-[9px] px-2 py-0.5 rounded-br font-bold z-10" style="display:none;">
+                Map: map_0
+            </div>
+            <div class="flex justify-between mb-1 pt-1">
                 <div class="res-pill" onclick="window.KOVSettingsRefillModule.openRefill(window.game, 'energy', window.game.refillDeps)">
                     <img src="https://raw.githubusercontent.com/nod-sean/bmo/main/img/energy.png" class="res-icon"
                         onerror="this.style.display='none';this.nextElementSibling.innerText='⚡'+this.nextElementSibling.innerText">
@@ -2422,17 +2528,30 @@ canvas {
                 <span class="btn-icon">🛡️</span>
                 <span class="btn-label" id="footer-equipment-label">Equip</span>
             </button>
-            <button class="action-btn build-btn" style="margin-left:5px;" onclick="window.game.mergeController.toggleShop()">
-                <span class="btn-icon">🏠</span>
-                <span class="btn-label" id="footer-build-label">Build</span>
-            </button>
             <button class="action-btn world-btn" style="margin-left:5px;" onclick="window.game.fieldController.toggleField()">
                 <span class="btn-icon">🌍</span>
                 <span class="btn-label" id="footer-field-label">Field</span>
             </button>
+
         </div>
 
         <!-- Modals -->
+        <div id="title-screen" class="modal-overlay" style="display:none; z-index: 9999; background-color: #111827;">
+            <div class="flex flex-col items-center justify-center w-full h-full">
+                <h1 class="text-6xl font-bold text-yellow-500 mb-12 tracking-wider filter drop-shadow-[0_0_10px_rgba(234,179,8,0.5)]">KOV</h1>
+                <div class="flex flex-col gap-4 w-64">
+                    <button id="title-guest-btn" class="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-4 rounded-lg shadow-lg border border-blue-400 transform transition hover:scale-105">
+                        GUEST START
+                    </button>
+                    <button id="title-login-btn" class="bg-gray-800 text-gray-500 font-bold py-3 rounded-lg border border-gray-700 cursor-not-allowed">
+                        LOGIN (Soon)
+                    </button>
+                </div>
+                <div id="title-status" class="mt-8 text-yellow-200/50 text-sm font-mono h-6"></div>
+                <div class="absolute bottom-8 text-gray-600 text-xs">v0.4.0 Pre-Alpha</div>
+            </div>
+        </div>
+
         <div id="field-modal">
             <div class="flex justify-between items-center px-3 py-2 border-b border-gray-600 bg-gray-900">
                 <h2 class="text-lg font-bold text-yellow-400" id="modal-title">Menu</h2>
@@ -2527,6 +2646,8 @@ canvas {
                     </div>
                 </div>
                 <div class="mt-4 flex gap-2">
+                    <button id="settings-logout-btn" onclick="window.KOVAuthSessionModule.logout()"
+                        class="flex-1 bg-amber-700 py-2 rounded text-xs text-amber-100 border border-amber-500 hover:bg-amber-600">Logout</button>
                     <button id="settings-support-btn" onclick="window.KOVSettingsRefillModule.openSupport(window.game)"
                         class="flex-1 bg-slate-700 py-2 rounded text-xs text-slate-100 border border-slate-500 hover:bg-slate-600">Support</button>
                     <button id="settings-delete-btn" onclick="window.KOVSettingsRefillModule.requestAccountDeletion(window.game)"
@@ -2580,9 +2701,8 @@ canvas {
                         <label id="lobby-channel-label" for="lobby-channel-select">Channel</label>
                         <select id="lobby-channel-select" onchange="window.KOVLobbyChatModule.renderLobbyChannelStatus(window.game)"
                             class="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-gray-100">
-                            <option value="alpha">Alpha</option>
-                            <option value="beta">Beta</option>
-                            <option value="gamma">Gamma</option>
+                            <option value="map_0">Map 0 (Tutorial)</option>
+                            <option value="map_1">Map 1 (World)</option>
                         </select>
                     </div>
                     <div id="lobby-channel-status" class="bg-gray-900 border border-gray-700 p-3 rounded text-xs text-gray-200"></div>
@@ -2632,14 +2752,7 @@ canvas {
                 <div class="battle-container">
                     <div class="battle-stage" id="battle-stage">
                         <div class="battle-front">
-                            <div class="battle-side battle-side-ally">
-                                <span id="battle-allies-label" class="text-blue-400 font-bold text-xs mb-1">ALLIES</span>
-                                <div class="battle-grid-check" id="battle-grid-ally"></div>
-                            </div>
-                            <div class="battle-side battle-side-enemy">
-                                <span id="battle-enemies-label" class="text-red-400 font-bold text-xs mb-1">ENEMIES</span>
-                                <div class="battle-grid-check" id="battle-grid-enemy"></div>
-                            </div>
+                            <div class="battle-grid-unified" id="battle-grid-container"></div>
                         </div>
                         <div class="battle-result-overlay" id="battle-result-overlay">
                             <div class="battle-result-text" id="battle-result-title">VICTORY</div>
@@ -2661,15 +2774,12 @@ canvas {
                     <div id="battle-prep-subtitle" class="text-xs text-gray-400">Drag to change formation</div>
                 </div>
                 <div class="battle-container">
-                    <div class="battle-front battle-prep-front">
-                        <div class="battle-side battle-side-ally">
-                            <span id="battle-prep-allies-label" class="text-blue-400 font-bold text-sm mb-2">Allies (Drag)</span>
-                            <div class="battle-grid-check" id="prep-grid-ally"></div>
+                    <div class="battle-front battle-prep-front flex-col">
+                        <div class="w-full flex justify-between px-2 mb-1">
+                            <span id="battle-prep-allies-label" class="text-blue-400 font-bold text-sm">Allies (Drag)</span>
+                            <span id="battle-prep-enemies-label" class="text-red-400 font-bold text-sm">Enemies</span>
                         </div>
-                        <div class="battle-side battle-side-enemy">
-                            <span id="battle-prep-enemies-label" class="text-red-400 font-bold text-sm mb-2">Enemies</span>
-                            <div class="battle-grid-check" id="prep-grid-enemy"></div>
-                        </div>
+                        <div class="battle-grid-unified" id="prep-grid-unified"></div>
                     </div>
                     <div class="flex gap-4">
                         <button id="battle-prep-cancel-btn" class="battle-btn close"
@@ -2682,71 +2792,84 @@ canvas {
         </div>
 
         <div id="toast">Message</div>
+
+
     </div>
 
-    <script src="battle/simulator.js"></script>
-    <script src="field/fieldConsts.js"></script>
-    <script src="field/fieldSpawn.js"></script>
-    <script src="core/dataLookup.js"></script>
-    <script src="core/runtimeClasses.js"></script>
-    <script src="core/pathfinding.js"></script>
-    <script src="core/persistence.js"></script>
-    <script src="ui/adminUi.js"></script>
-    <script src="ui/lobbyChat.js"></script>
-    <script src="world/worldConfig.js"></script>
-    <script src="ui/localizationRuntime.js"></script>
-    <script src="world/worldSeason.js"></script>
-    <script src="field/fieldEconomy.js"></script>
-    <script src="field/fieldRules.js"></script>
-    <script src="field/fieldNavigation.js"></script>
-    <script src="field/fieldState.js"></script>
-    <script src="field/fieldEventLogic.js"></script>
-    <script src="field/fieldCommand.js"></script>
-    <script src="field/fieldFlow.js"></script>
-    <script src="field/fieldEventUi.js"></script>
-    <script src="field/fieldRender.js"></script>
-    <script src="battle/battleResult.js"></script>
-    <script src="battle/battleUi.js"></script>
-    <script src="battle/battleCore.js"></script>
-    <script src="battle/battleFlow.js"></script>
-    <script src="battle/dragonBoss.js"></script>
-    <script src="battle/battleReward.js"></script>
-    <script src="merge/mergeController.js"></script>
-    <script src="field/fieldController.js"></script>
-    <script src="ui/uiShell.js"></script>
-    <script src="field/fieldUiEffects.js"></script>
-    <script src="field/fieldUi.js"></script>
-    <script src="field/fieldCamera.js"></script>
-    <script src="ui/uiFormat.js"></script>
-    <script src="ui/settingsRefill.js"></script>
-    <script src="ui/socialProfile.js"></script>
-    <script src="ui/equipmentUi.js"></script>
-    <script src="merge/shop.js"></script>
-    <script src="core/moduleUtils.js"></script>
-    <script src="runtime/statics.js"></script>
-    <script src="runtime/defaults.js"></script>
-    <script src="runtime/dataNormalization.js"></script>
-    <script src="runtime/dataTransforms.js"></script>
-    <script src="merge/mergeData.js"></script>
-    <script src="runtime/levelRuntime.js"></script>
-    <script src="world/worldRuntime.js"></script>
-    <script src="runtime/dummyData.js"></script>
-    <script src="runtime/aStarAdapter.js"></script>
-    <script src="runtime/methodDeps.js"></script>
-    <script src="runtime/runtimeBaseSlice.js"></script>
-    <script src="world/runtimeWorldSlice.js"></script>
-    <script src="merge/runtimeMergeSlice.js"></script>
-    <script src="field/runtimeFieldSlice.js"></script>
-    <script src="runtime/runtimeDepsAssembler.js"></script>
-    <script src="runtime/runtimeGroups.js"></script>
-    <script src="runtime/runtimeContext.js"></script>
-    <script src="runtime/instanceSetup.js"></script>
-    <script src="merge/mergeSetup.js"></script>
-    <script src="merge/mergeBoard.js"></script>
-    <script src="runtime/coreLogic.js"></script>
-    <script src="runtime/progression.js"></script>
-    <script src="runtime/bootstrap.js"></script>
-    <script src="runtime/dataLoader.js" data-game-script="game.js?v=40"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="battle/simulator.js?t=1771770960023"></script>
+    <script src="field/fieldConsts.js?t=1771770960023"></script>
+    <script src="field/fieldSpawn.js?t=1771770960023"></script>
+    <script src="core/dataLookup.js?t=1771770960023"></script>
+    <script src="core/runtimeClasses.js?t=1771770960023"></script>
+    <script src="core/pathfinding.js?t=1771770960023"></script>
+    <script src="core/persistence.js?t=1771770960023"></script>
+    <script src="core/apiClient.js?t=1771770960023"></script>
+    <script src="core/serverApi.js?t=1771770960023"></script>
+    <script src="core/authSession.js?t=1771770960023"></script>
+    <script src="core/gameRuntime.js?t=1771770960023"></script>
+    <script src="core/offlineRuntime.js?t=1771770960023"></script>
+    <script src="core/onlineRuntime.js?t=1771770960023"></script>
+    <script src="ui/adminUi.js?t=1771770960023"></script>
+    <script src="ui/lobbyChat.js?t=1771770960023"></script>
+    <script src="world/worldConfig.js?t=1771770960023"></script>
+    <script src="ui/localizationRuntime.js?t=1771770960023"></script>
+    <script src="world/worldSeason.js?t=1771770960023"></script>
+    <script src="field/fieldEconomy.js?t=1771770960023"></script>
+    <script src="field/fieldRules.js?t=1771770960023"></script>
+    <script src="field/fieldNavigation.js?t=1771770960023"></script>
+    <script src="field/fieldState.js?t=1771770960023"></script>
+    <script src="field/fieldInteraction.js?t=1771770960023"></script>
+    <script src="field/fieldEventLogic.js?t=1771770960023"></script>
+    <script src="field/fieldCommand.js?t=1771770960023"></script>
+    <script src="field/fieldFlow.js?t=1771770960023"></script>
+    <script src="field/fieldEventUi.js?t=1771770960023"></script>
+    <script src="field/fieldRender.js?t=1771770960023"></script>
+    <script src="battle/battleResult.js?t=1771770960023"></script>
+    <script src="battle/battleUi.js?t=1771770960023"></script>
+    <script src="battle/battleCore.js?t=1771770960023"></script>
+    <script src="battle/battleFlow.js?t=1771770960023"></script>
+    <script src="battle/dragonBoss.js?t=1771770960023"></script>
+    <script src="battle/battleReward.js?t=1771770960023"></script>
+    <script src="merge/mergeController.js?t=1771770960023"></script>
+    <script src="field/fieldController.js?t=1771770960023"></script>
+    <script src="ui/uiShell.js?t=1771770960023"></script>
+    <script src="ui/titleUi.js?t=1771770960023"></script>
+    <script src="field/fieldUiEffects.js?t=1771770960023"></script>
+    <script src="field/fieldUi.js?t=1771770960023"></script>
+    <script src="field/fieldCamera.js?t=1771770960023"></script>
+    <script src="ui/uiFormat.js?t=1771770960023"></script>
+    <script src="ui/settingsRefill.js?t=1771770960023"></script>
+    <script src="ui/socialProfile.js?t=1771770960023"></script>
+    <script src="ui/titleUi.js?t=1771770960023"></script>
+    <script src="ui/equipmentUi.js?t=1771770960023"></script>
+
+    <script src="merge/shop.js?t=1771770960023"></script>
+    <script src="core/moduleUtils.js?t=1771770960023"></script>
+    <script src="runtime/statics.js?t=1771770960023"></script>
+    <script src="runtime/defaults.js?t=1771770960023"></script>
+    <script src="runtime/dataNormalization.js?t=1771770960023"></script>
+    <script src="runtime/dataTransforms.js?t=1771770960023"></script>
+    <script src="merge/mergeData.js?t=1771770960023"></script>
+    <script src="runtime/levelRuntime.js?t=1771770960023"></script>
+    <script src="world/worldRuntime.js?t=1771770960023"></script>
+    <script src="runtime/dummyData.js?t=1771770960023"></script>
+    <script src="runtime/aStarAdapter.js?t=1771770960023"></script>
+    <script src="runtime/methodDeps.js?t=1771770960023"></script>
+    <script src="runtime/runtimeBaseSlice.js?t=1771770960023"></script>
+    <script src="world/runtimeWorldSlice.js?t=1771770960023"></script>
+    <script src="merge/runtimeMergeSlice.js?t=1771770960023"></script>
+    <script src="field/runtimeFieldSlice.js?t=1771770960023"></script>
+    <script src="runtime/runtimeDepsAssembler.js?t=1771770960023"></script>
+    <script src="runtime/runtimeGroups.js?t=1771770960023"></script>
+    <script src="runtime/runtimeContext.js?t=1771770960023"></script>
+    <script src="runtime/instanceSetup.js?t=1771770960023"></script>
+    <script src="merge/mergeSetup.js?t=1771770960023"></script>
+    <script src="merge/mergeBoard.js?t=1771770960023"></script>
+    <script src="runtime/coreLogic.js?t=1771770960023"></script>
+    <script src="runtime/progression.js?t=1771770960023"></script>
+    <script src="runtime/bootstrap.js?t=1771770960023"></script>
+    <script src="runtime/dataLoader.js?t=1771770960023" data-game-script="game.js?t=1771770960023"></script>
 </body>
 
 </html>

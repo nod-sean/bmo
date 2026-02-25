@@ -83,6 +83,19 @@
 
     function isHostileTarget(game, type, r, c, deps) {
         const worldRule = window.KOVWorldSeasonModule.getGameWorldRuleSet(game);
+        
+        let hasOtherArmy = false;
+        if (Array.isArray(game.otherArmies)) {
+            hasOtherArmy = game.otherArmies.some(a => {
+                const targetR = a.moving?.to ? a.moving.to.r : a.r;
+                const targetC = a.moving?.to ? a.moving.to.c : a.c;
+                return targetR === r && targetC === c;
+            });
+        }
+        if (hasOtherArmy) {
+            return worldRule.allowPvpAttack !== false; // Allow by default unless explicitly false
+        }
+
         if (type === deps.FIELD_EVENT_TYPES.BANDIT || type === deps.FIELD_EVENT_TYPES.BANDIT_LEADER || type === deps.FIELD_EVENT_TYPES.DUNGEON || type === deps.FIELD_EVENT_TYPES.CROWN) {
             return !!worldRule.allowHostileEventAttack;
         }

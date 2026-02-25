@@ -1,9 +1,18 @@
 (function (global) {
     'use strict';
 
-    function buildMethodDepsInput(args) {
-        const { base, worldSlice, mergeSlice, fieldSlice, GAMEPLAY, runtimeBits } = args;
-        return {
+    function buildRuntimeDepsBundle(args) {
+        const {
+            requireModuleFunction,
+            base,
+            worldSlice,
+            mergeSlice,
+            fieldSlice,
+            GAMEPLAY,
+            runtimeBits
+        } = args;
+
+        const allDeps = {
             CONFIG: base.CONFIG,
             MAP_SIZE: fieldSlice.MAP_SIZE,
             FIELD_MAP_DATA: fieldSlice.FIELD_MAP_DATA,
@@ -35,7 +44,9 @@
             isGateTile: fieldSlice.isGateTile,
             isCitadelTile: fieldSlice.isCitadelTile,
             isDragonTile: fieldSlice.isDragonTile,
+            isReturnGateTile: fieldSlice.isReturnGateTile,
             isStatueTile: fieldSlice.isStatueTile,
+            isTerritoryTile: fieldSlice.isTerritoryTile,
             isRuinsTile: fieldSlice.isRuinsTile,
             isFountainTile: fieldSlice.isFountainTile,
             isShopTile: fieldSlice.isShopTile,
@@ -65,28 +76,9 @@
             TERRAIN_COLORS_BORDER: runtimeBits.TERRAIN_COLORS_BORDER,
             getFieldObjectKind: fieldSlice.getFieldObjectKind
         };
-    }
-
-    function buildRuntimeDepsBundle(args) {
-        const {
-            requireModuleFunction,
-            base,
-            worldSlice,
-            mergeSlice,
-            fieldSlice,
-            GAMEPLAY,
-            runtimeBits
-        } = args;
 
         const buildGameMethodDeps = requireModuleFunction('KOVGameMethodDepsModule', 'buildGameMethodDeps');
-        return buildGameMethodDeps(buildMethodDepsInput({
-            base,
-            worldSlice,
-            mergeSlice,
-            fieldSlice,
-            GAMEPLAY,
-            runtimeBits
-        }));
+        return buildGameMethodDeps(allDeps);
     }
 
     global.KOVGameRuntimeDepsAssemblerModule = { buildRuntimeDepsBundle };

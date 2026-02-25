@@ -24,8 +24,27 @@ class Game {
     constructor() {
         initCoreSurface(this);
 
+        this.runtimeConfig = RUNTIME; // Expose for TitleUI
+
+        // Initialize Game Runtime (Default to Offline, switchable)
+        const isOnline = true; // Enable Online Mode
+        if (isOnline && window.KOVOnlineRuntimeModule) {
+            this.runtime = new window.KOVOnlineRuntimeModule.OnlineRuntime();
+        } else if (window.KOVOfflineRuntimeModule) {
+            this.runtime = new window.KOVOfflineRuntimeModule.OfflineRuntime();
+        } else {
+            console.warn('[Game] No runtime module found, defaulting to null runtime.');
+            this.runtime = null;
+        }
+
         window.KOVGameInstanceSetupModule.applyGameInstanceSetup(this, RUNTIME);
-        bootstrapGameState(this, BOOTSTRAP_STATE_DEPS);
+        // bootstrapGameState(this, BOOTSTRAP_STATE_DEPS); // Defer until login
+    }
+
+    async start() {
+        if (this.started) return;
+        this.started = true;
+        await bootstrapGameState(this, BOOTSTRAP_STATE_DEPS);
     }
 
     requestRender() {
@@ -46,3 +65,28 @@ class Game {
 
 const game = new Game();
 window.game = game;
+
+// Title & Auth Flow Integration
+(async function() {
+    if (document.readyState === 'loading') {
+        await new Promise(r => document.addEventListener('DOMContentLoaded', r));
+    }
+
+    if (window.KOVTitleUiModule) {
+        window.KOVTitleUiModule.setupTitle(game);
+        
+        // Auto-restore check
+        const user = await window.KOVAuthSessionModule.restoreSession();
+        if (user) {
+            console.log('[Game] Session restored:', user.name);
+            window.KOVTitleUiModule.startGame(game);
+        } else {
+            console.log('[Game] No session, showing title.');
+            window.KOVTitleUiModule.showTitle(game);
+        }
+    } else {
+        // Fallback if Title UI missing
+        console.warn('[Game] Title UI missing, auto-starting.');
+        game.start();
+    }
+})();

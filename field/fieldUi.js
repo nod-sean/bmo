@@ -54,24 +54,130 @@
         overlay.appendChild(line);
     }
 
-    function hideFieldActionMenu() {
+    function hideMovableRange(game) {
+        if (!game.movableRangeTiles) return;
+        game.movableRangeTiles.forEach((key) => {
+            const [r, c] = key.split(',').map(Number);
+            const cell = document.getElementById(`field-cell-${r}-${c}`);
+            if (cell) cell.classList.remove('field-movable');
+        });
+        game.movableRangeTiles = null;
+    }
+
+    function showMovableRange(game, movableSet) {
+        hideMovableRange(game);
+        if (!movableSet || movableSet.size === 0) return;
+        game.movableRangeTiles = movableSet;
+        movableSet.forEach((key) => {
+            const [r, c] = key.split(',').map(Number);
+            const cell = document.getElementById(`field-cell-${r}-${c}`);
+            if (cell) cell.classList.add('field-movable');
+        });
+    }
+
+    function hideFieldActionMenu(game) {
         const menu = document.getElementById('field-action-menu');
         if (menu) menu.remove();
+        if (game && game.lockedPathPreviewTarget) {
+            game.lockedPathPreviewTarget = null;
+            clearPathPreview(game);
+        }
+    }
+
+    function getCombatDifficulty(game, allyTotalLevel, enemyTotalLevel) {
+        if (!allyTotalLevel || !enemyTotalLevel) return null;
+        const ratio = enemyTotalLevel / allyTotalLevel;
+        if (ratio <= 0.4) return { label: 'Easy', color: '#4ade80' };
+        if (ratio <= 0.7) return { label: 'Normal', color: '#fbbf24' };
+        if (ratio <= 1.0) return { label: 'Hard', color: '#f87171' };
+        return { label: 'Hell', color: '#dc2626' };
     }
 
     function showFieldActionMenu(game, r, c, type, clientX, clientY, deps) {
         const gp = deps.GAMEPLAY || deps;
-        hideFieldActionMenu();
+        hideFieldActionMenu(game);
+        game.lockedPathPreviewTarget = { r, c };
+        if (game.moveTargetMode) {
+            window.KOVFieldCommandModule.previewMoveTarget(game, r, c, deps);
+        }
+        
         const viewport = document.getElementById('map-viewport');
         if (!viewport) return;
         const key = `${r},${c}`;
         const isCaptured = game.occupiedTiles.has(key);
 
+        const menu = document.createElement('div');
+        menu.id = 'field-action-menu';
+        menu.className = 'field-action-menu';
+
+        let hasOtherArmy = false;
+        let otherArmyObj = null;
+        if (Array.isArray(game.otherArmies)) {
+            otherArmyObj = game.otherArmies.find(a => {
+                const targetR = a.moving?.to ? a.moving.to.r : a.r;
+                const targetC = a.moving?.to ? a.moving.to.c : a.c;
+                return targetR === r && targetC === c;
+            });
+            if (otherArmyObj) hasOtherArmy = true;
+        }
+
+        const info = getFieldObjectInfo(game, type, r, c, deps);
+        let titleText = `${info.name}${info.level !== '-' ? ` Lv.${info.level}` : ''}`;
+        if (hasOtherArmy) {
+            titleText = game.tr('ui.field.enemy_player', {}, 'Enemy Player');
+        }
+        
+        let headerHtml = `<div class="action-menu-header">
+            <div class="action-menu-title">${titleText}</div>`;
+        
+        let moveInfo = null;
+        let allyTotalLevel = 0;
+        
+        if (game.selectedArmyId !== null && game.armies && game.armies[game.selectedArmyId]) {
+            moveInfo = window.KOVFieldCommandModule.getArmyMoveInfo(game, game.selectedArmyId, r, c, deps);
+            if (moveInfo && moveInfo.stats) {
+                // power is essentially the sum of stats, we can use it as a proxy for total level, 
+                // but let's get actual levels from squad
+                const squadData = window.KOVFieldCommandModule.getSquadByArmyId(game, game.selectedArmyId) || [];
+                allyTotalLevel = squadData.reduce((sum, u) => sum + (u ? (u.level || 1) : 0), 0);
+            }
+        }
+
+        const canAttackTarget = window.KOVGameCoreModule.isHostileTarget(game, type, r, c, game.gameCoreDeps) || hasOtherArmy;
+        let difficultyBadge = '';
+        if (canAttackTarget && allyTotalLevel > 0) {
+            const defenders = info.defenders || [];
+            const enemyTotalLevel = defenders.reduce((sum, d) => {
+                let lvl = typeof info.level === 'number' ? info.level : parseInt(info.level, 10) || 1;
+                if (d.code >= 1000) {
+                    lvl = d.code % 100;
+                }
+                return sum + (d.count * lvl);
+            }, 0);
+            const diff = getCombatDifficulty(game, allyTotalLevel, enemyTotalLevel);
+            if (diff) {
+                difficultyBadge = `<span class="action-menu-difficulty" style="background-color: ${diff.color}22; color: ${diff.color}; border: 1px solid ${diff.color};">${diff.label}</span>`;
+            }
+        }
+        
+        if (difficultyBadge) {
+            headerHtml += difficultyBadge;
+        }
+        headerHtml += `</div>`;
+        
+        menu.innerHTML = headerHtml;
+
         function createActionButton(text, onClick, options = {}) {
             const btn = document.createElement('button');
             btn.className = 'field-action-btn';
             btn.type = 'button';
-            btn.innerText = text;
+            
+            let innerHtml = `<span>${text}</span>`;
+            if (options.cost !== undefined) {
+                innerHtml += `<span class="action-btn-cost">-${options.cost}AP</span>`;
+            }
+            btn.innerHTML = innerHtml;
+            
             const isDisabled = !!options.disabled;
             if (isDisabled) {
                 btn.classList.add('disabled');
@@ -85,8 +191,24 @@
             return btn;
         }
 
+        let extraActionCount = 0;
+        
+        const isMoveTargetActive = !!game.moveTargetMode;
+        
+        if (canAttackTarget) {
+            const attackCost = gp.CP_COST_PER_COMMAND || 1; // Assuming same cost as move, or adjust if distinct
+            const btn = createActionButton(game.tr('ui.field.action.attack', {}, 'Attack'), () => {
+                hideFieldActionMenu(game);
+                const opts = hasOtherArmy ? { pvpTarget: otherArmyObj } : {};
+                window.KOVFieldCommandModule.attackTarget(game, game.selectedArmyId, r, c, type, { ...deps, battlePrepOpts: opts });
+            }, { cost: attackCost });
+            menu.appendChild(btn);
+            extraActionCount++;
+        }
+
+        const actualCpCost = moveInfo ? moveInfo.cpCost : (gp.CP_COST_PER_COMMAND || 1);
         const moveBtn = createActionButton(game.tr('ui.field.action.move', {}, 'Move'), () => {
-            hideFieldActionMenu();
+            hideFieldActionMenu(game);
             if (game.selectedArmyId !== null) {
                 window.KOVFieldCommandModule.exitMoveTargetMode(game);
                 window.KOVFieldCommandModule.commandArmy(game, game.selectedArmyId, r, c, type, {
@@ -106,37 +228,14 @@
             } else {
                 window.KOVUiShellModule.showToast(game, game.tr('toast.select_army_first', {}, 'Select a squad first'));
             }
-        });
-
-        const menu = document.createElement('div');
-        menu.id = 'field-action-menu';
-        menu.className = 'field-action-menu';
-
-        let extraActionCount = 0;
-        const canAttackTarget = window.KOVGameCoreModule.isHostileTarget(game, type, r, c, game.gameCoreDeps);
-        if (canAttackTarget) {
-            const btn = createActionButton(game.tr('ui.field.action.attack', {}, 'Attack'), () => {
-                hideFieldActionMenu();
-                if (game.selectedArmyId !== null) {
-                    const army = game.armies[game.selectedArmyId];
-                    const dr = Math.abs(army.r - r);
-                    const dc = Math.abs(army.c - c);
-                    if (dr <= 1 && dc <= 1) window.KOVBattleFlowModule.openBattlePrepModal(game, type, r, c, game.battlePrepDeps);
-                    else window.KOVUiShellModule.showToast(game, game.tr('toast.target_need_adjacent', {}, 'Target is out of range (need adjacent)'));
-                } else {
-                    window.KOVUiShellModule.showToast(game, game.tr('toast.select_army_first', {}, 'Select a squad first'));
-                }
-            });
-            menu.appendChild(btn);
-            extraActionCount++;
-        }
-
+        }, { cost: actualCpCost });
+        
         menu.appendChild(moveBtn);
 
         if (deps.isGoldMineTile(type)) {
             const btn = createActionButton(
                 game.tr('ui.field.action.collect_gold', {}, 'Collect Gold'),
-                () => window.KOVFieldStateModule.collectFieldResource(game, type, r, c, game.fieldInfoDeps),
+                () => { hideFieldActionMenu(game); window.KOVFieldStateModule.collectFieldResource(game, type, r, c, game.fieldInfoDeps); },
                 { disabled: !isCaptured }
             );
             menu.appendChild(btn);
@@ -145,7 +244,7 @@
         if (deps.isFountainTile(type)) {
             const btn = createActionButton(
                 game.tr('ui.field.action.collect_energy', {}, 'Collect Energy'),
-                () => window.KOVFieldStateModule.collectFieldResource(game, type, r, c, game.fieldInfoDeps),
+                () => { hideFieldActionMenu(game); window.KOVFieldStateModule.collectFieldResource(game, type, r, c, game.fieldInfoDeps); },
                 { disabled: !isCaptured }
             );
             menu.appendChild(btn);
@@ -154,7 +253,7 @@
         if (deps.isShopTile(type)) {
             const btn = createActionButton(
                 game.tr('ui.field.action.open_shop', {}, 'Open Shop'),
-                () => window.KOVShopModule.openShopOrTavern(game, type, r, c, game.shopDeps),
+                () => { hideFieldActionMenu(game); window.KOVShopModule.openShopOrTavern(game, type, r, c, game.shopDeps); },
                 { disabled: !isCaptured }
             );
             menu.appendChild(btn);
@@ -163,7 +262,19 @@
         if (deps.isTavernTile(type)) {
             const btn = createActionButton(
                 game.tr('ui.field.action.open_tavern', {}, 'Open Tavern'),
-                () => window.KOVShopModule.openShopOrTavern(game, type, r, c, game.shopDeps),
+                () => { hideFieldActionMenu(game); window.KOVShopModule.openShopOrTavern(game, type, r, c, game.shopDeps); },
+                { disabled: !isCaptured }
+            );
+            menu.appendChild(btn);
+            extraActionCount++;
+        }
+        if (deps.isReturnGateTile(type)) {
+            const btn = createActionButton(
+                game.tr('ui.field.action.enter_gate', {}, 'Enter'),
+                () => { 
+                    hideFieldActionMenu(game); 
+                    window.KOVFieldInteractionModule.interactWithObject(game, type, r, c, 'enter', game.fieldInfoDeps); 
+                },
                 { disabled: !isCaptured }
             );
             menu.appendChild(btn);
@@ -173,7 +284,7 @@
         if (type === deps.FIELD_EVENT_TYPES.CARAVAN) {
             const btn = createActionButton(
                 game.tr('ui.field.action.caravan', {}, 'Caravan'),
-                () => window.KOVFieldEventLogicModule.openCaravanShop(game, r, c, { FIELD_EVENT_TYPES: deps.FIELD_EVENT_TYPES })
+                () => { hideFieldActionMenu(game); window.KOVFieldEventLogicModule.openCaravanShop(game, r, c, { FIELD_EVENT_TYPES: deps.FIELD_EVENT_TYPES }); }
             );
             menu.appendChild(btn);
             extraActionCount++;
@@ -181,23 +292,25 @@
         if (type === deps.FIELD_EVENT_TYPES.PORTAL) {
             const btn = createActionButton(
                 game.tr('ui.field.action.portal', {}, 'Portal'),
-                () => window.KOVFieldEventUiModule.openPortalModal(game, r, c, null, game.portalDeps)
+                () => { hideFieldActionMenu(game); window.KOVFieldEventUiModule.openPortalModal(game, r, c, null, game.portalDeps); }
             );
             menu.appendChild(btn);
             extraActionCount++;
         }
 
-        if (extraActionCount === 0) {
-            moveBtn.onclick({ stopPropagation: () => { } });
-            return;
-        }
+        const cancelBtn = createActionButton(game.tr('ui.field.action.cancel', {}, 'Cancel'), () => {
+            hideFieldActionMenu(game);
+        });
+        cancelBtn.classList.add('action-btn-cancel');
+        menu.appendChild(cancelBtn);
+
         viewport.appendChild(menu);
 
         const rect = viewport.getBoundingClientRect();
         const x = clientX - rect.left;
         const y = clientY - rect.top;
-        const menuW = 110;
-        const menuH = 80;
+        const menuW = 140; // Increased width for header
+        const menuH = menu.offsetHeight || 120; // Dynamic height or rough estimate
         const clampPos = (pos) => ({
             x: Math.min(rect.width - menuW - 8, Math.max(8, pos.x)),
             y: Math.min(rect.height - menuH - 8, Math.max(8, pos.y))
@@ -206,33 +319,26 @@
         const candidates = [
             { x: x + 8, y: y - 8 },
             { x: x - menuW - 8, y: y - 8 },
-            { x: x - menuW / 2, y: y + 10 },
-            { x: x - menuW / 2, y: y - menuH - 10 }
+            { x: x - menuW / 2, y: y + 20 },
+            { x: x - menuW / 2, y: y - menuH - 20 }
         ];
 
         let finalPos = clampPos(candidates[0]);
-        const wrap = document.getElementById('field-floating-wrap');
-        if (wrap && wrap.style.display !== 'none') {
-            const wrapRect = wrap.getBoundingClientRect();
-            const wr = {
-                left: wrapRect.left - rect.left,
-                top: wrapRect.top - rect.top,
-                right: wrapRect.right - rect.left,
-                bottom: wrapRect.bottom - rect.top
-            };
-            const intersects = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
-            for (const cand of candidates) {
-                const pos = clampPos(cand);
-                const mr = { left: pos.x, top: pos.y, right: pos.x + menuW, bottom: pos.y + menuH };
-                if (!intersects(mr, wr)) {
-                    finalPos = pos;
-                    break;
-                }
-            }
-        }
-
+        // ... Wait, the DOM hasn't fully layed out but we can check offsets
+        
         menu.style.left = `${finalPos.x}px`;
         menu.style.top = `${finalPos.y}px`;
+        
+        // Setup outside click to close
+        setTimeout(() => {
+            const closeHandler = (e) => {
+                if (!menu.contains(e.target)) {
+                    hideFieldActionMenu(game);
+                    document.removeEventListener('click', closeHandler);
+                }
+            };
+            document.addEventListener('click', closeHandler);
+        }, 10);
     }
 
     function setFieldInfo(game, type, r, c, deps) {
@@ -384,8 +490,9 @@
         if (deps.isShopTile(type)) return 'SH';
         if (deps.isTavernTile(type)) return 'TV';
         if (deps.isRuinsTile(type)) return 'RU';
+        if (deps.isTerritoryTile && deps.isTerritoryTile(type)) return 'TR';
         if (deps.isStatueTile(type)) return 'ST';
-        if (deps.isTerrainCode(type)) return 'TR';
+        if (deps.isTerrainCode(type)) return '--';
         return '--';
     }
 
@@ -626,6 +733,7 @@
                 else if (deps.isShopTile(type)) { color = '#2563eb'; cell.classList.add('field-shop'); }
                 else if (deps.isTavernTile(type)) { color = '#7c3aed'; cell.classList.add('field-tavern'); }
                 else if (deps.isRuinsTile(type)) { color = '#9ca3af'; cell.classList.add('field-ruins'); }
+                else if (deps.isTerritoryTile && deps.isTerritoryTile(type)) { color = '#4ade80'; cell.classList.add('field-territory'); }
                 else if (deps.isStatueTile(type)) { color = '#94a3b8'; cell.classList.add('field-statue'); }
                 else if (deps.isTerrainCode(type)) {
                     const base = deps.getTerrainBase(type);
@@ -659,6 +767,7 @@
                             'field-shop',
                             'field-tavern',
                             'field-ruins',
+                            'field-territory',
                             'field-statue',
                             'locked',
                             'unlocked'
@@ -693,6 +802,13 @@
             }
         }
         if (game.previewPath) applyPathPreview(game, game.previewPath);
+        if (game.movableRangeTiles && game.movableRangeTiles.size > 0) {
+            game.movableRangeTiles.forEach((key) => {
+                const [r, c] = key.split(',').map(Number);
+                const cell = document.getElementById(`field-cell-${r}-${c}`);
+                if (cell) cell.classList.add('field-movable');
+            });
+        }
         updateFloatingPanelPositionFromSelection(game);
         return true;
     }
@@ -700,6 +816,8 @@
         setMovePreview,
         clearPathPreview,
         applyPathPreview,
+        showMovableRange,
+        hideMovableRange,
         hideFieldActionMenu,
         showFieldActionMenu,
         formatStatueBuffEffect,

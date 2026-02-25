@@ -60,7 +60,7 @@
         const gameplay = (src.GAMEPLAY && typeof src.GAMEPLAY === 'object') ? src.GAMEPLAY : src;
         return {
             FOG_RADIUS: Number(src.FOG_RADIUS || 8),
-            PLAYER_START: src.PLAYER_START || { r: 22, c: 7 },
+            PLAYER_START: src.PLAYER_START || { r: 17, c: 3 },
             EVENT_DROP_TABLE: eventDropTable,
             FIELD_EVENT_TYPES: Object.assign({}, DEFAULT_FIELD_EVENT_TYPES, src.FIELD_EVENT_TYPES || {}),
             FIELD_MAP_DATA: src.FIELD_MAP_DATA || [],
@@ -426,6 +426,19 @@
     }
 
     function handleBattleWin(game, r, c, deps) {
+    if (game.battleContext && game.battleContext.isBossBattle) {
+        if (global.KOVServerApiModule && global.KOVServerApiModule.WorldApi) {
+            global.KOVServerApiModule.WorldApi.clear().then(response => {
+                if (response && response.success) {
+                    window.KOVUiShellModule.showToast(game, 'World Cleared!', { duration: 5000 });
+                    // TODO: Transition to lobby
+                    setTimeout(() => {
+                        window.location.reload(); // Simple way to go back to lobby
+                    }, 5000);
+                }
+            });
+        }
+    }
         const resolved = resolveBattleResultDeps(game, deps);
         const army = game.armies[game.lastSelectedArmyId] || game.armies.find((a) => game.battleContext && a.id === game.battleContext.armyId) || game.armies[0];
         if (game.lastSelectedArmyId !== null && game.lastSelectedArmyId !== undefined) {

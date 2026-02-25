@@ -72,7 +72,8 @@
             const unitCodes = Object.keys(deps.UNIT_STATS).map((n) => parseInt(n, 10))
                 .filter((code) => {
                     const info = deps.getInfoFromCode(code);
-                    return Number.isFinite(code) && !!info && info.type >= deps.ITEM_TYPE.UNIT_INFANTRY && info.type <= deps.ITEM_TYPE.UNIT_CAVALRY && info.level <= maxUnitLevel;
+                    const isUnlocked = game.progressionState && game.progressionState.unlockedUnits && game.progressionState.unlockedUnits.includes(code);
+                    return Number.isFinite(code) && !!info && info.type >= deps.ITEM_TYPE.UNIT_INFANTRY && info.type <= deps.ITEM_TYPE.UNIT_CAVALRY && info.level <= maxUnitLevel && isUnlocked;
                 });
             itemCodes.sort(() => Math.random() - 0.5);
             unitCodes.sort(() => Math.random() - 0.5);
@@ -135,7 +136,8 @@
             const pool = Object.keys(deps.UNIT_STATS).map((n) => parseInt(n, 10))
                 .filter((code) => {
                     const info = deps.getInfoFromCode(code);
-                    return Number.isFinite(code) && !!info && info.type >= deps.ITEM_TYPE.UNIT_INFANTRY && info.type <= deps.ITEM_TYPE.UNIT_CAVALRY && info.level <= 5;
+                    const isUnlocked = game.progressionState && game.progressionState.unlockedUnits && game.progressionState.unlockedUnits.includes(code);
+                    return Number.isFinite(code) && !!info && info.type >= deps.ITEM_TYPE.UNIT_INFANTRY && info.type <= deps.ITEM_TYPE.UNIT_CAVALRY && info.level <= 5 && isUnlocked;
                 });
             pool.sort(() => Math.random() - 0.5);
             return pool.slice(0, 3).map((code) => {
@@ -157,6 +159,40 @@
     function buyFieldItem(game, item, deps) {
         if (item.sold) { window.KOVUiShellModule.showToast(game, game.tr('toast.sold_out', {}, 'Sold out')); return; }
         if (game.gold < item.price) { window.KOVUiShellModule.showToast(game, game.tr('toast.gold_short', {}, 'Not enough gold')); return; }
+
+        if (game.onlineMode && window.KOVServerApiModule?.EconomyApi) {
+            window.KOVServerApiModule.EconomyApi.buyShopItem({
+                type: item.type,
+                level: item.level,
+                cost: item.price,
+                kind: item.kind,
+                code: item.code
+            }).then(res => {
+                if (res && res.success) {
+                    const data = res.data || {};
+                    if (data.resources) game.gold = data.resources.gold;
+                    
+                    // Use local spawn logic to show visual effect
+                    // Ideally we should use res.targetId to force location, but spawnItem is deterministic
+                    window.KOVMergeBoardModule.spawnItem(game, { type: item.type, level: item.level, scale: 0 }, game.spawnItemDeps);
+                    
+                    game.sound.playCollect();
+                    window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
+                    window.KOVUiShellModule.showToast(game, game.tr('toast.purchase_done', {}, 'Purchased'));
+                    item.sold = true;
+                    refreshShopModal(game, deps);
+                } else {
+                    const msg = res?.error?.message || res?.err?.msg || 'Purchase failed';
+                    const code = res?.error?.code || res?.err?.code;
+                    if (code === 'inventory_full') window.KOVUiShellModule.showToast(game, game.tr('toast.space_short', {}, 'No space available'));
+                    else window.KOVUiShellModule.showToast(game, msg);
+                }
+            }).catch(err => {
+                 window.KOVUiShellModule.showToast(game, 'Network error');
+            });
+            return;
+        }
+
         if (!window.KOVMergeBoardModule.spawnItem(game, { type: item.type, level: item.level, scale: 0 }, game.spawnItemDeps)) { window.KOVUiShellModule.showToast(game, game.tr('toast.space_short', {}, 'No space available')); return; }
         game.gold -= item.price;
         game.sound.playCollect();
@@ -292,10 +328,12 @@
                 `;
                 const btn = row.querySelector('.price-btn');
                 const affordable = game.gold >= item.price;
-                if (item.sold || !affordable) row.classList.add('disabled');
+                const isUnlocked = game.progressionState && game.progressionState.unlockedUnits && game.progressionState.unlockedUnits.includes(item.code);
+                if (item.sold || !affordable || !isUnlocked) row.classList.add('disabled');
                 btn.onclick = () => {
                     if (item.sold) { window.KOVUiShellModule.showToast(game, game.tr('toast.sold_out', {}, 'Sold out')); return; }
                     if (!affordable) { window.KOVUiShellModule.showToast(game, game.tr('toast.gold_short', {}, 'Not enough gold')); return; }
+                    if (!isUnlocked) { window.KOVUiShellModule.showToast(game, game.tr('toast.unit_locked', {}, 'Unit not unlocked')); return; }
                     buyFieldItem(game, item, deps);
                 };
             } else {

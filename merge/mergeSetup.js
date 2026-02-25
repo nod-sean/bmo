@@ -22,7 +22,7 @@
         game.gridTileSize = Math.floor(gw / deps.CONFIG.gridCols);
         game.gridStartX = deps.CONFIG.gridPadding;
         game.gridStartY = deps.CONFIG.gridTopY;
-        const useThird = game.thirdSquadUnlocked;
+        const useThird = true;
         const squadSize = useThird ? deps.CONFIG.squadCellSize3 : deps.CONFIG.squadCellSize;
         const squadGap = useThird ? deps.CONFIG.squadGap3 : deps.CONFIG.squadGap;
         game.squadCellSize = squadSize;

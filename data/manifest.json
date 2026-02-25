@@ -1,17 +1,23 @@
 {
-  "version": "dadc5bb4860a",
-  "generated_at": "2026-02-20T17:25:46.769Z",
+  "version": "75e167b716fa",
+  "generated_at": "2026-02-25T01:38:08.047Z",
   "files": [
     "buildings.json",
     "camps.json",
     "chests.json",
     "constants.json",
     "field_map.json",
+    "field_map_0.json",
+    "field_map_conquest.json",
     "field_objects.json",
     "items.json",
     "level_data.json",
     "localization.json",
     "merge_xp.json",
+    "object_regen_0.json",
+    "object_regen_conquest.json",
+    "object_start_0.json",
+    "object_start_conquest.json",
     "units.json",
     "unlock_conditions.json"
   ]

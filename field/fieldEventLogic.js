@@ -192,7 +192,8 @@
                             : game.tr('ui.field.event.crown', {}, 'Crown'))),
                 level: type === deps.FIELD_EVENT_TYPES.CROWN ? 7 : (type === deps.FIELD_EVENT_TYPES.DUNGEON ? 5 : (type === deps.FIELD_EVENT_TYPES.BANDIT_LEADER ? 3 : 1)),
                 defenders,
-                abilities: []
+                abilities: [],
+                reward: type === deps.FIELD_EVENT_TYPES.CROWN ? 13 : (type === deps.FIELD_EVENT_TYPES.DUNGEON ? 12 : (type === deps.FIELD_EVENT_TYPES.BANDIT_LEADER ? 11 : 1))
             };
         }
         const data = deps.getFieldObjectDataByType(type);

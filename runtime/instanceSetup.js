@@ -35,7 +35,7 @@
         game.battleStartDeps = core.METHOD_DEPS.BATTLE_START;
         game.battleResultDeps = {
             FOG_RADIUS: field.FOG_RADIUS,
-            PLAYER_START: world.WORLD_NEXT_SEASON_DEPS?.PLAYER_START || { r: 22, c: 7 },
+            PLAYER_START: world.WORLD_NEXT_SEASON_DEPS?.PLAYER_START || { r: 17, c: 3 },
             EVENT_DROP_TABLE: field.EVENT_DROP_TABLE,
             FIELD_EVENT_TYPES: field.FIELD_EVENT_TYPES,
             FIELD_MAP_DATA: field.FIELD_MAP_DATA,

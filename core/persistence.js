@@ -132,6 +132,14 @@
                         army.lastMoveTime = 0;
                         army.moveInterval = 0;
                     }
+                    const map = (window.KOVDynamicData && window.KOVDynamicData.field_map) || deps.FIELD_MAP_DATA;
+                    if (map) {
+                        const tile = map[army.r]?.[army.c] || 0;
+                        if (tile !== 100 && tile !== 200 && tile !== 300) {
+                            army.r = deps.PLAYER_START.r;
+                            army.c = deps.PLAYER_START.c;
+                        }
+                    }
                 });
             }
             if (!validGridState) {

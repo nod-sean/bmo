@@ -18,8 +18,8 @@
         const FIELD_RULES = createFieldRules(FIELD_OBJECT_DATA);
         assertObjectFunctions('FIELD_RULES', FIELD_RULES, [
             'getFieldObjectKind', 'getFieldObjectDataByType', 'isTerrainCode', 'isWallTile', 'getTerrainBase',
-            'isCastleTile', 'isGateTile', 'isCitadelTile', 'isDragonTile', 'isGoldMineTile', 'isFountainTile',
-            'isShopTile', 'isTavernTile', 'isRuinsTile', 'isStatueTile', 'isBorderTerrain', 'isBlockingField',
+            'isCastleTile', 'isGateTile', 'isCitadelTile', 'isDragonTile', 'isReturnGateTile', 'isGoldMineTile', 'isFountainTile',
+            'isShopTile', 'isTavernTile', 'isRuinsTile', 'isStatueTile', 'isTerritoryTile', 'isBorderTerrain', 'isBlockingField',
             'getStatueKind', 'getObjectLevelFromCode', 'isCapturableFieldObjectKind'
         ]);
 
@@ -32,12 +32,14 @@
         const isGateTile = FIELD_RULES.isGateTile;
         const isCitadelTile = FIELD_RULES.isCitadelTile;
         const isDragonTile = FIELD_RULES.isDragonTile;
+        const isReturnGateTile = FIELD_RULES.isReturnGateTile;
         const isGoldMineTile = FIELD_RULES.isGoldMineTile;
         const isFountainTile = FIELD_RULES.isFountainTile;
         const isShopTile = FIELD_RULES.isShopTile;
         const isTavernTile = FIELD_RULES.isTavernTile;
         const isRuinsTile = FIELD_RULES.isRuinsTile;
         const isStatueTile = FIELD_RULES.isStatueTile;
+        const isTerritoryTile = FIELD_RULES.isTerritoryTile;
         const isBorderTerrain = FIELD_RULES.isBorderTerrain;
         const isBlockingField = FIELD_RULES.isBlockingField;
         const getStatueKind = FIELD_RULES.getStatueKind;
@@ -107,12 +109,14 @@
             isGateTile,
             isCitadelTile,
             isDragonTile,
+            isReturnGateTile,
             isGoldMineTile,
             isFountainTile,
             isShopTile,
             isTavernTile,
             isRuinsTile,
             isStatueTile,
+            isTerritoryTile,
             isBorderTerrain,
             isBlockingField,
             getStatueKind,

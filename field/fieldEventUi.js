@@ -53,7 +53,10 @@
         army.c = target.c;
         army.target = null;
         army.path = [];
-        window.KOVFieldEventLogicModule.revealFog(game, target.r, target.c, deps.FOG_RADIUS, game.revealFogDeps);
+        const squadData = window.KOVFieldCommandModule.getSquadByArmyId(game, army.id);
+        const stats = window.KOVFieldCommandModule.getSquadStats(game, squadData, { getData: game.mergeActionDeps?.getData || (() => ({})) });
+        const fogRadius = stats.range || deps.FOG_RADIUS;
+        window.KOVFieldEventLogicModule.revealFog(game, target.r, target.c, fogRadius, game.revealFogDeps);
         window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
         window.KOVFieldCommandModule.updateArmies(game, game.updateArmiesDeps);
         window.KOVFieldRenderModule.renderFieldMap(game, game.fieldMapRenderDeps);

@@ -18,6 +18,7 @@
             if (text.includes('shop')) return 'shop';
             if (text.includes('tavern')) return 'tavern';
             if (text.includes('ruins')) return 'ruins';
+            if (text.includes('territory') || text.includes('conquest')) return 'territory';
             if (text.includes('statue atk') || (text.includes('statue') && text.includes('atk'))) return 'statue_atk';
             if (text.includes('statue def') || (text.includes('statue') && text.includes('def'))) return 'statue_def';
             if (text.includes('statue hp') || (text.includes('statue') && text.includes('hp'))) return 'statue_hp';
@@ -41,6 +42,7 @@
             if (code >= 5321 && code <= 5322) return 'statue_hp';
             if (code >= 5331 && code <= 5332) return 'statue_spd';
             if (code >= 5300 && code < 5400) return 'statue';
+            if (code >= 5400 && code <= 5499) return 'territory';
             return null;
         }
 
@@ -83,6 +85,7 @@
         function isGateTile(code) { return code === 2 || getFieldObjectKind(code) === 'gate'; }
         function isCitadelTile(code) { return code === 3 || getFieldObjectKind(code) === 'citadel'; }
         function isDragonTile(code) { return getFieldObjectKind(code) === 'dragon'; }
+        function isReturnGateTile(code) { return code === 5151; }
         function isGoldMineTile(code) { return code === 5 || getFieldObjectKind(code) === 'goldmine'; }
         function isFountainTile(code) { return code === 6 || getFieldObjectKind(code) === 'fountain'; }
         function isShopTile(code) { return getFieldObjectKind(code) === 'shop'; }
@@ -92,6 +95,7 @@
             const kind = getFieldObjectKind(code);
             return kind === 'statue' || kind === 'statue_atk' || kind === 'statue_def' || kind === 'statue_hp' || kind === 'statue_spd';
         }
+        function isTerritoryTile(code) { return getFieldObjectKind(code) === 'territory'; }
         function isBorderTerrain(code) { return isTerrainCode(code) && code % 100 === 1; }
         function isBlockingField(code) { return isWallTile(code) || isGateTile(code) || isCitadelTile(code) || isDragonTile(code) || isBorderTerrain(code); }
         function getStatueKind(code) {
@@ -144,6 +148,7 @@
             'shop',
             'tavern',
             'ruins',
+            'territory',
             'statue',
             'statue_atk',
             'statue_def',
@@ -169,12 +174,14 @@
             isGateTile,
             isCitadelTile,
             isDragonTile,
+            isReturnGateTile,
             isGoldMineTile,
             isFountainTile,
             isShopTile,
             isTavernTile,
             isRuinsTile,
             isStatueTile,
+            isTerritoryTile,
             isBorderTerrain,
             isBlockingField,
             getStatueKind,

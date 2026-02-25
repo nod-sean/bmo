@@ -83,7 +83,9 @@
         }
         const FIELD_TERRAIN_DATA = FIELD_MAP_DATA.map((row) => row.slice());
         const MAP_SIZE = FIELD_MAP_DATA.length;
-        const PLAYER_START = { r: 22, c: 7 };
+
+        const PLAYER_START = { r: 18, c: 4 };
+
         const FOG_RADIUS = 8;
 
         return {

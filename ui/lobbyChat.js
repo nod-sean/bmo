@@ -1,16 +1,16 @@
 ﻿(function (global) {
     'use strict';
 
-    const VALID_LOBBY_CHANNELS = ['alpha', 'beta', 'gamma'];
+    const VALID_LOBBY_CHANNELS = ['map_0', 'map_1'];
     const VALID_CHAT_CHANNELS = ['world', 'guild', 'system'];
 
     function ensureWorldLobbyState(game) {
         if (!game.worldLobbyState || typeof game.worldLobbyState !== 'object') {
-            game.worldLobbyState = { entered: false, channel: 'alpha', enteredAt: 0 };
+            game.worldLobbyState = { entered: false, channel: 'map_0', enteredAt: 0 };
         }
         if (!Object.prototype.hasOwnProperty.call(game.worldLobbyState, 'entered')) game.worldLobbyState.entered = false;
-        const rawChannel = String(game.worldLobbyState.channel || 'alpha').trim().toLowerCase();
-        game.worldLobbyState.channel = VALID_LOBBY_CHANNELS.includes(rawChannel) ? rawChannel : 'alpha';
+        const rawChannel = String(game.worldLobbyState.channel || 'map_0').trim().toLowerCase();
+        game.worldLobbyState.channel = VALID_LOBBY_CHANNELS.includes(rawChannel) ? rawChannel : 'map_0';
         if (!Object.prototype.hasOwnProperty.call(game.worldLobbyState, 'enteredAt')) game.worldLobbyState.enteredAt = 0;
         return game.worldLobbyState;
     }
@@ -27,9 +27,8 @@
             return { channel, occupied, cap, ratio };
         };
         return {
-            alpha: make('alpha', 58, 120),
-            beta: make('beta', 34, 100),
-            gamma: make('gamma', 22, 80)
+            map_0: make('map_0', 58, 120),
+            map_1: make('map_1', 34, 100)
         };
     }
 
@@ -208,9 +207,9 @@
         const select = document.getElementById('lobby-channel-select');
         const panel = document.getElementById('lobby-channel-status');
         if (!select || !panel) return;
-        const selected = String(select.value || 'alpha').trim().toLowerCase();
+        const selected = String(select.value || 'map_0').trim().toLowerCase();
         const table = game.lobbyChannelStatusTable || buildLobbyChannelStatusTable();
-        const row = table[selected] || table.alpha;
+        const row = table[selected] || table.map_0;
         if (!row) return;
         const profile = getLobbyCongestionProfile(game, row.ratio);
         const pct = Math.round(row.ratio * 100);
@@ -313,61 +312,104 @@
     }
 
     function ensureChatSocket(game) {
-        if (game.chatSocket && game.chatSocket.readyState === WebSocket.OPEN) return game.chatSocket;
-        if (game.chatSocket && game.chatSocket.readyState === WebSocket.CONNECTING) return game.chatSocket;
-        const wsUrl = getChatWsUrl();
-        if (!wsUrl || typeof WebSocket === 'undefined') return null;
-        let socket = null;
-        try {
-            socket = new WebSocket(wsUrl);
-        } catch (e) {
-            return null;
+        if (game.chatSocket && game.chatSocket.connected) return game.chatSocket;
+        if (game.chatSocket && !game.chatSocket.connected) {
+            game.chatSocket.connect();
+            return game.chatSocket;
         }
+
+        const wsUrl = getApiBaseUrl(); // Using base URL since socket.io uses path
+        if (!wsUrl || typeof io === 'undefined') return null;
+
+        const token = window.KOVAuthSessionModule?.getToken() || '';
+
+        const socket = io(wsUrl, {
+            path: '/socket.io',
+            auth: { token },
+            reconnection: true,
+            reconnectionAttempts: 10,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 20000,
+        });
+
         game.chatSocket = socket;
-        socket.onopen = () => {
+
+        socket.on('connect', () => {
             try {
                 const state = ensureChatState(game);
-                socket.send(JSON.stringify({
-                    type: 'subscribe',
-                    channels: VALID_CHAT_CHANNELS.filter((ch) => ch !== 'system'),
-                    active: state.activeChannel
-                }));
+                const active = state.activeChannel || 'world';
+                socket.emit('chat.join', { channel: active });
+                socket.emit('lobby.enter', { channelId: game.worldLobbyState?.channel || 'map_0' });
             } catch (e) { }
-        };
-        socket.onmessage = (event) => {
-            let payload = null;
-            try {
-                payload = JSON.parse(String(event?.data || '{}'));
-            } catch (e) {
-                return;
-            }
-            const data = payload && payload.type === 'chat_message'
-                ? payload.message
-                : payload;
-            if (!applySocketChatEvent(game, data)) return;
+        });
+
+        socket.on('chat.message', (payload) => {
+            if (!applySocketChatEvent(game, payload)) return;
             if (game.isChatOpen && window.KOVSocialProfileModule && typeof window.KOVSocialProfileModule.refreshChatUI === 'function') {
                 window.KOVSocialProfileModule.refreshChatUI(game);
             }
-        };
-        socket.onclose = () => {
-            if (game.chatSocket === socket) game.chatSocket = null;
-        };
-        socket.onerror = () => { };
+        });
+
+        socket.on('lobby.channel_status_updated', (payload) => {
+            if (payload && payload.channelId) {
+                if (!game.lobbyChannelStatusTable) game.lobbyChannelStatusTable = buildLobbyChannelStatusTable();
+                const ch = String(payload.channelId).toLowerCase();
+                const cap = Math.max(1, Number(payload.capacity || 0));
+                const occupied = Math.max(0, Math.min(cap, Number(payload.population || 0)));
+                game.lobbyChannelStatusTable[ch] = { channel: ch, occupied, cap, ratio: occupied / cap };
+                
+                const modal = document.getElementById('modal-lobby');
+                if (modal?.classList?.contains('open')) renderLobbyChannelStatus(game);
+            }
+        });
+
+        // Add world event listeners here for targeted broadcast features
+        socket.on('world.army_march_started', (payload) => {
+            if (window.KOVFieldControllerModule?.handleSocketWorldEvent) {
+                window.KOVFieldControllerModule.handleSocketWorldEvent(game, 'world.army_march_started', payload);
+            }
+        });
+
+        socket.on('world.tile_updated', (payload) => {
+            if (window.KOVFieldControllerModule?.handleSocketWorldEvent) {
+                window.KOVFieldControllerModule.handleSocketWorldEvent(game, 'world.tile_updated', payload);
+            }
+        });
+
+        socket.on('battle.started', (payload) => {
+            if (window.KOVFieldControllerModule?.handleSocketWorldEvent) {
+                window.KOVFieldControllerModule.handleSocketWorldEvent(game, 'battle.started', payload);
+            }
+        });
+
+        socket.on('disconnect', () => {
+        });
+        
+        socket.on('connect_error', () => {
+        });
+
         return socket;
     }
 
     async function fetchApiJson(path, options = {}) {
+        const client = global.KOVApiClientModule;
+        if (client && typeof client.request === 'function') {
+            return client.request({
+                baseUrl: getApiBaseUrl(),
+                method: options.method || 'GET',
+                path,
+                headers: options.headers || {},
+                body: options.body
+            });
+        }
         const base = getApiBaseUrl();
         if (!base) return null;
-        const method = options.method || 'GET';
-        const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
         try {
-            const response = await fetch(`${base}${path}`, Object.assign({}, options, { method, headers, cache: 'no-store' }));
+            const response = await fetch(`${base}${path}`, Object.assign({}, options, { cache: 'no-store' }));
             if (!response.ok) return null;
             return await response.json();
-        } catch (e) {
-            return null;
-        }
+        } catch (e) { return null; }
     }
 
     async function fetchLobbyChannelStatusFromApi(game, force = false) {
@@ -378,7 +420,11 @@
         game.lobbyChannelStatusLastAttemptAt = now;
         let didUpdateFromServer = false;
         try {
-            const payload = await fetchApiJson('/v1/lobby/channels');
+            const api = global.KOVServerApiModule?.LobbyApi;
+            let payload = (api && typeof api.getChannels === 'function')
+                ? await api.getChannels()
+                : await fetchApiJson('/api/lobby/channels');
+            if (payload && payload.success && payload.data) payload = payload.data;
             if (!payload || !Array.isArray(payload.channels)) return;
             const table = {};
             payload.channels.forEach((row) => {
@@ -403,12 +449,16 @@
     }
 
     async function enterLobbyChannelViaApi(game, channel) {
-        const requested = String(channel || 'alpha').trim().toLowerCase();
-        const fallbackChannel = VALID_LOBBY_CHANNELS.includes(requested) ? requested : 'alpha';
-        const payload = await fetchApiJson('/v1/lobby/enter', {
-            method: 'POST',
-            body: JSON.stringify({ channel: fallbackChannel })
-        });
+        const requested = String(channel || 'map_0').trim().toLowerCase();
+        const fallbackChannel = VALID_LOBBY_CHANNELS.includes(requested) ? requested : 'map_0';
+        const api = global.KOVServerApiModule?.LobbyApi;
+        let payload = (api && typeof api.enter === 'function')
+            ? await api.enter(fallbackChannel)
+            : await fetchApiJson('/api/lobby/enter', {
+                method: 'POST',
+                body: JSON.stringify({ channel: fallbackChannel })
+            });
+        if (payload && payload.success && payload.data) payload = payload.data;
         if (!payload || typeof payload !== 'object') {
             return { ok: false, channel: fallbackChannel };
         }
@@ -429,7 +479,11 @@
         game.socialStateFetchPending = true;
         let updated = false;
         try {
-            const payload = await fetchApiJson('/v1/social/state');
+            const api = global.KOVServerApiModule?.SocialApi;
+            let payload = (api && typeof api.getState === 'function')
+                ? await api.getState()
+                : await fetchApiJson('/api/social/state');
+            if (payload && payload.success && payload.data) payload = payload.data;
             const normalized = normalizeSocialStatePayload(payload);
             if (!normalized) return false;
             game.socialState = normalized;
@@ -462,7 +516,11 @@
         if (game.chatStateMeta.fetchPending[target]) return false;
         game.chatStateMeta.fetchPending[target] = true;
         try {
-            const payload = await fetchApiJson(`/v1/chat/messages?channel=${encodeURIComponent(target)}`);
+            const api = global.KOVServerApiModule?.SocialApi;
+            let payload = (api && typeof api.getChatMessages === 'function')
+                ? await api.getChatMessages(target)
+                : await fetchApiJson(`/api/chat/messages?channel=${encodeURIComponent(target)}`);
+            if (payload && payload.success && payload.data) payload = payload.data;
             const rows = normalizeChatMessagesPayload(payload, target);
             if (!rows.length) return false;
             state.logsByChannel[target] = rows.slice(-state.maxLogs);
@@ -480,25 +538,26 @@
             : 'world';
         if (target === 'system') return false;
         const socket = ensureChatSocket(game);
-        if (socket && socket.readyState === WebSocket.OPEN) {
+        if (socket && socket.connected) {
             try {
-                socket.send(JSON.stringify({
-                    type: 'chat_send',
-                    channel: target,
-                    text: String(text || '')
-                }));
-                return true;
+                return new Promise((resolve) => {
+                    socket.emit('chat.send', {
+                        channel: target,
+                        text: String(text || '')
+                    }, (response) => {
+                        resolve(response && response.result !== false);
+                    });
+                });
             } catch (e) { }
         }
-        const body = {
-            channel: target,
-            text: String(text || '')
-        };
-        const payload = await fetchApiJson('/v1/chat/send', {
-            method: 'POST',
-            body: JSON.stringify(body)
-        });
-        return !!payload;
+        const api = global.KOVServerApiModule?.SocialApi;
+        const payload = (api && typeof api.sendChat === 'function')
+            ? await api.sendChat(target, String(text || ''))
+            : await fetchApiJson('/api/chat/send', {
+                method: 'POST',
+                body: JSON.stringify({ channel: target, text: String(text || '') })
+            });
+        return payload && payload.success !== false;
     }
 
     global.KOVLobbyChatModule = {

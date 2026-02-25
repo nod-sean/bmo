@@ -223,6 +223,30 @@
                         game.sound.playError();
                         return;
                     }
+
+                    if (game.onlineMode && window.KOVServerApiModule?.EconomyApi) {
+                        window.KOVServerApiModule.EconomyApi.refillResource({ type, amount, cost: 0, ad: 1 })
+                            .then(res => {
+                                if (res && res.success) {
+                                    applyRefillGain(game, type, amount);
+                                    const data = res.data || {};
+                                    if (data.gem !== undefined) game.gem = data.gem;
+                                    if (data.energy !== undefined && type === 'energy') game.energy = data.energy;
+                                    if (data.cp !== undefined && type === 'cp') game.cp = data.cp;
+                                    if (data.gold !== undefined && type === 'gold') game.gold = data.gold;
+
+                                    game.sound.playCollect();
+                                    window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
+                                    openRefill(game, type, deps);
+                                } else {
+                                    window.KOVUiShellModule.showToast(game, res?.error?.message || res?.err?.msg || 'Failed');
+                                }
+                            }).catch(() => {
+                                window.KOVUiShellModule.showToast(game, 'Network error');
+                            });
+                        return;
+                    }
+
                     applyRefillGain(game, type, amount);
                     game.sound.playCollect();
                     window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
@@ -233,6 +257,29 @@
                 if (game.gem < costCrystal) {
                     window.KOVUiShellModule.showToast(game, game.tr('toast.gem_short', {}, 'Not enough crystals'));
                     game.sound.playError();
+                    return;
+                }
+
+                if (game.onlineMode && window.KOVServerApiModule?.EconomyApi) {
+                    window.KOVServerApiModule.EconomyApi.refillResource({ type, amount, cost: costCrystal })
+                        .then(res => {
+                            if (res && res.success) {
+                                applyRefillGain(game, type, amount);
+                                const data = res.data || {};
+                                if (data.gem !== undefined) game.gem = data.gem;
+                                if (data.energy !== undefined && type === 'energy') game.energy = data.energy;
+                                if (data.cp !== undefined && type === 'cp') game.cp = data.cp;
+                                if (data.gold !== undefined && type === 'gold') game.gold = data.gold;
+
+                                game.sound.playCollect();
+                                window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
+                                modal.classList.remove('open');
+                            } else {
+                                window.KOVUiShellModule.showToast(game, res?.error?.message || res?.err?.msg || 'Failed');
+                            }
+                        }).catch(() => {
+                            window.KOVUiShellModule.showToast(game, 'Network error');
+                        });
                     return;
                 }
 

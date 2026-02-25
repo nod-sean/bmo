@@ -1,7 +1,7 @@
 (function (global) {
     'use strict';
 
-    function openBattlePrepModal(game, targetType, r, c, deps) {
+    async function openBattlePrepModal(game, targetType, r, c, deps, options = {}) {
         const gp = deps.GAMEPLAY || deps;
         if (window.KOVWorldSeasonModule.guardWorldAction(
             game,
@@ -9,14 +9,31 @@
             window.KOVWorldSeasonModule.ensureWorldState(game),
             window.KOVWorldSeasonModule.getActiveWorldEndConditions(game, game.worldAdminDeps)
         )) return;
-        const objData = window.KOVFieldEventLogicModule.getFieldObjectData(game, targetType, game.fieldObjectDataDeps);
-        const baseDefenders = window.KOVBattleCoreModule.getDefendersForTile(game, targetType, r, c);
-        if (targetType === deps.FIELD_EVENT_TYPES.DUNGEON && !window.KOVFieldEventLogicModule.canEnterDungeon(game, r, c, true, {
-            GAMEPLAY: gp
-        })) return;
-        if (!objData || !baseDefenders || baseDefenders.length === 0) {
-            window.KOVBattleResultModule.handleBattleWin(game, r, c);
-            return;
+        
+        let objData = null;
+        let baseDefenders = [];
+        let pvpTarget = options.pvpTarget || null;
+
+        if (pvpTarget) {
+            // PVP Battle!
+            // We can fetch defenders from server right away or just display them as unknown for prep.
+            // Let's show a placeholder for now, actual defenders will be fetched on confirmBattleStart
+            baseDefenders = [
+                { code: 10, count: 1, isPvPPlaceholder: true },
+                { code: 11, count: 1, isPvPPlaceholder: true },
+                { code: 12, count: 1, isPvPPlaceholder: true }
+            ];
+            objData = { level: 1 };
+        } else {
+            objData = window.KOVFieldEventLogicModule.getFieldObjectData(game, targetType, game.fieldObjectDataDeps);
+            baseDefenders = window.KOVBattleCoreModule.getDefendersForTile(game, targetType, r, c);
+            if (targetType === deps.FIELD_EVENT_TYPES.DUNGEON && !window.KOVFieldEventLogicModule.canEnterDungeon(game, r, c, true, {
+                GAMEPLAY: gp
+            })) return;
+            if (!objData || !baseDefenders || baseDefenders.length === 0) {
+                window.KOVBattleResultModule.handleBattleWin(game, r, c);
+                return;
+            }
         }
 
         const armyId = (game.selectedArmyId !== null && game.selectedArmyId !== undefined)
@@ -27,6 +44,8 @@
             r,
             c,
             armyId,
+            isBossBattle: options.isBossBattle || false,
+            battleId: options.battleId || null,
             baseDefenders: window.KOVBattleCoreModule.cloneDefenders(baseDefenders),
             defenders: window.KOVBattleCoreModule.parseDefenders(game, baseDefenders, objData.level, {
                 UNIT_STATS: deps.UNIT_STATS,
@@ -37,7 +56,8 @@
             allies: [],
             log: [],
             active: false,
-            dungeonEntryConsumed: false
+            dungeonEntryConsumed: false,
+            pvpTarget
         };
         window.KOVBattleUiModule.resetBattleResultOverlay();
         const modal = document.getElementById('modal-battle-prep');
@@ -102,6 +122,42 @@
                 getCode: deps.getCode,
                 getUnitClassTypeFromCode: deps.getUnitClassTypeFromCode
             });
+
+            if (window.KOVServerApiModule && window.KOVServerApiModule.BattleApi) {
+                try {
+                    const reqPayload = {
+                        attackerArmyId: game.battleContext.armyId,
+                        target: { r: game.battleContext.r, c: game.battleContext.c },
+                        enemyCode: game.battleContext.targetCode
+                    };
+                    if (game.battleContext.pvpTarget) {
+                        reqPayload.targetUserId = game.battleContext.pvpTarget.userId;
+                        reqPayload.targetArmyId = game.battleContext.pvpTarget.id;
+                    }
+                    const res = await window.KOVServerApiModule.BattleApi.start(reqPayload);
+                    if (res && res.success) {
+                        const data = res.data || {};
+                        game.battleContext.battleId = data.battleId;
+                        game.battleContext.seed = data.seed;
+                        if (data.pvpDefenders && Array.isArray(data.pvpDefenders)) {
+                            // Override placeholder defenders with actual PvP defenders
+                            game.battleContext.defenders = window.KOVBattleCoreModule.parseDefenders(
+                                game,
+                                data.pvpDefenders,
+                                1, // Assume level 1 scaling for PvP since actual levels are inside pvpDefenders
+                                {
+                                    UNIT_STATS: deps.UNIT_STATS,
+                                    getCode: deps.getCode,
+                                    getUnitClassTypeFromCode: deps.getUnitClassTypeFromCode
+                                }
+                            );
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to start battle on server', err);
+                }
+            }
+
             startBattleSimulation(game, deps);
         } catch (e) {
             alert(game.tr('ui.alert.battle_error', { message: e.message }, `Battle error: ${e.message}`));
@@ -233,7 +289,7 @@
         if (step.type === 'log') {
             addBattleLog(game, step.msg);
             nextDelay = 320;
-        } else if (step.type === 'attack') {
+        } else if (step.type === 'attack' || step.type === 'move') {
             addBattleLog(game, step.msg);
             const fxDelay = Number(window.KOVBattleCoreModule.triggerBattleFx(game, step) || 0);
             if (fxDelay > 0) nextDelay = fxDelay + 140;
@@ -252,6 +308,17 @@
         game.battleFx = null;
         const outcome = String(game.battleSimulation?.outcome || 'wipeout');
         const decisiveWin = !!isWin && outcome === 'wipeout';
+        
+        // Notify Server
+        if (window.KOVServerApiModule && window.KOVServerApiModule.BattleApi && game.battleContext.battleId) {
+            window.KOVServerApiModule.BattleApi.finish({
+                battleId: game.battleContext.battleId,
+                winner: isWin ? 'allies' : 'defenders',
+                allies: game.battleContext.allies.map(u => ({ type: u.type, level: u.level, hp: u.hp, maxHp: u.maxHp })),
+                defenders: game.battleContext.defenders.map(u => ({ code: u.code, count: 1, hp: u.hp }))
+            }).catch(e => console.warn('Battle finish API error:', e));
+        }
+
         window.KOVBattleResultModule.applyDefenderLoss(game, decisiveWin);
         window.KOVBattleResultModule.applyAllyLoss(game);
         window.KOVBattleResultModule.handleEmptySquadRetreat(game, decisiveWin);

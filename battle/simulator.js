@@ -56,11 +56,20 @@
 
     getPos(slot, team) {
         const clamped = Math.max(0, Math.min(8, Number.isFinite(slot) ? slot : 0));
-        const base = { r: Math.floor(clamped / 3), c: clamped % 3 };
-        // Keep a fixed lane gap between ally and enemy formations.
-        // Gap 3 keeps "approach before attack" while avoiding excessive unreachable turns.
-        if (team === 'B') base.c += 3;
-        return base;
+        // 8x8 Grid System (r: 0~7, c: 0~7)
+        // Team A (Allies) starts on the left, Team B (Enemies) starts on the right.
+        // Rows: Center them vertically, so slot%3 maps to rows 2, 3, 4
+        const r = 2 + (clamped % 3);
+        
+        let c;
+        if (team === 'A') {
+            // Frontline (slots 0,1,2) at c=2, Mid (3,4,5) at c=1, Back (6,7,8) at c=0
+            c = 2 - Math.floor(clamped / 3);
+        } else {
+            // Frontline (slots 0,1,2) at c=5, Mid (3,4,5) at c=6, Back (6,7,8) at c=7
+            c = 5 + Math.floor(clamped / 3);
+        }
+        return { r, c };
     }
 
     getDistance(attacker, target) {
@@ -69,21 +78,96 @@
         return Math.abs(a.r - b.r) + Math.abs(a.c - b.c);
     }
 
-    moveUnitToward(attacker, target, steps) {
+    getGridOccupancy(activeUnits, excludeUnit = null) {
+        const grid = Array.from({ length: 8 }, () => Array(8).fill(false));
+        if (!activeUnits) return grid;
+        for (const u of activeUnits) {
+            if (u.currentHp > 0 && u !== excludeUnit) {
+                const r = u.pos ? u.pos.r : this.getPos(u.slot, u.team).r;
+                const c = u.pos ? u.pos.c : this.getPos(u.slot, u.team).c;
+                if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    grid[r][c] = true;
+                }
+            }
+        }
+        return grid;
+    }
+
+    findPath(start, goal, grid, maxSteps) {
+        const queue = [{r: start.r, c: start.c, dist: 0, path: []}];
+        const visited = Array.from({length: 8}, () => Array(8).fill(false));
+        visited[start.r][start.c] = true;
+        
+        let closestNode = { r: start.r, c: start.c, dist: 0, path: [] };
+        let minHeuristic = Math.abs(start.r - goal.r) + Math.abs(start.c - goal.c);
+        
+        while(queue.length > 0) {
+            const current = queue.shift();
+            
+            const h = Math.abs(current.r - goal.r) + Math.abs(current.c - goal.c);
+            if (h < minHeuristic) {
+                minHeuristic = h;
+                closestNode = current;
+            } else if (h === minHeuristic && current.dist < closestNode.dist) {
+                closestNode = current;
+            }
+            
+            if (h <= 1 && grid[goal.r] && grid[goal.r][goal.c]) {
+                if (h < minHeuristic) {
+                     minHeuristic = h;
+                     closestNode = current;
+                }
+            }
+            if (h === 0) {
+                closestNode = current;
+                break;
+            }
+            if (current.dist >= maxSteps) continue;
+            
+            const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
+            dirs.sort((a,b) => {
+                const da = Math.abs((current.r + a[0]) - goal.r) + Math.abs((current.c + a[1]) - goal.c);
+                const db = Math.abs((current.r + b[0]) - goal.r) + Math.abs((current.c + b[1]) - goal.c);
+                return da - db;
+            });
+            
+            for (const [dr, dc] of dirs) {
+                const nr = current.r + dr;
+                const nc = current.c + dc;
+                
+                if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !visited[nr][nc]) {
+                    if (!grid[nr][nc] || (nr === goal.r && nc === goal.c)) {
+                        visited[nr][nc] = true;
+                        if (nr !== goal.r || nc !== goal.c) {
+                            queue.push({
+                                r: nr,
+                                c: nc,
+                                dist: current.dist + 1,
+                                path: [...current.path, {r: nr, c: nc}]
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        return closestNode.path;
+    }
+
+    moveUnitToward(attacker, target, steps, activeUnits) {
         if (!attacker || !target || steps <= 0) return 0;
         if (!attacker.pos) attacker.pos = this.getPos(attacker.slot, attacker.team);
         if (!target.pos) target.pos = this.getPos(target.slot, target.team);
-        let moved = 0;
-        while (moved < steps) {
-            const dr = target.pos.r - attacker.pos.r;
-            const dc = target.pos.c - attacker.pos.c;
-            if (dr === 0 && dc === 0) break;
-            if (Math.abs(dc) >= Math.abs(dr) && dc !== 0) attacker.pos.c += Math.sign(dc);
-            else if (dr !== 0) attacker.pos.r += Math.sign(dr);
-            else attacker.pos.c += Math.sign(dc);
-            moved += 1;
+
+        const grid = this.getGridOccupancy(activeUnits, attacker);
+        const path = this.findPath(attacker.pos, target.pos, grid, steps);
+        
+        if (path && path.length > 0) {
+            const finalPos = path[path.length - 1];
+            attacker.pos.r = finalPos.r;
+            attacker.pos.c = finalPos.c;
+            return path.length;
         }
-        return moved;
+        return 0;
     }
 
     isAdvantage(attackerClass, defenderClass) {
@@ -94,19 +178,44 @@
         );
     }
 
-    buildTargetCandidate(attacker, enemy) {
-        const dist = this.getDistance(attacker, enemy);
+    buildTargetCandidate(attacker, enemy, activeUnits) {
+        if (!attacker.pos) attacker.pos = this.getPos(attacker.slot, attacker.team);
+        if (!enemy.pos) enemy.pos = this.getPos(enemy.slot, enemy.team);
+
+        const mDist = this.getDistance(attacker, enemy);
         const range = Math.max(0, attacker.range || 0);
         const move = Math.max(0, attacker.move || 0);
-        const requiredMove = Math.max(0, dist - range);
+        
+        let pathDist = mDist;
+        let requiredMove = Math.max(0, mDist - range);
+        
+        // If manhattan distance suggests it might be reachable or we need to pathfind
+        if (mDist > range) {
+            const grid = this.getGridOccupancy(activeUnits, attacker);
+            // find path with a large max steps to see if it's reachable at all
+            const fullPath = this.findPath(attacker.pos, enemy.pos, grid, 20);
+            if (fullPath) {
+                // path length is the actual distance to the closest point
+                // Wait, findPath returns a path to the closest reachable node to the enemy.
+                // The actual distance from the end of that path to the enemy is:
+                const endNode = fullPath.length > 0 ? fullPath[fullPath.length - 1] : attacker.pos;
+                const distFromEndToEnemy = Math.abs(endNode.r - enemy.pos.r) + Math.abs(endNode.c - enemy.pos.c);
+                if (distFromEndToEnemy <= range) {
+                     requiredMove = fullPath.length;
+                } else {
+                     requiredMove = fullPath.length + (distFromEndToEnemy - range); // estimate
+                }
+            }
+        }
+
         const reachable = requiredMove <= move;
         const hp20 = enemy.currentHp <= (enemy.maxHp * 0.2);
         const hasAdvantage = this.isAdvantage(attacker.classType, enemy.classType);
-        const stationary = dist <= range;
+        const stationary = mDist <= range;
 
         return {
             enemy,
-            dist,
+            dist: mDist,
             requiredMove,
             reachable,
             stationary,
@@ -115,9 +224,9 @@
         };
     }
 
-    selectTarget(attacker, enemies) {
+    selectTarget(attacker, enemies, activeUnits) {
         const candidates = enemies
-            .map((enemy) => this.buildTargetCandidate(attacker, enemy))
+            .map((enemy) => this.buildTargetCandidate(attacker, enemy, activeUnits))
             .filter((c) => c.reachable);
 
         if (candidates.length === 0) {
@@ -176,8 +285,8 @@
             attackerSpd: Number(attacker.spd || 1),
             attackerSlot: attacker.slot,
             defenderSlot: defender.slot,
-            attackerPos,
-            defenderPos,
+            attackerPos: { r: attackerPos.r, c: attackerPos.c },
+            defenderPos: { r: defenderPos.r, c: defenderPos.c },
             moved: !!(metadata && metadata.requiredMove > 0),
             requiredMove: metadata && Number.isFinite(metadata.requiredMove) ? metadata.requiredMove : 0,
             distance: metadata && Number.isFinite(metadata.dist) ? metadata.dist : 1,
@@ -231,7 +340,7 @@
                     break;
                 }
 
-                const selected = this.selectTarget(unit, liveEnemies);
+                const selected = this.selectTarget(unit, liveEnemies, activeUnits);
                 if (!selected) {
                     const nearest = liveEnemies
                         .map((enemy) => ({ enemy, dist: this.getDistance(unit, enemy) }))
@@ -240,11 +349,22 @@
                         const need = Math.max(0, nearest.dist - Math.max(0, unit.range || 0));
                         const advance = Math.min(Math.max(0, unit.move || 0), need);
                         if (advance > 0) {
-                            const moved = this.moveUnitToward(unit, nearest.enemy, advance);
+                            const moved = this.moveUnitToward(unit, nearest.enemy, advance, activeUnits);
                             movementThisTurn += moved;
                             if (moved > 0) {
                                 const p = unit.pos || this.getPos(unit.slot, unit.team);
                                 steps.push({ type: 'log', msg: `${unit.name} advances to (x${p.c + 1},y${p.r + 1})` });
+                                steps.push({
+                                    type: 'move',
+                                    msg: `${unit.name} moved`,
+                                    attackerId: unit.id,
+                                    attackerTeam: unit.team,
+                                    attackerSpd: Number(unit.spd || 1),
+                                    attackerSlot: unit.slot,
+                                    attackerPos: { r: p.r, c: p.c },
+                                    moved: true,
+                                    requiredMove: moved
+                                });
                             } else {
                                 noTargetCount += 1;
                             }
@@ -258,7 +378,7 @@
                 }
 
                 if (selected.requiredMove > 0) {
-                    const moved = this.moveUnitToward(unit, selected.enemy, selected.requiredMove);
+                    const moved = this.moveUnitToward(unit, selected.enemy, selected.requiredMove, activeUnits);
                     movementThisTurn += moved;
                     selected.requiredMove = moved;
                     selected.dist = this.getDistance(unit, selected.enemy);

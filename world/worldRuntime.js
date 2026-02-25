@@ -105,6 +105,14 @@
                 seasonPolicy: worldSeasonPolicy
             });
         }
+        if (!parsedPresets.conquest) {
+            parsedPresets.conquest = Object.freeze({
+                label: 'Conquest War',
+                ruleSet: worldRuleSetKeys.CRUEL,
+                worldEndConditions: parseWorldEndConditions({ type: 'hybrid', targetScore: 5000 }),
+                seasonPolicy: worldSeasonPolicy
+            });
+        }
 
         const worldAdminDeps = Object.freeze({
             WORLD_PRESETS: Object.freeze(parsedPresets),

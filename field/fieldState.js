@@ -184,6 +184,17 @@
 
     function isTileBlocked(game, current, r, c, type, isOccupied, isTarget, regionId, deps) {
         if (deps.isWallTile(type)) return true;
+        
+        // Treat other armies as obstacles unless they are our movement target
+        if (!isTarget && Array.isArray(game.otherArmies)) {
+            const hasOtherArmy = game.otherArmies.some(a => {
+                const targetR = a.moving?.to ? a.moving.to.r : a.r;
+                const targetC = a.moving?.to ? a.moving.to.c : a.c;
+                return targetR === r && targetC === c;
+            });
+            if (hasOtherArmy) return true;
+        }
+
         if (deps.isBorderTerrain(type)) return !isBorderOpen(game, r, c);
         if (isOccupied || isTarget) return false;
         if (current && deps.isBorderTerrain(deps.FIELD_MAP_DATA[current.r][current.c])) {

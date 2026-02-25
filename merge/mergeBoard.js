@@ -1,6 +1,49 @@
 ﻿(function (global) {
     'use strict';
 
+    function locationToId(loc, deps) {
+        if (!loc) return null;
+        if (loc.zone === deps.ZONES.GRID) return `grid_${loc.r}_${loc.c}`;
+        if (loc.zone === deps.ZONES.SQUAD1) return `squad1_${loc.idx}`;
+        if (loc.zone === deps.ZONES.SQUAD2) return `squad2_${loc.idx}`;
+        if (loc.zone === deps.ZONES.SQUAD3) return `squad3_${loc.idx}`;
+        return null;
+    }
+
+    async function syncAction(game, type, payload) {
+        if (game.isOfflineMode || !window.KOVServerApiModule?.MergeApi) return true;
+        try {
+            const res = await window.KOVServerApiModule.MergeApi.executeAction({ type, payload });
+            
+            if (res && res.xpGained && game.runtime && game.runtime.getProgressionState) {
+                // Background sync progression to catch level ups
+                game.runtime.getProgressionState(game).then(progRes => {
+                    if (progRes && progRes.success && progRes.data) {
+                        const pd = progRes.data;
+                        if (Number.isFinite(pd.level)) game.lordLevel = pd.level;
+                        if (Number.isFinite(pd.xp)) game.currentXp = pd.xp;
+                        if (Number.isFinite(pd.energy)) game.energy = pd.energy;
+                        if (Number.isFinite(pd.cp)) game.cp = pd.cp;
+                        window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
+                    }
+                }).catch(() => {});
+            }
+            
+            return true;
+        } catch (err) {
+            console.error(`Merge action ${type} failed:`, err);
+            try {
+                const stateRes = await window.KOVServerApiModule.MergeApi.getState();
+                if (stateRes && stateRes.data && window.KOVMergeControllerModule?.applyMergeState) {
+                    window.KOVMergeControllerModule.applyMergeState(game, stateRes.data);
+                }
+            } catch (rErr) {
+                console.error('Rollback fetch failed:', rErr);
+            }
+            return false;
+        }
+    }
+
     function selectItem(game, item, location, deps) {
         if (game.selectedItem?.item !== item) game.sound.playClick();
         game.selectedItem = item ? { item, location } : null;
@@ -89,6 +132,7 @@
             selectItem(game, null, null, deps);
             window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
             game.requestRender();
+            syncAction(game, 'sell', { targetId: locationToId(location, deps) });
         } else if (item.type < 10 && item.type !== deps.ITEM_TYPE.BUILDING_CHEST && item.type !== deps.ITEM_TYPE.BUILDING_CAMP) {
             produce(game, item, deps);
         }
@@ -105,8 +149,12 @@
         };
         let res = check(game.squad1Rect, deps.CONFIG.squadRows, deps.CONFIG.squadCols, game.squadCellSize);
         if (res) return { zone: deps.ZONES.SQUAD1, ...res };
-        res = check(game.squad2Rect, deps.CONFIG.squadRows, deps.CONFIG.squadCols, game.squadCellSize);
-        if (res) return { zone: deps.ZONES.SQUAD2, ...res };
+        
+        if (game.lordLevel >= 5) {
+            res = check(game.squad2Rect, deps.CONFIG.squadRows, deps.CONFIG.squadCols, game.squadCellSize);
+            if (res) return { zone: deps.ZONES.SQUAD2, ...res };
+        }
+        
         if (game.thirdSquadUnlocked && game.squad3Rect) {
             res = check(game.squad3Rect, deps.CONFIG.squadRows, deps.CONFIG.squadCols, game.squadCellSize);
             if (res) return { zone: deps.ZONES.SQUAD3, ...res };
@@ -211,6 +259,7 @@
     function endDrag(game, deps) {
         const hit = getZoneAt(game, game.drag.x, game.drag.y, deps);
         let returned = false;
+        let actionPayload = null;
         if (hit) {
             let target = null;
             if (hit.zone === deps.ZONES.GRID) {
@@ -226,6 +275,7 @@
                     else if (hit.zone === deps.ZONES.SQUAD2) game.squad2[hit.idx] = game.drag.item;
                     else game.squad3[hit.idx] = game.drag.item;
                     selectItem(game, game.drag.item, hit, deps);
+                    actionPayload = { type: 'move', fromId: locationToId(game.drag.startZone, deps), toId: locationToId(hit, deps) };
                 } else if (target.type === deps.ITEM_TYPE.BUILDING_CAMP && game.drag.item.type >= 10 && game.drag.item.type < 20 && hit.zone === deps.ZONES.GRID) {
                     if (!target.storedUnits) target.storedUnits = [];
                     const cap = deps.CAMP_CAPACITY[target.level] || 4;
@@ -233,6 +283,7 @@
                         target.storedUnits.push(game.drag.item);
                         window.KOVUiShellModule.showToast(game, game.tr('toast.stored', { current: target.storedUnits.length, cap }, `Stored (${target.storedUnits.length}/${cap})`));
                         game.sound.playClick();
+                        actionPayload = { type: 'move', fromId: locationToId(game.drag.startZone, deps), toId: locationToId(hit, deps) };
                     } else {
                         window.KOVUiShellModule.showToast(game, game.tr('toast.camp_storage_full', {}, 'Camp storage is full.'));
                         returned = true;
@@ -263,6 +314,7 @@
                         window.KOVUiShellModule.showFloatingImage(game, 'xp', hit.zone === deps.ZONES.GRID ? game.gridStartX + hit.c * game.gridTileSize : game.drag.x, game.drag.y);
                         game.spawnParticles(game.drag.x, game.drag.y, '#FFD700', 30, 'spark');
                         game.sound.playMerge();
+                        actionPayload = { type: 'move', fromId: locationToId(game.drag.startZone, deps), toId: locationToId(hit, deps) };
                     } else if (canMerge) {
                         window.KOVUiShellModule.showToast(game, game.tr('toast.max_level', {}, 'Max level reached'));
                         returned = true;
@@ -280,6 +332,8 @@
             else if (s.zone === deps.ZONES.SQUAD1) game.squad1[s.idx] = game.drag.item;
             else if (s.zone === deps.ZONES.SQUAD2) game.squad2[s.idx] = game.drag.item;
             else game.squad3[s.idx] = game.drag.item;
+        } else if (actionPayload) {
+            syncAction(game, actionPayload.type, actionPayload);
         }
         game.hover = null;
         window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
@@ -313,13 +367,32 @@
     }
 
     function drawSquad(game, data, rect, label, color, zone, deps) {
-        const cp = getSquadPower(game, data, deps);
-        game.ctx.fillStyle = color;
+        let isLocked = false;
+        let lockReason = '';
+        if (zone === deps.ZONES.SQUAD2 && game.lordLevel < 5) {
+            isLocked = true;
+            lockReason = game.tr('ui.squad.unlock_lv', { level: 5 }, 'Unlock at Lv.5');
+        }
+        if (zone === deps.ZONES.SQUAD3 && !game.thirdSquadUnlocked) {
+            isLocked = true;
+            lockReason = game.tr('ui.squad.unlock_citadel', {}, 'Capture Citadel');
+        }
+
+        const cp = isLocked ? 0 : getSquadPower(game, data, deps);
+        game.ctx.fillStyle = isLocked ? '#666' : color;
         game.ctx.font = 'bold 40px sans-serif';
         game.ctx.textAlign = 'center';
         game.ctx.fillText(`${label}`, rect.x + rect.w / 2, rect.y - 22);
-        game.ctx.fillStyle = `${color}11`;
+        game.ctx.fillStyle = isLocked ? 'rgba(0,0,0,0.5)' : `${color}11`;
         game.ctx.fillRect(rect.x - 5, rect.y - 5, rect.w + 10, rect.h + 10);
+        
+        if (isLocked) {
+            game.ctx.fillStyle = '#ff6b6b';
+            game.ctx.font = 'bold 24px sans-serif';
+            game.ctx.fillText(lockReason, rect.x + rect.w / 2, rect.y + rect.h / 2);
+            return;
+        }
+
         const powerShort = game.tr('ui.squad.power_short', {}, 'PWR');
         game.ctx.font = 'bold 34px sans-serif';
         game.ctx.fillStyle = '#fff';
@@ -470,7 +543,7 @@
             const squadLabel = game.tr('ui.squad.label', {}, 'Squad');
             drawSquad(game, game.squad1, game.squad1Rect, `${squadLabel} 1`, '#4caf50', deps.ZONES.SQUAD1, deps);
             drawSquad(game, game.squad2, game.squad2Rect, `${squadLabel} 2`, '#2196f3', deps.ZONES.SQUAD2, deps);
-            if (game.thirdSquadUnlocked && game.squad3Rect) drawSquad(game, game.squad3, game.squad3Rect, `${squadLabel} 3`, '#f59e0b', deps.ZONES.SQUAD3, deps);
+            if (game.squad3Rect) drawSquad(game, game.squad3, game.squad3Rect, `${squadLabel} 3`, '#f59e0b', deps.ZONES.SQUAD3, deps);
             for (let r = 0; r < deps.CONFIG.gridRows; r++) for (let c = 0; c < deps.CONFIG.gridCols; c++) {
                 const x = game.gridStartX + c * game.gridTileSize;
                 const y = game.gridStartY + r * game.gridTileSize;
@@ -516,11 +589,13 @@
             if (r <= sum) { lvl = i + 1; break; }
         }
 
-        if (window.KOVMergeBoardModule.spawnItem(game, { type: unitType, level: lvl, scale: 0 }, game.spawnItemDeps)) {
+        const spawnPos = window.KOVMergeBoardModule.spawnItem(game, { type: unitType, level: lvl, scale: 0 }, game.spawnItemDeps);
+        if (spawnPos) {
             game.energy -= stats.energy;
             window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
             game.requestRender();
             game.sound.playSpawn();
+            syncAction(game, 'produce', { targetId: locationToId({ zone: deps.ZONES.GRID, r: spawnPos.r, c: spawnPos.c }, deps), itemType: unitType, level: lvl });
         } else {
             window.KOVUiShellModule.showToast(game, game.tr('toast.space_short', {}, 'No space available'));
         }
@@ -548,7 +623,8 @@
             window.KOVUiShellModule.showToast(game, game.tr('toast.chest_reward_invalid', {}, 'Invalid chest reward data'));
             return;
         }
-        if (window.KOVMergeBoardModule.spawnItem(game, { type: info.type, level: info.level, scale: 0 }, game.spawnItemDeps)) {
+        const spawnPos = window.KOVMergeBoardModule.spawnItem(game, { type: info.type, level: info.level, scale: 0 }, game.spawnItemDeps);
+        if (spawnPos) {
             game.energy--;
             chest.usage--;
             chest.scale = 1.2;
@@ -560,6 +636,7 @@
             window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
             game.requestRender();
             game.sound.playSpawn();
+            syncAction(game, 'produce', { targetId: locationToId({ zone: deps.ZONES.GRID, r: spawnPos.r, c: spawnPos.c }, deps), itemType: info.type, level: info.level });
         } else {
             window.KOVUiShellModule.showToast(game, game.tr('toast.space_short', {}, 'No space available'));
         }
@@ -572,7 +649,7 @@
                 const cx = game.gridStartX + c * game.gridTileSize + game.gridTileSize / 2;
                 const cy = game.gridStartY + r * game.gridTileSize + game.gridTileSize / 2;
                 game.spawnParticles(cx, cy, '#EEE', 10, 'smoke');
-                return true;
+                return { r, c };
             }
         }
         return false;
@@ -593,6 +670,7 @@
                 game.requestRender();
                 game.sound.playClick();
                 window.KOVUiShellModule.showToast(game, game.tr('toast.withdrawn', { remain: camp.storedUnits.length }, `Released (${camp.storedUnits.length} left)`));
+                syncAction(game, 'eject', { fromId: locationToId({ zone: deps.ZONES.GRID, r, c }, deps), toId: locationToId({ zone: deps.ZONES.GRID, r: nr, c: nc }, deps) });
                 return;
             }
         }
@@ -626,6 +704,7 @@
         game.grid[r][c] = null;
         window.KOVUiShellModule.updateUI(game, game.uiShellDeps);
         game.requestRender();
+        syncAction(game, 'collect', { targetId: locationToId({ zone: deps.ZONES.GRID, r, c }, deps) });
     }
 
     function tryUnlock(game, r, c, deps) {
@@ -659,6 +738,7 @@
                 game.spawnParticles(game.gridStartX + c * game.gridTileSize + game.gridTileSize / 2, game.gridStartY + r * game.gridTileSize + game.gridTileSize / 2, '#FFF', 20, 'confetti');
                 game.sound.playUnlock();
                 showUnlockItemFx();
+                syncAction(game, 'unlock', { r, c });
             } else {
                 window.KOVUiShellModule.showToast(game, game.tr('toast.gold_short', {}, 'Not enough gold'));
                 game.sound.playError();
@@ -670,6 +750,7 @@
                 game.spawnParticles(game.gridStartX + c * game.gridTileSize + game.gridTileSize / 2, game.gridStartY + r * game.gridTileSize + game.gridTileSize / 2, '#FFF', 20, 'confetti');
                 game.sound.playUnlock();
                 showUnlockItemFx();
+                syncAction(game, 'unlock', { r, c });
             } else {
                 window.KOVUiShellModule.showToast(game, game.tr('toast.require_level', { level: l.value }, `Requires LV.${l.value}`));
                 game.sound.playError();

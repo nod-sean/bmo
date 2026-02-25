@@ -81,8 +81,24 @@
         viewport.style.overflow = 'hidden';
         viewport.style.backgroundColor = '#2e3b23';
         viewport.style.touchAction = 'none';
+        let lastCellClickTime = 0;
+        let lastCellClickKey = null;
+        const DOUBLE_CLICK_TIME = 300;
+
         viewport.onclick = (e) => {
-            if (e.target === viewport) window.KOVFieldUiModule.hideFieldActionMenu();
+            if (e.target === viewport) {
+                const now = Date.now();
+                const isDoubleClick = (lastCellClickKey === 'viewport' && now - lastCellClickTime < DOUBLE_CLICK_TIME);
+                lastCellClickTime = now;
+                lastCellClickKey = 'viewport';
+
+                window.KOVFieldUiModule.hideFieldActionMenu(game);
+                
+                if (game.moveTargetMode && isDoubleClick) {
+                    window.KOVFieldCommandModule.exitMoveTargetMode(game);
+                    lastCellClickTime = 0;
+                }
+            }
         };
         content.appendChild(viewport);
 
@@ -96,7 +112,10 @@
         const incomeLabel = game.tr('ui.field.header.income', {}, 'Income');
         const cpLabel = game.tr('ui.field.header.cp', {}, 'AP');
         const per3secLabel = game.tr('ui.field.header.per_3sec', {}, '/3sec');
-        headerDiv.innerHTML = `<div>${occupiedLabel}: <span class="text-white font-bold">${game.occupiedTiles.size}</span></div><div>${incomeLabel}: <span class="text-yellow-400 font-bold">${incomeSign}${game.income}${per3secLabel}</span></div><div>${cpLabel}: <span id="field-cp-display" class="text-white font-bold">${game.cp}/${game.maxCp}</span></div>`;
+        
+        const currentChannel = game.worldLobbyState?.channel || 'map_0';
+        
+        headerDiv.innerHTML = `<div class="text-blue-300 font-bold mr-2">Map: ${currentChannel}</div><div>${occupiedLabel}: <span class="text-white font-bold">${game.occupiedTiles.size}</span></div><div>${incomeLabel}: <span class="text-yellow-400 font-bold">${incomeSign}${game.income}${per3secLabel}</span></div><div>${cpLabel}: <span id="field-cp-display" class="text-white font-bold">${game.cp}/${game.maxCp}</span></div>`;
         overlay.appendChild(headerDiv);
 
         const squadTabs = document.createElement('div');
@@ -112,7 +131,7 @@
             btn.innerText = `${squadLabel} ${army.id + 1}`;
             btn.onclick = (e) => {
                 e.stopPropagation();
-                window.KOVFieldUiModule.hideFieldActionMenu();
+                window.KOVFieldUiModule.hideFieldActionMenu(game);
                 window.KOVFieldCommandModule.enterMoveTargetMode(game, army.id, { center: true }, commandDeps);
             };
             squadTabs.appendChild(btn);
@@ -219,6 +238,42 @@
             marker.style.transform = `translate(${x}px, ${y}px)`;
             armyLayer.appendChild(marker);
         });
+
+        // Render other players' armies
+        if (Array.isArray(game.otherArmies)) {
+            game.otherArmies.forEach((otherArmy) => {
+                const marker = document.createElement('div');
+                marker.className = 'army-marker other-army';
+                marker.id = `other-army-marker-${otherArmy.userId}-${otherArmy.id}`;
+                marker.style.backgroundColor = '#9ca3af'; // Gray color for other armies
+                marker.style.border = '2px solid #ef4444'; // Red border for enemy
+                
+                // Use a default hero sprite (e.g. infantry level 1 = 1101)
+                const avatarCode = otherArmy.avatar || '1101';
+                const img = game.assets.getImage(String(avatarCode));
+                if (img && img.src) {
+                    marker.style.backgroundImage = `url(${img.src})`;
+                    marker.innerText = '';
+                } else {
+                    marker.innerText = '!';
+                }
+
+                // Determine position based on whether it's moving
+                let r = otherArmy.r;
+                let c = otherArmy.c;
+                if (otherArmy.state === 'MOVING' && otherArmy.moving?.to) {
+                    // For simplicity, just place them at the destination, or use the source
+                    r = otherArmy.moving.to.r;
+                    c = otherArmy.moving.to.c;
+                }
+
+                const TILE_SIZE = 13;
+                const x = 50 + (c * TILE_SIZE);
+                const y = 50 + (r * TILE_SIZE);
+                marker.style.transform = `translate(${x}px, ${y}px)`;
+                armyLayer.appendChild(marker);
+            });
+        }
 
         const reachable = window.KOVFieldFlowModule.buildReachableTiles(game, {
             MAP_SIZE: MAP_SIZE,
@@ -374,27 +429,24 @@
                 cell.onclick = (e) => {
                     e.stopPropagation();
                     if (!game.isDraggingMap) {
+                        const now = Date.now();
+                        const isDoubleClick = (lastCellClickKey === key && now - lastCellClickTime < DOUBLE_CLICK_TIME);
+                        lastCellClickTime = now;
+                        lastCellClickKey = key;
+
                         const displayType = evt ? evt.type : type;
                         if (game.moveTargetMode) {
-                            const moveArmy = game.armies?.[game.moveTargetMode.armyId];
-                            const isOnSameTile = !!moveArmy && moveArmy.r === r && moveArmy.c === c;
-                            const menuDeps = game.fieldActionMenuDeps || {};
-                            const has = (name) => typeof menuDeps[name] === 'function';
-                            const isMenuObject = (has('isShopTile') && menuDeps.isShopTile(displayType))
-                                || (has('isTavernTile') && menuDeps.isTavernTile(displayType))
-                                || (has('isGoldMineTile') && menuDeps.isGoldMineTile(displayType))
-                                || (has('isFountainTile') && menuDeps.isFountainTile(displayType))
-                                || (has('isGateTile') && menuDeps.isGateTile(displayType))
-                                || (has('isCitadelTile') && menuDeps.isCitadelTile(displayType))
-                                || (has('isRuinsTile') && menuDeps.isRuinsTile(displayType))
-                                || (has('isStatueTile') && menuDeps.isStatueTile(displayType));
-                            if (isOnSameTile && isMenuObject) {
+                            const isMovable = game.moveTargetMode.movableRange && game.moveTargetMode.movableRange.has(key);
+                            if (isDoubleClick && !isMovable) {
+                                window.KOVFieldUiModule.hideFieldActionMenu(game);
                                 window.KOVFieldCommandModule.exitMoveTargetMode(game);
-                                window.KOVFieldUiModule.setFieldInfo(game, displayType, r, c, game.fieldInfoDeps);
-                                window.KOVFieldUiModule.showFieldActionMenu(game, r, c, displayType, e.clientX, e.clientY, game.fieldActionMenuDeps);
+                                lastCellClickTime = 0; // reset
                                 return;
                             }
-                            window.KOVFieldCommandModule.handleMoveTargetClick(game, r, c, type, commandDeps);
+                            // Instead of moving instantly, show the action menu
+                            // The Action Menu has the actual Execute (Move/Battle) buttons now
+                            window.KOVFieldUiModule.setFieldInfo(game, displayType, r, c, game.fieldInfoDeps);
+                            window.KOVFieldUiModule.showFieldActionMenu(game, r, c, displayType, e.clientX, e.clientY, game.fieldActionMenuDeps);
                             return;
                         }
                         window.KOVFieldUiModule.setFieldInfo(game, displayType, r, c, game.fieldInfoDeps);
@@ -403,10 +455,12 @@
                 };
                 cell.onmouseenter = () => {
                     if (!game.moveTargetMode || game.isDraggingMap) return;
+                    if (game.lockedPathPreviewTarget) return; // Don't preview if an action menu is open
                     window.KOVFieldCommandModule.previewMoveTarget(game, r, c, commandDeps);
                 };
                 cell.onmouseleave = () => {
                     if (!game.moveTargetMode || game.isDraggingMap) return;
+                    if (game.lockedPathPreviewTarget) return; // Don't clear preview if an action menu is open
                     window.KOVFieldUiModule.clearPathPreview(game);
                     const armyId = game.moveTargetMode.armyId;
                     const squadNo = Number(armyId) + 1;
@@ -452,6 +506,7 @@
             window.KOVFieldUiModule.setFieldInfo(game, null, undefined, undefined, game.fieldInfoDeps);
         }
         if (game.previewPath) window.KOVFieldUiModule.applyPathPreview(game, game.previewPath);
+        if (game.movableRangeTiles && window.KOVFieldUiModule.showMovableRange) window.KOVFieldUiModule.showMovableRange(game, game.movableRangeTiles);
         window.KOVFieldCameraModule.initFieldCamera(game, viewport, mapLayer, { PLAYER_START: deps.PLAYER_START });
     }
 
